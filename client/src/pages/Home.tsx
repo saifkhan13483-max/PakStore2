@@ -20,19 +20,19 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
           {/* Background with overlay */}
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
             <img 
               src="https://images.unsplash.com/photo-1548013146-72479768bada?w=1920&q=80" 
-              alt="Background" 
+              alt="NoorBazaar Hero" 
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
           </div>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -40,22 +40,22 @@ export default function Home() {
               className="max-w-2xl text-white"
             >
               <span className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-sm font-medium mb-6">
-                New Collection 2024
+                Premium Quality Products
               </span>
               <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Discover the <span className="text-secondary italic">Soul</span> of Pakistan
+                Shop the <span className="text-secondary italic">Best Deals</span> in Pakistan
               </h1>
               <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
-                Curated artisanal treasures, from Kashmiri Pashminas to Multani Ceramics. Experience luxury rooted in tradition.
+                Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
               </p>
-              <div className="flex gap-4">
-                <Link href="/collections">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-14 text-lg">
-                    Shop Collection
+              <div className="flex flex-wrap gap-4">
+                <Link href="/products">
+                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 min-h-14 text-lg font-bold">
+                    Shop Now
                   </Button>
                 </Link>
                 <Link href="/about">
-                  <Button size="lg" variant="outline" className="bg-transparent text-white border-white hover:bg-white/10 rounded-full px-8 h-14 text-lg">
+                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 min-h-14 text-lg">
                     Our Story
                   </Button>
                 </Link>
@@ -64,30 +64,45 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features / Value Props */}
-        <section className="py-16 bg-muted/30">
+        {/* Trust Indicators */}
+        <section className="py-12 border-b bg-card">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
-                  <Truck className="h-6 w-6" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <Truck className="h-5 w-5" />
                 </div>
-                <h3 className="font-display text-xl font-semibold mb-2">Nationwide Delivery</h3>
-                <p className="text-muted-foreground">Fast shipping to Karachi, Lahore, Islamabad, and beyond.</p>
+                <div>
+                  <h4 className="font-bold text-sm">Free Delivery</h4>
+                  <p className="text-xs text-muted-foreground">Orders over Rs. 2000</p>
+                </div>
               </div>
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
-                  <ShieldCheck className="h-6 w-6" />
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <ShieldCheck className="h-5 w-5" />
                 </div>
-                <h3 className="font-display text-xl font-semibold mb-2">Authentic Guarantee</h3>
-                <p className="text-muted-foreground">Sourced directly from master artisans and trusted local growers.</p>
+                <div>
+                  <h4 className="font-bold text-sm">Secure Payment</h4>
+                  <p className="text-xs text-muted-foreground">100% Protected</p>
+                </div>
               </div>
-              <div className="flex flex-col items-center text-center p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
-                  <Clock className="h-6 w-6" />
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <Clock className="h-5 w-5" />
                 </div>
-                <h3 className="font-display text-xl font-semibold mb-2">24/7 Support</h3>
-                <p className="text-muted-foreground">Our dedicated team is here to assist you anytime.</p>
+                <div>
+                  <h4 className="font-bold text-sm">24/7 Support</h4>
+                  <p className="text-xs text-muted-foreground">Always available</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <Star className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">Top Rated</h4>
+                  <p className="text-xs text-muted-foreground">50k+ Happy customers</p>
+                </div>
               </div>
             </div>
           </div>

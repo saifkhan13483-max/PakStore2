@@ -8,7 +8,7 @@ import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
 
 // Page Imports
-const Home = () => <div>Home Page</div>;
+import Home from "@/pages/Home";
 const Products = () => <div>Products Listing Page</div>;
 const ProductDetail = () => <div>Product Detail Page</div>;
 const Cart = () => <div>Shopping Cart Page</div>;
