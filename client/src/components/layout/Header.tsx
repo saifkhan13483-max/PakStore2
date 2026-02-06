@@ -1,8 +1,9 @@
-import { Link } from "wouter";
-import { ShoppingCart, Menu, Search, User } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { ShoppingCart, Menu, Search, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -10,10 +11,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
+  const [location] = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
   const totalItems = useCartStore((state) => state.getTotalItems());
   
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/products", label: "Shop" },
@@ -22,103 +34,126 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+    <header 
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        isScrolled 
+          ? "bg-background/80 backdrop-blur-lg border-b shadow-sm py-2" 
+          : "bg-transparent py-4"
+      )}
+    >
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center group">
+              <span className="font-display text-2xl md:text-3xl font-bold tracking-tight text-primary transition-transform group-hover:scale-105">
+                Noor<span className="text-secondary">Bazaar</span>
+              </span>
+            </Link>
+
+            <nav className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
+                    location === link.href 
+                      ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="hidden sm:flex items-center">
+              <Button variant="ghost" size="icon" className="hover-elevate">
+                <Search className="h-5 w-5" />
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <SheetHeader>
-                <SheetTitle className="text-left font-display text-2xl font-bold text-primary">
-                  Noor<span className="text-secondary">Bazaar</span>
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 py-8">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="search"
-                    placeholder="Search products..."
-                    className="w-full rounded-md border border-input bg-background px-9 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-                <nav className="flex flex-col gap-4 text-lg font-medium">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="transition-colors hover:text-primary"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-                <div className="mt-auto border-t pt-4">
-                  <div className="flex flex-col gap-4">
-                    <Link href="/cart" className="flex items-center justify-between text-lg font-medium transition-colors hover:text-primary">
-                      <div className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        Cart
-                      </div>
-                      {totalItems > 0 && (
-                        <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs">
-                          {totalItems}
-                        </Badge>
-                      )}
-                    </Link>
-                    <Link href="/account" className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary">
-                      <User className="h-5 w-5" />
-                      My Account
-                    </Link>
+            </div>
+            
+            <Button variant="ghost" size="icon" className="relative hover-elevate" asChild>
+              <Link href="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] font-bold animate-in zoom-in"
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
+
+            <Button variant="ghost" size="icon" className="hidden sm:flex hover-elevate">
+              <User className="h-5 w-5" />
+            </Button>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden hover-elevate">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+                <div className="flex flex-col h-full bg-background">
+                  <SheetHeader className="p-6 border-b text-left">
+                    <SheetTitle className="font-display text-2xl font-bold text-primary">
+                      Noor<span className="text-secondary">Bazaar</span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  
+                  <div className="flex flex-col flex-1 py-6">
+                    <nav className="flex flex-col px-6">
+                      {navLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className={cn(
+                            "flex items-center py-4 text-lg font-medium transition-colors border-b last:border-0",
+                            location === link.href ? "text-primary" : "text-foreground hover:text-primary"
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </nav>
+                    
+                    <div className="mt-auto p-6 space-y-4">
+                      <Link href="/cart">
+                        <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
+                          <ShoppingCart className="h-5 w-5" />
+                          View Cart
+                          {totalItems > 0 && (
+                            <Badge variant="secondary" className="ml-auto rounded-full px-2 py-0.5">
+                              {totalItems}
+                            </Badge>
+                          )}
+                        </Button>
+                      </Link>
+                      <Link href="/account">
+                        <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
+                          <User className="h-5 w-5" />
+                          My Account
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Link href="/" className="flex items-center space-x-2">
-            <h1 className="font-display text-2xl font-bold text-primary">
-              Noor<span className="text-secondary">Bazaar</span>
-            </h1>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition-colors hover:text-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center pr-2">
-            <Button variant="ghost" size="icon">
-              <Search className="h-5 w-5" />
-            </Button>
+              </SheetContent>
+            </Sheet>
           </div>
-          <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href="/cart">
-              <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
         </div>
       </div>
     </header>
   );
 };
+
+export default Header;
 
 export default Header;

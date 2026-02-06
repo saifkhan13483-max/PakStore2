@@ -25,7 +25,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
           {/* Background with overlay */}
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
@@ -35,9 +35,11 @@ export default function Home() {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            {/* Added a subtle overlay to make the text pop even more against the background */}
+            <div className="absolute inset-0 bg-black/20" />
           </div>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20 mt-[-64px]">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
