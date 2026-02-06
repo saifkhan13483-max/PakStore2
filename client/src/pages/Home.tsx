@@ -116,16 +116,16 @@ export default function Home() {
         </section>
 
         {/* Featured Categories */}
-        <section className="py-20 bg-muted/30">
+        <section className="py-12 sm:py-20 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="font-display text-4xl font-bold mb-4">Shop by Category</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
+            <div className="text-center mb-10 sm:mb-12">
+              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Shop by Category</h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
                 Discover our diverse range of Pakistani artisanal products across multiple categories.
               </p>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               <CategoryCard 
                 name="Apparel" 
                 slug="Apparel" 
@@ -198,27 +198,27 @@ export default function Home() {
         </section>
 
         {/* Newsletter / CTA */}
-        <section className="py-24 bg-primary text-white overflow-hidden relative">
+        <section className="py-16 sm:py-24 bg-primary text-white overflow-hidden relative">
           {/* Decorative pattern */}
-          <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
+          <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4 hidden sm:block">
             <svg width="600" height="600" viewBox="0 0 100 100">
                <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="currentColor" />
             </svg>
           </div>
           
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center max-w-3xl">
-            <Star className="h-12 w-12 text-secondary mx-auto mb-6" />
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">Join the NoorBazaar Family</h2>
-            <p className="text-primary-foreground/80 text-lg mb-10">
+            <Star className="h-10 w-10 sm:h-12 sm:w-12 text-secondary mx-auto mb-6" />
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Join the NoorBazaar Family</h2>
+            <p className="text-primary-foreground/80 text-base sm:text-lg mb-8 sm:mb-10">
               Subscribe to receive updates on new arrivals, exclusive artisan stories, and special offers.
             </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
               <input 
                 type="email" 
                 placeholder="Enter your email address" 
-                className="flex-1 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-white/20 transition-all"
+                className="flex-1 px-5 py-3 sm:px-6 sm:py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-white/20 transition-all text-sm sm:text-base"
               />
-              <Button type="submit" className="rounded-full px-8 py-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-lg">
+              <Button type="submit" className="rounded-full px-8 py-5 sm:py-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base sm:text-lg">
                 Subscribe
               </Button>
             </form>
