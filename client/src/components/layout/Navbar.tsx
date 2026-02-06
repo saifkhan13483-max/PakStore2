@@ -1,14 +1,25 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ShoppingCart, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 export function Navbar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
   const getTotalItems = useCartStore(state => state.getTotalItems);
   const itemCount = getTotalItems();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setLocation(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -32,6 +43,16 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <nav className="flex flex-col gap-4 mt-8">
+                  <form onSubmit={handleSearch} className="relative mb-4">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search products..."
+                      className="pl-8"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </form>
                   {navLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
                       {link.name}
@@ -68,7 +89,20 @@ export function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
+            <form onSubmit={handleSearch} className="hidden lg:flex relative mr-2">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                className="pl-8 h-9 w-64"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+            
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => {
+              // Toggle mobile search or just show placeholder for now
+            }}>
               <Search className="h-5 w-5 text-muted-foreground" />
             </Button>
             

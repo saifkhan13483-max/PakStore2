@@ -51,8 +51,24 @@ export default function Products() {
     }
   }, [search]);
 
+  const queryParam = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("q") || "";
+  }, [search]);
+
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
+
+    // Filter by search query
+    if (queryParam) {
+      const q = queryParam.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q)
+      );
+    }
 
     // Filter by category
     if (filterState.categories.length > 0) {
@@ -174,7 +190,9 @@ export default function Products() {
         <main className="flex-1">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Shop All Products</h1>
+              <h1 className="text-3xl font-bold">
+                {queryParam ? `Search Results for "${queryParam}"` : "Shop All Products"}
+              </h1>
               <p className="text-muted-foreground">
                 Showing {displayedProducts.length} of {filteredAndSortedProducts.length} products
               </p>
