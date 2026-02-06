@@ -20,7 +20,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col font-body">
       <SEO 
         title="Home" 
-        description="Shop the best artisanal products in Pakistan at NoorBazaar. From Kashmiri Pashminas to Multani Khussas, quality delivered to your door."
+        description="Shop the best artisanal products in Pakistan at PakCart. From Kashmiri Pashminas to Multani Khussas, quality delivered to your door."
       />
 
       <main className="flex-1">
@@ -31,7 +31,7 @@ export default function Home() {
              {/* Abstract luxury texture background */}
             <img 
               src="https://images.unsplash.com/photo-1548013146-72479768bada?w=1920&q=80" 
-              alt="NoorBazaar Hero" 
+              alt="PakCart Hero" 
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
@@ -208,7 +208,7 @@ export default function Home() {
           
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center max-w-3xl">
             <Star className="h-10 w-10 sm:h-12 sm:w-12 text-secondary mx-auto mb-6" />
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Join the NoorBazaar Family</h2>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Join the PakCart Family</h2>
             <p className="text-primary-foreground/80 text-base sm:text-lg mb-8 sm:mb-10">
               Subscribe to receive updates on new arrivals, exclusive artisan stories, and special offers.
             </p>

@@ -1,3 +1,4 @@
+import logoImg from "@/assets/logo.png";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ShoppingCart, Menu, Search } from "lucide-react";
@@ -66,9 +67,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <span className="font-display text-2xl font-bold text-primary tracking-tight">
-                Noor<span className="text-secondary">Bazaar</span>
-              </span>
+              <img src={logoImg} alt="PakCart" className="h-10 w-auto" />
             </Link>
           </div>
 

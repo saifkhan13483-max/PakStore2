@@ -17,7 +17,7 @@ export default function SEO({
   url = window.location.href,
   type = "website"
 }: SEOProps) {
-  const siteName = "NoorBazaar";
+  const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
   const defaultDescription = "Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep.";
 
@@ -48,8 +48,8 @@ export default function SEO({
           "@context": "https://schema.org",
           "@type": type === "product" ? "Product" : "Organization",
           "name": siteName,
-          "url": "https://noorbazaar.pk",
-          "logo": "https://noorbazaar.pk/logo.png",
+          "url": "https://pakcart.store",
+          "logo": "https://pakcart.store/logo.png",
           "description": defaultDescription,
           ...(type === "product" && {
             "name": title,

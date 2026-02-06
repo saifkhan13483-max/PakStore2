@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Company Information */}
           <div className="space-y-4">
             <h3 className="font-display text-2xl font-bold text-primary">
-              Noor<span className="text-secondary">Bazaar</span>
+              PakCart
             </h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.
@@ -66,18 +66,18 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 text-secondary shrink-0" />
-                <span>hello@noorbazaar.pk</span>
+                <span>hello@pakcart.store</span>
               </li>
               <li className="flex items-center gap-3 text-muted-foreground">
                 <Globe className="h-5 w-5 text-secondary shrink-0" />
-                <span>www.noorbazaar.pk</span>
+                <span>www.pakcart.store</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} NoorBazaar. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} PakCart. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-red-500 fill-current" />
