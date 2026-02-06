@@ -11,7 +11,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
-const Cart = () => <div>Shopping Cart Page</div>;
+import Cart from "@/pages/Cart";
 const Checkout = () => <div>Checkout Page</div>;
 const ThankYou = () => <div>Thank You Page</div>;
 const About = () => <div>About Us Page</div>;
