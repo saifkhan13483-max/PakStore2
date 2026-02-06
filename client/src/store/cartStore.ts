@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { type Product, type CartItem } from '@shared/schema';
+import { db, auth } from '../lib/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 interface CartState {
   items: CartItem[];
@@ -10,6 +12,7 @@ interface CartState {
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  syncWithFirebase: (userId: string) => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
@@ -17,56 +20,101 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addToCart: (product, quantity = 1) => {
-        const items = get().items;
-        const existingItem = items.find((item) => item.productId === product.id);
-
-        if (existingItem) {
-          set({
-            items: items.map((item) =>
-              item.productId === product.id
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            ),
-          });
-        } else {
-          set({
-            items: [
-              ...items,
-              {
-                id: Math.floor(Math.random() * 1000000), // Temporary client-side ID
-                productId: product.id,
-                quantity,
-                userId: null,
-                sessionId: null,
-                // Add fields needed for display in cart
-                name: product.name,
-                price: product.price,
-                images: product.images,
-                category: product.category,
-                slug: product.slug,
-              } as any,
-            ],
-          });
+      syncToFirebase: async (items: CartItem[]) => {
+        const user = auth.currentUser;
+        if (user) {
+          try {
+            await setDoc(doc(db, 'users', user.uid, 'cart', 'current'), { items });
+          } catch (error) {
+            console.error("Error syncing cart to Firebase:", error);
+          }
         }
       },
 
+      addToCart: (product, quantity = 1) => {
+        const items = get().items;
+        const existingItem = items.find((item) => item.productId === product.id);
+        let newItems;
+
+        if (existingItem) {
+          newItems = items.map((item) =>
+            item.productId === product.id
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        } else {
+          newItems = [
+            ...items,
+            {
+              id: Math.floor(Math.random() * 1000000), // Temporary client-side ID
+              productId: product.id,
+              quantity,
+              userId: null,
+              sessionId: null,
+              name: product.name,
+              price: product.price,
+              images: product.images,
+              category: product.category,
+              slug: product.slug,
+            } as any,
+          ];
+        }
+        set({ items: newItems });
+        (get() as any).syncToFirebase(newItems);
+      },
+
       removeFromCart: (productId) => {
-        set({
-          items: get().items.filter((item) => item.productId !== productId),
-        });
+        const newItems = get().items.filter((item) => item.productId !== productId);
+        set({ items: newItems });
+        (get() as any).syncToFirebase(newItems);
       },
 
       updateQuantity: (productId, quantity) => {
         if (quantity < 1) return;
-        set({
-          items: get().items.map((item) =>
-            item.productId === productId ? { ...item, quantity } : item
-          ),
-        });
+        const newItems = get().items.map((item) =>
+          item.productId === productId ? { ...item, quantity } : item
+        );
+        set({ items: newItems });
+        (get() as any).syncToFirebase(newItems);
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => {
+        set({ items: [] });
+        (get() as any).syncToFirebase([]);
+      },
+
+      syncWithFirebase: async (userId) => {
+        try {
+          const cartRef = doc(db, 'users', userId, 'cart', 'current');
+          const cartDoc = await getDoc(cartRef);
+          
+          if (cartDoc.exists()) {
+            const cloudItems = cartDoc.data().items as CartItem[];
+            const localItems = get().items;
+            
+            // Hybrid Merge Logic
+            const mergedItems = [...localItems];
+            cloudItems.forEach((cloudItem) => {
+              const existingIndex = mergedItems.findIndex((item) => item.productId === cloudItem.productId);
+              if (existingIndex > -1) {
+                mergedItems[existingIndex].quantity = Math.max(
+                  mergedItems[existingIndex].quantity,
+                  cloudItem.quantity
+                );
+              } else {
+                mergedItems.push(cloudItem);
+              }
+            });
+            
+            set({ items: mergedItems });
+            await setDoc(cartRef, { items: mergedItems });
+          } else if (get().items.length > 0) {
+            await setDoc(cartRef, { items: get().items });
+          }
+        } catch (error) {
+          console.error("Error syncing with Firebase:", error);
+        }
+      },
 
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
@@ -74,15 +122,6 @@ export const useCartStore = create<CartState>()(
 
       getTotalPrice: () => {
         const { items } = get();
-        // Since we don't have the full products list in the store, 
-        // we'll rely on the price being part of the item if possible,
-        // but looking at Cart.tsx, items are mapped from schema.
-        // Wait, the CartItem in schema.ts doesn't have price.
-        // But the items in useCartStore.addToCart(product) are adding a partial product.
-        // Let's fix the addToCart to include price and name if needed, 
-        // or just calculate it correctly here if the items have it.
-        // Looking at Cart.tsx line 70: {formatPrice(item.price * item.quantity)}
-        // This means 'item' in 'items' must have 'price'.
         return (items as any[]).reduce((total, item) => total + (item.price * item.quantity), 0);
       },
     }),

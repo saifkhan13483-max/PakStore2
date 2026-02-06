@@ -49,7 +49,20 @@ function Router() {
   );
 }
 
+import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
+import { useEffect } from "react";
+
 function App() {
+  const { user } = useAuthStore();
+  const { syncWithFirebase } = useCartStore();
+
+  useEffect(() => {
+    if (user) {
+      syncWithFirebase(user.uid);
+    }
+  }, [user, syncWithFirebase]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
