@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { ShoppingCart, Menu, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/store/cartStore";
+import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -10,6 +12,8 @@ import {
 } from "@/components/ui/sheet";
 
 const Header = () => {
+  const totalItems = useCartStore((state) => state.getTotalItems());
+  
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/products", label: "Shop" },
@@ -55,9 +59,16 @@ const Header = () => {
                 </nav>
                 <div className="mt-auto border-t pt-4">
                   <div className="flex flex-col gap-4">
-                    <Link href="/cart" className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary">
-                      <ShoppingCart className="h-5 w-5" />
-                      Cart
+                    <Link href="/cart" className="flex items-center justify-between text-lg font-medium transition-colors hover:text-primary">
+                      <div className="flex items-center gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        Cart
+                      </div>
+                      {totalItems > 0 && (
+                        <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-xs">
+                          {totalItems}
+                        </Badge>
+                      )}
                     </Link>
                     <Link href="/account" className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-primary">
                       <User className="h-5 w-5" />
@@ -69,7 +80,9 @@ const Header = () => {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold tracking-tight text-primary">NoorBazaar</span>
+            <h1 className="font-display text-2xl font-bold text-primary">
+              Noor<span className="text-secondary">Bazaar</span>
+            </h1>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             {navLinks.map((link) => (
@@ -89,9 +102,14 @@ const Header = () => {
               <Search className="h-5 w-5" />
             </Button>
           </div>
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-white">
+                  {totalItems}
+                </span>
+              )}
             </Link>
           </Button>
           <Button variant="ghost" size="icon">
