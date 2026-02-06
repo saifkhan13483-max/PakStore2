@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import Footer from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "@/hooks/use-products";
