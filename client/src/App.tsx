@@ -12,7 +12,7 @@ import Home from "@/pages/Home";
 import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import Cart from "@/pages/Cart";
-const Checkout = () => <div>Checkout Page</div>;
+import Checkout from "@/pages/Checkout";
 const ThankYou = () => <div>Thank You Page</div>;
 const About = () => <div>About Us Page</div>;
 const Contact = () => <div>Contact Us Page</div>;
