@@ -9,7 +9,16 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProducts(): Promise<Product[]> {
+  async getProducts(search?: string): Promise<Product[]> {
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      const allProducts = await db.select().from(products);
+      return allProducts.filter(p => 
+        p.name.toLowerCase().includes(lowerSearch) || 
+        p.description.toLowerCase().includes(lowerSearch) ||
+        (p.category && p.category.toLowerCase().includes(lowerSearch))
+      );
+    }
     return await db.select().from(products);
   }
 

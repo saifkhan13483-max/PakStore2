@@ -7,8 +7,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  app.get(api.products.list.path, async (_req, res) => {
-    const products = await storage.getProducts();
+  app.get(api.products.list.path, async (req, res) => {
+    const search = req.query.search as string | undefined;
+    const products = await storage.getProducts(search);
     res.json(products);
   });
 
