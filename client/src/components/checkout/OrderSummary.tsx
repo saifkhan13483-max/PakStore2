@@ -16,13 +16,13 @@ export function OrderSummary() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <div key={item.id} className="flex gap-3 text-sm">
               <div className="h-16 w-16 rounded-md bg-muted overflow-hidden flex-shrink-0">
-                {item.product.images?.[0] ? (
+                {item.images?.[0] ? (
                   <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
+                    src={item.images[0]}
+                    alt={item.name}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -32,10 +32,10 @@ export function OrderSummary() {
                 )}
               </div>
               <div className="flex-1 space-y-1">
-                <p className="font-medium line-clamp-1">{item.product.name}</p>
+                <p className="font-medium line-clamp-1">{item.name}</p>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Qty: {item.quantity}</span>
-                  <span>Rs. {(item.product.price * item.quantity).toLocaleString()}</span>
+                  <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               </div>
             </div>
