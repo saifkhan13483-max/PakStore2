@@ -237,7 +237,7 @@ const Header = () => {
                       ))}
                     </nav>
                     
-                    <div className="mt-auto p-6 space-y-4">
+                    <div className="mt-auto p-6 flex flex-col gap-3">
                       <Link href="/cart">
                         <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
                           <ShoppingCart className="h-5 w-5" />
