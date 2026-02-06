@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Company Information */}
           <div className="space-y-4">
             <Link href="/" className="inline-block">
-              <img src={logoImg} alt="PakCart" className="h-10 w-auto" />
+              <img src={logoImg} alt="PakCart" className="h-12 w-auto" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.

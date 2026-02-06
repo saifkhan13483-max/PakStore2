@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Product } from "@shared/schema";
+import logoImg from "@/assets/logo.png";
 import {
   Sheet,
   SheetContent,
@@ -63,9 +64,11 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center group">
-              <span className="font-display text-2xl md:text-3xl font-bold tracking-tight text-primary transition-transform group-hover:scale-105">
-                Noor<span className="text-secondary">Bazaar</span>
-              </span>
+              <img 
+                src={logoImg} 
+                alt="PakCart" 
+                className="h-10 w-auto transition-transform group-hover:scale-105" 
+              />
             </Link>
 
             <nav className="hidden lg:flex items-center gap-8">
@@ -197,7 +200,7 @@ const Header = () => {
                 <div className="flex flex-col h-full bg-background">
                   <SheetHeader className="p-6 border-b text-left">
                     <SheetTitle className="font-display text-2xl font-bold text-primary">
-                      Noor<span className="text-secondary">Bazaar</span>
+                      <img src={logoImg} alt="PakCart" className="h-8 w-auto" />
                     </SheetTitle>
                   </SheetHeader>
                   
