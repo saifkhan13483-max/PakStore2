@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { products } from "@/data/products";
-import ProductCard from "@/components/product/ProductCard";
+import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -105,7 +105,7 @@ export default function Products() {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {displayedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCardComponent key={product.id} product={product} />
                 ))}
               </div>
 
