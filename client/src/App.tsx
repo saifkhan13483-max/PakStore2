@@ -13,7 +13,7 @@ import Products from "@/pages/Products";
 import ProductDetail from "@/pages/ProductDetail";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
-const ThankYou = () => <div>Thank You Page</div>;
+import ThankYou from "@/pages/ThankYou";
 const About = () => <div>About Us Page</div>;
 const Contact = () => <div>Contact Us Page</div>;
 const Privacy = () => <div>Privacy Policy Page</div>;
