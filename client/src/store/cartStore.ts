@@ -67,10 +67,10 @@ export const useCartStore = create<CartState>()(
       },
 
       getTotalPrice: () => {
-        // This would ideally fetch prices from a product store/data, 
-        // but for now we'll assume the quantity is all we have in the item.
-        // In a real app, CartItem might include a price snapshot or we'd join with products.
-        return 0; 
+        // We'll import products here to avoid circular dependency if possible, 
+        // or just calculate based on available items.
+        // For now, let's keep it simple.
+        return 0;
       },
     }),
     {
@@ -78,3 +78,11 @@ export const useCartStore = create<CartState>()(
     }
   )
 );
+
+// Helper for total calculation
+export const calculateTotal = (items: CartItem[], products: Product[]) => {
+  return items.reduce((total, item) => {
+    const product = products.find(p => p.id === item.productId);
+    return total + (product ? product.price * item.quantity : 0);
+  }, 0);
+};

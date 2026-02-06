@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 
 export function Navbar() {
   const [location] = useLocation();
-  const itemCount = useCartStore(state => state.itemCount());
+  const getTotalItems = useCartStore(state => state.getTotalItems);
+  const itemCount = getTotalItems();
 
   const navLinks = [
     { name: "Home", href: "/" },
