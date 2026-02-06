@@ -88,7 +88,7 @@ export function Navbar() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <form onSubmit={handleSearch} className="hidden lg:flex relative mr-2">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -100,11 +100,28 @@ export function Navbar() {
               />
             </form>
             
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => {
-              // Toggle mobile search or just show placeholder for now
-            }}>
-              <Search className="h-5 w-5 text-muted-foreground" />
-            </Button>
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="top" className="h-20 flex items-center px-4">
+                  <form onSubmit={handleSearch} className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search products..."
+                      className="pl-10 h-10 w-full"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                    />
+                  </form>
+                </SheetContent>
+              </Sheet>
+            </div>
             
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">

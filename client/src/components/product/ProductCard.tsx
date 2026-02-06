@@ -50,17 +50,17 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
           <Link href={`/product/${product.slug}`}>
-            <Button variant="secondary" size="icon" className="rounded-full h-12 w-12 hover:scale-110 transition-transform">
-              <Eye className="h-5 w-5" />
+            <Button variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:scale-110 transition-transform">
+              <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
           <Button 
             onClick={handleAddToCart}
             variant="default" 
             size="icon" 
-            className="rounded-full h-12 w-12 hover:scale-110 transition-transform bg-primary text-primary-foreground hover:bg-primary/90"
+            className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:scale-110 transition-transform bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
 

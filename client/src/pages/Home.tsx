@@ -39,7 +39,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/20" />
           </div>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20 mt-[-64px]">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -49,20 +49,20 @@ export default function Home() {
               <span className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-sm font-medium mb-6">
                 Premium Quality Products
               </span>
-              <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
                 Shop the <span className="text-secondary italic">Best Deals</span> in Pakistan
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
                 Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
               </p>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/products">
-                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 min-h-14 text-lg font-bold">
+                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 h-12 sm:min-h-14 text-base sm:text-lg font-bold w-full sm:w-auto">
                     Shop Now
                   </Button>
                 </Link>
                 <Link href="/about">
-                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 min-h-14 text-lg">
+                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 h-12 sm:min-h-14 text-base sm:text-lg w-full sm:w-auto">
                     Our Story
                   </Button>
                 </Link>
@@ -74,9 +74,9 @@ export default function Home() {
         {/* Trust Indicators */}
         <section className="py-12 border-b bg-card">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-8">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
                   <Truck className="h-5 w-5" />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
@@ -94,7 +94,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
@@ -103,7 +103,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
                   <Star className="h-5 w-5" />
                 </div>
                 <div>
