@@ -9,16 +9,65 @@ import {
   ShoppingCart, 
   ArrowRight, 
   ShoppingBag,
-  ChevronLeft
+  ChevronLeft,
+  AlertCircle
 } from "lucide-react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCartStore();
+  const { toast } = useToast();
   const totalPrice = getTotalPrice();
   const shippingThreshold = 5000;
   const shippingCost = totalPrice >= shippingThreshold ? 0 : 500;
+  
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
+  const [showClearCartAlert, setShowClearCartAlert] = useState(false);
+
+  const handleUpdateQuantity = (productId: number, newQuantity: number, maxStock: number = 10) => {
+    if (newQuantity > maxStock) {
+      toast({
+        title: "Stock Limit Reached",
+        description: `Only ${maxStock} items available in stock.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    updateQuantity(productId, newQuantity);
+  };
+
+  const confirmRemove = () => {
+    if (itemToRemove !== null) {
+      removeFromCart(itemToRemove);
+      setItemToRemove(null);
+      toast({
+        title: "Item Removed",
+        description: "The item has been removed from your cart.",
+      });
+    }
+  };
+
+  const confirmClearCart = () => {
+    clearCart();
+    setShowClearCartAlert(false);
+    toast({
+      title: "Cart Cleared",
+      description: "All items have been removed from your cart.",
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -31,7 +80,7 @@ export default function Cart() {
           <p className="text-muted-foreground">
             Looks like you haven't added anything to your cart yet. Explore our collection of authentic Pakistani artisanal products.
           </p>
-          <Button asChild size="lg" className="w-full sm:w-auto">
+          <Button asChild size="lg" className="w-full sm:w-auto" data-testid="button-start-shopping">
             <Link href="/products">Start Shopping</Link>
           </Button>
         </div>
@@ -46,7 +95,12 @@ export default function Cart() {
           <ShoppingCart className="w-8 h-8 text-primary" />
           Shopping Cart
         </h1>
-        <Button variant="ghost" className="text-muted-foreground hover:text-destructive no-default-hover-elevate" onClick={clearCart}>
+        <Button 
+          variant="ghost" 
+          className="text-muted-foreground hover:text-destructive no-default-hover-elevate" 
+          onClick={() => setShowClearCartAlert(true)}
+          data-testid="button-clear-cart"
+        >
           Clear Cart
         </Button>
       </div>
@@ -91,32 +145,43 @@ export default function Cart() {
                         </div>
 
                         <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center border rounded-md h-9 px-1 bg-background">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 no-default-hover-elevate"
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <span className="w-10 text-center font-medium text-sm">{item.quantity}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 no-default-hover-elevate"
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center border rounded-md h-9 px-1 bg-background">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 no-default-hover-elevate"
+                                onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                                disabled={item.quantity <= 1}
+                                data-testid={`button-decrease-qty-${item.productId}`}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="w-10 text-center font-medium text-sm" data-testid={`text-qty-${item.productId}`}>{item.quantity}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 no-default-hover-elevate"
+                                onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                                data-testid={`button-increase-qty-${item.productId}`}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </div>
+                            {item.quantity >= 10 && (
+                              <p className="text-[10px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" />
+                                Max stock reached
+                              </p>
+                            )}
                           </div>
 
                           <Button
                             variant="ghost"
                             size="icon"
                             className="text-muted-foreground hover:text-destructive no-default-hover-elevate"
-                            onClick={() => removeFromCart(item.productId)}
+                            onClick={() => setItemToRemove(item.productId)}
+                            data-testid={`button-remove-item-${item.productId}`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -129,7 +194,7 @@ export default function Cart() {
             ))}
           </AnimatePresence>
 
-          <Button variant="ghost" asChild className="mt-4 no-default-hover-elevate">
+          <Button variant="ghost" asChild className="mt-4 no-default-hover-elevate" data-testid="link-continue-shopping">
             <Link href="/products">
               <ChevronLeft className="w-4 h-4 mr-2" />
               Continue Shopping
@@ -146,15 +211,15 @@ export default function Cart() {
               <div className="space-y-4">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <span>Rs. {totalPrice.toLocaleString()}</span>
+                  <span data-testid="text-subtotal">Rs. {totalPrice.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between text-muted-foreground">
                   <span>Shipping</span>
                   {shippingCost === 0 ? (
-                    <span className="text-green-600 font-medium italic">Free</span>
+                    <span className="text-green-600 font-medium italic" data-testid="text-shipping-free">Free</span>
                   ) : (
-                    <span>Rs. {shippingCost.toLocaleString()}</span>
+                    <span data-testid="text-shipping-cost">Rs. {shippingCost.toLocaleString()}</span>
                   )}
                 </div>
 
@@ -168,11 +233,11 @@ export default function Cart() {
                 
                 <div className="flex justify-between text-xl font-bold pt-2">
                   <span>Total</span>
-                  <span className="text-primary">Rs. {(totalPrice + shippingCost).toLocaleString()}</span>
+                  <span className="text-primary" data-testid="text-total">Rs. {(totalPrice + shippingCost).toLocaleString()}</span>
                 </div>
 
                 <div className="pt-6 space-y-3">
-                  <Button asChild size="lg" className="w-full gap-2">
+                  <Button asChild size="lg" className="w-full gap-2" data-testid="button-checkout">
                     <Link href="/checkout">
                       Proceed to Checkout
                       <ArrowRight className="w-4 h-4" />
@@ -187,6 +252,41 @@ export default function Cart() {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={itemToRemove !== null} onOpenChange={(open) => !open && setItemToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove from cart?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this item from your shopping cart?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove Item
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showClearCartAlert} onOpenChange={setShowClearCartAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear your cart?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove all items from your shopping cart. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClearCart} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Clear Cart
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
