@@ -33,3 +33,11 @@ export const cartItems = pgTable("cart_items", {
 export const insertCartItemSchema = createInsertSchema(cartItems);
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+
+export const checkoutInfoSchema = z.object({
+  fullName: z.string().min(3, "Full name must be at least 3 characters").regex(/^[a-zA-Z\s]+$/, "Only letters and spaces are allowed"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().regex(/^\+92\d{10}$/, "Mobile number must follow Pakistani format (+92 followed by 10 digits)"),
+});
+
+export type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;

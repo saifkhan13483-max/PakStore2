@@ -3,6 +3,11 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, ShoppingCart, Info, CreditCard, CheckCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { checkoutInfoSchema, type CheckoutInfo } from "@shared/schema";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 export default function Checkout() {
   const { items, getTotalPrice } = useCartStore();
@@ -10,6 +15,20 @@ export default function Checkout() {
   const totalPrice = getTotalPrice();
   const shippingThreshold = 5000;
   const shippingCost = totalPrice >= shippingThreshold ? 0 : 500;
+
+  const form = useForm<CheckoutInfo>({
+    resolver: zodResolver(checkoutInfoSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "+92",
+    },
+  });
+
+  const onSubmit = (data: CheckoutInfo) => {
+    console.log("Contact info submitted:", data);
+    // Proceed to next section or handle submission logic
+  };
 
   const steps = [
     { id: "cart", label: "Cart", icon: ShoppingCart, href: "/cart" },
@@ -68,14 +87,59 @@ export default function Checkout() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-8">
-        {/* Left Column: Forms (Placeholder for now) */}
+        {/* Left Column: Forms */}
         <div className="lg:col-span-3 space-y-6">
           <Card>
             <CardContent className="p-6">
               <h2 className="text-xl font-bold mb-4">Contact Information</h2>
-              <div className="h-48 flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/30">
-                <p className="text-muted-foreground italic">Form sections (Contact, Shipping) will be implemented in subsequent parts.</p>
-              </div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your full name" {...field} data-testid="input-fullname" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Address</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="Enter your email" {...field} data-testid="input-email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mobile Number (Pakistan)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+92XXXXXXXXXX" {...field} data-testid="input-phone" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="pt-4">
+                    <Button type="submit" className="w-full" data-testid="button-continue-shipping">
+                      Continue to Shipping
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>
