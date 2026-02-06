@@ -22,7 +22,6 @@ export default function Home() {
         title="Home" 
         description="Shop the best artisanal products in Pakistan at NoorBazaar. From Kashmiri Pashminas to Multani Khussas, quality delivered to your door."
       />
-      <Navbar />
 
       <main className="flex-1">
         {/* Hero Section */}
