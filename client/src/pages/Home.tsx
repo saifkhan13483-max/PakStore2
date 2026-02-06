@@ -25,7 +25,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
           {/* Background with overlay */}
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
@@ -39,7 +39,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/20" />
           </div>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
