@@ -13,7 +13,8 @@ export async function registerRoutes(
   });
 
   app.get(api.products.get.path, async (req, res) => {
-    const product = await storage.getProduct(req.params.slug);
+    const slug = req.params.slug as string;
+    const product = await storage.getProduct(slug);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
