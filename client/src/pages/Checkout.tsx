@@ -2,7 +2,7 @@ import { useCartStore } from "@/store/cartStore";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, Info, CreditCard, CheckCircle } from "lucide-react";
+import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutInfoSchema, type CheckoutInfo } from "@shared/schema";
@@ -10,6 +10,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const PAKISTANI_CITIES = [
   "Karachi", "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", 
@@ -20,11 +24,11 @@ const PAKISTANI_CITIES = [
 ].sort();
 
 export default function Checkout() {
-  const { items, getTotalPrice } = useCartStore();
-  const [location] = useLocation();
-  const totalPrice = getTotalPrice();
-  const shippingThreshold = 5000;
-  const shippingCost = totalPrice >= shippingThreshold ? 0 : 500;
+  const { items, clearCart } = useCartStore();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState<"info" | "payment">("info");
 
   const form = useForm<CheckoutInfo>({
     resolver: zodResolver(checkoutInfoSchema),
@@ -38,22 +42,49 @@ export default function Checkout() {
     },
   });
 
-  const onSubmit = (data: CheckoutInfo) => {
-    console.log("Checkout info submitted:", data);
+  const onSubmit = async (data: CheckoutInfo) => {
+    if (step === "info") {
+      setStep("payment");
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Order placed:", data);
+      
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Thank you for shopping with NoorBazaar. Your order ID is #NB" + Math.floor(Math.random() * 100000),
+      });
+
+      clearCart();
+      setLocation("/thank-you");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const steps = [
     { id: "cart", label: "Cart", icon: ShoppingCart, href: "/cart" },
-    { id: "info", label: "Information", icon: Info, active: true },
-    { id: "payment", icon: CreditCard, label: "Payment" },
+    { id: "info", label: "Information", icon: Info, active: step === "info", completed: step === "payment" },
+    { id: "payment", label: "Payment", icon: CreditCard, active: step === "payment" },
     { id: "confirmation", label: "Confirmation", icon: CheckCircle },
   ];
 
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-        <Button asChild>
+        <h1 className="text-2xl font-bold mb-4 text-emerald-900">Your cart is empty</h1>
+        <Button asChild className="bg-emerald-800 hover:bg-emerald-900">
           <Link href="/products">Go to Shop</Link>
         </Button>
       </div>
@@ -61,36 +92,41 @@ export default function Checkout() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Progress Indicator */}
       <div className="mb-12">
         <div className="flex items-center justify-center max-w-3xl mx-auto">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center flex-1 last:flex-none">
+          {steps.map((s, index) => (
+            <div key={s.id} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center relative group">
                 <div 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
-                    step.active 
-                      ? "bg-primary border-primary text-primary-foreground" 
-                      : step.href 
-                        ? "bg-background border-primary text-primary cursor-pointer"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                    s.active 
+                      ? "bg-emerald-800 border-emerald-800 text-white scale-110 shadow-lg" 
+                      : s.completed || s.href
+                        ? "bg-emerald-100 border-emerald-800 text-emerald-800 cursor-pointer"
                         : "bg-background border-muted text-muted-foreground"
                   }`}
-                  data-testid={`checkout-step-${step.id}`}
+                  onClick={() => s.href && setLocation(s.href)}
+                  data-testid={`checkout-step-${s.id}`}
                 >
-                  <step.icon className="w-5 h-5" />
+                  {s.completed ? <CheckCircle className="w-5 h-5" /> : <s.icon className="w-5 h-5" />}
                 </div>
                 <span 
-                  className={`absolute -bottom-7 text-xs font-medium whitespace-nowrap ${
-                    step.active ? "text-primary" : "text-muted-foreground"
+                  className={`absolute -bottom-7 text-xs font-semibold whitespace-nowrap ${
+                    s.active ? "text-emerald-900" : "text-muted-foreground"
                   }`}
                 >
-                  {step.label}
+                  {s.label}
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div className="flex-1 h-[2px] mx-4 bg-muted">
-                  <div className={`h-full bg-primary transition-all duration-500 ${step.href ? "w-full" : "w-0"}`} />
+                <div className="flex-1 h-[2px] mx-4 bg-muted overflow-hidden">
+                  <div 
+                    className={`h-full bg-emerald-800 transition-all duration-500 ${
+                      s.completed || s.href ? "w-full" : "w-0"
+                    }`} 
+                  />
                 </div>
               )}
             </div>
@@ -98,151 +134,238 @@ export default function Checkout() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
         {/* Left Column: Forms */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Contact Information</h2>
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full name" {...field} data-testid="input-fullname" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Address</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} data-testid="input-email" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Mobile Number (Pakistan)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+92XXXXXXXXXX" {...field} data-testid="input-phone" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Complete Street Address</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="House #, Street Name, Sector/Block, Landmark" 
-                              className="min-h-[100px] resize-none"
-                              {...field} 
-                              data-testid="textarea-address"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="area"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Area / Locality</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Neighborhood / Phase" {...field} data-testid="input-area" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              {step === "info" ? (
+                <>
+                  <Card className="border-emerald-100 shadow-sm overflow-hidden">
+                    <div className="h-1 bg-emerald-800" />
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                        <Info className="w-5 h-5" />
+                        <h2 className="text-xl font-bold">Contact Information</h2>
+                      </div>
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="fullName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-emerald-900 font-medium">Full Name</FormLabel>
                               <FormControl>
-                                <SelectTrigger data-testid="select-city">
-                                  <SelectValue placeholder="Select your city" />
-                                </SelectTrigger>
+                                <Input 
+                                  placeholder="Enter your full name" 
+                                  className="focus-visible:ring-emerald-800"
+                                  {...field} 
+                                  data-testid="input-fullname" 
+                                />
                               </FormControl>
-                              <SelectContent>
-                                {PAKISTANI_CITIES.map((city) => (
-                                  <SelectItem key={city} value={city}>{city}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-emerald-900 font-medium">Email Address</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="email" 
+                                    placeholder="Enter your email" 
+                                    className="focus-visible:ring-emerald-800"
+                                    {...field} 
+                                    data-testid="input-email" 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-emerald-900 font-medium">Mobile Number (Pakistan)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="+92XXXXXXXXXX" 
+                                    className="focus-visible:ring-emerald-800"
+                                    {...field} 
+                                    data-testid="input-phone" 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <div className="pt-4">
-                <Button type="submit" className="w-full" data-testid="button-continue-payment">
-                  Continue to Payment
+                  <Card className="border-emerald-100 shadow-sm overflow-hidden">
+                    <div className="h-1 bg-emerald-800" />
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                        <ShoppingCart className="w-5 h-5" />
+                        <h2 className="text-xl font-bold">Shipping Address</h2>
+                      </div>
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-emerald-900 font-medium">Complete Street Address</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="House #, Street Name, Sector/Block, Landmark" 
+                                  className="min-h-[100px] resize-none focus-visible:ring-emerald-800"
+                                  {...field} 
+                                  data-testid="textarea-address"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="area"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-emerald-900 font-medium">Area / Locality</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Neighborhood / Phase" 
+                                    className="focus-visible:ring-emerald-800"
+                                    {...field} 
+                                    data-testid="input-area" 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-emerald-900 font-medium">City</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger 
+                                      className="focus:ring-emerald-800"
+                                      data-testid="select-city"
+                                    >
+                                      <SelectValue placeholder="Select your city" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {PAKISTANI_CITIES.map((city) => (
+                                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <Card className="border-emerald-100 shadow-sm overflow-hidden">
+                  <div className="h-1 bg-emerald-800" />
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                      <CreditCard className="w-5 h-5" />
+                      <h2 className="text-xl font-bold">Payment Method</h2>
+                    </div>
+                    
+                    <RadioGroup defaultValue="cod" className="space-y-4">
+                      <div className="flex items-center space-x-4 border rounded-lg p-4 cursor-pointer hover:bg-emerald-50 transition-colors border-emerald-100">
+                        <RadioGroupItem value="cod" id="cod" className="text-emerald-800 border-emerald-800" />
+                        <label htmlFor="cod" className="flex flex-1 items-center gap-3 cursor-pointer">
+                          <Wallet className="w-6 h-6 text-emerald-800" />
+                          <div>
+                            <p className="font-bold text-emerald-900">Cash on Delivery (COD)</p>
+                            <p className="text-sm text-muted-foreground">Pay with cash upon delivery to your doorstep.</p>
+                          </div>
+                        </label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4 border rounded-lg p-4 cursor-pointer opacity-60 bg-muted/20">
+                        <RadioGroupItem value="card" id="card" disabled className="text-muted border-muted" />
+                        <label htmlFor="card" className="flex flex-1 items-center gap-3 cursor-not-allowed">
+                          <CreditCard className="w-6 h-6 text-muted-foreground" />
+                          <div>
+                            <p className="font-bold text-muted-foreground">Online Payment (Coming Soon)</p>
+                            <p className="text-sm text-muted-foreground">Debit/Credit Card, JazzCash, or EasyPaisa.</p>
+                          </div>
+                        </label>
+                      </div>
+                    </RadioGroup>
+
+                    <div className="mt-8 p-4 bg-emerald-50 rounded-lg border border-emerald-100 flex gap-3 text-emerald-800">
+                      <Info className="w-5 h-5 flex-shrink-0" />
+                      <p className="text-sm">
+                        By clicking "Complete Order", you agree to our Terms of Service and Privacy Policy. Your order will be processed and delivered within 3-5 business days.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                {step === "payment" && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="flex-1 border-emerald-800 text-emerald-800 hover:bg-emerald-50"
+                    onClick={() => setStep("info")}
+                  >
+                    Back to Shipping
+                  </Button>
+                )}
+                <Button 
+                  type="submit" 
+                  className={`flex-[2] bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-6 ${
+                    isSubmitting ? "opacity-80" : ""
+                  }`}
+                  disabled={isSubmitting}
+                  data-testid={step === "info" ? "button-continue-payment" : "button-complete-order"}
+                >
+                  {isSubmitting ? (
+                    "Processing..."
+                  ) : step === "info" ? (
+                    "Continue to Payment"
+                  ) : (
+                    "Complete Order"
+                  )}
                 </Button>
               </div>
             </form>
           </Form>
         </div>
 
-        {/* Right Column: Order Summary (Placeholder for now) */}
-        <div className="lg:col-span-2">
-          <Card className="sticky top-24 border-muted/40 shadow-sm">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-bold mb-6">Order Summary</h2>
-              <div className="h-64 flex items-center justify-center border-2 border-dashed rounded-lg bg-muted/30 mb-4">
-                <p className="text-muted-foreground italic text-center px-4">Order Summary component will be implemented in Part 21.</p>
-              </div>
-              
-              <div className="space-y-4 pt-4 border-t">
-                <div className="flex justify-between font-bold text-xl">
-                  <span>Total</span>
-                  <span className="text-primary">Rs. {(totalPrice + shippingCost).toLocaleString()}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Right Column: Order Summary */}
+        <div className="lg:col-span-4">
+          <OrderSummary />
         </div>
       </div>
     </div>
   );
 }
+
