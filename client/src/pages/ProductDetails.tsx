@@ -2,7 +2,6 @@ import { useRoute, Link } from "wouter";
 import { useProduct } from "@/hooks/use-products";
 import { useCartStore } from "@/store/cartStore";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -206,8 +205,6 @@ export default function ProductDetails() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
