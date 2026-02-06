@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { useProducts } from "@/hooks/use-products";
@@ -108,17 +109,56 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Featured Categories */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="font-display text-4xl font-bold mb-4">Shop by Category</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Discover our diverse range of Pakistani artisanal products across multiple categories.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <CategoryCard 
+                name="Apparel" 
+                slug="Apparel" 
+                count={1} 
+                image="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=800"
+              />
+              <CategoryCard 
+                name="Home Decor" 
+                slug="Home Decor" 
+                count={1} 
+                image="https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?auto=format&fit=crop&q=80&w=800"
+              />
+              <CategoryCard 
+                name="Footwear" 
+                slug="Footwear" 
+                count={1} 
+                image="https://images.unsplash.com/photo-1628149455678-16f37bc392f4?auto=format&fit=crop&q=80&w=800"
+              />
+              <CategoryCard 
+                name="Food" 
+                slug="Food" 
+                count={1} 
+                image="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* Featured Products */}
         <section className="py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-end mb-12">
               <div>
-                <h2 className="font-display text-4xl font-bold text-foreground mb-4">Trending Now</h2>
+                <h2 className="font-display text-4xl font-bold text-foreground mb-4">Best Sellers</h2>
                 <p className="text-muted-foreground max-w-xl">
-                  Explore our most coveted pieces, hand-picked for their exceptional quality and popularity.
+                  Discover our most coveted pieces, hand-picked for their exceptional quality and popularity.
                 </p>
               </div>
-              <Link href="/collections">
+              <Link href="/products">
                 <Button variant="ghost" className="hidden md:flex gap-2 group">
                   View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -142,9 +182,9 @@ export default function Home() {
             </div>
 
             <div className="mt-12 text-center md:hidden">
-              <Link href="/collections">
+              <Link href="/products">
                 <Button size="lg" className="rounded-full w-full">
-                  View All Collections
+                  View All Products
                 </Button>
               </Link>
             </div>
