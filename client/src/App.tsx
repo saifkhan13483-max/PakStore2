@@ -14,10 +14,10 @@ import ProductDetail from "@/pages/ProductDetail";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import ThankYou from "@/pages/ThankYou";
-const About = () => <div>About Us Page</div>;
-const Contact = () => <div>Contact Us Page</div>;
-const Privacy = () => <div>Privacy Policy Page</div>;
-const Terms = () => <div>Terms & Conditions Page</div>;
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 
 function Router() {
   return (
