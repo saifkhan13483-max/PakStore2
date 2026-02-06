@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { Helmet } from "react-helmet-async";
 import { products } from "@/data/products";
 import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
@@ -19,18 +19,96 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filters, type FilterState } from "@/components/products/Filters";
+
+type SortOption = "featured" | "price-low" | "price-high" | "newest";
 
 export default function Products() {
   const [location] = useLocation();
+  const search = useSearch();
   const [visibleCount, setVisibleCount] = useState(8);
+  const [sortBy, setSortBy] = useState<SortOption>("featured");
+  const [filterState, setFilterState] = useState<FilterState>({
+    categories: [],
+    priceRange: null,
+    inStockOnly: false,
+  });
+
+  // Handle URL parameters for initial filters (optional but recommended in Part 14)
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const cat = params.get("category");
+    if (cat) {
+      setFilterState(prev => ({ ...prev, categories: [cat] }));
+    }
+  }, [search]);
+
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...products];
+
+    // Filter by category
+    if (filterState.categories.length > 0) {
+      result = result.filter((p) => filterState.categories.includes(p.category));
+    }
+
+    // Filter by price range
+    if (filterState.priceRange) {
+      const ranges: Record<string, { min: number; max: number }> = {
+        "Under Rs. 1,000": { min: 0, max: 1000 },
+        "Rs. 1,000 - Rs. 3,000": { min: 1000, max: 3000 },
+        "Rs. 3,000 - Rs. 5,000": { min: 3000, max: 5000 },
+        "Rs. 5,000 - Rs. 10,000": { min: 5000, max: 10000 },
+        "Over Rs. 10,000": { min: 10000, max: Infinity },
+      };
+      const range = ranges[filterState.priceRange];
+      if (range) {
+        result = result.filter((p) => p.price >= range.min && p.price <= range.max);
+      }
+    }
+
+    // Filter by availability
+    if (filterState.inStockOnly) {
+      result = result.filter((p) => p.inStock);
+    }
+
+    // Sort
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "newest":
+        result.sort((a, b) => b.id - a.id);
+        break;
+      default:
+        // Featured - no sorting
+        break;
+    }
+
+    return result;
+  }, [filterState, sortBy]);
 
   const displayedProducts = useMemo(() => {
-    return products.slice(0, visibleCount);
-  }, [visibleCount]);
+    return filteredAndSortedProducts.slice(0, visibleCount);
+  }, [filteredAndSortedProducts, visibleCount]);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 8, products.length));
+    setVisibleCount((prev) => Math.min(prev + 8, filteredAndSortedProducts.length));
+  };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilterState(newFilters);
+    setVisibleCount(8); // Reset visibility when filters change
   };
 
   return (
@@ -40,7 +118,6 @@ export default function Products() {
         <meta name="description" content="Browse our complete collection of authentic Pakistani artisanal products." />
       </Helmet>
 
-      {/* Breadcrumbs */}
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -55,10 +132,10 @@ export default function Products() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Mobile Filter Trigger */}
-        <div className="lg:hidden mb-4">
+        <div className="lg:hidden mb-4 flex gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="w-full gap-2">
+              <Button variant="outline" className="flex-1 gap-2">
                 <Filter className="h-4 w-4" />
                 Filters
               </Button>
@@ -68,38 +145,70 @@ export default function Products() {
                 <SheetTitle>Filters</SheetTitle>
               </SheetHeader>
               <div className="py-4">
-                <p className="text-sm text-muted-foreground italic">Filtering functionality coming in Part 14.</p>
+                <Filters onFilterChange={handleFilterChange} />
               </div>
             </SheetContent>
           </Sheet>
+          <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
+            <SelectTrigger className="w-[180px]">
+              <SlidersHorizontal className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
+              <SelectItem value="newest">Newest Arrivals</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Sidebar Filters (Desktop) */}
         <aside className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-24 space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Filters</h3>
-              <div className="p-4 border rounded-lg bg-card text-card-foreground">
-                <p className="text-sm text-muted-foreground italic">Filtering functionality coming in Part 14.</p>
-              </div>
-            </div>
+          <div className="sticky top-24">
+            <Filters onFilterChange={handleFilterChange} />
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Shop All Products</h1>
-            <p className="text-muted-foreground">
-              Showing {displayedProducts.length} of {products.length} products
-            </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">Shop All Products</h1>
+              <p className="text-muted-foreground">
+                Showing {displayedProducts.length} of {filteredAndSortedProducts.length} products
+              </p>
+            </div>
+            
+            <div className="hidden lg:block">
+              <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
+                <SelectTrigger className="w-[200px]">
+                  <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="featured">Featured</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="newest">Newest Arrivals</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Product Grid */}
-          {products.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground mb-4">No products found.</p>
-              <Button variant="outline">Browse All Products</Button>
+          {filteredAndSortedProducts.length === 0 ? (
+            <div className="text-center py-20 bg-muted/30 rounded-2xl border-2 border-dashed">
+              <div className="max-w-md mx-auto">
+                <Filter className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No products match your filters</h3>
+                <p className="text-muted-foreground mb-6">
+                  Try adjusting your filters or search criteria to find what you're looking for.
+                </p>
+                <Button variant="default" onClick={() => handleFilterChange({ categories: [], priceRange: null, inStockOnly: false })}>
+                  Clear All Filters
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -110,7 +219,7 @@ export default function Products() {
               </div>
 
               {/* Load More */}
-              {visibleCount < products.length && (
+              {visibleCount < filteredAndSortedProducts.length && (
                 <div className="mt-12 text-center">
                   <Button 
                     onClick={handleLoadMore} 
