@@ -2,12 +2,22 @@ import { useCartStore } from "@/store/cartStore";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, ShoppingCart, Info, CreditCard, CheckCircle } from "lucide-react";
+import { ShoppingCart, Info, CreditCard, CheckCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutInfoSchema, type CheckoutInfo } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const PAKISTANI_CITIES = [
+  "Karachi", "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", 
+  "Peshawar", "Multan", "Hyderabad", "Islamabad", "Quetta",
+  "Sargodha", "Sialkot", "Bahawalpur", "Sukkur", "Jhang",
+  "Sheikhupura", "Larkana", "Gujrat", "Mardan", "Kasur",
+  "Rahim Yar Khan", "Sahiwal", "Okara", "Wah Cantonment", "Dera Ghazi Khan"
+].sort();
 
 export default function Checkout() {
   const { items, getTotalPrice } = useCartStore();
@@ -22,18 +32,20 @@ export default function Checkout() {
       fullName: "",
       email: "",
       phone: "+92",
+      address: "",
+      area: "",
+      city: "",
     },
   });
 
   const onSubmit = (data: CheckoutInfo) => {
-    console.log("Contact info submitted:", data);
-    // Proceed to next section or handle submission logic
+    console.log("Checkout info submitted:", data);
   };
 
   const steps = [
     { id: "cart", label: "Cart", icon: ShoppingCart, href: "/cart" },
     { id: "info", label: "Information", icon: Info, active: true },
-    { id: "payment", label: "Payment", icon: CreditCard },
+    { id: "payment", icon: CreditCard, label: "Payment" },
     { id: "confirmation", label: "Confirmation", icon: CheckCircle },
   ];
 
@@ -89,59 +101,127 @@ export default function Checkout() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-8">
         {/* Left Column: Forms */}
         <div className="lg:col-span-3 space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-xl font-bold mb-4">Contact Information</h2>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter your full name" {...field} data-testid="input-fullname" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="Enter your email" {...field} data-testid="input-email" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mobile Number (Pakistan)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+92XXXXXXXXXX" {...field} data-testid="input-phone" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="pt-4">
-                    <Button type="submit" className="w-full" data-testid="button-continue-shipping">
-                      Continue to Shipping
-                    </Button>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your full name" {...field} data-testid="input-fullname" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="Enter your email" {...field} data-testid="input-email" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Mobile Number (Pakistan)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+92XXXXXXXXXX" {...field} data-testid="input-phone" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Complete Street Address</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="House #, Street Name, Sector/Block, Landmark" 
+                              className="min-h-[100px] resize-none"
+                              {...field} 
+                              data-testid="textarea-address"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="area"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Area / Locality</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Neighborhood / Phase" {...field} data-testid="input-area" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>City</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-city">
+                                  <SelectValue placeholder="Select your city" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {PAKISTANI_CITIES.map((city) => (
+                                  <SelectItem key={city} value={city}>{city}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="pt-4">
+                <Button type="submit" className="w-full" data-testid="button-continue-payment">
+                  Continue to Payment
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
 
         {/* Right Column: Order Summary (Placeholder for now) */}
