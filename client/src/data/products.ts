@@ -1,107 +1,109 @@
-import { type Product } from "@shared/schema";
+import { Product } from '../types';
 
-// Mock data for Phase 1 - simulating database content
-export const mockProducts: Product[] = [
+export const products: Product[] = [
   {
-    id: 1,
-    name: "Hand-Embroidered Pashmina Shawl",
-    slug: "pashmina-shawl-royal-blue",
-    description: "Authentic Kashmiri Pashmina with intricate needlework.",
-    longDescription: "Experience the luxury of a genuine handcrafted Pashmina shawl. Each piece takes over 3 weeks to complete, featuring traditional paisley motifs embroidered by master artisans. The wool is sourced ethically from the Himalayas, ensuring warmth and unparalleled softness. Perfect for formal gatherings or as a cherished gift.",
+    id: "1",
+    slug: "kashmiri-pashmina-shawl",
+    name: "Hand-Woven Kashmiri Pashmina Shawl",
+    description: "Authentic, pure wool pashmina shawl from the valleys of Kashmir.",
+    longDescription: "This exquisite shawl is hand-woven by master artisans using the finest Grade A pashmina wool. Known for its incredible warmth and lightness, this timeless piece features traditional patterns and a soft emerald green hue with gold thread accents.",
     price: 45000,
     originalPrice: 55000,
     images: [
-      "https://images.unsplash.com/photo-1598556808803-a496b834927b?w=800&q=80", // Shawl/Fabric texture
-      "https://images.unsplash.com/photo-1629196914375-f7e48f477b6d?w=800&q=80"  // Detailed fabric
+      "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?auto=format&fit=crop&q=80&w=800"
     ],
-    category: "Clothing",
+    category: "Apparel",
     inStock: true,
-    features: ["100% Pure Wool", "Hand Embroidered", "Dry Clean Only"],
-    specifications: { "Dimensions": "40x80 inches", "Origin": "Kashmir", "Weight": "250g" }
+    features: [
+      "100% Pure Pashmina Wool",
+      "Hand-loomed in Kashmir",
+      "Intricate gold thread borders",
+      "Eco-friendly natural dyes"
+    ],
+    specifications: {
+      "Material": "Pure Pashmina",
+      "Dimensions": "200cm x 100cm",
+      "Weight": "200g",
+      "Care": "Dry Clean Only"
+    }
   },
   {
-    id: 2,
-    name: "Multani Khussa - Golden Noir",
-    slug: "multani-khussa-gold",
-    description: "Traditional leather footwear with gold thread work.",
-    longDescription: "Step into tradition with our Multani Khussa. Crafted from premium vegetable-tanned leather and adorned with tilla (gold thread) work, these shoes mold to your feet for exceptional comfort. The vibrant patterns reflect the rich heritage of Southern Punjab.",
+    id: "2",
+    slug: "multani-blue-pottery-vase",
+    name: "Multani Blue Pottery Decorative Vase",
+    description: "Traditional hand-painted ceramic art from Multan.",
+    longDescription: "Bring a touch of Multani heritage to your home with this stunning blue pottery vase. Each piece is meticulously hand-painted with cobalt blue floral patterns on a white base, a signature style that has been perfected over centuries.",
     price: 3500,
     originalPrice: 4200,
     images: [
-      "https://images.unsplash.com/photo-1560343076-8d42950d22ef?w=800&q=80", // Leather shoes
-      "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?w=800&q=80"  // Footwear detail
-    ],
-    category: "Footwear",
-    inStock: true,
-    features: ["Genuine Leather", "Hand-stitched", "Memory Foam Insole"],
-    specifications: { "Size": "EU 36-44", "Color": "Black/Gold", "Sole": "Leather" }
-  },
-  {
-    id: 3,
-    name: "Premium Basmati Rice - Royal Harvest",
-    slug: "basmati-rice-royal-5kg",
-    description: "Extra long grain aged aromatic rice.",
-    longDescription: "Our Royal Harvest Basmati is aged for 2 years to ensure the grains elongate to twice their size upon cooking. Grown in the fertile plains of Punjab, this rice offers a distinct aroma and fluffy texture that is essential for the perfect Biryani or Pulao.",
-    price: 2800,
-    originalPrice: null,
-    images: [
-      "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&q=80", // Rice
-      "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=800&q=80"  // Uncooked rice
-    ],
-    category: "Grocery",
-    inStock: true,
-    features: ["Aged 2 Years", "Extra Long Grain", "Gluten Free"],
-    specifications: { "Weight": "5kg", "Crop Year": "2023", "Type": "Super Kernel" }
-  },
-  {
-    id: 4,
-    name: "Ajrak Block Print Bed Set",
-    slug: "ajrak-bed-set-king",
-    description: "King size bedsheet with traditional Sindhi Ajrak geometric patterns.",
-    longDescription: "Transform your bedroom with the historic geometric patterns of Sindh. This Ajrak block print set involves a rigorous 14-stage dyeing process using natural indigo and madder dyes. Includes one king-size sheet and two pillowcases.",
-    price: 6500,
-    originalPrice: 8000,
-    images: [
-      "https://images.unsplash.com/photo-1522771753014-df7091c196dd?w=800&q=80", // Bedding
-      "https://images.unsplash.com/photo-1616627547584-bf28ceeec79c?w=800&q=80"  // Fabric pattern
+      "https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?auto=format&fit=crop&q=80&w=800"
     ],
     category: "Home Decor",
     inStock: true,
-    features: ["100% Cotton", "Natural Dyes", "400 Thread Count"],
-    specifications: { "Size": "King (108x108 inches)", "Includes": "1 Sheet, 2 Pillowcases", "Care": "Machine Wash Cold" }
-  },
-  {
-    id: 5,
-    name: "Himalayan Pink Salt Lamp",
-    slug: "salt-lamp-natural",
-    description: "Natural air purifier handcrafted from Khewra salt mines.",
-    longDescription: "Bring a warm, soothing glow to your space with our authentic Himalayan Pink Salt Lamp. Mined from the Khewra Salt Mine in Pakistan, these lamps are believed to release negative ions that purify the air and promote relaxation.",
-    price: 1800,
-    originalPrice: 2500,
-    images: [
-      "https://images.unsplash.com/photo-1515516089376-88db1e26d463?w=800&q=80", // Lamp/Light
-      "https://images.unsplash.com/photo-1540932296774-3243896b7173?w=800&q=80"  // Ambience
+    features: [
+      "Hand-painted ceramics",
+      "Lead-free glaze",
+      "Authentic Multani Kashi Kari",
+      "Unique floral patterns"
     ],
-    category: "Home Decor",
-    inStock: true,
-    features: ["Natural Ionizer", "Dimmable Switch", "Wooden Base"],
-    specifications: { "Weight": "3-5kg", "Height": "8-10 inches", "Bulb": "15W Included" }
+    specifications: {
+      "Material": "Glazed Ceramic",
+      "Height": "12 inches",
+      "Origin": "Multan, Pakistan",
+      "Technique": "Kashi Kari"
+    }
   },
   {
-    id: 6,
-    name: "Peshawari Chappal - Charcoal",
-    slug: "peshawari-chappal-charcoal",
-    description: "Classic sturdy footwear with tire sole for durability.",
-    longDescription: "A modern take on the classic Peshawari Chappal. Featuring premium charcoal leather and a durable tire rubber sole, this footwear combines rugged durability with traditional style. Ideal for pairing with Shalwar Kameez.",
-    price: 4500,
-    originalPrice: null,
+    id: "3",
+    slug: "peshawari-chappal-leather",
+    name: "Classic Peshawar Chappal - Premium Leather",
+    description: "Handcrafted traditional footwear with modern comfort.",
+    longDescription: "The legendary Peshawari Chappal, reimagined with premium full-grain leather and a comfort-focused sole. Durable, stylish, and deeply rooted in Pakistani culture, these are perfect for both formal and casual wear.",
+    price: 5500,
+    originalPrice: 6500,
     images: [
-      "https://images.unsplash.com/photo-1519415943484-9fa1873496d4?w=800&q=80", // Men's footwear
-      "https://images.unsplash.com/photo-1603487742131-4160ec88a032?w=800&q=80"  // Leather detail
+      "https://images.unsplash.com/photo-1628149455678-16f37bc392f4?auto=format&fit=crop&q=80&w=800"
     ],
     category: "Footwear",
-    inStock: false,
-    features: ["Tire Rubber Sole", "Double Stitching", "Adjustable Strap"],
-    specifications: { "Material": "Cow Leather", "Origin": "Peshawar", "Warranty": "6 Months" }
+    inStock: true,
+    features: [
+      "Full-grain cow leather",
+      "Hand-stitched construction",
+      "Adjustable heel strap",
+      "Durable rubber sole"
+    ],
+    specifications: {
+      "Material": "Genuine Leather",
+      "Color": "Classic Brown",
+      "Sole": "Tyre Rubber",
+      "Weight": "800g (pair)"
+    }
+  },
+  {
+    id: "4",
+    slug: "premium-sidr-honey-kp",
+    name: "Organic Premium Sidr Honey",
+    description: "Rare and medicinal honey sourced from the Beri trees of KP.",
+    longDescription: "Known as the 'Manuka of the East', our Sidr honey is harvested from the wild Sidr (Beri) trees in the Karak region of Khyber Pakhtunkhwa. It is cold-pressed, unprocessed, and packed with antioxidants and healing properties.",
+    price: 8500,
+    originalPrice: 9500,
+    images: [
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800"
+    ],
+    category: "Food",
+    inStock: true,
+    features: [
+      "100% Pure & Raw",
+      "Medicinal Grade",
+      "Sourced from KP wild forests",
+      "No added preservatives"
+    ],
+    specifications: {
+      "Type": "Monofloral Sidr",
+      "Volume": "1kg",
+      "Harvesting Period": "Autumn",
+      "Shelf Life": "2 Years"
+    }
   }
 ];
