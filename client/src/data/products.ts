@@ -1,8 +1,9 @@
-import { Product } from '../types';
+import { type Product } from "@shared/schema";
 
-export const products: Product[] = [
+// Mock data for Phase 1 - simulating database content
+export const mockProducts: Product[] = [
   {
-    id: "1",
+    id: 1,
     slug: "kashmiri-pashmina-shawl",
     name: "Hand-Woven Kashmiri Pashmina Shawl",
     description: "Authentic, pure wool pashmina shawl from the valleys of Kashmir.",
@@ -29,7 +30,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: "2",
+    id: 2,
     slug: "multani-blue-pottery-vase",
     name: "Multani Blue Pottery Decorative Vase",
     description: "Traditional hand-painted ceramic art from Multan.",
@@ -55,7 +56,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: "3",
+    id: 3,
     slug: "peshawari-chappal-leather",
     name: "Classic Peshawar Chappal - Premium Leather",
     description: "Handcrafted traditional footwear with modern comfort.",
@@ -81,7 +82,7 @@ export const products: Product[] = [
     }
   },
   {
-    id: "4",
+    id: 4,
     slug: "premium-sidr-honey-kp",
     name: "Organic Premium Sidr Honey",
     description: "Rare and medicinal honey sourced from the Beri trees of KP.",
@@ -107,3 +108,5 @@ export const products: Product[] = [
     }
   }
 ];
+
+export const products = mockProducts;
