@@ -38,6 +38,9 @@ export const checkoutInfoSchema = z.object({
   fullName: z.string().min(3, "Full name must be at least 3 characters").regex(/^[a-zA-Z\s]+$/, "Only letters and spaces are allowed"),
   email: z.string().email("Invalid email address"),
   phone: z.string().regex(/^\+92\d{10}$/, "Mobile number must follow Pakistani format (+92 followed by 10 digits)"),
+  address: z.string().min(10, "Complete street address must be at least 10 characters"),
+  area: z.string().min(3, "Area/Locality is required"),
+  city: z.string().min(1, "Please select a city"),
 });
 
 export type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
