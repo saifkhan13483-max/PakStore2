@@ -4,26 +4,38 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider, Helmet } from "react-helmet-async";
+import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
-import Home from "@/pages/Home";
-import ProductDetails from "@/pages/ProductDetails";
-import Cart from "@/pages/Cart";
+
+// Page Imports
+const Home = () => <div>Home Page</div>;
+const Products = () => <div>Products Listing Page</div>;
+const ProductDetail = () => <div>Product Detail Page</div>;
+const Cart = () => <div>Shopping Cart Page</div>;
+const Checkout = () => <div>Checkout Page</div>;
+const ThankYou = () => <div>Thank You Page</div>;
+const About = () => <div>About Us Page</div>;
+const Contact = () => <div>Contact Us Page</div>;
+const Privacy = () => <div>Privacy Policy Page</div>;
+const Terms = () => <div>Terms & Conditions Page</div>;
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/products" component={Home} />
-      <Route path="/products/:slug" component={ProductDetails} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Home} />
-      <Route path="/thank-you" component={Home} />
-      <Route path="/about" component={Home} />
-      <Route path="/contact" component={Home} />
-      <Route path="/privacy" component={Home} />
-      <Route path="/terms" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/products" component={Products} />
+        <Route path="/products/:slug" component={ProductDetail} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/thank-you" component={ThankYou} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/terms" component={Terms} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
