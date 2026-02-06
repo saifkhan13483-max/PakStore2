@@ -3,12 +3,12 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
-import { Trash2, Minus, Plus, ArrowLeft } from "lucide-react";
+import { Trash2, Minus, Plus, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function Cart() {
-  const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCartStore();
-  const subtotal = totalPrice();
+  const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
+  const subtotal = getTotalPrice();
   const shipping = subtotal > 5000 ? 0 : 250; // Free shipping over 5000
   const total = subtotal + shipping;
 

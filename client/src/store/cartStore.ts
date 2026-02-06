@@ -39,7 +39,13 @@ export const useCartStore = create<CartState>()(
                 quantity,
                 userId: null,
                 sessionId: null,
-              },
+                // Add fields needed for display in cart
+                name: product.name,
+                price: product.price,
+                images: product.images,
+                category: product.category,
+                slug: product.slug,
+              } as any,
             ],
           });
         }
@@ -67,10 +73,17 @@ export const useCartStore = create<CartState>()(
       },
 
       getTotalPrice: () => {
-        // We'll import products here to avoid circular dependency if possible, 
-        // or just calculate based on available items.
-        // For now, let's keep it simple.
-        return 0;
+        const { items } = get();
+        // Since we don't have the full products list in the store, 
+        // we'll rely on the price being part of the item if possible,
+        // but looking at Cart.tsx, items are mapped from schema.
+        // Wait, the CartItem in schema.ts doesn't have price.
+        // But the items in useCartStore.addToCart(product) are adding a partial product.
+        // Let's fix the addToCart to include price and name if needed, 
+        // or just calculate it correctly here if the items have it.
+        // Looking at Cart.tsx line 70: {formatPrice(item.price * item.quantity)}
+        // This means 'item' in 'items' must have 'price'.
+        return (items as any[]).reduce((total, item) => total + (item.price * item.quantity), 0);
       },
     }),
     {
