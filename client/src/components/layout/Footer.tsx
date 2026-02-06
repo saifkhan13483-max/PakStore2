@@ -1,3 +1,4 @@
+import logoImg from "@/assets/logo.png";
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, Globe, Heart } from "lucide-react";
 import { Link } from "wouter";
 
@@ -9,9 +10,9 @@ const Footer = () => {
           
           {/* Company Information */}
           <div className="space-y-4">
-            <h3 className="font-display text-2xl font-bold text-primary">
-              PakCart
-            </h3>
+            <Link href="/" className="inline-block">
+              <img src={logoImg} alt="PakCart" className="h-10 w-auto" />
+            </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.
             </p>
