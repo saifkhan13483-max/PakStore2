@@ -53,7 +53,7 @@ export default function Products() {
 
   const queryParam = useMemo(() => {
     const params = new URLSearchParams(search);
-    return params.get("q") || "";
+    return params.get("search") || params.get("q") || "";
   }, [search]);
 
   const filteredAndSortedProducts = useMemo(() => {
