@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
-import { Helmet } from "react-helmet-async";
+import SEO from "@/components/SEO";
 import { products } from "@/data/products";
 import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -113,10 +113,10 @@ export default function Products() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Helmet>
-        <title>Shop All Products | NoorBazaar</title>
-        <meta name="description" content="Browse our complete collection of authentic Pakistani artisanal products." />
-      </Helmet>
+      <SEO 
+        title="Shop All Products" 
+        description="Browse our complete collection of authentic Pakistani artisanal products, including apparel, home decor, and food."
+      />
 
       <Breadcrumb className="mb-6">
         <BreadcrumbList>

@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import SEO from "@/components/SEO";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductDetail() {
@@ -67,6 +68,12 @@ export default function ProductDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title={product.name} 
+        description={product.description}
+        type="product"
+        image={images[0]}
+      />
       <Button variant="ghost" className="mb-6" asChild>
         <Link href="/products">
           <ChevronLeft className="w-4 h-4 mr-2" />

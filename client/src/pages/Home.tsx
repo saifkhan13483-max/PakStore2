@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SEO from "@/components/SEO";
 import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-body">
+      <SEO 
+        title="Home" 
+        description="Shop the best artisanal products in Pakistan at NoorBazaar. From Kashmiri Pashminas to Multani Khussas, quality delivered to your door."
+      />
       <Navbar />
 
       <main className="flex-1">
