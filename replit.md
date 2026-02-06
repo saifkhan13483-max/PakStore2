@@ -49,6 +49,17 @@ Preferred communication style: Simple, everyday language.
 
 ## External Dependencies
 
+### Firebase (Authentication & Cart Sync)
+- **Firebase Auth** — Google Sign-In via popup for user authentication (`client/src/store/authStore.ts`)
+- **Cloud Firestore** — Syncs cart data for authenticated users (`client/src/store/cartStore.ts`)
+- **Required Environment Variables** (set as secrets with `VITE_` prefix):
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
+
 ### Database
 - **PostgreSQL** — Primary data store, connected via `DATABASE_URL` environment variable
 - **Drizzle ORM** — Query builder and schema management
