@@ -1,7 +1,7 @@
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "wouter";
 
-export function Footer() {
+const Footer = () => {
   return (
     <footer className="bg-primary/5 border-t border-primary/10 pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,10 +26,9 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold text-lg mb-6">Shop</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link></li>
-              <li><Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">Best Sellers</Link></li>
-              <li><Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">Collections</Link></li>
-              <li><Link href="/collections" className="text-muted-foreground hover:text-primary transition-colors">Sale</Link></li>
+              <li><Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">All Products</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -37,10 +36,8 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold text-lg mb-6">Support</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
-              <li><Link href="/shipping" className="text-muted-foreground hover:text-primary transition-colors">Shipping Policy</Link></li>
-              <li><Link href="/returns" className="text-muted-foreground hover:text-primary transition-colors">Returns & Exchanges</Link></li>
-              <li><Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQs</Link></li>
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
 
@@ -65,13 +62,11 @@ export function Footer() {
         </div>
 
         <div className="border-t border-primary/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>© 2024 NoorBazaar. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-          </div>
+          <p>© {new Date().getFullYear()} NoorBazaar. All rights reserved.</p>
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;
