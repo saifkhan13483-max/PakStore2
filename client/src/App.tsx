@@ -9,8 +9,8 @@ import NotFound from "@/pages/not-found";
 
 // Page Imports
 import Home from "@/pages/Home";
-const Products = () => <div>Products Listing Page</div>;
-const ProductDetail = () => <div>Product Detail Page</div>;
+import Products from "@/pages/Products";
+import ProductDetail from "@/pages/ProductDetail";
 const Cart = () => <div>Shopping Cart Page</div>;
 const Checkout = () => <div>Checkout Page</div>;
 const ThankYou = () => <div>Thank You Page</div>;
