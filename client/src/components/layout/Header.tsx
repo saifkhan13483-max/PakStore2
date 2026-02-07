@@ -62,32 +62,30 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-12 items-center justify-between gap-4">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center group">
-              <img 
-                src={logoImg} 
-                alt="PakCart" 
-                className="h-10 w-auto transition-transform group-hover:scale-105" 
-              />
-            </Link>
+          <Link href="/" className="flex items-center group">
+            <img 
+              src={logoImg} 
+              alt="PakCart" 
+              className="h-10 w-auto transition-transform group-hover:scale-105" 
+            />
+          </Link>
 
-            <nav className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
-                    location === link.href 
-                      ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
+                  location === link.href 
+                    ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
+                    : "text-muted-foreground"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="relative">
