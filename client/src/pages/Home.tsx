@@ -51,7 +51,7 @@ export default function Home() {
                 Premium Quality Products
               </span>
               <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Shop the <span className="text-secondary italic">Best Deals</span> in Pakistan
+                <span className="text-[#2a7e2c]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#2a7e2c]">in Pakistan</span>
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
                 Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
