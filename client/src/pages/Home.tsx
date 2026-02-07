@@ -35,9 +35,9 @@ export default function Home() {
               alt="PakCart Hero" 
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
             {/* Added a subtle overlay to make the text pop even more against the background */}
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-black/40" />
           </div>
 
           <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
