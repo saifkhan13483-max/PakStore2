@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Company Information */}
           <div className="space-y-4">
             <Link href="/" className="inline-block">
-              <img src={logoImg} alt="PakCart" className="h-12 w-auto" />
+              <img src={logoImg} alt="NoorBazaar" className="h-12 w-auto" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.
@@ -56,29 +56,29 @@ const Footer = () => {
           {/* Contact Details */}
           <div className="space-y-4">
             <h4 className="font-display font-semibold text-lg">Contact Us</h4>
-            <ul className="space-y-4 text-sm">
-              <li className="flex items-start gap-3 text-muted-foreground">
-                <MapPin className="h-5 w-5 text-secondary shrink-0" />
-                <span>123 Liberty Market, Gulberg III, Lahore, Pakistan</span>
-              </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
-                <Phone className="h-5 w-5 text-secondary shrink-0" />
-                <span>+92 300 1234567</span>
-              </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
-                <Mail className="h-5 w-5 text-secondary shrink-0" />
-                <span>hello@pakcart.store</span>
-              </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
-                <Globe className="h-5 w-5 text-secondary shrink-0" />
-                <span>www.pakcart.store</span>
-              </li>
-            </ul>
+                <ul className="space-y-4 text-sm">
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <MapPin className="h-5 w-5 text-secondary shrink-0" />
+                    <span>123 Liberty Market, Gulberg III, Lahore, Pakistan</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-muted-foreground">
+                    <Phone className="h-5 w-5 text-secondary shrink-0" />
+                    <span>+92 300 1234567</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-muted-foreground">
+                    <Mail className="h-5 w-5 text-secondary shrink-0" />
+                    <span>hello@noorbazaar.pk</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-muted-foreground">
+                    <Globe className="h-5 w-5 text-secondary shrink-0" />
+                    <span>www.noorbazaar.pk</span>
+                  </li>
+                </ul>
           </div>
         </div>
 
         <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} PakCart. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} NoorBazaar. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-red-500 fill-current" />

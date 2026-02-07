@@ -2,15 +2,15 @@ export default function About() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto prose prose-emerald dark:prose-invert">
-        <h1 className="text-4xl font-serif text-emerald-900 mb-4">About Us</h1>
+        <h1 className="text-4xl font-serif text-emerald-900 mb-4">About NoorBazaar</h1>
         <p className="text-lg text-muted-foreground mb-8">
-          Welcome to PakCart, Pakistan's premier destination for authentic artisanal products.
+          Welcome to NoorBazaar, Pakistan's premier destination for authentic artisanal products.
         </p>
 
         <section className="mb-12">
           <h2 className="text-2xl font-serif text-emerald-800">Our Mission</h2>
           <p>
-            At PakCart, our mission is to preserve and promote the rich cultural heritage of Pakistan 
+            At NoorBazaar, our mission is to preserve and promote the rich cultural heritage of Pakistan 
             by connecting local artisans with a global audience. We believe in sustainable commerce 
             that empowers communities while delivering exceptional quality to our customers.
           </p>
@@ -36,7 +36,7 @@ export default function About() {
         <section className="mb-12">
           <h2 className="text-2xl font-serif text-emerald-800">Our Story</h2>
           <p>
-            PakCart started with a simple idea: to bring the hidden treasures of Pakistan's bazaars 
+            NoorBazaar started with a simple idea: to bring the hidden treasures of Pakistan's bazaars 
             to the digital age. From the intricate weaves of Kashmiri shawls to the vibrant pottery 
             of Multan, we represent the soul of our nation's artistry.
           </p>

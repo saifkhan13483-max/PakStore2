@@ -20,6 +20,9 @@ const About = lazy(() => import("@/pages/About"));
 const Contact = lazy(() => import("@/pages/Contact"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
+const Shipping = lazy(() => import("@/pages/Shipping"));
+const Returns = lazy(() => import("@/pages/Returns"));
+const FAQ = lazy(() => import("@/pages/FAQ"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -42,6 +45,9 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/terms" component={Terms} />
+          <Route path="/shipping" component={Shipping} />
+          <Route path="/returns" component={Returns} />
+          <Route path="/faq" component={FAQ} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

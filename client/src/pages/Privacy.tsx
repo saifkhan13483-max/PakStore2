@@ -1,5 +1,5 @@
 export default function Privacy() {
-  const lastUpdated = "February 06, 2026";
+  const lastUpdated = "February 07, 2026";
 
   return (
     <div className="container mx-auto px-4 py-12">
