@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import heroImage from "@/assets/hero-image.jpg";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
@@ -30,7 +31,7 @@ export default function Home() {
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
             <img 
-              src="https://images.unsplash.com/photo-1548013146-72479768bada?w=1920&q=80" 
+              src={heroImage} 
               alt="PakCart Hero" 
               className="w-full h-full object-cover"
             />
