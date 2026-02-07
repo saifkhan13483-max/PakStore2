@@ -21,14 +21,14 @@ export default function Terms() {
           <h2 className="text-2xl font-serif text-emerald-800">2. Use License</h2>
           <p>
             Permission is granted to temporarily download one copy of the materials (information or software) 
-            on NoorBazaar's website for personal, non-commercial transitory viewing only.
+            on NoorCrafts's website for personal, non-commercial transitory viewing only.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-serif text-emerald-800">3. Disclaimer</h2>
           <p>
-            The materials on NoorBazaar's website are provided "as is". NoorBazaar makes no warranties, 
+            The materials on NoorCrafts's website are provided "as is". NoorCrafts makes no warranties, 
             expressed or implied, and hereby disclaims and negates all other warranties, including without 
             limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, 
             or non-infringement of intellectual property or other violation of rights.
@@ -47,7 +47,7 @@ export default function Terms() {
         <section className="mb-8">
           <h2 className="text-2xl font-serif text-emerald-800">5. Governing Law</h2>
           <p>
-            Any claim relating to NoorBazaar's website shall be governed by the laws of Pakistan without 
+            Any claim relating to NoorCrafts's website shall be governed by the laws of Pakistan without 
             regard to its conflict of law provisions.
           </p>
         </section>
