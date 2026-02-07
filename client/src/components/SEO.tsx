@@ -19,7 +19,7 @@ export default function SEO({
 }: SEOProps) {
   const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
-  const defaultDescription = "Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep.";
+  const defaultDescription = "Shop the best artisanal products and daily essentials at PakCart. Quality items delivered to your doorstep in Pakistan.";
 
   return (
     <Helmet>

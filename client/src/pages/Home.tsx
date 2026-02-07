@@ -21,7 +21,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col font-body">
       <SEO 
         title="Home" 
-        description="Shop the best artisanal products in Pakistan at PakCart. From Kashmiri Pashminas to Multani Khussas, quality delivered to your door."
+        description="Shop the best products at PakCart. Quality items delivered to your door in Pakistan."
       />
 
       <main className="flex-1">
