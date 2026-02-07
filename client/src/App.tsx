@@ -74,7 +74,7 @@ function App() {
       <HelmetProvider>
         <TooltipProvider>
           <Helmet>
-            <title>NoorBazaar | Authentic Pakistani Artisanal Products</title>
+            <title>PakCart | Authentic Pakistani Artisanal Products</title>
             <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
           </Helmet>
           <Router />

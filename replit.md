@@ -1,8 +1,8 @@
-# NoorBazaar - Pakistani E-Commerce Platform
+# PakCart - Pakistani E-Commerce Platform
 
 ## Overview
 
-NoorBazaar is a Pakistani artisanal e-commerce platform built as a full-stack application. It showcases curated products like Kashmiri Pashminas, Multani Khussas, and premium food items. The app features a React frontend with a luxury emerald & gold design theme, an Express backend serving product APIs, and a PostgreSQL database managed via Drizzle ORM. Prices are displayed in PKR (Pakistani Rupees). The cart uses client-side Zustand state management with localStorage persistence, while product data is served from the database with a mock data fallback.
+PakCart is a Pakistani artisanal e-commerce platform built as a full-stack application. It showcases curated products like Kashmiri Pashminas, Multani Khussas, and premium food items. The app features a React frontend with a luxury emerald & gold design theme, an Express backend serving product APIs, and a PostgreSQL database managed via Drizzle ORM. Prices are displayed in PKR (Pakistani Rupees). The cart uses client-side Zustand state management with localStorage persistence, while product data is served from the database with a mock data fallback.
 
 ## User Preferences
 
