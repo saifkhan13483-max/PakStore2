@@ -149,7 +149,7 @@ export default function Home() {
                 name="Watches" 
                 slug="Watches" 
                 count={1} 
-                image="/src/assets/images/watches-category.jpg"
+                image="/src/assets/images/watches-category.png"
               />
             </div>
           </div>

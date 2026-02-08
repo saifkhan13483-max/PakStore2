@@ -31,7 +31,7 @@ export const mockProducts: Product[] = [
     longDescription: "A masterpiece of craftsmanship, this luxury timepiece features a deep emerald green dial set in a polished gold-plated stainless steel case. The precision movement ensures perfect timekeeping, while the scratch-resistant sapphire crystal protects the elegant face. This watch is the perfect blend of traditional elegance and modern luxury.",
     price: 15500,
     originalPrice: 22000,
-    images: ["/src/assets/images/watches-category.jpg"],
+    images: ["/src/assets/images/watches-category.png"],
     category: "Watches",
     inStock: true,
     rating: "4.9",
