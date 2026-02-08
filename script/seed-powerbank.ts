@@ -1,32 +1,42 @@
 import { storage } from "../server/storage";
-import { insertProductSchema } from "../shared/schema";
+import { type InsertProduct } from "../shared/schema";
 
 async function seed() {
-  const powerBank = {
+  const product: InsertProduct = {
     name: "BLUKS BX-301 Power Bank 20000mAh",
     slug: "bluks-bx-301-power-bank-20000mah",
-    description: "FULL 20000 MAH WITH FAST CHARGING (ONE YEAR WARRANTY)",
-    longDescription: "BLUKS BX-301 Power Bank 20000mAh - FULL 20000 MAH WITH FAST CHARGING. Features high capacity, portable design, and reliable performance. Comes with a one-year warranty for peace of mind. LIMITED QUANTITY available.",
+    description: "FULL 20000 MAH WITH FAST CHARGING. (ONE YEAR WARRANTY). LIMITED QUANTITY.",
+    longDescription: "Experience high-speed charging with the BLUKS BX-301 Power Bank. This powerful 20000mAh portable charger ensures your devices stay powered up all day long. Featuring fast charging technology and a robust build, it is the perfect companion for travel and daily use.",
     price: 4300,
     originalPrice: 5500,
-    images: ["/images/bluks-bx-301-power-bank-20000mah-pakistan-priceoye-va1cz-500x_1770554316337.webp", "/images/bluks-bx-301-power-bank-20000mah-pakistan-priceoye-h0xeo-500x_1770554316338.webp"],
     category: "Power Banks",
+    images: ["https://images.unsplash.com/photo-1609592424089-98319e716867?q=80&w=800&auto=format&fit=crop"],
     inStock: true,
-    features: ["20000mAh Capacity", "Fast Charging Support", "One Year Warranty", "Digital Display", "Dual USB Output"],
+    features: [
+      "20000mAh High Capacity",
+      "Fast Charging Support",
+      "One Year Warranty",
+      "Limited Quantity",
+      "Multiple USB Ports",
+      "LED Power Indicator"
+    ],
     specifications: {
       capacity: "20000mAh",
-      charging: "Fast Charging (22.5W)",
       warranty: "1 Year",
-      model: "BX-301"
+      type: "Lithium Polymer",
+      input: "5V/2.1A",
+      output: "5V/2.1A (Max)"
     }
   };
 
   try {
-    const validated = insertProductSchema.parse(powerBank);
-    await storage.createProduct(validated);
-    console.log("Product seeded successfully");
+    console.log("Seeding BLUKS BX-301 Power Bank...");
+    await storage.createProduct(product);
+    console.log("Successfully seeded product!");
+    process.exit(0);
   } catch (error) {
     console.error("Error seeding product:", error);
+    process.exit(1);
   }
 }
 
