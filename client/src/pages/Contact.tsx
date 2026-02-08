@@ -100,16 +100,6 @@ export default function Contact() {
                   <p className="text-muted-foreground">Sunday: Closed</p>
                 </div>
               </div>
-
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-100 rounded-lg text-emerald-700">
-                  <MapPin className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-medium">Our Location</p>
-                  <p className="text-muted-foreground">Gulberg III, Lahore, Pakistan</p>
-                </div>
-              </div>
             </div>
 
             <div className="mt-10 flex gap-4">
