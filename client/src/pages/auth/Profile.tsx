@@ -1,12 +1,61 @@
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import SEO from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Calendar, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Mail, Calendar, ShieldCheck, Phone, MapPin, Truck, AlertCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema, type ProfileValues } from "@/lib/validations/auth";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+
+const PAKISTAN_CITIES = [
+  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", 
+  "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala"
+];
 
 export default function Profile() {
   const { user } = useAuthStore();
+  const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const form = useForm<ProfileValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: user?.displayName || "",
+      phoneNumber: user?.phoneNumber || "",
+      city: "",
+      address: "",
+      emergencyContact: "",
+    },
+  });
 
   if (!user) return null;
+
+  const onSubmit = async (data: ProfileValues) => {
+    setIsUpdating(true);
+    try {
+      // In a real app, we would update Firebase profile/Firestore here
+      console.log("Updating profile with:", data);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      toast({
+        title: "Profile Updated",
+        description: "Your information has been successfully saved.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "There was an error updating your profile.",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -16,57 +65,188 @@ export default function Profile() {
         <p className="text-muted-foreground">Manage your personal information and preferences.</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-8">
+        {/* Account Information Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>Details about your PakCart account</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Account Information
+            </CardTitle>
+            <CardDescription>View your basic account details and security status</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary">
+            <div className="flex items-center gap-6 pb-6 border-b">
+              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary border-2 border-primary/20">
                 {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
               </div>
               <div>
                 <h3 className="text-xl font-semibold">{user.displayName || "Valued Customer"}</h3>
                 <p className="text-muted-foreground">{user.email}</p>
+                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                  {user.providerId === 'password' ? 'Email/Password' : 'Google Authentication'}
+                </div>
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t">
+            <div className="grid sm:grid-cols-2 gap-6 pt-2">
               <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-primary mt-0.5" />
+                <div className="p-2 rounded-md bg-secondary/50">
+                  <Mail className="h-4 w-4 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium">Email Address</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email Address</p>
+                  <p className="text-sm font-medium">{user.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <User className="h-5 w-5 text-primary mt-0.5" />
+                <div className="p-2 rounded-md bg-secondary/50">
+                  <Calendar className="h-4 w-4 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium">Full Name</p>
-                  <p className="text-sm text-muted-foreground">{user.displayName || "Not set"}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Member Since</p>
+                  <p className="text-sm font-medium">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-PK', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    }) : "N/A"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                <div className="p-2 rounded-md bg-secondary/50">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium">Member Since</p>
-                  <p className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Security Status</p>
+                  <p className={`text-sm font-medium ${user.emailVerified ? "text-green-600" : "text-amber-600"}`}>
+                    {user.emailVerified ? "Verified Account" : "Pending Verification"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary mt-0.5" />
+                <div className="p-2 rounded-md bg-secondary/50">
+                  <AlertCircle className="h-4 w-4 text-primary" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium">Account Status</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.emailVerified ? "Verified" : "Email Pending Verification"}
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Last Login</p>
+                  <p className="text-sm font-medium">
+                    {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('en-PK', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : "Today"}
                   </p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Edit Profile Form */}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  Contact & Shipping
+                </CardTitle>
+                <CardDescription>Update your delivery information for faster checkout</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0300-1234567" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your city" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PAKISTAN_CITIES.map((city) => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="emergencyContact"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0321-7654321" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Shipping Address</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Street address, Apartment, etc." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="pt-4 flex justify-end">
+                  <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
+                    {isUpdating ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </form>
+        </Form>
       </div>
     </div>
   );
