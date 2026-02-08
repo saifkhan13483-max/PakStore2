@@ -171,7 +171,7 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="text-muted-foreground text-lg">
+            <div className="text-muted-foreground text-lg leading-relaxed line-clamp-5 min-h-[7.5rem]">
               {product.description}
             </div>
 
