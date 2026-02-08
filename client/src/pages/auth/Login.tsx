@@ -336,7 +336,6 @@ export default function Login() {
         </div>
 
         <SocialAuthButton
-          provider="google"
           onClick={handleGoogleSignIn}
           isLoading={isGoogleLoading}
           disabled={isLoading}
