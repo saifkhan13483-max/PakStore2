@@ -67,7 +67,6 @@ const Header = () => {
     { name: "Apparel", href: "/products?category=Apparel" },
     { name: "Home Decor", href: "/products?category=Home Decor" },
     { name: "Footwear", href: "/products?category=Footwear" },
-    { name: "Food", href: "/products?category=Food" },
     { name: "Power Banks", href: "/products?category=Power Banks" },
   ];
 

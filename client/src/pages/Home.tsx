@@ -126,7 +126,7 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <CategoryCard 
                 name="Apparel" 
                 slug="Apparel" 
@@ -144,12 +144,6 @@ export default function Home() {
                 slug="Footwear" 
                 count={1} 
                 image="https://images.unsplash.com/photo-1628149455678-16f37bc392f4?auto=format&fit=crop&q=80&w=800"
-              />
-              <CategoryCard 
-                name="Food" 
-                slug="Food" 
-                count={1} 
-                image="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800"
               />
             </div>
           </div>
