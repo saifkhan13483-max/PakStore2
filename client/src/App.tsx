@@ -25,6 +25,9 @@ const Terms = lazy(() => import("@/pages/Terms"));
 const Shipping = lazy(() => import("@/pages/Shipping"));
 const Returns = lazy(() => import("@/pages/Returns"));
 const FAQ = lazy(() => import("@/pages/FAQ"));
+const Profile = lazy(() => import("@/pages/auth/Profile"));
+
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -43,7 +46,16 @@ function Router() {
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/cart" component={Cart} />
-          <Route path="/checkout" component={Checkout} />
+          <Route path="/checkout">
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          </Route>
+          <Route path="/profile">
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          </Route>
           <Route path="/thank-you" component={ThankYou} />
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
