@@ -18,9 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db, googleProvider } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 
 const signupSchema = z.object({
   fullName: z
@@ -58,6 +59,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -99,6 +101,65 @@ export default function Signup() {
     if (score <= 40) return "Weak";
     if (score <= 80) return "Medium";
     return "Strong";
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Check if user exists in Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      
+      if (!userDoc.exists()) {
+        // Create new user document
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          phoneNumber: "",
+          createdAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
+          provider: "google",
+          emailVerified: user.emailVerified,
+          preferences: {},
+          shippingAddresses: [],
+        });
+      } else {
+        // Update last login
+        await setDoc(doc(db, "users", user.uid), {
+          lastLoginAt: serverTimestamp(),
+        }, { merge: true });
+      }
+
+      toast({
+        title: "Welcome back!",
+        description: `Successfully signed in as ${user.displayName}`,
+      });
+
+      setLocation("/");
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      let message = "Failed to sign in with Google. Please try again.";
+
+      if (error.code === "auth/popup-blocked") {
+        message = "Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.";
+      } else if (error.code === "auth/popup-closed-by-user") {
+        message = "Sign-in was cancelled. Click the button to try again when you're ready.";
+      } else if (error.code === "auth/account-exists-with-different-credential") {
+        message = "An account already exists with the same email address but different sign-in credentials.";
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Sign-in Failed",
+        description: message,
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   async function onSubmit(data: SignupFormValues) {
@@ -411,7 +472,7 @@ export default function Signup() {
           <Button
             type="submit"
             className="w-full min-h-[44px]"
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
             data-testid="button-submit-signup"
           >
             {isLoading ? (
@@ -424,8 +485,23 @@ export default function Signup() {
             )}
           </Button>
 
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm uppercase">
+              <span className="bg-background px-2 text-muted-foreground">OR</span>
+            </div>
+          </div>
+
+          <SocialAuthButton
+            onClick={handleGoogleSignIn}
+            isLoading={isGoogleLoading}
+            disabled={isLoading}
+          />
+
           <div className="text-center mt-4">
-            <span className="text-sm text-muted-foreground tertiary">
+            <span className="text-sm text-muted-foreground">
               Already have an account?{" "}
             </span>
             <Link
