@@ -74,6 +74,14 @@ const Header = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-12 items-center justify-between gap-4">
           <Link href="/" className="flex items-center group">
+            <div className="flex flex-col mr-2">
+              <span className="text-xl font-display font-bold tracking-tight text-emerald-900 leading-none">
+                PakCart
+              </span>
+              <span className="text-[8px] uppercase tracking-[0.2em] text-emerald-600 font-medium leading-none mt-1">
+                Premium Artisanal
+              </span>
+            </div>
             <img 
               src={logoImg} 
               alt="PakCart" 

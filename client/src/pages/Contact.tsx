@@ -51,7 +51,7 @@ export default function Contact() {
     console.log(data);
     toast({
       title: "Message Sent",
-      description: "Thank you for contacting NoorBazaar. We'll get back to you soon!",
+      description: "Thank you for contacting PakCart. We'll get back to you soon!",
     });
     form.reset();
   }
@@ -84,8 +84,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-medium">Email Support</p>
-                  <a href="mailto:support@noorbazaar.pk" className="text-muted-foreground hover:text-emerald-700 transition-colors">
-                    support@noorbazaar.pk
+                  <a href="mailto:support@pakcart.store" className="text-muted-foreground hover:text-emerald-700 transition-colors">
+                    support@pakcart.store
                   </a>
                 </div>
               </div>

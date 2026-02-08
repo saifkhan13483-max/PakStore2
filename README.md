@@ -1,6 +1,6 @@
-# NoorBazaar - Authentic Pakistani Artisanal E-Commerce
+# PakCart - Authentic Pakistani Artisanal E-Commerce
 
-NoorBazaar is a premium Pakistani artisanal e-commerce platform built as a full-stack application. It showcases curated products like Kashmiri Pashminas, Multani Khussas, and premium local artisanal goods.
+PakCart is a premium Pakistani artisanal e-commerce platform built as a full-stack application. It showcases curated products like Kashmiri Pashminas, Multani Khussas, and premium local artisanal goods.
 
 ## 🚀 Technology Stack
 

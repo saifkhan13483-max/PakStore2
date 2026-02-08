@@ -57,7 +57,7 @@ export default function Checkout() {
       
       toast({
         title: "Order Placed Successfully!",
-        description: "Thank you for shopping with NoorBazaar. Your order ID is #NB" + Math.floor(Math.random() * 100000),
+        description: "Thank you for shopping with PakCart. Your order ID is #PC" + Math.floor(Math.random() * 100000),
       });
 
       clearCart();

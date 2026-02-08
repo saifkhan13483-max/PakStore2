@@ -18,7 +18,7 @@ export default function ThankYou() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
       <Helmet>
-        <title>Order Confirmed - Thank You | NoorBazaar</title>
+        <title>Order Confirmed - Thank You | PakCart</title>
         <meta name="description" content="Thank you for your order! Your request has been received and is being processed." />
       </Helmet>
 
@@ -31,7 +31,7 @@ export default function ThankYou() {
 
         <h1 className="text-4xl font-bold mb-4">Shukriya! Order Confirmed</h1>
         <p className="text-xl text-muted-foreground mb-8">
-          Thank you for shopping with NoorBazaar. Your order has been successfully placed and is being processed for delivery.
+          Thank you for shopping with PakCart. Your order has been successfully placed and is being processed for delivery.
         </p>
 
         <Card className="mb-8 border-dashed">
