@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 const Home = lazy(() => import("@/pages/Home"));
 const Products = lazy(() => import("@/pages/Products"));
 const Signup = lazy(() => import("@/pages/auth/Signup"));
+const Login = lazy(() => import("@/pages/auth/Login"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const Cart = lazy(() => import("@/pages/Cart"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
@@ -38,6 +39,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/auth/signup" component={Signup} />
+          <Route path="/auth/login" component={Login} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/cart" component={Cart} />

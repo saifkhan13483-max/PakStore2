@@ -4,6 +4,8 @@ import { AuthUser, AuthError } from '@/types/auth';
 import { 
   onAuthStateChanged, 
   signInWithPopup, 
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   User as FirebaseUser
 } from 'firebase/auth';
@@ -18,6 +20,8 @@ interface AuthState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: AuthError | null) => void;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -58,6 +62,32 @@ export const useAuthStore = create<AuthState>()(
             error: { code: error.code, message: error.message }, 
             isLoading: false 
           });
+          throw error;
+        }
+      },
+      signInWithEmail: async (email, password) => {
+        set({ isLoading: true, error: null });
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (error: any) {
+          set({ 
+            error: { code: error.code, message: error.message }, 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+      resetPassword: async (email) => {
+        set({ isLoading: true, error: null });
+        try {
+          await sendPasswordResetEmail(auth, email);
+          set({ isLoading: false });
+        } catch (error: any) {
+          set({ 
+            error: { code: error.code, message: error.message }, 
+            isLoading: false 
+          });
+          throw error;
         }
       },
       logout: async () => {
