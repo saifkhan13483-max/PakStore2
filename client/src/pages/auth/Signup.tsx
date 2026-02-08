@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { CheckCircle, AlertCircle, Eye, EyeOff, X, Check, Loader2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import SEO from "@/components/SEO";
 import {
@@ -19,9 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { auth, db, googleProvider } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
+import { useCartStore } from "@/store/cartStore";
 
 const signupSchema = z.object({
   fullName: z
@@ -60,8 +61,21 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const { toast } = useToast();
+  const cartStore = useCartStore();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -103,6 +117,37 @@ export default function Signup() {
     return "Strong";
   };
 
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0 || !auth.currentUser) return;
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setResendCooldown(60);
+      toast({
+        title: "Verification email sent",
+        description: "Please check your inbox (and spam folder) for the link.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not resend verification email. Please try again later.",
+      });
+    }
+  };
+
+  const handleRedirect = () => {
+    const params = new URLSearchParams(searchString);
+    const redirectUrl = params.get("redirect") || params.get("returnTo");
+    
+    if (redirectUrl && redirectUrl.startsWith("/")) {
+      setLocation(redirectUrl);
+    } else if (cartStore.items.length > 0) {
+      setLocation("/cart");
+    } else {
+      setLocation("/");
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
@@ -132,7 +177,6 @@ export default function Signup() {
         // Update last login and potentially sync profile info
         await updateDoc(userDocRef, {
           lastLoginAt: serverTimestamp(),
-          // Optional: sync displayName or photoURL if they changed
           displayName: user.displayName || userDoc.data().displayName,
           photoURL: user.photoURL || userDoc.data().photoURL,
         });
@@ -156,28 +200,29 @@ export default function Signup() {
             const batch = writeBatch(db);
             
             guestItems.forEach((item: any) => {
-              const existingItem = existingItemsMap.get(item.id);
+              const existingItem = existingItemsMap.get(item.productId || item.id);
               if (existingItem) {
-                // Use higher quantity
                 const newQuantity = Math.max(existingItem.quantity, item.quantity);
                 batch.update(doc(db, "users", user.uid, "cart", existingItem.id), {
                   quantity: newQuantity,
                   updatedAt: serverTimestamp()
                 });
               } else {
-                // Add new item
                 const newDocRef = doc(collection(db, "users", user.uid, "cart"));
                 batch.set(newDocRef, {
-                  productId: item.id,
+                  productId: item.productId || item.id,
                   quantity: item.quantity,
                   addedAt: serverTimestamp(),
-                  // Add other product info if needed
                 });
               }
             });
 
             await batch.commit();
-            // Optional: Notify user about cart merge in next part
+            localStorage.removeItem("cart-storage");
+            toast({
+              title: "Cart saved!",
+              description: `We've saved ${guestItems.length} items to your account! Checkout with cash on delivery across Pakistan.`,
+            });
           }
         } catch (e) {
           console.error("Cart sync error:", e);
@@ -185,11 +230,11 @@ export default function Signup() {
       }
 
       toast({
-        title: "Welcome back!",
-        description: `Successfully signed in as ${user.displayName}`,
+        title: `Welcome to PakCart, ${user.displayName}!`,
+        description: "Account created successfully. Enjoy free delivery on orders over Rs. 2,000 and nationwide COD.",
       });
 
-      setLocation("/");
+      handleRedirect();
     } catch (error: any) {
       console.error("Google sign-in error:", error);
       let message = "Failed to sign in with Google. Please try again.";
@@ -233,12 +278,22 @@ export default function Signup() {
         shippingAddresses: [],
       });
 
+      try {
+        await sendEmailVerification(user);
+        toast({
+          title: "Verify your email",
+          description: "We've sent a verification link to your email. Please check your inbox to complete registration.",
+        });
+      } catch (e) {
+        console.error("Verification email error:", e);
+      }
+
       toast({
-        title: "Account created!",
-        description: "Welcome to PakCart. Redirecting you to home...",
+        title: "Welcome to PakCart!",
+        description: "Your account has been created successfully. Enjoy nationwide COD and free shipping on orders over Rs. 2,000.",
       });
 
-      setLocation("/");
+      handleRedirect();
     } catch (error: any) {
       console.error("Signup error:", error);
       let message = "An error occurred during registration. Please try again.";
@@ -286,8 +341,9 @@ export default function Signup() {
                   <div className="relative">
                     <Input
                       placeholder="Enter your full name"
-                      disabled={isLoading}
-                      className={`min-h-[44px] text-base transition-colors ${
+                      disabled={isLoading || isGoogleLoading}
+                      inputMode="text"
+                      className={`min-h-[44px] text-base transition-all duration-200 ${
                         touchedFields.fullName
                           ? errors.fullName
                             ? "border-red-500 focus-visible:ring-red-500"
@@ -327,9 +383,10 @@ export default function Signup() {
                   <div className="relative">
                     <Input
                       type="email"
+                      inputMode="email"
                       placeholder="Enter your email address"
-                      disabled={isLoading}
-                      className={`min-h-[44px] text-base transition-colors ${
+                      disabled={isLoading || isGoogleLoading}
+                      className={`min-h-[44px] text-base transition-all duration-200 ${
                         touchedFields.email
                           ? errors.email
                             ? "border-red-500 focus-visible:ring-red-500"
@@ -371,8 +428,8 @@ export default function Signup() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a secure password"
                       autoComplete="new-password"
-                      disabled={isLoading}
-                      className={`min-h-[44px] pr-10 text-base transition-colors ${
+                      disabled={isLoading || isGoogleLoading}
+                      className={`min-h-[44px] pr-10 text-base transition-all duration-200 ${
                         touchedFields.password
                           ? errors.password
                             ? "border-red-500 focus-visible:ring-red-500"
@@ -387,7 +444,7 @@ export default function Signup() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={showPassword ? "Hide password" : "Show password"}
-                      disabled={isLoading}
+                      disabled={isLoading || isGoogleLoading}
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -453,8 +510,8 @@ export default function Signup() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       autoComplete="new-password"
-                      disabled={isLoading}
-                      className={`min-h-[44px] pr-10 text-base transition-colors ${
+                      disabled={isLoading || isGoogleLoading}
+                      className={`min-h-[44px] pr-10 text-base transition-all duration-200 ${
                         touchedFields.confirmPassword
                           ? errors.confirmPassword
                             ? "border-red-500 focus-visible:ring-red-500"
@@ -469,7 +526,7 @@ export default function Signup() {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                      disabled={isLoading}
+                      disabled={isLoading || isGoogleLoading}
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -498,7 +555,7 @@ export default function Signup() {
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    disabled={isLoading}
+                    disabled={isLoading || isGoogleLoading}
                     data-testid="checkbox-terms"
                   />
                 </FormControl>
@@ -549,6 +606,20 @@ export default function Signup() {
             isLoading={isGoogleLoading}
             disabled={isLoading}
           />
+
+          {auth.currentUser && !auth.currentUser.emailVerified && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm text-blue-800">
+              Please verify your email address. Didn't receive it?{" "}
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendCooldown > 0}
+                className="font-medium underline hover:text-blue-600 disabled:no-underline disabled:text-blue-400"
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend verification email"}
+              </button>
+            </div>
+          )}
 
           <div className="text-center mt-4">
             <span className="text-sm text-muted-foreground">
