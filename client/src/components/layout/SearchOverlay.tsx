@@ -12,11 +12,11 @@ interface SearchOverlayProps {
 }
 
 const POPULAR_TOOLS = [
-  { id: "loan", title: "Loan Calculator", category: "FINANCE", description: "Calculate monthly payments and total interest for any loan" },
-  { id: "emi", title: "EMI Calculator", category: "FINANCE", description: "Calculate Equated Monthly Installments for loans" },
-  { id: "word", title: "Word Counter", category: "TEXT", description: "Count words, characters, and paragraphs" },
-  { id: "unit", title: "Unit Converter", category: "TEXT", description: "Convert between different units of measurement" },
-  { id: "bmi", title: "BMI Calculator", category: "HEALTH", description: "Calculate your Body Mass Index and get health insights" },
+  { id: "pashmina", title: "Kashmiri Pashmina", category: "BEST SELLER", description: "Authentic hand-woven wool scarf" },
+  { id: "khussa", title: "Multani Khussa", category: "BEST SELLER", description: "Traditional leather footwear with embroidery" },
+  { id: "powerbank", title: "BX-301 Power Bank", category: "BEST SELLER", description: "High-capacity 20000mAh fast charging" },
+  { id: "honey", title: "Sidr Honey", category: "BEST SELLER", description: "Pure organic mountain honey" },
+  { id: "lamp", title: "Salt Lamp", category: "BEST SELLER", description: "Natural Himalayan rock salt lamp" },
 ];
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
@@ -80,12 +80,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     <div className="fixed inset-0 z-[100] bg-background/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="fixed inset-x-0 top-0 z-[101] bg-background p-4 shadow-lg md:top-[15%] md:mx-auto md:max-w-2xl md:rounded-2xl border animate-in slide-in-from-top-4 duration-300">
         <div className="flex items-center gap-2 mb-6">
-          <form onSubmit={handleSearch} className="relative flex-1 group">
+              <form onSubmit={handleSearch} className="relative flex-1 group">
             <Input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search tools..."
+              placeholder="Search products..."
               className="h-14 text-lg border border-primary/20 focus-visible:ring-0 focus-visible:border-primary transition-all rounded-xl pl-4 pr-10"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -113,7 +113,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         <div className="space-y-6">
           <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-1">
             <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-            Popular Tools
+            Best Seller Products
           </div>
           
           <div className="space-y-1">
