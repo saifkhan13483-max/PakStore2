@@ -20,6 +20,9 @@ export const signupSchema = z.object({
     .regex(/[0-9]/, "Must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
   confirmPassword: z.string().min(1, "Confirm password is required"),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: "Please accept our terms to continue",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],

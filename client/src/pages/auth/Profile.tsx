@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Calendar, ShieldCheck, Phone, MapPin, Truck, AlertCircle } from "lucide-react";
+import { User, Mail, Calendar, ShieldCheck, Phone, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, type ProfileValues } from "@/lib/validations/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { db } from "@/lib/firebase";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 const PAKISTAN_CITIES = [
   "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", 
@@ -39,14 +41,18 @@ export default function Profile() {
   const onSubmit = async (data: ProfileValues) => {
     setIsUpdating(true);
     try {
-      // In a real app, we would update Firebase profile/Firestore here
-      console.log("Updating profile with:", data);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        ...data,
+        updatedAt: serverTimestamp(),
+      });
+      
       toast({
         title: "Profile Updated",
         description: "Your information has been successfully saved.",
       });
     } catch (error) {
+      console.error("Profile update error:", error);
       toast({
         variant: "destructive",
         title: "Update Failed",

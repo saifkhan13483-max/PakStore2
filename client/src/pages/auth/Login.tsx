@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Link, useLocation, useSearch } from "wouter";
 import { AlertCircle, Eye, EyeOff, Loader2, Lock, Mail, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -21,16 +20,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/authStore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { useCartStore } from "@/store/cartStore";
-import { doc, getDoc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().default(false),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { loginSchema, type LoginValues } from "@/lib/validations/auth";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +34,7 @@ export default function Login() {
   const { signInWithEmail, signInWithGoogle, resetPassword } = useAuthStore();
   const cartStore = useCartStore();
 
-  const form = useForm<LoginFormValues>({
+  const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -173,7 +165,7 @@ export default function Login() {
         const userDocRef = doc(db, "users", currentUser.uid);
         await updateDoc(userDocRef, {
           lastLoginAt: serverTimestamp()
-        });
+        }).catch(err => console.error("Update lastLoginAt failed:", err));
 
         await syncCartAfterLogin(currentUser.uid);
         

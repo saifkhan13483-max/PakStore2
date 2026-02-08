@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Link, useLocation, useSearch } from "wouter";
 import { CheckCircle, AlertCircle, Eye, EyeOff, X, Check, Loader2 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
@@ -23,30 +22,7 @@ import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, sendEma
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { useCartStore } from "@/store/cartStore";
-
-const signupSchema = z.object({
-  fullName: z
-    .string()
-    .min(2, "Full name must be at least 2 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Full name should only contain letters and spaces"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine((val) => val === true, {
-    message: "Please accept our terms to continue",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
-type SignupFormValues = z.infer<typeof signupSchema>;
+import { signupSchema, type SignupValues } from "@/lib/validations/auth";
 
 const passwordRequirements = [
   { id: "length", label: "Minimum 8 characters", regex: /.{8,}/ },
@@ -77,7 +53,7 @@ export default function Signup() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const form = useForm<SignupFormValues>({
+  const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       fullName: "",
