@@ -37,10 +37,14 @@ export default function ProductDetail() {
     }).format(price);
   };
 
+  const relatedProducts = products
+    .filter(p => p.category === product?.category && p.id !== product?.id)
+    .slice(0, 4);
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12">
           <Skeleton className="aspect-square rounded-2xl" />
           <div className="space-y-6">
             <div className="space-y-2">
@@ -54,6 +58,10 @@ export default function ProductDetail() {
               <Skeleton className="h-12 flex-1" />
             </div>
           </div>
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-40 w-full" />
         </div>
       </div>
     );
@@ -91,10 +99,11 @@ export default function ProductDetail() {
         </Link>
       </Button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+      {/* Top Section: Images and Primary Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12">
         {/* Gallery Section */}
         <div className="space-y-4">
-          <Card className="overflow-hidden border-none shadow-none bg-muted/30 rounded-2xl">
+          <Card className="overflow-hidden border border-border/50 shadow-sm rounded-2xl">
             <CardContent className="p-0 aspect-square relative">
               <AnimatePresence mode="wait">
                 <motion.img
@@ -130,49 +139,46 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {/* Product Details Section */}
+        {/* Info Section */}
         <div className="flex flex-col">
-          <div className="mb-6">
-            <Badge variant="outline" className="mb-4 text-primary border-primary/20 font-medium">
+          <div className="space-y-4">
+            <Badge variant="outline" className="text-primary border-primary/20 font-medium w-fit">
               {product.category}
             </Badge>
             
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
               {product.name}
             </h1>
 
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-1.5">
-                <div className="flex items-center text-yellow-500">
-                  <Star className="w-5 h-5 fill-current" />
-                </div>
-                <span className="font-bold text-lg">{product.rating || "0.0"}</span>
-                <span className="text-muted-foreground">({product.reviewCount || 0} reviews)</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center text-yellow-500">
+                <Star className="w-5 h-5 fill-current" />
               </div>
-              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full">
+              <span className="font-bold">{product.rating || "0.0"}</span>
+              <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
+              <Separator orientation="vertical" className="h-4 mx-2" />
+              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full text-xs">
                 {product.inStock ? "In Stock" : "Out of Stock"}
               </Badge>
             </div>
             
-            <div className="flex items-baseline gap-4 mb-8">
-              <span className="text-3xl font-bold text-primary">
-                {formatPrice(product.price)}
-              </span>
+            <div className="text-3xl font-bold text-primary">
+              {formatPrice(product.price)}
               {product.originalPrice && (
-                <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50">
+                <span className="ml-3 text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
 
-            <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed mb-8">
-              <p>{product.longDescription || product.description}</p>
+            <div className="text-muted-foreground text-lg">
+              {product.description}
             </div>
 
             {product.features && product.features.length > 0 && (
-              <div className="mb-8 p-6 rounded-2xl bg-muted/30 border border-border/50">
-                <h3 className="font-semibold text-foreground mb-4">Key Features</h3>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="py-4">
+                <h3 className="font-semibold text-foreground mb-3">Key Features</h3>
+                <ul className="space-y-2">
                   {product.features.map((feature, i) => (
                     <li key={i} className="flex items-start text-sm text-muted-foreground">
                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 mr-3 flex-shrink-0" />
@@ -182,69 +188,74 @@ export default function ProductDetail() {
                 </ul>
               </div>
             )}
-          </div>
 
-          <div className="mt-auto space-y-8">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex items-center border rounded-full bg-background p-1 w-fit shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border/50">
+              <div className="flex items-center border rounded-md bg-background p-1 w-fit">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-9 w-9 rounded-full no-default-hover-elevate"
+                  className="h-8 w-8 no-default-hover-elevate"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-3 h-3" />
                 </Button>
-                <span className="w-10 text-center font-bold text-lg">{quantity}</span>
+                <span className="w-10 text-center font-bold">{quantity}</span>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-9 w-9 rounded-full no-default-hover-elevate"
+                  className="h-8 w-8 no-default-hover-elevate"
                   onClick={() => setQuantity(quantity + 1)}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3 h-3" />
                 </Button>
               </div>
               <Button 
                 size="lg"
-                className="flex-1 h-12 rounded-full gap-3 text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]" 
+                className="flex-1 h-11 bg-[#1A4D2E] hover:bg-[#1A4D2E]/90 text-white rounded-md gap-2 font-semibold" 
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
               >
-                <ShoppingCart className="w-5 h-5" />
-                {product.inStock ? "Add to Cart" : "Currently Unavailable"}
+                <ShoppingCart className="w-4 h-4" />
+                {product.inStock ? "Add to Cart" : "Out of Stock"}
               </Button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 py-6 border-y border-border/50">
-              <div className="flex flex-col items-center text-center px-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary">
-                  <Truck className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-foreground">Free Delivery</span>
-                <span className="text-[10px] text-muted-foreground mt-1">Orders over Rs. 5,000</span>
-              </div>
-              <div className="flex flex-col items-center text-center px-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-foreground">Authentic</span>
-                <span className="text-[10px] text-muted-foreground mt-1">100% Quality Check</span>
-              </div>
-              <div className="flex flex-col items-center text-center px-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary">
-                  <RotateCcw className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-foreground">7-Day Return</span>
-                <span className="text-[10px] text-muted-foreground mt-1">Hassle-free Returns</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <Separator className="my-12" />
+
+      {/* Middle Section: Long Description */}
+      <section className="mb-16">
+        <h2 className="text-2xl font-bold mb-6">Product Long Description:</h2>
+        <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed">
+          <p>{product.longDescription || "No detailed description available for this product."}</p>
+        </div>
+      </section>
+
+      <Separator className="my-12" />
+
+      {/* Bottom Section: Related Products */}
+      {relatedProducts.length > 0 && (
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold">Related Products</h2>
+            <Button variant="ghost" asChild className="p-0 h-auto">
+              <Link href={`/products?category=${product.category}`}>View all</Link>
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
 import { Separator } from "@/components/ui/separator";
+import { products } from "@/data/products";
+import { ProductCard } from "@/components/product/ProductCard";
