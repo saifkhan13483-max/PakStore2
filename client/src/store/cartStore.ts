@@ -21,8 +21,8 @@ export const useCartStore = create<CartState>()(
       items: [],
 
       syncToFirebase: async (items: CartItem[]) => {
-        const user = auth.currentUser;
-        if (user) {
+        const user = auth?.currentUser;
+        if (user && db) {
           try {
             await setDoc(doc(db, 'users', user.uid, 'cart', 'current'), { items });
           } catch (error) {
@@ -84,6 +84,7 @@ export const useCartStore = create<CartState>()(
       },
 
       syncWithFirebase: async (userId) => {
+        if (!db) return;
         try {
           const cartRef = doc(db, 'users', userId, 'cart', 'current');
           const cartDoc = await getDoc(cartRef);

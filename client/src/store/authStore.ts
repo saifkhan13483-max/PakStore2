@@ -119,11 +119,14 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// Initialize auth listener
-onAuthStateChanged(auth, (firebaseUser) => {
-  if (firebaseUser) {
-    useAuthStore.getState().setUser(mapFirebaseUserToAuthUser(firebaseUser));
-  } else {
-    useAuthStore.getState().setUser(null);
-  }
-});
+if (auth) {
+  onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      useAuthStore.getState().setUser(mapFirebaseUserToAuthUser(firebaseUser));
+    } else {
+      useAuthStore.getState().setUser(null);
+    }
+  });
+} else {
+  useAuthStore.getState().setLoading(false);
+}
