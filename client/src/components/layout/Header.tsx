@@ -17,6 +17,16 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
+import { useAuthStore } from "@/store/authStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 const Header = () => {
   const [location, setLocation] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -24,6 +34,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const totalItems = useCartStore((state) => state.getTotalItems());
+  const { user, isAuthenticated, logout } = useAuthStore();
   
   const { data: searchResults, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products", { search: searchQuery }],
@@ -184,9 +195,46 @@ const Header = () => {
               </Link>
             </Button>
 
-            <Button variant="ghost" size="icon" className="hidden sm:flex hover-elevate">
-              <User className="h-5 w-5" />
-            </Button>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hover-elevate">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user?.displayName || "Account"}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer w-full">Profile Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/orders" className="cursor-pointer w-full">My Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="text-destructive focus:text-destructive cursor-pointer"
+                    onClick={() => logout()}
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild className="text-sm font-medium">
+                  <Link href="/auth/login">Log In</Link>
+                </Button>
+                <Button size="sm" asChild className="text-sm font-medium">
+                  <Link href="/auth/signup">Sign Up</Link>
+                </Button>
+              </div>
+            )}
 
             <Sheet>
               <SheetTrigger asChild>
@@ -247,12 +295,32 @@ const Header = () => {
                           )}
                         </Button>
                       </Link>
-                      <Link href="/account">
-                        <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
-                          <User className="h-5 w-5" />
-                          My Account
-                        </Button>
-                      </Link>
+                      {isAuthenticated ? (
+                        <>
+                          <Link href="/profile">
+                            <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
+                              <User className="h-5 w-5" />
+                              My Profile
+                            </Button>
+                          </Link>
+                          <Button 
+                            className="w-full justify-start gap-3 h-12 text-lg text-destructive" 
+                            variant="ghost"
+                            onClick={() => logout()}
+                          >
+                            Logout
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col gap-3">
+                          <Link href="/auth/login">
+                            <Button className="w-full h-12 text-lg" variant="outline">Log In</Button>
+                          </Link>
+                          <Link href="/auth/signup">
+                            <Button className="w-full h-12 text-lg">Sign Up</Button>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
