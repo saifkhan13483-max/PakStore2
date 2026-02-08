@@ -1,13 +1,14 @@
 import logoImg from "@/assets/logo.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, LogOut } from "lucide-react";
+import { ShoppingCart, Menu, Search, User, LogOut, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { SearchOverlay } from "./SearchOverlay";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,18 +21,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navbar() {
   const [location, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const getTotalItems = useCartStore(state => state.getTotalItems);
   const itemCount = getTotalItems();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLocation(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsSearchOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -55,16 +59,14 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <form onSubmit={handleSearch} className="relative mb-4">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search products..."
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </form>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-muted-foreground mb-4"
+                    onClick={() => setIsSearchOpen(true)}
+                  >
+                    <Search className="mr-2 h-4 w-4" />
+                    Search tools...
+                  </Button>
                   {navLinks.map((link) => (
                     <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
                       {link.name}
@@ -99,39 +101,29 @@ export function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-1 sm:gap-2">
-            <form onSubmit={handleSearch} className="hidden lg:flex relative mr-2">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="pl-8 h-9 w-64"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </form>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSearchOpen(true)}
+              className="hidden lg:flex items-center gap-2 w-64 justify-start text-muted-foreground h-9 px-3 rounded-md bg-muted/50 hover:bg-muted border-muted-foreground/20"
+            >
+              <Search className="h-4 w-4" />
+              <span className="text-xs">Search tools...</span>
+              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </Button>
             
-            <div className="lg:hidden">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Search className="h-5 w-5 text-muted-foreground" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="top" className="h-20 flex items-center px-4">
-                  <form onSubmit={handleSearch} className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search products..."
-                      className="pl-10 h-10 w-full"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoFocus
-                    />
-                  </form>
-                </SheetContent>
-              </Sheet>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="lg:hidden"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </Button>
+
+            <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
             
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
