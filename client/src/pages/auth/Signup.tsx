@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
-import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 
 const signupSchema = z.object({
@@ -110,11 +110,12 @@ export default function Signup() {
       const user = result.user;
 
       // Check if user exists in Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
       
       if (!userDoc.exists()) {
-        // Create new user document
-        await setDoc(doc(db, "users", user.uid), {
+        // Create new user document with consistent fields
+        await setDoc(userDocRef, {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName,
@@ -128,10 +129,59 @@ export default function Signup() {
           shippingAddresses: [],
         });
       } else {
-        // Update last login
-        await setDoc(doc(db, "users", user.uid), {
+        // Update last login and potentially sync profile info
+        await updateDoc(userDocRef, {
           lastLoginAt: serverTimestamp(),
-        }, { merge: true });
+          // Optional: sync displayName or photoURL if they changed
+          displayName: user.displayName || userDoc.data().displayName,
+          photoURL: user.photoURL || userDoc.data().photoURL,
+        });
+      }
+
+      // Sync Cart from localStorage to Firestore
+      const guestCartJson = localStorage.getItem("cart-storage");
+      if (guestCartJson) {
+        try {
+          const guestCartData = JSON.parse(guestCartJson);
+          const guestItems = guestCartData.state?.items || [];
+          
+          if (guestItems.length > 0) {
+            const cartCollectionRef = collection(db, "users", user.uid, "cart");
+            const existingCartSnap = await getDocs(cartCollectionRef);
+            const existingItemsMap = new Map();
+            existingCartSnap.docs.forEach(doc => {
+              existingItemsMap.set(doc.data().productId, { id: doc.id, ...doc.data() });
+            });
+
+            const batch = writeBatch(db);
+            
+            guestItems.forEach((item: any) => {
+              const existingItem = existingItemsMap.get(item.id);
+              if (existingItem) {
+                // Use higher quantity
+                const newQuantity = Math.max(existingItem.quantity, item.quantity);
+                batch.update(doc(db, "users", user.uid, "cart", existingItem.id), {
+                  quantity: newQuantity,
+                  updatedAt: serverTimestamp()
+                });
+              } else {
+                // Add new item
+                const newDocRef = doc(collection(db, "users", user.uid, "cart"));
+                batch.set(newDocRef, {
+                  productId: item.id,
+                  quantity: item.quantity,
+                  addedAt: serverTimestamp(),
+                  // Add other product info if needed
+                });
+              }
+            });
+
+            await batch.commit();
+            // Optional: Notify user about cart merge in next part
+          }
+        } catch (e) {
+          console.error("Cart sync error:", e);
+        }
       }
 
       toast({
