@@ -30,6 +30,9 @@
   --border: 160 20% 88%;
   --input: 160 20% 88%;
   --ring: 160 55% 25%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 50% 10%;
   
   --radius: 0.75rem;
 }
@@ -56,6 +59,9 @@
   --border: 160 30% 15%;
   --input: 160 30% 15%;
   --ring: 160 50% 40%;
+
+  --popover: 160 30% 10%;
+  --popover-foreground: 45 20% 90%;
 }
 
 @layer base {
