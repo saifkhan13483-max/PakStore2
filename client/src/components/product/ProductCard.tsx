@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
         
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-          <Link href={`/product/${product.slug}`}>
+          <Link href={`/products/${product.slug}`}>
             <Button variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:scale-110 transition-transform">
               <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -82,7 +82,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
           {product.category}
         </p>
-        <Link href={`/product/${product.slug}`} className="block">
+        <Link href={`/products/${product.slug}`} className="block">
           <h3 className="font-display text-lg font-bold text-foreground mb-2 line-clamp-1 hover:text-primary transition-colors">
             {product.name}
           </h3>
