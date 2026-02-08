@@ -117,16 +117,16 @@ export default function Home() {
         </section>
 
         {/* Featured Categories */}
-        <section className="py-12 sm:py-20 bg-muted/30">
+        <section className="py-16 sm:py-24 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10 sm:mb-12">
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">Shop by Category</h2>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-                Discover our diverse range of Pakistani artisanal products across multiple categories.
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6 tracking-tight">Shop by Category</h2>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Discover our curated collection of Pakistani artisanal treasures and luxury accessories.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
               <CategoryCard 
                 name="Apparel" 
                 slug="Apparel" 
@@ -144,6 +144,12 @@ export default function Home() {
                 slug="Footwear" 
                 count={1} 
                 image="https://images.unsplash.com/photo-1628149455678-16f37bc392f4?auto=format&fit=crop&q=80&w=800"
+              />
+              <CategoryCard 
+                name="Watches" 
+                slug="Watches" 
+                count={1} 
+                image="/src/assets/images/watches-category.jpg"
               />
             </div>
           </div>

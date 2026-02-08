@@ -22,6 +22,27 @@ export const mockProducts: Product[] = [
       warranty: "1 Year",
       model: "BX-301"
     }
+  },
+  {
+    id: 6,
+    slug: "luxury-gold-watch",
+    name: "Luxury Emerald Gold Timepiece",
+    description: "Elegant wristwatch with emerald dial and gold-plated finish",
+    longDescription: "A masterpiece of craftsmanship, this luxury timepiece features a deep emerald green dial set in a polished gold-plated stainless steel case. The precision movement ensures perfect timekeeping, while the scratch-resistant sapphire crystal protects the elegant face. This watch is the perfect blend of traditional elegance and modern luxury.",
+    price: 15500,
+    originalPrice: 22000,
+    images: ["/src/assets/images/watches-category.jpg"],
+    category: "Watches",
+    inStock: true,
+    rating: "4.9",
+    reviewCount: 42,
+    features: ["Gold-plated Finish", "Emerald Green Dial", "Sapphire Crystal", "Water Resistant", "2-Year Warranty"],
+    specifications: {
+      case: "Stainless Steel (Gold-plated)",
+      dial: "Emerald Green",
+      movement: "Precision Quartz",
+      warranty: "2 Years"
+    }
   }
 ];
 
