@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { SearchOverlay } from "./SearchOverlay";
 
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -99,87 +100,19 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <div className="relative">
-              {isSearchOpen ? (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center bg-background border rounded-full px-3 py-1 w-[200px] sm:w-[300px] animate-in slide-in-from-right-4">
-                  <Input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search products..."
-                    className="border-0 focus-visible:ring-0 h-8 p-0 text-sm"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && searchQuery.trim()) {
-                        setLocation(`/products?search=${encodeURIComponent(searchQuery)}`);
-                        setIsSearchOpen(false);
-                      }
-                      if (e.key === "Escape") setIsSearchOpen(false);
-                    }}
-                  />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={() => setIsSearchOpen(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  
-                  {searchQuery.length > 2 && (
-                    <div className="absolute top-full right-0 mt-2 w-full bg-background border rounded-lg shadow-lg overflow-hidden z-50">
-                      {isLoading ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
-                      ) : searchResults && searchResults.length > 0 ? (
-                        <div className="max-height-[300px] overflow-auto">
-                          {searchResults.slice(0, 5).map((product) => (
-                            <Link 
-                              key={product.id} 
-                              href={`/products/${product.slug}`}
-                              onClick={() => {
-                                setIsSearchOpen(false);
-                                setSearchQuery("");
-                              }}
-                              className="flex items-center gap-3 p-3 hover:bg-muted transition-colors border-b last:border-0"
-                            >
-                              <div className="w-10 h-10 rounded bg-muted flex-shrink-0">
-                                {product.images?.[0] && (
-                                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover rounded" />
-                                )}
-                              </div>
-                              <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-medium truncate">{product.name}</p>
-                                <p className="text-xs text-muted-foreground">Rs. {product.price}</p>
-                              </div>
-                            </Link>
-                          ))}
-                          {searchResults.length > 5 && (
-                            <Link 
-                              href={`/products?search=${encodeURIComponent(searchQuery)}`}
-                              onClick={() => setIsSearchOpen(false)}
-                              className="block p-2 text-center text-xs font-medium text-primary hover:bg-muted"
-                            >
-                              View all results
-                            </Link>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="p-4 text-center text-sm text-muted-foreground">No products found</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="hover-elevate"
-                  onClick={() => setIsSearchOpen(true)}
-                >
-                  <Search className="h-5 w-5" />
-                </Button>
-              )}
-            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hover-elevate"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            <SearchOverlay 
+              isOpen={isSearchOpen} 
+              onClose={() => setIsSearchOpen(false)} 
+            />
             
             <Button variant="ghost" size="icon" className="relative hover-elevate" asChild>
               <Link href="/cart">
