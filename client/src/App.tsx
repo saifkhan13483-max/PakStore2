@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 // Page Imports with Code Splitting
 const Home = lazy(() => import("@/pages/Home"));
 const Products = lazy(() => import("@/pages/Products"));
+const Signup = lazy(() => import("@/pages/auth/Signup"));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
 const Cart = lazy(() => import("@/pages/Cart"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
@@ -36,6 +37,7 @@ function Router() {
       <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/auth/signup" component={Signup} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/cart" component={Cart} />
