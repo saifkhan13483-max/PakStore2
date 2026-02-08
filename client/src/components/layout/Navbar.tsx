@@ -1,7 +1,7 @@
 import logoImg from "@/assets/logo.png";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, LogOut, Command } from "lucide-react";
+import { ShoppingCart, Menu, Search, User, LogOut, Command, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/store/cartStore";
@@ -44,6 +44,14 @@ export function Navbar() {
     { name: "Contact", href: "/contact" },
   ];
 
+  const categories = [
+    { name: "Apparel", href: "/products?category=Apparel" },
+    { name: "Home Decor", href: "/products?category=Home Decor" },
+    { name: "Footwear", href: "/products?category=Footwear" },
+    { name: "Food", href: "/products?category=Food" },
+    { name: "Power Banks", href: "/products?category=Power Banks" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,7 +75,25 @@ export function Navbar() {
                     <Search className="mr-2 h-4 w-4" />
                     Search tools...
                   </Button>
-                  {navLinks.map((link) => (
+                  
+                  <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
+                    Home
+                  </Link>
+
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Categories
+                    </p>
+                    <div className="flex flex-col gap-2 pl-4">
+                      {categories.map((category) => (
+                        <Link key={category.href} href={category.href} className="text-base font-medium hover:text-primary transition-colors">
+                          {category.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {navLinks.slice(2).map((link) => (
                     <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
                       {link.name}
                     </Link>
@@ -86,7 +112,43 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {navLinks.map((link) => (
+            <Link 
+              href="/"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                location === "/" ? "text-primary font-semibold" : "text-muted-foreground"
+              }`}
+            >
+              Home
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none ${
+                    location.startsWith("/products") ? "text-primary font-semibold" : "text-muted-foreground"
+                  }`}
+                >
+                  Categories <ChevronDown className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {categories.map((category) => (
+                  <DropdownMenuItem key={category.name} asChild>
+                    <Link href={category.href} className="cursor-pointer w-full">
+                      {category.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/products" className="cursor-pointer w-full font-medium">
+                    All Products
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {navLinks.slice(2).map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href}

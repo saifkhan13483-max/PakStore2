@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, X } from "lucide-react";
+import { ShoppingCart, Menu, Search, User, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +63,14 @@ const Header = () => {
     { href: "/contact", label: "Contact" },
   ];
 
+  const categories = [
+    { name: "Apparel", href: "/products?category=Apparel" },
+    { name: "Home Decor", href: "/products?category=Home Decor" },
+    { name: "Footwear", href: "/products?category=Footwear" },
+    { name: "Food", href: "/products?category=Food" },
+    { name: "Power Banks", href: "/products?category=Power Banks" },
+  ];
+
   return (
     <header 
       className={cn(
@@ -83,7 +91,47 @@ const Header = () => {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            {navLinks.map((link) => (
+            <Link
+              href="/"
+              className={cn(
+                "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
+                location === "/" 
+                  ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
+                  : "text-muted-foreground"
+              )}
+            >
+              Home
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary py-1 px-0.5 focus:outline-none",
+                    location.startsWith("/products") ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  Categories <ChevronDown className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {categories.map((category) => (
+                  <DropdownMenuItem key={category.name} asChild>
+                    <Link href={category.href} className="cursor-pointer w-full">
+                      {category.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/products" className="cursor-pointer w-full font-medium">
+                    All Products
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {navLinks.slice(2).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -202,7 +250,37 @@ const Header = () => {
                     </div>
 
                     <nav className="flex flex-col px-6">
-                      {navLinks.map((link) => (
+                      <Link
+                        href="/"
+                        className={cn(
+                          "flex items-center py-4 text-lg font-medium transition-colors border-b",
+                          location === "/" ? "text-primary" : "text-foreground hover:text-primary"
+                        )}
+                      >
+                        Home
+                      </Link>
+
+                      <div className="flex flex-col border-b">
+                        <p className="pt-4 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                          Categories
+                        </p>
+                        <div className="flex flex-col gap-1 pb-4 pl-4">
+                          {categories.map((category) => (
+                            <Link
+                              key={category.name}
+                              href={category.href}
+                              className={cn(
+                                "py-2 text-base font-medium transition-colors",
+                                location === category.href ? "text-primary" : "text-foreground hover:text-primary"
+                              )}
+                            >
+                              {category.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+
+                      {navLinks.slice(2).map((link) => (
                         <Link
                           key={link.href}
                           href={link.href}
