@@ -142,13 +142,6 @@ export default function ProductDetail() {
             </h1>
 
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < 4 ? "fill-current" : "text-muted-foreground/30"}`} />
-                ))}
-                <span className="ml-2 text-sm font-medium text-muted-foreground">4.8 (120 reviews)</span>
-              </div>
-              <Separator orientation="vertical" className="h-4" />
               <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full">
                 {product.inStock ? "In Stock" : "Out of Stock"}
               </Badge>
