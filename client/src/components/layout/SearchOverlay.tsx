@@ -21,11 +21,13 @@ const POPULAR_TOOLS = [
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setSelectedIndex(0);
     } else {
       document.body.style.overflow = "unset";
     }
@@ -33,6 +35,36 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % POPULAR_TOOLS.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + POPULAR_TOOLS.length) % POPULAR_TOOLS.length);
+      } else if (e.key === "Enter") {
+        if (query.trim() && selectedIndex === -1) {
+          // Normal search if typing and nothing selected
+          return;
+        }
+        e.preventDefault();
+        const selectedTool = POPULAR_TOOLS[selectedIndex];
+        if (selectedTool) {
+          setLocation(`/products?search=${encodeURIComponent(selectedTool.title)}`);
+          onClose();
+        }
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, selectedIndex, query, setLocation, onClose]);
 
   if (!isOpen) return null;
 
@@ -85,21 +117,22 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
           </div>
           
           <div className="space-y-1">
-            {POPULAR_TOOLS.map((tool) => (
+            {POPULAR_TOOLS.map((tool, index) => (
               <button
                 key={tool.id}
                 onClick={() => {
                   setLocation(`/products?search=${encodeURIComponent(tool.title)}`);
                   onClose();
                 }}
+                onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
                   "w-full flex items-center gap-4 p-3 rounded-xl transition-all text-left group",
-                  tool.id === "bmi" ? "bg-primary/5 ring-1 ring-primary/10" : "hover:bg-accent/50"
+                  index === selectedIndex ? "bg-primary/10 ring-1 ring-primary/20" : "hover:bg-accent/50"
                 )}
               >
                 <div className={cn(
                   "h-12 w-12 flex items-center justify-center rounded-xl transition-colors shrink-0",
-                  tool.id === "bmi" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                  index === selectedIndex ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                 )}>
                   <Search className="h-5 w-5" />
                 </div>
@@ -107,7 +140,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   <div className="flex items-center justify-between gap-2">
                     <span className={cn(
                       "font-semibold transition-colors truncate",
-                      tool.id === "bmi" ? "text-primary" : "text-foreground group-hover:text-primary"
+                      index === selectedIndex ? "text-primary" : "text-foreground group-hover:text-primary"
                     )}>
                       {tool.title}
                     </span>
