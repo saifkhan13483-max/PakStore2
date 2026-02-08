@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Link } from "wouter";
-import { CheckCircle, AlertCircle, Eye, EyeOff, X, Check } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { CheckCircle, AlertCircle, Eye, EyeOff, X, Check, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import SEO from "@/components/SEO";
@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { auth, db } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const signupSchema = z.object({
   fullName: z
@@ -32,6 +36,9 @@ const signupSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: "Please accept our terms to continue",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -50,6 +57,9 @@ const passwordRequirements = [
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -58,6 +68,7 @@ export default function Signup() {
       email: "",
       password: "",
       confirmPassword: "",
+      acceptTerms: false,
     },
     mode: "onChange",
   });
@@ -91,7 +102,56 @@ export default function Signup() {
   };
 
   async function onSubmit(data: SignupFormValues) {
-    console.log(data);
+    setIsLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName: data.fullName });
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: data.email,
+        displayName: data.fullName,
+        phoneNumber: "",
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        provider: "password",
+        emailVerified: false,
+        preferences: {},
+        shippingAddresses: [],
+      });
+
+      toast({
+        title: "Account created!",
+        description: "Welcome to PakCart. Redirecting you to home...",
+      });
+
+      setLocation("/");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      let message = "An error occurred during registration. Please try again.";
+      
+      if (error.code === "auth/email-already-in-use") {
+        message = "An account already exists with this email address. Please sign in instead or use a different email.";
+      } else if (error.code === "auth/weak-password") {
+        message = "Password should be at least 8 characters with uppercase, lowercase, number and special character for better security.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Please enter a valid email address.";
+      } else if (error.code === "auth/operation-not-allowed") {
+        message = "Email/password accounts are not enabled. Please contact support.";
+      } else if (error.code === "auth/network-request-failed") {
+        message = "Check your connection and try again.";
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -115,6 +175,7 @@ export default function Signup() {
                   <div className="relative">
                     <Input
                       placeholder="Enter your full name"
+                      disabled={isLoading}
                       className={`min-h-[44px] text-base transition-colors ${
                         touchedFields.fullName
                           ? errors.fullName
@@ -156,6 +217,7 @@ export default function Signup() {
                     <Input
                       type="email"
                       placeholder="Enter your email address"
+                      disabled={isLoading}
                       className={`min-h-[44px] text-base transition-colors ${
                         touchedFields.email
                           ? errors.email
@@ -198,6 +260,7 @@ export default function Signup() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a secure password"
                       autoComplete="new-password"
+                      disabled={isLoading}
                       className={`min-h-[44px] pr-10 text-base transition-colors ${
                         touchedFields.password
                           ? errors.password
@@ -213,6 +276,7 @@ export default function Signup() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={showPassword ? "Hide password" : "Show password"}
+                      disabled={isLoading}
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -278,6 +342,7 @@ export default function Signup() {
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
                       autoComplete="new-password"
+                      disabled={isLoading}
                       className={`min-h-[44px] pr-10 text-base transition-colors ${
                         touchedFields.confirmPassword
                           ? errors.confirmPassword
@@ -293,6 +358,7 @@ export default function Signup() {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      disabled={isLoading}
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -312,12 +378,50 @@ export default function Signup() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="acceptTerms"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md py-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                    data-testid="checkbox-terms"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-normal text-muted-foreground">
+                    I agree to the{" "}
+                    <Link href="/terms" className="text-primary hover:underline" target="_blank">
+                      Terms & Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" className="text-primary hover:underline" target="_blank">
+                      Privacy Policy
+                    </Link>
+                  </FormLabel>
+                  <FormMessage className="text-xs" />
+                </div>
+              </FormItem>
+            )}
+          />
+
           <Button
             type="submit"
             className="w-full min-h-[44px]"
+            disabled={isLoading}
             data-testid="button-submit-signup"
           >
-            Continue
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating Account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </Button>
 
           <div className="text-center mt-4">
