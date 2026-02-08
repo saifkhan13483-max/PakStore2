@@ -13,6 +13,8 @@ export const products = pgTable("products", {
   images: text("images").array(),
   category: text("category").notNull(),
   inStock: boolean("in_stock").default(true),
+  rating: text("rating").default("0"),
+  reviewCount: integer("review_count").default(0),
   features: text("features").array(),
   specifications: jsonb("specifications"),
 });

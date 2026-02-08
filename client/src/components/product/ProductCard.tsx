@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingCart, Eye, Star } from "lucide-react";
 import { type Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
@@ -83,10 +83,17 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.category}
         </p>
         <Link href={`/products/${product.slug}`} className="block">
-          <h3 className="font-display text-lg font-bold text-foreground mb-2 line-clamp-1 hover:text-primary transition-colors">
+          <h3 className="font-display text-lg font-bold text-foreground mb-1 line-clamp-1 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
+        <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center text-yellow-500">
+            <Star className="w-3.5 h-3.5 fill-current" />
+            <span className="ml-1 text-sm font-medium text-foreground">{product.rating || "0.0"}</span>
+          </div>
+          <span className="text-xs text-muted-foreground">({product.reviewCount || 0})</span>
+        </div>
         <div className="flex items-baseline gap-2">
           <span className="text-lg font-semibold text-primary">
             {formatPrice(product.price)}
