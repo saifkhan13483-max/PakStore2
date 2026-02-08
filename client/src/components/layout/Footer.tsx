@@ -35,19 +35,15 @@ const Footer = () => {
             <nav className="flex flex-col gap-3">
               <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shop All Products</Link>
               <Link href="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Categories</Link>
-              <Link href="/offers" className="text-sm text-muted-foreground hover:text-primary transition-colors">Special Offers</Link>
               <Link href="/new-arrivals" className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link>
             </nav>
           </div>
 
           {/* Customer Service */}
           <div className="space-y-4">
-            <h4 className="font-display font-semibold text-lg">Customer Service</h4>
+            <h4 className="font-display font-semibold text-lg">Help & Info</h4>
             <nav className="flex flex-col gap-3">
               <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
-              <Link href="/shipping" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shipping Information</Link>
-              <Link href="/returns" className="text-sm text-muted-foreground hover:text-primary transition-colors">Returns & Exchanges</Link>
-              <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">FAQs</Link>
               <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link>
             </nav>
