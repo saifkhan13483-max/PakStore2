@@ -79,7 +79,6 @@ function Router() {
 
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
-import { useEffect } from "react";
 
 function App() {
   const { user } = useAuthStore();
