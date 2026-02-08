@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 // Page Imports with Code Splitting
@@ -36,6 +36,12 @@ const PageLoader = () => (
 );
 
 function Router() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+
   return (
     <Layout>
       <Suspense fallback={<PageLoader />}>
