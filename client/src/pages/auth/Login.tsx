@@ -22,6 +22,7 @@ import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { useCartStore } from "@/store/cartStore";
 import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import * as z from "zod";
 import { loginSchema, type LoginValues } from "@/lib/validations/auth";
 
 export default function Login() {
@@ -155,7 +156,7 @@ export default function Login() {
     }
   };
 
-  async function onSubmit(data: LoginFormValues) {
+  async function onSubmit(data: LoginValues) {
     setIsLoading(true);
     try {
       await signInWithEmail(data.email, data.password);

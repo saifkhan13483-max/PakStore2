@@ -233,7 +233,7 @@ export default function Signup() {
     }
   };
 
-  async function onSubmit(data: SignupFormValues) {
+  async function onSubmit(data: SignupValues) {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
