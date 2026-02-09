@@ -81,9 +81,11 @@ export default function AdminProducts() {
             Manage your product catalog, prices, and stock.
           </p>
         </div>
-        <Button data-testid="button-add-product">
-          <Plus className="mr-2 h-4 w-4" /> Add Product
-        </Button>
+        <Link href="/admin/products/new">
+          <Button data-testid="button-add-product">
+            <Plus className="mr-2 h-4 w-4" /> Add Product
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2">
@@ -170,8 +172,12 @@ export default function AdminProducts() {
                             </div>
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Pencil className="mr-2 h-4 w-4" /> Edit
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/products/${product.id}/edit`}>
+                            <div className="flex items-center cursor-pointer">
+                              <Pencil className="mr-2 h-4 w-4" /> Edit
+                            </div>
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
