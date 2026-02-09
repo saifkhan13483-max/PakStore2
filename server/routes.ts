@@ -30,15 +30,6 @@ export async function registerRoutes(
       const pageSize = parseInt(req.query.pageSize as string) || 10;
       const lastVisibleId = req.query.lastVisibleId as string || null;
 
-      // PostgreSQL code commented out as requested
-      /*
-      const allProducts = await db
-        .select()
-        .from(products)
-        .orderBy(desc(products.createdAt))
-        .limit(pageSize);
-      */
-
       const { products: firebaseProducts, lastVisibleId: nextLastVisibleId } = 
         await productService.getAllProducts(pageSize, lastVisibleId as any);
 
