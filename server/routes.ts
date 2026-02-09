@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
-import { insertProductSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, insertParentCategorySchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(
@@ -14,9 +14,63 @@ export async function registerRoutes(
     res.json(categories);
   });
 
+  app.post("/api/parent-categories", async (req, res) => {
+    try {
+      const data = insertParentCategorySchema.parse(req.body);
+      const category = await storage.createParentCategory(data);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
+  app.patch("/api/parent-categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertParentCategorySchema.partial().parse(req.body);
+      const category = await storage.updateParentCategory(id, data);
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
+  app.delete("/api/parent-categories/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    await storage.deleteParentCategory(id);
+    res.json({ success: true });
+  });
+
   app.get("/api/categories", async (_req, res) => {
     const categories = await storage.getCategories();
     res.json(categories);
+  });
+
+  app.post("/api/categories", async (req, res) => {
+    try {
+      const data = insertCategorySchema.parse(req.body);
+      const category = await storage.createCategory(data);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
+  app.patch("/api/categories/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = insertCategorySchema.partial().parse(req.body);
+      const category = await storage.updateCategory(id, data);
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  });
+
+  app.delete("/api/categories/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    await storage.deleteCategory(id);
+    res.json({ success: true });
   });
 
   app.get(api.products.list.path, async (req, res) => {

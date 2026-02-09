@@ -18,6 +18,10 @@ export interface IStorage {
   getCategories(): Promise<Category[]>;
   createParentCategory(category: InsertParentCategory): Promise<ParentCategory>;
   createCategory(category: InsertCategory): Promise<Category>;
+  updateParentCategory(id: number, category: Partial<InsertParentCategory>): Promise<ParentCategory | undefined>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
+  deleteParentCategory(id: number): Promise<void>;
+  deleteCategory(id: number): Promise<void>;
   deleteProduct(id: number): Promise<void>;
   clearCategories(): Promise<void>;
   getAdminStats(): Promise<AdminStats>;
@@ -82,6 +86,30 @@ export class DatabaseStorage implements IStorage {
   async createCategory(category: InsertCategory): Promise<Category> {
     const [result] = await db.insert(categories).values(category).returning();
     return result;
+  }
+
+  async updateParentCategory(id: number, updateCategory: Partial<InsertParentCategory>): Promise<ParentCategory | undefined> {
+    const [result] = await db.update(parentCategories)
+      .set(updateCategory)
+      .where(eq(parentCategories.id, id))
+      .returning();
+    return result;
+  }
+
+  async updateCategory(id: number, updateCategory: Partial<InsertCategory>): Promise<Category | undefined> {
+    const [result] = await db.update(categories)
+      .set(updateCategory)
+      .where(eq(categories.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteParentCategory(id: number): Promise<void> {
+    await db.delete(parentCategories).where(eq(parentCategories.id, id));
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    await db.delete(categories).where(eq(categories.id, id));
   }
 
   async deleteProduct(id: number): Promise<void> {
