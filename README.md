@@ -27,6 +27,8 @@ PakCart is a premium Pakistani artisanal e-commerce platform built as a full-sta
     - `VITE_FIREBASE_STORAGE_BUCKET`
     - `VITE_FIREBASE_MESSAGING_SENDER_ID`
     - `VITE_FIREBASE_APP_ID`
+    - `VITE_CLOUDINARY_CLOUD_NAME`: Cloudinary Cloud Name
+    - `VITE_CLOUDINARY_UPLOAD_PRESET`: Cloudinary Unsigned Upload Preset name (e.g., pakcart_unsigned)
 
 3.  **Database Setup**:
     Sync the schema to your PostgreSQL database:
