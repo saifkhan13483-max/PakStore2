@@ -26,7 +26,7 @@ const Profile = lazy(() => import("@/pages/auth/Profile"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminProducts = lazy(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazy(() => import("@/pages/admin/ProductForm"));
-const AdminCategories = lazy(() => import("@/pages/admin/Categories"));
+const AdminCategories = lazy(() => import("@/pages/admin/ManageCategories"));
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
