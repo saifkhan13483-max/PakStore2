@@ -38,8 +38,8 @@ export default function ProductDetail() {
     }).format(price);
   };
 
-  const relatedProducts = products
-    .filter(p => p.category === product?.category && p.id !== product?.id)
+  const relatedProducts = (products || [])
+    .filter(p => p.categoryId === product?.categoryId && p.id !== product?.id)
     .slice(0, 4);
 
   if (isLoading) {
@@ -143,10 +143,6 @@ export default function ProductDetail() {
         {/* Info Section */}
         <div className="flex flex-col">
           <div className="space-y-4">
-            <Badge variant="outline" className="text-primary border-primary/20 font-medium w-fit">
-              {product.category}
-            </Badge>
-            
             <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
               {product.name}
             </h1>
@@ -243,7 +239,7 @@ export default function ProductDetail() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold">Related Products</h2>
             <Button variant="ghost" asChild className="p-0 h-auto">
-              <Link href={`/products?category=${product.category}`}>View all</Link>
+              <Link href={`/products?categoryId=${product.categoryId}`}>View all</Link>
             </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

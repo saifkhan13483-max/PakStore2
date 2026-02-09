@@ -81,9 +81,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Content */}
       <div className="p-5">
-        <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
-          {product.category}
-        </p>
         <Link href={`/products/${product.slug}`} className="block">
           <h3 className="font-display text-lg font-bold text-foreground mb-1 line-clamp-1 hover:text-primary transition-colors">
             {product.name}
