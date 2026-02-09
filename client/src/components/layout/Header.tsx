@@ -5,7 +5,7 @@ import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Product } from "@shared/schema";
+import { Category, ParentCategory, Product } from "@shared/schema";
 import logoImg from "@/assets/logo.png";
 import {
   Sheet,
@@ -37,9 +37,11 @@ const Header = () => {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { user, isAuthenticated, logout } = useAuthStore();
   
-  const { data: searchResults, isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products", { search: searchQuery }],
-    enabled: searchQuery.length > 2,
+  const { data: parentCategories } = useQuery<ParentCategory[]>({ 
+    queryKey: ["/api/parent-categories"] 
+  });
+  const { data: categoriesData } = useQuery<Category[]>({ 
+    queryKey: ["/api/categories"] 
   });
 
   useEffect(() => {
@@ -113,17 +115,29 @@ const Header = () => {
                   Categories <ChevronDown className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {categories.map((category) => (
-                  <DropdownMenuItem key={category.name} asChild>
-                    <Link href={category.href} className="cursor-pointer w-full">
-                      {category.name}
-                    </Link>
-                  </DropdownMenuItem>
+              <DropdownMenuContent align="start" className="w-64 p-2">
+                {parentCategories?.map((parent) => (
+                  <div key={parent.id} className="mb-4 last:mb-0">
+                    <DropdownMenuLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
+                      {parent.name}
+                    </DropdownMenuLabel>
+                    <div className="grid grid-cols-1 gap-1">
+                      {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                        <DropdownMenuItem key={category.id} asChild>
+                          <Link 
+                            href={`/products?categoryId=${category.id}`} 
+                            className="cursor-pointer w-full rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {category.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  </div>
                 ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/products" className="cursor-pointer w-full font-medium">
+                  <Link href="/products" className="cursor-pointer w-full font-medium px-2 py-1.5">
                     All Products
                   </Link>
                 </DropdownMenuItem>
@@ -263,18 +277,27 @@ const Header = () => {
                         <p className="pt-4 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                           Categories
                         </p>
-                        <div className="flex flex-col gap-1 pb-4 pl-4">
-                          {categories.map((category) => (
-                            <Link
-                              key={category.name}
-                              href={category.href}
-                              className={cn(
-                                "py-2 text-base font-medium transition-colors",
-                                location === category.href ? "text-primary" : "text-foreground hover:text-primary"
-                              )}
-                            >
-                              {category.name}
-                            </Link>
+                        <div className="flex flex-col gap-4 pb-4 pl-4">
+                          {parentCategories?.map((parent) => (
+                            <div key={parent.id} className="flex flex-col gap-2">
+                              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                {parent.name}
+                              </p>
+                              <div className="flex flex-col gap-1 pl-4">
+                                {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                                  <Link
+                                    key={category.id}
+                                    href={`/products?categoryId=${category.id}`}
+                                    className={cn(
+                                      "py-1 text-base font-medium transition-colors",
+                                      location.includes(`categoryId=${category.id}`) ? "text-primary" : "text-foreground hover:text-primary"
+                                    )}
+                                  >
+                                    {category.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
