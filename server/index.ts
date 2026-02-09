@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { verifyFirebaseToken } from "./middleware/firebaseAuth";
 
 const app = express();
 const httpServer = createServer(app);
@@ -57,6 +58,13 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Use Firebase auth middleware for all API routes
+app.use("/api", (req, res, next) => {
+  // Skip auth for routes that don't need it (e.g., public endpoints)
+  // You can add logic here to exclude specific paths
+  verifyFirebaseToken(req, res, next);
 });
 
 (async () => {

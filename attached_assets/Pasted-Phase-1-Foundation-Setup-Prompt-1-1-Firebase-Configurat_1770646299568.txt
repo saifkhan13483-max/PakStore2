@@ -1,0 +1,177 @@
+Phase 1: Foundation Setup
+Prompt 1.1 - Firebase Configuration
+
+I need to add Firebase to my existing Express project without changing any current functionality.
+
+Create a new file called `config/firebase.js` (or `firebase.ts` if using TypeScript) that:
+1. Initializes Firebase Admin SDK
+2. Exports `db` (Firestore instance) and `auth` (Firebase Auth instance)
+3. Uses environment variables for configuration
+
+Do not modify any existing files. Just provide the complete code for this single new file and tell me which npm packages to install.
+Prompt 1.2 - Environment Variables Setup
+
+Based on the Firebase config file we just created, provide me with:
+1. A list of environment variables I need to add to my .env file
+2. Instructions for obtaining these values from Firebase Console
+3. Example .env entries (with placeholder values)
+
+Do not modify any code files - just provide the configuration information.
+Phase 2: Data Service Layer Creation
+Prompt 2.1 - Single Entity Service (Example: Users)
+
+Create a new file `services/userService.js` that contains Firestore operations for user data.
+
+Include these functions only:
+- createUser(userData)
+- getUserById(userId)
+- updateUser(userId, updateData)
+- deleteUser(userId)
+- getAllUsers() [with pagination]
+
+Use the `db` instance from our firebase.js config file. Do not connect this to any routes yet - just provide the complete service file code.
+Prompt 2.2 - Additional Entity Services
+
+Following the same pattern as userService.js, create a new file `services/[entityName]Service.js` for [specific entity like posts, products, etc.].
+
+Include the same CRUD operations pattern. Keep this completely separate from existing code and don't modify any routes yet.
+
+[Repeat this prompt for each major entity in your database]
+Phase 3: Incremental Route Migration
+Prompt 3.1 - Single Route Migration
+
+I want to update ONE specific route in my existing Express app.
+
+Here's my current route file: [paste specific route file]
+
+Please modify ONLY the `[METHOD] /[specific-endpoint]` route handler to use the Firestore service we created instead of PostgreSQL. 
+
+Requirements:
+- Keep all other routes unchanged
+- Comment out the old PostgreSQL code (don't delete it yet)
+- Use the appropriate service function from our userService.js
+- Maintain the same response format
+- Keep all middleware and validation exactly as is
+Prompt 3.2 - Next Route Migration
+
+In the same route file we just modified, now update ONLY the `[METHOD] /[next-endpoint]` route handler.
+
+Apply the same pattern: comment out PostgreSQL code, use Firestore service, maintain response format. Leave all other routes untouched.
+Phase 4: Authentication Migration
+Prompt 4.1 - Firebase Auth Middleware
+
+Create a new file `middleware/firebaseAuth.js` that contains a single middleware function.
+
+This middleware should:
+1. Extract Bearer token from Authorization header
+2. Verify the token using Firebase Admin Auth
+3. Attach decoded user info to req.user
+4. Handle errors appropriately
+
+Do not modify any existing routes or middleware files. Just provide this single new middleware file.
+Prompt 4.2 - Apply Auth Middleware
+
+In my main app file [paste your app.js or server.js], replace the existing auth middleware with the Firebase auth middleware we just created.
+
+Only modify the middleware imports and application - don't change any route definitions or other configuration.
+Phase 5: Data Migration
+Prompt 5.1 - Migration Script Structure
+
+Create a standalone script `scripts/migrateData.js` that will run independently of my main application.
+
+The script should:
+1. Connect to both PostgreSQL (using my existing config) and Firestore
+2. Include helper functions for batch operations
+3. Have error handling and progress logging
+4. Not actually migrate data yet - just provide the structure
+
+Show me the complete script framework without the actual migration logic.
+Prompt 5.2 - Single Table Migration Logic
+
+Add migration logic to the script for ONLY the [specific table name] table.
+
+Here's my PostgreSQL table structure: [paste schema]
+
+Add a function that:
+1. Reads all records from this PostgreSQL table
+2. Transforms the data for Firestore format
+3. Writes to the appropriate Firestore collection
+4. Logs progress and errors
+
+Don't add logic for other tables yet.
+Phase 6: Testing and Validation
+Prompt 6.1 - Single Endpoint Test
+
+Create a test file `tests/[endpoint].test.js` for the specific endpoint we migrated: `[METHOD] /[endpoint]`.
+
+Include tests that verify:
+1. The endpoint returns the same response format as before
+2. Data is correctly retrieved from Firestore
+3. Error cases are handled properly
+
+Use [your testing framework] and don't create tests for other endpoints yet.
+Prompt 6.2 - Firebase Emulator Setup
+
+Show me how to configure Firebase emulators for local testing of the endpoints we've migrated so far.
+
+Provide:
+1. Firebase emulator configuration
+2. npm scripts to run emulators
+3. Instructions to point our migrated code to use emulators during testing
+
+Don't modify the main application code - just provide configuration.
+Phase 7: Cleanup and Optimization
+Prompt 7.1 - Remove PostgreSQL Dependencies
+
+Now that all routes are migrated and tested, help me clean up the PostgreSQL code.
+
+In this specific file [paste route file], remove all the commented PostgreSQL code and any unused imports related to database connections.
+
+Only clean up this one file - don't modify other files yet.
+Prompt 7.2 - Firestore Index Optimization
+
+Based on the Firestore queries we're now using in our services, provide a list of indexes I should create.
+
+Review the query patterns in: [paste your service files]
+
+Provide the exact firestore.indexes.json configuration for optimal performance.
+Phase 8: Deployment Preparation
+Prompt 8.1 - Production Configuration
+
+Create a production-ready version of our firebase.js config file.
+
+Show me:
+1. How to handle different environments (dev/staging/prod)
+2. Proper error handling for missing credentials
+3. Connection pooling or optimization settings
+4. Security considerations
+
+Don't modify existing functionality - just enhance the config file.
+Prompt 8.2 - Deployment Scripts
+
+Provide deployment scripts and configuration for hosting this Express app with Firebase integration.
+
+Include:
+1. Build scripts for production
+2. Environment variable setup for deployment
+3. Firebase hosting or Cloud Functions configuration
+4. Health check endpoints
+
+Don't modify the main application - just provide deployment configuration.
+Usage Guidelines
+Best Practices:
+
+Execute prompts sequentially, waiting for completion before moving to the next
+Test each migrated component before proceeding
+Keep backups of your original PostgreSQL code until migration is complete
+Use Firebase emulators during development to avoid costs and rate limits
+Troubleshooting:
+
+If a prompt seems too broad, break it down further into smaller components
+If you get autonomous mode warnings, add more explicit limitations about what should NOT be changed
+Save all responses as you go - you'll reference them later
+Customization:
+
+Replace [entityName], [METHOD], [endpoint] with your actual values
+Adjust file paths and naming conventions to match your project structure
+Modify the technology stack references (TypeScript vs JavaScript, testing framework, etc.)
