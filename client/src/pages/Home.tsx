@@ -122,34 +122,28 @@ export default function Home() {
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6 tracking-tight">Shop by Category</h2>
               <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Discover our curated collection of Pakistani artisanal treasures and luxury accessories.
+                Discover our curated collection of electronics, home essentials, and fashion accessories.
               </p>
             </div>
             
             <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-w-4xl mx-auto">
               <CategoryCard 
-                name="Apparel" 
-                slug="Apparel" 
-                count={1} 
-                image="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&q=80&w=800"
+                name="Electronics" 
+                slug="electronics-gadgets" 
+                count={5} 
+                image="https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=800"
               />
               <CategoryCard 
-                name="Home Decor" 
-                slug="Home Decor" 
-                count={1} 
-                image="https://images.unsplash.com/photo-1612196808214-b7e239e5f6b7?auto=format&fit=crop&q=80&w=800"
+                name="Home & Kitchen" 
+                slug="home-kitchen" 
+                count={5} 
+                image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800"
               />
               <CategoryCard 
-                name="Footwear" 
-                slug="Footwear" 
-                count={1} 
-                image="https://images.unsplash.com/photo-1628149455678-16f37bc392f4?auto=format&fit=crop&q=80&w=800"
-              />
-              <CategoryCard 
-                name="Watches" 
-                slug="Watches" 
-                count={1} 
-                image="/src/assets/images/watches-category.png"
+                name="Fashion" 
+                slug="fashion-accessories" 
+                count={5} 
+                image="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800"
               />
             </div>
           </div>
