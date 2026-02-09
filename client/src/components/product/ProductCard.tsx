@@ -1,3 +1,4 @@
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
 import { ShoppingCart, Eye, Star } from "lucide-react";
 import { type Product } from "@shared/schema";
@@ -41,9 +42,10 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         {product.images?.[0] && (
           <img
-            src={product.images[0]}
+            src={getOptimizedImageUrl(product.images[0], { width: 400, height: 500 })}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
           />
         )}
         

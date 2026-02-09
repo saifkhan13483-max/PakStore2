@@ -10,6 +10,7 @@ import { useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-image.jpg";
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
@@ -31,7 +32,7 @@ export default function Home() {
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
             <img 
-              src={heroImage} 
+              src={getOptimizedImageUrl(heroImage, { width: 1200, quality: 'auto:eco' })} 
               alt="PakCart Hero" 
               className="w-full h-full object-cover"
             />

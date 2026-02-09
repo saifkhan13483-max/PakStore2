@@ -10,6 +10,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -112,7 +113,7 @@ export default function ProductDetail() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  src={images[activeImage]}
+                  src={getOptimizedImageUrl(images[activeImage], { width: 800, height: 800 })}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
@@ -132,7 +133,7 @@ export default function ProductDetail() {
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
                   }`}
                 >
-                  <img src={img} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(img, { width: 100, height: 100 })} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

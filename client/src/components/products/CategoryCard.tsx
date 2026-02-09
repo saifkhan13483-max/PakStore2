@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 
 interface CategoryCardProps {
   name: string;
@@ -19,9 +20,10 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
         <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-sm h-full">
           <CardContent className="p-0 relative aspect-[4/3]">
             <img
-              src={image}
+              src={getOptimizedImageUrl(image, { width: 400, height: 300 })}
               alt={name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-3 sm:p-4 text-white">
