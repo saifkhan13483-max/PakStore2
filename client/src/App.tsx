@@ -23,8 +23,11 @@ const Contact = lazy(() => import("@/pages/Contact"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Profile = lazy(() => import("@/pages/auth/Profile"));
+const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/admin/AdminRoute";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -39,33 +42,60 @@ function Router() {
     window.scrollTo(0, 0);
   }, [location]);
 
+  const isAdminPath = location.startsWith("/admin");
+
+  const routes = (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/auth/signup" component={Signup} />
+      <Route path="/auth/login" component={Login} />
+      <Route path="/products" component={Products} />
+      <Route path="/products/:slug" component={ProductDetail} />
+      <Route path="/cart" component={Cart} />
+      <Route path="/checkout">
+        <ProtectedRoute>
+          <Checkout />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/thank-you" component={ThankYou} />
+      <Route path="/about" component={About} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/:rest*">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+
+      <Route component={NotFound} />
+    </Switch>
+  );
+
+  if (isAdminPath) {
+    return <Suspense fallback={<PageLoader />}>{routes}</Suspense>;
+  }
+
   return (
     <Layout>
       <Suspense fallback={<PageLoader />}>
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/auth/signup" component={Signup} />
-          <Route path="/auth/login" component={Login} />
-          <Route path="/products" component={Products} />
-          <Route path="/products/:slug" component={ProductDetail} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/checkout">
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          </Route>
-          <Route path="/profile">
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          </Route>
-          <Route path="/thank-you" component={ThankYou} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/privacy" component={Privacy} />
-          <Route path="/terms" component={Terms} />
-          <Route component={NotFound} />
-        </Switch>
+        {routes}
       </Suspense>
     </Layout>
   );

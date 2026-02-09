@@ -8,6 +8,7 @@ export interface AuthUser {
   createdAt: string;
   lastLoginAt: string;
   providerId: string;
+  role?: 'admin' | 'user';
 }
 
 export interface AuthError {

@@ -16,6 +16,7 @@ interface AuthState {
   isLoading: boolean;
   error: AuthError | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   setUser: (user: AuthUser | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: AuthError | null) => void;
@@ -24,6 +25,8 @@ interface AuthState {
   resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com'];
 
 const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   uid: user.uid,
@@ -35,19 +38,22 @@ const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   createdAt: user.metadata.creationTime || new Date().toISOString(),
   lastLoginAt: user.metadata.lastSignInTime || new Date().toISOString(),
   providerId: user.providerData[0]?.providerId || 'password',
+  role: ADMIN_EMAILS.includes(user.email || '') ? 'admin' : 'user',
 });
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isLoading: true,
       error: null,
       isAuthenticated: false,
+      isAdmin: false,
       setUser: (user) => 
         set({ 
           user, 
           isAuthenticated: !!user, 
+          isAdmin: user?.role === 'admin',
           isLoading: false,
           error: null 
         }),
