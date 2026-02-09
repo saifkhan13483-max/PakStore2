@@ -16,8 +16,8 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
       transition={{ duration: 0.3 }}
     >
       <Link href={`/products?category=${slug}`}>
-        <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-md">
-          <CardContent className="p-0 relative aspect-square">
+        <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-sm h-full">
+          <CardContent className="p-0 relative aspect-[4/3]">
             <img
               src={image}
               alt={name}
