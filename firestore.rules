@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Rules for user-specific data (cart, etc.)
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // Cart subcollection
+      match /cart/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Rules for categories and products (read-only for everyone, write-only for admins)
+    // Assuming you might add an admin role later, for now we just allow read.
+    match /categories/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only manageable via backend/scripts
+    }
+
+    match /products/{document=**} {
+      allow read: if true;
+      allow write: if false; // Only manageable via backend/scripts
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
