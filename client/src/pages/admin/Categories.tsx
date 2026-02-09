@@ -139,7 +139,7 @@ export default function AdminCategories() {
                       <FormLabel>Parent Category</FormLabel>
                       <Select 
                         onValueChange={(val) => field.onChange(val === "none" ? null : parseInt(val))} 
-                        value={field.value?.toString() || "none"}
+                        value={field.value !== undefined && field.value !== null ? field.value.toString() : "none"}
                       >
                         <FormControl>
                           <SelectTrigger>
