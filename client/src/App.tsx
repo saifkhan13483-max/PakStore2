@@ -24,6 +24,7 @@ const Privacy = lazy(() => import("@/pages/Privacy"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Profile = lazy(() => import("@/pages/auth/Profile"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
+const AdminProducts = lazy(() => import("@/pages/admin/Products"));
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
@@ -73,6 +74,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminDashboard />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/products">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminProducts />
           </AdminLayout>
         </AdminRoute>
       </Route>

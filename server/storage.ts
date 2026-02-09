@@ -10,6 +10,7 @@ export interface IStorage {
   getCategories(): Promise<Category[]>;
   createParentCategory(category: InsertParentCategory): Promise<ParentCategory>;
   createCategory(category: InsertCategory): Promise<Category>;
+  deleteProduct(id: number): Promise<void>;
   clearCategories(): Promise<void>;
 }
 
@@ -52,6 +53,10 @@ export class DatabaseStorage implements IStorage {
   async createCategory(category: InsertCategory): Promise<Category> {
     const [result] = await db.insert(categories).values(category).returning();
     return result;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
   }
 
   async clearCategories(): Promise<void> {
