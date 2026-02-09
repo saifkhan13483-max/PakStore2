@@ -1,0 +1,139 @@
+Task:
+Reset the existing product category structure in Firebase and create a clean hierarchical category system.
+
+🔹 Step 1: Remove Existing Categories
+
+Delete all current category documents/nodes from the database to ensure no legacy or duplicate data remains.
+
+If using Firestore:
+Delete all documents inside the categories collection.
+
+If using Realtime Database:
+Remove the /categories node completely.
+
+🔹 Step 2: Create Parent Categories
+
+Create exactly three parent categories with the following names:
+
+Electronics & Gadgets
+
+Home & Kitchen
+
+Fashion & Accessories
+
+Each parent category should contain:
+
+id
+
+name
+
+slug
+
+children (array or subcollection)
+
+🔹 Step 3: Add Child Categories Under Each Parent
+📌 Parent: Electronics & Gadgets
+
+Add exactly 5 child categories:
+
+Mobile Accessories
+
+Smart Watches
+
+Earbuds & Headphones
+
+Power Banks & Chargers
+
+Home Gadgets
+
+📌 Parent: Home & Kitchen
+
+Add exactly 5 child categories:
+
+Kitchen Tools
+
+Storage & Organization
+
+Cleaning Products
+
+Home Decor
+
+LED Lights
+
+📌 Parent: Fashion & Accessories
+
+Add exactly 5 child categories:
+
+Men’s Clothing
+
+Women’s Clothing
+
+Watches
+
+Sunglasses
+
+Wallets & Belts
+
+🔹 Step 4: Data Structure Requirements
+
+Ensure the category hierarchy follows this structure:
+
+✅ Firestore Example Structure
+categories (collection)
+ ├── electronics_gadgets (document)
+ │    └── children (subcollection)
+ ├── home_kitchen (document)
+ │    └── children (subcollection)
+ └── fashion_accessories (document)
+      └── children (subcollection)
+
+✅ JSON Example (Realtime Database or Firestore Seed Data)
+{
+  "categories": {
+    "electronics_gadgets": {
+      "name": "Electronics & Gadgets",
+      "slug": "electronics-gadgets",
+      "children": {
+        "mobile_accessories": {"name": "Mobile Accessories"},
+        "smart_watches": {"name": "Smart Watches"},
+        "earbuds_headphones": {"name": "Earbuds & Headphones"},
+        "power_banks_chargers": {"name": "Power Banks & Chargers"},
+        "home_gadgets": {"name": "Home Gadgets"}
+      }
+    },
+    "home_kitchen": {
+      "name": "Home & Kitchen",
+      "slug": "home-kitchen",
+      "children": {
+        "kitchen_tools": {"name": "Kitchen Tools"},
+        "storage_organization": {"name": "Storage & Organization"},
+        "cleaning_products": {"name": "Cleaning Products"},
+        "home_decor": {"name": "Home Decor"},
+        "led_lights": {"name": "LED Lights"}
+      }
+    },
+    "fashion_accessories": {
+      "name": "Fashion & Accessories",
+      "slug": "fashion-accessories",
+      "children": {
+        "mens_clothing": {"name": "Men’s Clothing"},
+        "womens_clothing": {"name": "Women’s Clothing"},
+        "watches": {"name": "Watches"},
+        "sunglasses": {"name": "Sunglasses"},
+        "wallets_belts": {"name": "Wallets & Belts"}
+      }
+    }
+  }
+}
+
+🔹 Step 5: Final Validation Rules
+
+No extra categories should exist.
+
+Each parent must have exactly 5 child categories.
+
+Use lowercase, hyphenated slugs for URLs.
+
+Structure must be ready for product references (categoryId linking).
+
+Maintain consistent naming and capitalization.
