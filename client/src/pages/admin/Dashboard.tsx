@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, ShoppingCart, BarChart } from "lucide-react";
+import { Package, Users, ShoppingCart, BarChart, Tags } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   const stats = [
@@ -43,9 +45,16 @@ export default function AdminDashboard() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Quick links to manage products and categories.
-            </p>
+            <Link href="/admin/products/new">
+              <Button className="w-full justify-start" variant="outline">
+                <Package className="mr-2 h-4 w-4" /> Add New Product
+              </Button>
+            </Link>
+            <Link href="/admin/categories">
+              <Button className="w-full justify-start" variant="outline">
+                <Tags className="mr-2 h-4 w-4" /> Manage Categories
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
