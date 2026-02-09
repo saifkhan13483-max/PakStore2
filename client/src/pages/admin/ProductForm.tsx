@@ -115,6 +115,20 @@ export default function AdminProductForm() {
     },
   });
 
+  // Auto-generate slug from name
+  const name = form.watch("name");
+  useEffect(() => {
+    if (!isEditing && name) {
+      const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      form.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [name, isEditing, form]);
+
   const onSubmit = (data: InsertProduct) => {
     mutation.mutate(data);
   };
