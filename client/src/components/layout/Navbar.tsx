@@ -9,6 +9,8 @@ import { useAuthStore } from "@/store/authStore";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { SearchOverlay } from "./SearchOverlay";
+import { useQuery } from "@tanstack/react-query";
+import { Category, ParentCategory } from "@shared/schema";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,18 +39,17 @@ export function Navbar() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  const { data: parentCategories } = useQuery<ParentCategory[]>({ 
+    queryKey: ["/api/parent-categories"] 
+  });
+  const { data: categoriesData } = useQuery<Category[]>({ 
+    queryKey: ["/api/categories"] 
+  });
+
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Collections", href: "/collections" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-  ];
-
-  const categories = [
-    { name: "Apparel", href: "/products?category=Apparel" },
-    { name: "Home Decor", href: "/products?category=Home Decor" },
-    { name: "Footwear", href: "/products?category=Footwear" },
-    { name: "Power Banks", href: "/products?category=Power Banks" },
   ];
 
   return (
@@ -79,17 +80,21 @@ export function Navbar() {
                     Home
                   </Link>
 
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Categories
-                    </p>
-                    <div className="flex flex-col gap-2 pl-4">
-                      {categories.map((category) => (
-                        <Link key={category.href} href={category.href} className="text-base font-medium hover:text-primary transition-colors">
-                          {category.name}
-                        </Link>
-                      ))}
-                    </div>
+                  <div className="flex flex-col gap-4">
+                    {parentCategories?.map((parent) => (
+                      <div key={parent.id} className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          {parent.name}
+                        </p>
+                        <div className="flex flex-col gap-2 pl-4">
+                          {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                            <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
+                              {category.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   {navLinks.slice(2).map((link) => (
@@ -120,34 +125,28 @@ export function Navbar() {
               Home
             </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none ${
-                    location.startsWith("/products") ? "text-primary font-semibold" : "text-muted-foreground"
-                  }`}
-                >
-                  Categories <ChevronDown className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {categories.map((category) => (
-                  <DropdownMenuItem key={category.name} asChild>
-                    <Link href={category.href} className="cursor-pointer w-full">
-                      {category.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/products" className="cursor-pointer w-full font-medium">
-                    All Products
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {parentCategories?.map((parent) => (
+              <DropdownMenu key={parent.id}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none text-muted-foreground`}
+                  >
+                    {parent.name} <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                    <DropdownMenuItem key={category.id} asChild>
+                      <Link href={`/products?categoryId=${category.id}`} className="cursor-pointer w-full">
+                        {category.name}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ))}
 
-            {navLinks.slice(2).map((link) => (
+            {navLinks.slice(1).map((link) => (
               <Link 
                 key={link.href} 
                 href={link.href}
