@@ -80,8 +80,13 @@ export default function AdminProductForm() {
     if (product) {
       form.reset({
         ...product,
+        images: product.images || [],
         categoryId: product.categoryId ?? undefined,
-      } as any);
+        rating: product.rating || "0",
+        reviewCount: product.reviewCount || 0,
+        features: product.features || [],
+        specifications: product.specifications || {},
+      });
     }
   }, [product, form]);
 
