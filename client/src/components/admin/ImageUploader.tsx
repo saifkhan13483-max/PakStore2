@@ -3,9 +3,78 @@ import { useDropzone } from "react-dropzone";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { X, Upload, Image as ImageIcon } from "lucide-react";
+import { X, Upload, GripVertical } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface SortableImageProps {
+  url: string;
+  index: number;
+  onRemove: (index: number) => void;
+}
+
+function SortableImage({ url, index, onRemove }: SortableImageProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: url });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 0,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card className="relative group aspect-square overflow-hidden border-2 hover:border-primary/50 transition-colors">
+        <img
+          src={url.replace("/upload/", "/upload/c_fill,g_auto,w_300,h_300,q_auto,f_auto/")}
+          alt={`Product ${index + 1}`}
+          className="w-full h-full object-cover"
+        />
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="absolute top-1 left-1 h-6 w-6 bg-black/50 text-white rounded flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <GripVertical className="h-3 w-3" />
+        </div>
+        <Button
+          variant="destructive"
+          size="icon"
+          className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={() => onRemove(index)}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </Card>
+    </div>
+  );
+}
 
 interface ImageUploaderProps {
   value: string[];
@@ -17,6 +86,13 @@ interface ImageUploaderProps {
 export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart/products" }: ImageUploaderProps) {
   const { upload, isUploading, progress } = useCloudinaryUpload();
   const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const remainingSlots = maxFiles - value.length;
@@ -31,15 +107,17 @@ export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart
     }
 
     let successCount = 0;
+    let newUrls = [...value];
+
     for (const file of filesToUpload) {
       try {
         const url = await upload(file, { folder });
         if (url) {
-          onChange([...value, url]);
+          newUrls = [...newUrls, url];
+          onChange(newUrls);
           successCount++;
         }
       } catch (error) {
-        // useCloudinaryUpload hook already shows a toast for the error
         console.error("Upload error:", error);
       }
     }
@@ -57,6 +135,16 @@ export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart
     accept: { "image/*": [] },
     disabled: isUploading || value.length >= maxFiles,
   });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = value.indexOf(active.id as string);
+      const newIndex = value.indexOf(over.id as string);
+      onChange(arrayMove(value, oldIndex, newIndex));
+    }
+  };
 
   const removeImage = (index: number) => {
     const newValue = [...value];
@@ -97,25 +185,27 @@ export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart
       )}
 
       {value.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-          {value.map((url, index) => (
-            <Card key={url} className="relative group aspect-square overflow-hidden border-2 hover:border-primary/50 transition-colors">
-              <img
-                src={url.replace("/upload/", "/upload/c_fill,g_auto,w_300,h_300,q_auto,f_auto/")}
-                alt={`Product ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => removeImage(index)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Card>
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext 
+            items={value} 
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+              {value.map((url, index) => (
+                <SortableImage 
+                  key={url} 
+                  url={url} 
+                  index={index} 
+                  onRemove={removeImage} 
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );

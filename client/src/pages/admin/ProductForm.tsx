@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema, type Product, type InsertProduct, type Category } from "@shared/schema";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, Loader2, Save } from "lucide-react";
+import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { useEffect } from "react";
@@ -41,8 +41,6 @@ export default function AdminProductForm() {
   const { data: product, isLoading: isProductLoading } = useQuery<Product>({
     queryKey: [`/api/products-by-id/${id}`],
     queryFn: async () => {
-      // We need a way to fetch by ID or slug. Assuming the existing API might need extension or we use the slug.
-      // For now, let's fetch all and filter or assume /api/products/:id exists if we add it.
       const res = await fetch(`/api/products`);
       if (!res.ok) throw new Error("Failed to fetch products");
       const products: Product[] = await res.json();
@@ -74,6 +72,12 @@ export default function AdminProductForm() {
       features: [],
       specifications: {},
     },
+  });
+
+  // Handle features array
+  const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
+    control: form.control,
+    name: "features" as any,
   });
 
   useEffect(() => {
@@ -250,6 +254,44 @@ export default function AdminProductForm() {
                       </FormItem>
                     )}
                   />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
+                  <CardTitle>Features & Specifications</CardTitle>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => appendFeature("")}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Add Feature
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <FormLabel>Key Features</FormLabel>
+                    {featureFields.map((field, index) => (
+                      <div key={field.id} className="flex gap-2">
+                        <Input 
+                          {...form.register(`features.${index}` as any)} 
+                          placeholder="e.g. Hand-woven using traditional methods"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => removeFeature(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                    {featureFields.length === 0 && (
+                      <p className="text-sm text-muted-foreground italic">No features added yet.</p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
