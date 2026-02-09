@@ -1,24 +1,11 @@
 import { db } from "../config/firebase";
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  limit, 
-  startAfter,
-  orderBy
-} from "firebase/firestore";
 
 const COLLECTION_NAME = "products";
 
 export const productService = {
   async createProduct(productData: any) {
-    const docRef = doc(collection(db, COLLECTION_NAME));
-    await setDoc(docRef, {
+    const docRef = db.collection(COLLECTION_NAME).doc();
+    await docRef.set({
       ...productData,
       id: docRef.id,
       createdAt: new Date().toISOString()
@@ -27,45 +14,50 @@ export const productService = {
   },
 
   async getProductById(productId: string) {
-    const docRef = doc(db, COLLECTION_NAME, productId);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
+    const docSnap = await db.collection(COLLECTION_NAME).doc(productId).get();
+    if (docSnap.exists) {
       return docSnap.data();
     }
     return null;
   },
 
+  async getProductBySlug(slug: string) {
+    const snapshot = await db.collection(COLLECTION_NAME).where("slug", "==", slug).limit(1).get();
+    if (snapshot.empty) {
+      return null;
+    }
+    return snapshot.docs[0].data();
+  },
+
   async updateProduct(productId: string, updateData: any) {
-    const docRef = doc(db, COLLECTION_NAME, productId);
-    await updateDoc(docRef, {
+    const docRef = db.collection(COLLECTION_NAME).doc(productId);
+    await docRef.update({
       ...updateData,
       updatedAt: new Date().toISOString()
     });
   },
 
   async deleteProduct(productId: string) {
-    const docRef = doc(db, COLLECTION_NAME, productId);
-    await deleteDoc(docRef);
+    await db.collection(COLLECTION_NAME).doc(productId).delete();
   },
 
-  async getAllProducts(pageSize = 10, lastVisibleDoc = null) {
-    let q = query(
-      collection(db, COLLECTION_NAME),
-      orderBy("createdAt", "desc"),
-      limit(pageSize)
-    );
+  async getAllProducts(pageSize = 10, lastVisibleDocId = null) {
+    let query = db.collection(COLLECTION_NAME).orderBy("createdAt", "desc").limit(pageSize);
 
-    if (lastVisibleDoc) {
-      q = query(q, startAfter(lastVisibleDoc));
+    if (lastVisibleDocId) {
+      const lastDoc = await db.collection(COLLECTION_NAME).doc(lastVisibleDocId).get();
+      if (lastDoc.exists) {
+        query = query.startAfter(lastDoc);
+      }
     }
 
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await query.get();
     const products = querySnapshot.docs.map(doc => doc.data());
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
     return {
       products,
-      lastVisible
+      lastVisibleId: lastVisible ? lastVisible.id : null
     };
   }
 };
