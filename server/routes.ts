@@ -11,15 +11,6 @@ export async function registerRoutes(
     try {
       const { slug } = req.params;
       
-      // PostgreSQL code commented out as requested
-      /*
-      const [product] = await db
-        .select()
-        .from(products)
-        .where(eq(products.slug, slug))
-        .limit(1);
-      */
-
       const product = await productService.getProductBySlug(slug);
 
       if (!product) {
