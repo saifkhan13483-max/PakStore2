@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AppSidebar } from "../app-sidebar";
+import { ThemeToggle } from "../theme-toggle";
 
 interface AdminLayoutProps {
   children: ReactNode;

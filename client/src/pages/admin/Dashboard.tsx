@@ -1,8 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/sidebar"; // Error in original prompt, should use UI components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, ShoppingCart, BarChart } from "lucide-react";
-
-// Re-importing proper UI components since sidebar doesn't export Card
-import { Card as UICard, CardContent as UICardContent, CardHeader as UICardHeader, CardTitle as UICardTitle } from "@/components/ui/card";
 
 export default function AdminDashboard() {
   const stats = [
@@ -16,41 +13,41 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <UICard key={stat.title}>
-            <UICardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <UICardTitle className="text-sm font-medium">
+          <Card key={stat.title}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
                 {stat.title}
-              </UICardTitle>
+              </CardTitle>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
-            </UICardHeader>
-            <UICardContent>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-            </UICardContent>
-          </UICard>
+            </CardContent>
+          </Card>
         ))}
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <UICard className="col-span-4">
-          <UICardHeader>
-            <UICardTitle>Recent Activity</UICardTitle>
-          </UICardHeader>
-          <UICardContent>
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
             <p className="text-sm text-muted-foreground">
               Activity overview will be displayed here.
             </p>
-          </UICardContent>
-        </UICard>
-        <UICard className="col-span-3">
-          <UICardHeader>
-            <UICardTitle>Quick Actions</UICardTitle>
-          </UICardHeader>
-          <UICardContent className="space-y-2">
+          </CardContent>
+        </Card>
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Quick links to manage products and categories.
             </p>
-          </UICardContent>
-        </UICard>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
