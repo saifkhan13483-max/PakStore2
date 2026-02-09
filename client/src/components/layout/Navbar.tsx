@@ -125,26 +125,44 @@ export function Navbar() {
               Home
             </Link>
 
-            {parentCategories?.map((parent) => (
-              <DropdownMenu key={parent.id}>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none text-muted-foreground`}
-                  >
-                    {parent.name} <ChevronDown className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
-                    <DropdownMenuItem key={category.id} asChild>
-                      <Link href={`/products?categoryId=${category.id}`} className="cursor-pointer w-full">
-                        {category.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none ${
+                    location.startsWith("/products") ? "text-primary font-semibold" : "text-muted-foreground"
+                  }`}
+                >
+                  Categories <ChevronDown className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64 p-2">
+                {parentCategories?.map((parent) => (
+                  <div key={parent.id} className="mb-4 last:mb-0">
+                    <DropdownMenuLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
+                      {parent.name}
+                    </DropdownMenuLabel>
+                    <div className="grid grid-cols-1 gap-1">
+                      {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                        <DropdownMenuItem key={category.id} asChild>
+                          <Link 
+                            href={`/products?categoryId=${category.id}`} 
+                            className="cursor-pointer w-full rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {category.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/products" className="cursor-pointer w-full font-medium px-2 py-1.5">
+                    All Products
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {navLinks.slice(1).map((link) => (
               <Link 
