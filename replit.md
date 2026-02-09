@@ -32,6 +32,12 @@ Preferred communication style: Simple, everyday language.
 - **Routes**: `shared/routes.ts` — API route contracts with paths, methods, and Zod response schemas. Used by both frontend hooks and backend route handlers
 - **Types**: `Product`, `InsertProduct`, `CartItem`, `InsertCartItem` are exported from schema for use across the stack
 
+### Cloudinary (Media Management)
+- **Cloud Name**: Stored in `VITE_CLOUDINARY_CLOUD_NAME`
+- **Upload Preset**: Unsigned preset stored in `VITE_CLOUDINARY_UPLOAD_PRESET`
+- **Asset Folder**: `pakcart/products`
+- **Usage**: Direct frontend uploads via Cloudinary Upload API
+
 ### Database
 - **Engine**: PostgreSQL (required — `DATABASE_URL` environment variable must be set)
 - **ORM**: Drizzle ORM with `drizzle-kit` for migrations
