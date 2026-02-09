@@ -24,9 +24,9 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6 text-white">
-              <h3 className="font-display text-xl font-bold mb-1">{name}</h3>
-              <p className="text-sm text-white/70">{count} Products</p>
+            <div className="absolute bottom-0 left-0 p-3 sm:p-4 text-white">
+              <h3 className="font-display text-sm sm:text-base font-bold mb-0.5">{name}</h3>
+              <p className="text-[10px] sm:text-xs text-white/70">{count} Products</p>
             </div>
           </CardContent>
         </Card>
