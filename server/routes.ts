@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { type Server } from "http";
 import { productService } from "./services/productService";
+import { firebaseInitialized } from "./config/firebase";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -41,6 +42,16 @@ export async function registerRoutes(
       console.error("Error fetching products:", error);
       res.status(500).json({ message: "Internal server error" });
     }
+  });
+
+  // Health check endpoint for deployment
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      firebase: firebaseInitialized ? "connected" : "disabled",
+      env: process.env.NODE_ENV || "development"
+    });
   });
 
   return httpServer;
