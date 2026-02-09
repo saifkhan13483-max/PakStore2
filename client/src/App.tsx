@@ -140,8 +140,8 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 
 function App() {
-  const { user } = useAuthStore();
-  const { syncWithFirebase } = useCartStore();
+  const user = useAuthStore((state) => state.user);
+  const syncWithFirebase = useCartStore((state) => state.syncWithFirebase);
 
   useEffect(() => {
     if (user) {
