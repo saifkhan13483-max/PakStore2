@@ -28,11 +28,10 @@ export function useProducts() {
   return useQuery({
     queryKey: [api.products.list.path],
     queryFn: async () => {
-      // In a real app, strict use: return api.products.list.responses[200].parse(await res.json());
-      // For this phase, we use the fallback to ensure UI works immediately
       const data = await fetchWithMockFallback(api.products.list.path);
       return api.products.list.responses[200].parse(data);
     },
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time feel
   });
 }
 

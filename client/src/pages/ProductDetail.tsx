@@ -1,5 +1,5 @@
 import { useRoute, Link } from "wouter";
-import { useProduct } from "@/hooks/use-products";
+import { useProduct, useProducts } from "@/hooks/use-products";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,7 @@ export default function ProductDetail() {
 
   const { data: products } = useProducts();
   const relatedProducts = (products || [])
-    .filter(p => p.categoryId === product?.categoryId && p.id !== product?.id)
+    .filter((p: any) => p.categoryId === product?.categoryId && p.id !== product?.id)
     .slice(0, 4);
 
   if (isLoading) {
@@ -244,7 +244,7 @@ export default function ProductDetail() {
             </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((p) => (
+            {relatedProducts.map((p: any) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
