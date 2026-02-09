@@ -2,40 +2,73 @@ import { db } from "../config/firebase";
 
 const USERS_COLLECTION = "users";
 
-export const createUser = async (userData: any) => {
-  const docRef = await db.collection(USERS_COLLECTION).add(userData);
+export interface UserData {
+  id?: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  createdAt?: Date;
+  [key: string]: any;
+}
+
+/**
+ * Create a new user in Firestore
+ */
+export const createUser = async (userData: UserData): Promise<UserData> => {
+  const docRef = await db.collection(USERS_COLLECTION).add({
+    ...userData,
+    createdAt: new Date(),
+  });
   return { id: docRef.id, ...userData };
 };
 
-export const getUserById = async (userId: string) => {
+/**
+ * Get a user by ID from Firestore
+ */
+export const getUserById = async (userId: string): Promise<UserData | null> => {
   const doc = await db.collection(USERS_COLLECTION).doc(userId).get();
   if (!doc.exists) return null;
-  return { id: doc.id, ...doc.data() };
+  return { id: doc.id, ...doc.data() } as UserData;
 };
 
-export const updateUser = async (userId: string, updateData: any) => {
-  await db.collection(USERS_COLLECTION).doc(userId).update(updateData);
+/**
+ * Update an existing user in Firestore
+ */
+export const updateUser = async (userId: string, updateData: Partial<UserData>): Promise<UserData> => {
+  await db.collection(USERS_COLLECTION).doc(userId).update({
+    ...updateData,
+    updatedAt: new Date(),
+  });
   return { id: userId, ...updateData };
 };
 
-export const deleteUser = async (userId: string) => {
+/**
+ * Delete a user from Firestore
+ */
+export const deleteUser = async (userId: string): Promise<{ id: string }> => {
   await db.collection(USERS_COLLECTION).doc(userId).delete();
   return { id: userId };
 };
 
-export const getAllUsers = async (limit: number = 10, offset: any = null) => {
-  let query = db.collection(USERS_COLLECTION).limit(limit);
+/**
+ * Get all users with pagination
+ */
+export const getAllUsers = async (limit: number = 10, lastVisibleDocId?: string) => {
+  let query = db.collection(USERS_COLLECTION).orderBy("createdAt", "desc").limit(limit);
   
-  if (offset) {
-    query = query.startAfter(offset);
+  if (lastVisibleDocId) {
+    const lastVisibleDoc = await db.collection(USERS_COLLECTION).doc(lastVisibleDocId).get();
+    if (lastVisibleDoc.exists) {
+      query = query.startAfter(lastVisibleDoc);
+    }
   }
 
   const snapshot = await query.get();
-  const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserData));
   const lastVisible = snapshot.docs[snapshot.docs.length - 1];
 
   return {
     users,
-    nextOffset: lastVisible || null
+    nextOffset: lastVisible ? lastVisible.id : null
   };
 };
