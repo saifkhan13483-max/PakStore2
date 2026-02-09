@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import SEO from "@/components/SEO";
-import { products } from "@/data/products";
+import { useProducts } from "@/hooks/use-products";
 import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,6 +43,8 @@ export default function Products() {
     inStockOnly: false,
   });
 
+  const { data: productsData, isLoading } = useProducts();
+
   // Handle URL parameters for initial filters (optional but recommended in Part 14)
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -57,7 +60,8 @@ export default function Products() {
   }, [search]);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
+    if (!productsData) return [];
+    let result = [...productsData];
 
     // Filter by search query
     if (queryParam) {
@@ -66,13 +70,17 @@ export default function Products() {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
+          (p as any).category?.toLowerCase().includes(q)
       );
     }
 
     // Filter by category
     if (filterState.categories.length > 0) {
-      result = result.filter((p) => filterState.categories.includes(p.category));
+      // Adjusted to handle categoryId or category name matching
+      result = result.filter((p) => 
+        filterState.categories.includes(String(p.categoryId)) || 
+        (p as any).category && filterState.categories.includes((p as any).category)
+      );
     }
 
     // Filter by price range
@@ -112,7 +120,7 @@ export default function Products() {
     }
 
     return result;
-  }, [filterState, sortBy]);
+  }, [productsData, filterState, sortBy, queryParam]);
 
   const displayedProducts = useMemo(() => {
     return filteredAndSortedProducts.slice(0, visibleCount);
@@ -194,7 +202,11 @@ export default function Products() {
                 {queryParam ? `Search Results for "${queryParam}"` : "Shop All Products"}
               </h1>
               <p className="text-muted-foreground">
-                Showing {displayedProducts.length} of {filteredAndSortedProducts.length} products
+                {isLoading ? (
+                  <Skeleton className="h-4 w-32" />
+                ) : (
+                  `Showing ${displayedProducts.length} of ${filteredAndSortedProducts.length} products`
+                )}
               </p>
             </div>
             
@@ -215,7 +227,17 @@ export default function Products() {
           </div>
 
           {/* Product Grid */}
-          {filteredAndSortedProducts.length === 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="h-[300px] w-full rounded-2xl" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : filteredAndSortedProducts.length === 0 ? (
             <div className="text-center py-20 bg-muted/30 rounded-2xl border-2 border-dashed">
               <div className="max-w-md mx-auto">
                 <Filter className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />

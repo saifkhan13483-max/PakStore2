@@ -38,6 +38,7 @@ export default function ProductDetail() {
     }).format(price);
   };
 
+  const { data: products } = useProducts();
   const relatedProducts = (products || [])
     .filter(p => p.categoryId === product?.categoryId && p.id !== product?.id)
     .slice(0, 4);
@@ -254,5 +255,4 @@ export default function ProductDetail() {
 }
 
 import { Separator } from "@/components/ui/separator";
-import { products } from "@/data/products";
 import { ProductCard } from "@/components/product/ProductCard";
