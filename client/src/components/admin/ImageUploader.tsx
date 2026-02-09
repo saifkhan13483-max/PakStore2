@@ -20,17 +20,35 @@ export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart
     const remainingSlots = maxFiles - value.length;
     const filesToUpload = acceptedFiles.slice(0, remainingSlots);
 
+    if (acceptedFiles.length > remainingSlots) {
+      toast({
+        title: "Max files reached",
+        description: `Only ${remainingSlots} more images can be uploaded.`,
+        variant: "destructive",
+      });
+    }
+
+    let successCount = 0;
     for (const file of filesToUpload) {
       try {
         const url = await upload(file, { folder });
         if (url) {
           onChange([...value, url]);
+          successCount++;
         }
       } catch (error) {
+        // useCloudinaryUpload hook already shows a toast for the error
         console.error("Upload error:", error);
       }
     }
-  }, [value, onChange, maxFiles, upload, folder]);
+
+    if (successCount > 0) {
+      toast({
+        title: "Upload successful",
+        description: `Successfully uploaded ${successCount} image${successCount > 1 ? "s" : ""}.`,
+      });
+    }
+  }, [value, onChange, maxFiles, upload, folder, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
