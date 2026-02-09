@@ -11,7 +11,7 @@ export const mockProducts: Product[] = [
     price: 4300,
     originalPrice: 5500,
     images: ["/images/bluks-bx-301-power-bank-20000mah-pakistan-priceoye-va1cz-500x_1770554316337.webp", "/images/bluks-bx-301-power-bank-20000mah-pakistan-priceoye-h0xeo-500x_1770554316338.webp"],
-    category: "Power Banks",
+    categoryId: 1,
     inStock: true,
     rating: "4.8",
     reviewCount: 124,
