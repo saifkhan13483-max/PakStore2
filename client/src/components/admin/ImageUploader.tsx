@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X, Upload, Image as ImageIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 interface ImageUploaderProps {
   value: string[];
@@ -15,6 +16,7 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ value, onChange, maxFiles = 8, folder = "pakcart/products" }: ImageUploaderProps) {
   const { upload, isUploading, progress } = useCloudinaryUpload();
+  const { toast } = useToast();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const remainingSlots = maxFiles - value.length;
