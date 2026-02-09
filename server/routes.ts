@@ -80,5 +80,10 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/stats", async (_req, res) => {
+    const stats = await storage.getAdminStats();
+    res.json(stats);
+  });
+
   return httpServer;
 }

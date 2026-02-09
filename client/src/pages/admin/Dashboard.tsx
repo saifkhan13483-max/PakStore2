@@ -1,20 +1,61 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, ShoppingCart, BarChart, Tags } from "lucide-react";
+import { Package, Users, ShoppingCart, BarChart, Tags, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+
+interface AdminStats {
+  totalProducts: number;
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+}
 
 export default function AdminDashboard() {
-  const stats = [
-    { title: "Total Products", value: "124", icon: Package, color: "text-blue-500" },
-    { title: "Total Users", value: "1,240", icon: Users, color: "text-green-500" },
-    { title: "Total Orders", value: "456", icon: ShoppingCart, color: "text-purple-500" },
-    { title: "Revenue", value: "₨ 125,000", icon: BarChart, color: "text-yellow-500" },
+  const { data: stats, isLoading } = useQuery<AdminStats>({
+    queryKey: ["/api/admin/stats"],
+    refetchInterval: 5000, // Real-time updates every 5 seconds
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const statCards = [
+    { 
+      title: "Total Products", 
+      value: stats?.totalProducts ?? 0, 
+      icon: Package, 
+      color: "text-blue-500" 
+    },
+    { 
+      title: "Total Users", 
+      value: stats?.totalUsers?.toLocaleString() ?? "0", 
+      icon: Users, 
+      color: "text-green-500" 
+    },
+    { 
+      title: "Total Orders", 
+      value: stats?.totalOrders ?? 0, 
+      icon: ShoppingCart, 
+      color: "text-purple-500" 
+    },
+    { 
+      title: "Revenue", 
+      value: `₨ ${stats?.totalRevenue?.toLocaleString() ?? "0"}`, 
+      icon: BarChart, 
+      color: "text-yellow-500" 
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">

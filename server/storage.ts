@@ -2,6 +2,13 @@ import { db } from "./db";
 import { products, categories, parentCategories, type Product, type InsertProduct, type Category, type ParentCategory, type InsertCategory, type InsertParentCategory } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
+export interface AdminStats {
+  totalProducts: number;
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+}
+
 export interface IStorage {
   getProducts(): Promise<Product[]>;
   getProduct(slug: string): Promise<Product | undefined>;
@@ -13,9 +20,22 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   deleteProduct(id: number): Promise<void>;
   clearCategories(): Promise<void>;
+  getAdminStats(): Promise<AdminStats>;
 }
 
 export class DatabaseStorage implements IStorage {
+  async getAdminStats(): Promise<AdminStats> {
+    const productsCount = await db.select().from(products);
+    // Note: In a real app we would have users and orders tables.
+    // For now, we'll return some mock data for these since the schema doesn't have them yet.
+    return {
+      totalProducts: productsCount.length,
+      totalUsers: 1240,
+      totalOrders: 456,
+      totalRevenue: 125000,
+    };
+  }
+
   async getProducts(search?: string): Promise<Product[]> {
     if (search) {
       const lowerSearch = search.toLowerCase();
