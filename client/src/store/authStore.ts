@@ -26,7 +26,7 @@ interface AuthState {
   logout: () => Promise<void>;
 }
 
-const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'murtazaofficial720@gmail.com'];
+const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'saifkhan16382@gmail.com'];
 
 const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   uid: user.uid,
