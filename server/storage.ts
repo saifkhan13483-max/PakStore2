@@ -1,11 +1,16 @@
 import { db } from "./db";
-import { products, type Product, type InsertProduct } from "@shared/schema";
+import { products, categories, parentCategories, type Product, type InsertProduct, type Category, type ParentCategory, type InsertCategory, type InsertParentCategory } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
   getProduct(slug: string): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  getParentCategories(): Promise<ParentCategory[]>;
+  getCategories(): Promise<Category[]>;
+  createParentCategory(category: InsertParentCategory): Promise<ParentCategory>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  clearCategories(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -15,8 +20,7 @@ export class DatabaseStorage implements IStorage {
       const allProducts = await db.select().from(products);
       return allProducts.filter(p => 
         p.name.toLowerCase().includes(lowerSearch) || 
-        p.description.toLowerCase().includes(lowerSearch) ||
-        (p.category && p.category.toLowerCase().includes(lowerSearch))
+        p.description.toLowerCase().includes(lowerSearch)
       );
     }
     return await db.select().from(products);
@@ -30,6 +34,29 @@ export class DatabaseStorage implements IStorage {
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const [product] = await db.insert(products).values(insertProduct).returning();
     return product;
+  }
+
+  async getParentCategories(): Promise<ParentCategory[]> {
+    return await db.select().from(parentCategories);
+  }
+
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories);
+  }
+
+  async createParentCategory(category: InsertParentCategory): Promise<ParentCategory> {
+    const [result] = await db.insert(parentCategories).values(category).returning();
+    return result;
+  }
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const [result] = await db.insert(categories).values(category).returning();
+    return result;
+  }
+
+  async clearCategories(): Promise<void> {
+    await db.delete(categories);
+    await db.delete(parentCategories);
   }
 }
 

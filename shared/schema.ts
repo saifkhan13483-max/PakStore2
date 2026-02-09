@@ -2,6 +2,19 @@ import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-c
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const parentCategories = pgTable("parent_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+});
+
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  parentId: integer("parent_id").references(() => parentCategories.id),
+});
+
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -11,7 +24,7 @@ export const products = pgTable("products", {
   price: integer("price").notNull(),
   originalPrice: integer("original_price"),
   images: text("images").array(),
-  category: text("category").notNull(),
+  categoryId: integer("category_id").references(() => categories.id),
   inStock: boolean("in_stock").default(true),
   rating: text("rating").default("0"),
   reviewCount: integer("review_count").default(0),
@@ -19,10 +32,16 @@ export const products = pgTable("products", {
   specifications: jsonb("specifications"),
 });
 
+export const insertParentCategorySchema = createInsertSchema(parentCategories);
+export const insertCategorySchema = createInsertSchema(categories);
 export const insertProductSchema = createInsertSchema(products);
 
+export type ParentCategory = typeof parentCategories.$inferSelect;
+export type Category = typeof categories.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type InsertParentCategory = z.infer<typeof insertParentCategorySchema>;
 
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
