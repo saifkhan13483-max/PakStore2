@@ -174,7 +174,7 @@ export default function AdminCategories() {
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
                           {parentCategories?.map((pc) => (
-                            <SelectItem key={pc.id} value={pc.id}>{pc.name}</SelectItem>
+                            <SelectItem key={pc.id} value={String(pc.id)}>{pc.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -213,7 +213,7 @@ export default function AdminCategories() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => deleteParentMutation.mutate(parent.id)}
+                      onClick={() => deleteParentMutation.mutate(String(parent.id))}
                       disabled={deleteParentMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -246,13 +246,13 @@ export default function AdminCategories() {
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.slug}</TableCell>
                   <TableCell>
-                    {parentCategories?.find(pc => pc.id === category.parentId)?.name || "None"}
+                    {parentCategories?.find(pc => String(pc.id) === String(category.parentId))?.name || "None"}
                   </TableCell>
                   <TableCell>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => deleteCategoryMutation.mutate(category.id)}
+                      onClick={() => deleteCategoryMutation.mutate(String(category.id))}
                       disabled={deleteCategoryMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
