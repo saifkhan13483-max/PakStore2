@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
 import SEO from "@/components/SEO";
-import { useProducts } from "@/hooks/use-products";
 import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Filter, SlidersHorizontal } from "lucide-react";
 import { Filters, type FilterState } from "@/components/products/Filters";
+import { useQuery } from "@tanstack/react-query";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 type SortOption = "featured" | "price-low" | "price-high" | "newest";
 
@@ -43,9 +44,12 @@ export default function Products() {
     inStockOnly: false,
   });
 
-  const { data: productsData, isLoading } = useProducts();
+  const queryParam = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("search") || params.get("q") || "";
+  }, [search]);
 
-  // Handle URL parameters for initial filters (optional but recommended in Part 14)
+  // Handle URL parameters for initial filters
   useEffect(() => {
     const params = new URLSearchParams(search);
     const cat = params.get("category");
@@ -54,35 +58,24 @@ export default function Products() {
     }
   }, [search]);
 
-  const queryParam = useMemo(() => {
-    const params = new URLSearchParams(search);
-    return params.get("search") || params.get("q") || "";
-  }, [search]);
+  const { data: productsData, isLoading } = useQuery({
+    queryKey: ["/api/products", filterState, sortBy, queryParam],
+    queryFn: async () => {
+      const { products } = await productFirestoreService.getAllProducts({
+        category: filterState.categories.length > 0 ? Number(filterState.categories[0]) : undefined,
+        search: queryParam,
+        sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "id-desc" : undefined,
+        limit: 100 // Client-side filtering/pagination for now as per current UI
+      });
+      return products;
+    }
+  });
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!productsData) return [];
     let result = [...productsData];
 
-    // Filter by search query
-    if (queryParam) {
-      const q = queryParam.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          (p as any).category?.toLowerCase().includes(q)
-      );
-    }
-
-    // Filter by category
-    if (filterState.categories.length > 0) {
-      // Adjusted to handle categoryId or category name matching
-      result = result.filter((p) => 
-        filterState.categories.includes(String(p.categoryId)) || 
-        (p as any).category && filterState.categories.includes((p as any).category)
-      );
-    }
-
+    // Client-side additional filters if not handled by Firestore service
     // Filter by price range
     if (filterState.priceRange) {
       const ranges: Record<string, { min: number; max: number }> = {
@@ -103,24 +96,8 @@ export default function Products() {
       result = result.filter((p) => p.inStock);
     }
 
-    // Sort
-    switch (sortBy) {
-      case "price-low":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-high":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "newest":
-        result.sort((a, b) => b.id - a.id);
-        break;
-      default:
-        // Featured - no sorting
-        break;
-    }
-
     return result;
-  }, [productsData, filterState, sortBy, queryParam]);
+  }, [productsData, filterState]);
 
   const displayedProducts = useMemo(() => {
     return filteredAndSortedProducts.slice(0, visibleCount);

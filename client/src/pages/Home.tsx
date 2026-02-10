@@ -6,17 +6,21 @@ import SEO from "@/components/SEO";
 import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
-import { useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-image.jpg";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { useQuery } from "@tanstack/react-query";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function Home() {
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["/api/products", { limit: 4 }],
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 4 }).then(res => res.products),
+  });
 
-  // Featured products (take first 4)
-  const featuredProducts = products?.slice(0, 4) || [];
+  // Featured products
+  const featuredProducts = products || [];
 
   return (
     <div className="min-h-screen flex flex-col font-body">

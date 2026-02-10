@@ -1,5 +1,4 @@
 import { useRoute, Link } from "wouter";
-import { useProduct, useProducts } from "@/hooks/use-products";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +10,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { useQuery } from "@tanstack/react-query";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
-  const { data: product, isLoading, error } = useProduct(params?.slug || "");
+  const productId = params?.slug || ""; // In this migration, we are often using slug as id or mapping it
+  
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ["/api/products", productId],
+    queryFn: () => productFirestoreService.getProductById(productId),
+  });
+
+  const { data: relatedProductsData } = useQuery({
+    queryKey: ["/api/products", "related", product?.categoryId],
+    enabled: !!product?.categoryId,
+    queryFn: () => productFirestoreService.getProductsByCategory(product!.categoryId!),
+  });
+
   const addToCart = useCartStore(state => state.addToCart);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -38,9 +51,8 @@ export default function ProductDetail() {
     }).format(price);
   };
 
-  const { data: products } = useProducts();
-  const relatedProducts = (products || [])
-    .filter((p: any) => p.categoryId === product?.categoryId && p.id !== product?.id)
+  const relatedProducts = (relatedProductsData || [])
+    .filter((p: any) => p.id !== product?.id)
     .slice(0, 4);
 
   if (isLoading) {
