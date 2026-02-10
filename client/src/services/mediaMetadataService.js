@@ -25,13 +25,13 @@ export const saveMediaMetadata = async (userId, cloudinaryData, customMetadata =
       cloudinaryPublicId: cloudinaryData.public_id,
       cloudinaryUrl: cloudinaryData.secure_url,
       uploadedAt: serverTimestamp(),
-      fileType: cloudinaryData.resource_type,
-      fileSize: cloudinaryData.bytes,
+      fileType: cloudinaryData.resource_type || (cloudinaryData.format ? 'image' : 'unknown'),
+      fileSize: cloudinaryData.bytes || 0,
       dimensions: {
-        width: cloudinaryData.width,
-        height: cloudinaryData.height
+        width: cloudinaryData.width || 0,
+        height: cloudinaryData.height || 0
       },
-      format: cloudinaryData.format,
+      format: cloudinaryData.format || 'unknown',
       ...customMetadata
     };
     
