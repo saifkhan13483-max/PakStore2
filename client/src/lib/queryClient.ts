@@ -12,6 +12,7 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  console.warn("apiRequest is deprecated. Use Firestore services.");
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -39,24 +40,18 @@ export const getQueryFn: <T>(options: QueryOptions) => QueryFunction<T> =
 
     const path = queryKey.join("/");
 
-    // When query key starts with "/api/", use apiRequest style fetch
+    // Disable legacy API patterns
     if (path.startsWith("api/")) {
-      const res = await fetch(`/${path}`, {
-        credentials: "include",
-      });
-
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        return null as T;
-      }
-
-      await throwIfResNotOk(res);
-      return await res.json();
+      throw new Error(
+        `Legacy API pattern detected: [${queryKey.join(", ")}]. ` +
+        `apiRequest and /api/ keys are deprecated. Use Firestore services instead.`
+      );
     }
 
     // Default error for unhandled query keys during migration
     throw new Error(
       `No queryFn provided for key: [${queryKey.join(", ")}]. ` +
-      `During migration, ensure Firestore services are passed as queryFn or keys start with /api/`
+      `During migration, ensure Firestore services are passed as queryFn.`
     );
   };
 
