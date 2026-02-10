@@ -16,7 +16,7 @@ import { productFirestoreService } from "@/services/productFirestoreService";
 export default function Home() {
   const { data: products, isLoading } = useQuery({
     queryKey: ["featured-products"],
-    queryFn: () => productFirestoreService.getAllProducts({ limit: 4 }).then(res => res.products),
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 4 }),
   });
 
   // Featured products

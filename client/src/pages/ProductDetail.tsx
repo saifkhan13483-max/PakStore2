@@ -25,7 +25,7 @@ export default function ProductDetail() {
   const { data: relatedProductsData } = useQuery({
     queryKey: ["products", "related", product?.categoryId],
     enabled: !!product?.categoryId,
-    queryFn: () => productFirestoreService.getProductsByCategory(product!.categoryId!),
+    queryFn: () => productFirestoreService.getProductsByCategory(String(product!.categoryId!)),
   });
 
   const addToCart = useCartStore(state => state.addToCart);
