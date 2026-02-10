@@ -18,12 +18,12 @@ export default function ProductDetail() {
   const productId = params?.slug || ""; // In this migration, we are often using slug as id or mapping it
   
   const { data: product, isLoading, error } = useQuery({
-    queryKey: ["/api/products", productId],
+    queryKey: ["product", productId],
     queryFn: () => productFirestoreService.getProductById(productId),
   });
 
   const { data: relatedProductsData } = useQuery({
-    queryKey: ["/api/products", "related", product?.categoryId],
+    queryKey: ["products", "related", product?.categoryId],
     enabled: !!product?.categoryId,
     queryFn: () => productFirestoreService.getProductsByCategory(product!.categoryId!),
   });

@@ -59,10 +59,10 @@ export default function Products() {
   }, [search]);
 
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["/api/products", filterState, sortBy, queryParam],
+    queryKey: ["products", filterState, sortBy, queryParam],
     queryFn: async () => {
       const { products } = await productFirestoreService.getAllProducts({
-        category: filterState.categories.length > 0 ? Number(filterState.categories[0]) : undefined,
+        category: filterState.categories.length > 0 ? filterState.categories[0] : undefined,
         search: queryParam,
         sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "id-desc" : undefined,
         limit: 100 // Client-side filtering/pagination for now as per current UI
