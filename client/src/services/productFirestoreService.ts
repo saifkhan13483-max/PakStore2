@@ -64,7 +64,7 @@ export const productFirestoreService = {
         const searchLower = filters.search.toLowerCase();
         results = results.filter(p => 
           p.name.toLowerCase().includes(searchLower) || 
-          p.description.toLowerCase().includes(searchLower)
+          (p.description && p.description.toLowerCase().includes(searchLower))
         );
       }
 
@@ -111,7 +111,7 @@ export const productFirestoreService = {
         reviewCount: 0
       });
 
-      return { ...productData, id: docRef.id };
+      return { ...productData, id: docRef.id } as Product;
     } catch (error: any) {
       console.error("Error creating product:", error);
       throw new Error(`Failed to create product: ${error.message}`);
