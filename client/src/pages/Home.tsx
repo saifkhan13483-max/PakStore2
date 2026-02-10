@@ -17,13 +17,15 @@ import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function Home() {
-  const { data: products, isLoading } = useQuery({
+  const { data: featuredProducts, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ["featured-products"],
     queryFn: () => productFirestoreService.getAllProducts({ limit: 4 }),
   });
 
-  // Featured products
-  const featuredProducts = products || [];
+  const { data: newArrivals, isLoading: isNewArrivalsLoading } = useQuery({
+    queryKey: ["new-arrivals"],
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 4, sortBy: "newest" }),
+  });
 
   return (
     <div className="min-h-screen flex flex-col font-body">
@@ -191,6 +193,52 @@ export default function Home() {
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
         </section>
 
+        {/* New Arrivals */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h2 className="font-display text-4xl font-bold text-foreground mb-2">New Arrivals</h2>
+                <div className="h-1.5 w-16 bg-secondary rounded-full" />
+              </motion.div>
+              <Link href="/products?sort=newest">
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-full transition-all duration-300">
+                  Shop New Collection
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {isNewArrivalsLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-4">
+                    <Skeleton className="h-[300px] w-full rounded-2xl" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-1/3" />
+                  </div>
+                ))
+              ) : (
+                newArrivals?.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Featured Products */}
         <section className="py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -209,7 +257,7 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {isLoading ? (
+              {isFeaturedLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="h-[300px] w-full rounded-2xl" />
@@ -218,7 +266,7 @@ export default function Home() {
                   </div>
                 ))
               ) : (
-                featuredProducts.map((product) => (
+                featuredProducts?.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))
               )}
