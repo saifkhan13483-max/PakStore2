@@ -84,7 +84,7 @@ export const productFirestoreService = {
         throw new Error("Product not found");
       }
 
-      return { ...docSnap.data(), id: docSnap.id } as Product;
+      return { ...docSnap.data(), id: docSnap.id } as unknown as Product;
     } catch (error: any) {
       console.error("Error getting product:", error);
       throw new Error(`Failed to fetch product: ${error.message}`);

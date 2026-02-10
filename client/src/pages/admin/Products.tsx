@@ -68,7 +68,7 @@ export default function AdminProducts() {
     }),
   });
 
-  const products = productsData?.products || [];
+  const products = Array.isArray(productsData) ? productsData : [];
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
