@@ -25,18 +25,13 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
               alt={name} 
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:via-black/50 transition-colors duration-500" />
-            <div className="relative z-10 p-6 text-white">
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-500" />
+            <div className="relative z-10 p-6 text-white text-center sm:text-left">
               <div className="overflow-hidden">
-                <h3 className="font-display text-2xl sm:text-3xl font-bold mb-3 transform transition-transform duration-500 group-hover:translate-y-[-2px]">
+                <h3 className="font-display text-3xl sm:text-4xl font-bold mb-3 drop-shadow-lg transform transition-transform duration-500 group-hover:translate-y-[-2px]">
                   {name}
                 </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-[2px] w-6 bg-secondary rounded-full" />
-                <p className="text-sm sm:text-base font-bold tracking-wider uppercase text-secondary">
-                  {count} PRODUCTS
-                </p>
               </div>
             </div>
             
