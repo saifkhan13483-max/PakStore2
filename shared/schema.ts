@@ -70,5 +70,25 @@ export const checkoutInfoSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const orderSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  address: z.string(),
+  city: z.string(),
+  area: z.string(),
+  notes: z.string().optional(),
+  items: z.array(z.any()),
+  total: z.number(),
+  status: z.string(),
+  createdAt: z.string(),
+  orderId: z.string(),
+});
+
+export const insertOrderSchema = orderSchema.omit({ id: true });
+
+export type Order = z.infer<typeof orderSchema>;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
 export type CartItem = z.infer<typeof cartItemsSchema>;

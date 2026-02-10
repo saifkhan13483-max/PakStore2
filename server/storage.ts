@@ -5,10 +5,13 @@ import {
   Product, 
   InsertProduct, 
   User,
+  Order,
+  InsertOrder,
   parentCategorySchema,
   categorySchema,
   productSchema,
-  userSchema
+  userSchema,
+  insertOrderSchema
 } from "@shared/schema";
 
 export interface IStorage {
@@ -29,9 +32,13 @@ export interface IStorage {
   // Users
   getUser(uid: string): Promise<User | null>;
   createUser(user: User): Promise<User>;
+
+  // Orders
+  createOrder(order: InsertOrder): Promise<Order>;
 }
 
 export class FirestoreStorage implements IStorage {
+  // ... existing methods ...
   async getParentCategories(): Promise<ParentCategory[]> {
     const snapshot = await db.collection("parent_categories").get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ParentCategory));
@@ -92,6 +99,11 @@ export class FirestoreStorage implements IStorage {
   async createUser(user: User): Promise<User> {
     await db.collection("users").doc(user.uid).set(user);
     return user;
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const docRef = await db.collection("orders").add(order);
+    return { id: docRef.id, ...order } as Order;
   }
 }
 

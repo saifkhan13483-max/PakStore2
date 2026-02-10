@@ -52,7 +52,7 @@ export default function Checkout() {
 
     setIsSubmitting(true);
     try {
-      // 1. Save order to Firestore
+      // 1. Prepare order data
       const orderData = {
         ...data,
         items,
@@ -62,9 +62,18 @@ export default function Checkout() {
         orderId: "PC" + Math.floor(Math.random() * 100000)
       };
       
-      const { db } = await import("@/lib/firebase");
-      const { collection, addDoc } = await import("firebase/firestore");
-      await addDoc(collection(db, "orders"), orderData);
+      // 2. Send order to backend API instead of direct Firestore call
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to place order");
+      }
 
       console.log("Order placed:", orderData);
       
@@ -76,6 +85,7 @@ export default function Checkout() {
       clearCart();
       setLocation("/thank-you");
     } catch (error) {
+      console.error("Order error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -381,4 +391,3 @@ export default function Checkout() {
     </div>
   );
 }
-
