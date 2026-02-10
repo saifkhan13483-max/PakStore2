@@ -1,9 +1,10 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Category, ParentCategory, insertCategorySchema, insertParentCategorySchema } from "@shared/schema";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import {
   Form,
   FormControl,
@@ -27,8 +28,14 @@ import { Trash2, Plus } from "lucide-react";
 
 export default function AdminCategories() {
   const { toast } = useToast();
-  const { data: categories } = useQuery<Category[]>({ queryKey: ["/api/categories"] });
-  const { data: parentCategories } = useQuery<ParentCategory[]>({ queryKey: ["/api/parent-categories"] });
+  const { data: categories } = useQuery<Category[]>({ 
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories()
+  });
+  const { data: parentCategories } = useQuery<ParentCategory[]>({ 
+    queryKey: ["parent-categories"],
+    queryFn: () => categoryFirestoreService.getAllParentCategories()
+  });
 
   const parentForm = useForm({
     resolver: zodResolver(insertParentCategorySchema),
@@ -37,29 +44,47 @@ export default function AdminCategories() {
 
   const categoryForm = useForm({
     resolver: zodResolver(insertCategorySchema),
-    defaultValues: { name: "", slug: "", parentId: undefined },
+    defaultValues: { name: "", slug: "", parentId: "" },
   });
 
   const createParentMutation = useMutation({
-    mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/parent-categories", data);
-    },
+    mutationFn: (data: any) => categoryFirestoreService.createParentCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       parentForm.reset();
       toast({ title: "Success", description: "Parent category created" });
     },
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/categories", data);
-    },
+    mutationFn: (data: any) => categoryFirestoreService.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       categoryForm.reset();
       toast({ title: "Success", description: "Category created" });
     },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: string) => categoryFirestoreService.deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast({ title: "Success", description: "Category deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const deleteParentMutation = useMutation({
+    mutationFn: (id: string) => categoryFirestoreService.deleteParentCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
+      toast({ title: "Success", description: "Parent category deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   });
 
   return (
@@ -138,8 +163,8 @@ export default function AdminCategories() {
                     <FormItem>
                       <FormLabel>Parent Category</FormLabel>
                       <Select 
-                        onValueChange={(val) => field.onChange(val === "none" ? null : parseInt(val))} 
-                        value={field.value !== undefined && field.value !== null ? field.value.toString() : "none"}
+                        onValueChange={field.onChange} 
+                        value={field.value || "none"}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -149,7 +174,7 @@ export default function AdminCategories() {
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
                           {parentCategories?.map((pc) => (
-                            <SelectItem key={pc.id} value={pc.id.toString()}>{pc.name}</SelectItem>
+                            <SelectItem key={pc.id} value={pc.id}>{pc.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -167,6 +192,41 @@ export default function AdminCategories() {
       </div>
 
       <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Existing Parent Categories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Slug</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {parentCategories?.map((parent) => (
+                <TableRow key={parent.id}>
+                  <TableCell className="font-medium">{parent.name}</TableCell>
+                  <TableCell>{parent.slug}</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => deleteParentMutation.mutate(parent.id)}
+                      disabled={deleteParentMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader>
           <CardTitle>Existing Categories</CardTitle>
         </CardHeader>
@@ -177,6 +237,7 @@ export default function AdminCategories() {
                 <TableHead>Name</TableHead>
                 <TableHead>Slug</TableHead>
                 <TableHead>Parent</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -186,6 +247,16 @@ export default function AdminCategories() {
                   <TableCell>{category.slug}</TableCell>
                   <TableCell>
                     {parentCategories?.find(pc => pc.id === category.parentId)?.name || "None"}
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => deleteCategoryMutation.mutate(category.id)}
+                      disabled={deleteCategoryMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
