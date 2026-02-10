@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { SearchOverlay } from "./SearchOverlay";
 import { useQuery } from "@tanstack/react-query";
 import { Category, ParentCategory } from "@shared/schema";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,10 +41,12 @@ export function Navbar() {
   }, []);
 
   const { data: parentCategories } = useQuery<ParentCategory[]>({ 
-    queryKey: ["/api/parent-categories"] 
+    queryKey: ["parent-categories"],
+    queryFn: () => categoryFirestoreService.getAllParentCategories()
   });
   const { data: categoriesData } = useQuery<Category[]>({ 
-    queryKey: ["/api/categories"] 
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories()
   });
 
   const navLinks = [

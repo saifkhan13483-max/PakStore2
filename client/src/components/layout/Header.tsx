@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { SearchOverlay } from "./SearchOverlay";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -38,10 +39,12 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   
   const { data: parentCategories } = useQuery<ParentCategory[]>({ 
-    queryKey: ["/api/parent-categories"] 
+    queryKey: ["parent-categories"],
+    queryFn: () => categoryFirestoreService.getAllParentCategories()
   });
   const { data: categoriesData } = useQuery<Category[]>({ 
-    queryKey: ["/api/categories"] 
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories()
   });
 
   useEffect(() => {
