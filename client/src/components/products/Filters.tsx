@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { productFirestoreService } from "@/services/productFirestoreService";
 
 const PRICE_RANGES = [
@@ -36,17 +37,21 @@ export function Filters({ onFilterChange }: FiltersProps) {
   const [inStockOnly, setInStockOnly] = useState(false);
 
   // Fetch actual categories from database
+  const { data: allCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories()
+  });
+
   const { data: allProducts } = useQuery({
     queryKey: ["products-for-filters"],
     queryFn: () => productFirestoreService.getAllProducts({ limit: 1000 })
   });
 
-  const categories = Array.from(new Set(allProducts?.map((p) => p.categoryId) || [])).map(
-    (categoryId) => ({
-      name: categoryId,
-      count: allProducts?.filter((p) => p.categoryId === categoryId).length || 0,
-    })
-  );
+  const categories = allCategories?.map((category) => ({
+    id: category.id,
+    name: category.name,
+    count: allProducts?.filter((p) => p.categoryId === category.id).length || 0,
+  })) || [];
 
   useEffect(() => {
     onFilterChange({
@@ -90,14 +95,14 @@ export function Filters({ onFilterChange }: FiltersProps) {
           <AccordionContent>
             <div className="space-y-2 pt-2">
               {categories.map((category) => (
-                <div key={category.name} className="flex items-center space-x-2">
+                <div key={category.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`cat-${category.name}`}
-                    checked={selectedCategories.includes(category.name)}
-                    onCheckedChange={() => handleCategoryChange(category.name)}
+                    id={`cat-${category.id}`}
+                    checked={selectedCategories.includes(category.id)}
+                    onCheckedChange={() => handleCategoryChange(category.id)}
                   />
                   <Label
-                    htmlFor={`cat-${category.name}`}
+                    htmlFor={`cat-${category.id}`}
                     className="text-sm font-normal flex-1 cursor-pointer"
                   >
                     {category.name}
