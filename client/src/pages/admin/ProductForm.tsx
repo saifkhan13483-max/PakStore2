@@ -66,7 +66,7 @@ export default function AdminProductForm() {
       stock: 0,
       active: true,
       inStock: true,
-      rating: "0",
+      rating: 0,
       reviewCount: 0,
       features: [],
       specifications: {},
@@ -85,7 +85,7 @@ export default function AdminProductForm() {
         ...product,
         images: product.images || [],
         categoryId: product.categoryId ? String(product.categoryId) : undefined,
-        rating: product.rating || "0",
+        rating: typeof product.rating === 'string' ? parseFloat(product.rating) : (product.rating || 0),
         reviewCount: product.reviewCount || 0,
         features: product.features || [],
         specifications: product.specifications || {},
@@ -398,6 +398,26 @@ export default function AdminProductForm() {
                   <CardTitle>Organization</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="rating"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Rating (0-5)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            {...field} 
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="categoryId"

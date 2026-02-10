@@ -31,7 +31,7 @@ export const productSchema = z.object({
   stock: z.number().default(0),
   active: z.boolean().default(true),
   inStock: z.boolean().default(true),
-  rating: z.string().default("0"),
+  rating: z.number().default(0),
   reviewCount: z.number().default(0),
   features: z.array(z.string()).default([]),
   specifications: z.record(z.string()).default({}),

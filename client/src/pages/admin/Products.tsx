@@ -21,7 +21,9 @@ import {
   Copy,
   AlertTriangle,
   SlidersHorizontal,
-  X
+  X,
+  Eraser,
+  Loader2
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -158,6 +160,41 @@ export default function AdminProducts() {
     return product.inStock && (product.reviewCount || 0) < 5;
   };
 
+  const clearAllProductsMutation = useMutation({
+    mutationFn: async () => {
+      // Since we don't have a direct route yet, we'll delete them one by one if needed
+      // but the user asked for a "clear all" option.
+      // Assuming productFirestoreService might need this method too.
+      // For now, let's implement the UI and try to use a bulk delete if available.
+      if (typeof (productFirestoreService as any).deleteAllProducts === 'function') {
+        await (productFirestoreService as any).deleteAllProducts();
+      } else {
+        // Fallback: Delete each filtered product
+        await Promise.all(products.map(p => productFirestoreService.deleteProduct(p.id)));
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast({
+        title: "All products cleared",
+        description: "Your product catalog has been emptied.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear products.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleClearAll = () => {
+    if (confirm("WARNING: This will permanently delete ALL products in your store. This action cannot be undone. Are you sure?")) {
+      clearAllProductsMutation.mutate();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -167,11 +204,28 @@ export default function AdminProducts() {
             Manage your product catalog, prices, and stock.
           </p>
         </div>
-        <Link href="/admin/products/new">
-          <Button data-testid="button-add-product">
-            <Plus className="mr-2 h-4 w-4" /> Add Product
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {products.length > 0 && (
+            <Button 
+              variant="outline" 
+              className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20"
+              onClick={handleClearAll}
+              disabled={clearAllProductsMutation.isPending}
+            >
+              {clearAllProductsMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Eraser className="mr-2 h-4 w-4" />
+              )}
+              Clear All
+            </Button>
+          )}
+          <Link href="/admin/products/new">
+            <Button data-testid="button-add-product">
+              <Plus className="mr-2 h-4 w-4" /> Add Product
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">

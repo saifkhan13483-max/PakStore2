@@ -24,6 +24,7 @@ export interface IStorage {
   getProducts(categoryId?: string): Promise<Product[]>;
   getProduct(id: string): Promise<Product | null>;
   createProduct(product: InsertProduct): Promise<Product>;
+  deleteAllProducts(): Promise<void>;
   
   // Users
   getUser(uid: string): Promise<User | null>;
@@ -72,6 +73,15 @@ export class FirestoreStorage implements IStorage {
   async createProduct(product: InsertProduct): Promise<Product> {
     const docRef = await db.collection("products").add(product);
     return { id: docRef.id, ...product } as Product;
+  }
+
+  async deleteAllProducts(): Promise<void> {
+    const snapshot = await db.collection("products").get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
   }
 
   async getUser(uid: string): Promise<User | null> {
