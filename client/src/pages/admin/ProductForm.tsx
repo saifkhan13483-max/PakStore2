@@ -81,7 +81,7 @@ export default function AdminProductForm() {
       form.reset({
         ...product,
         images: product.images || [],
-        categoryId: product.categoryId ?? undefined,
+        categoryId: product.categoryId ? String(product.categoryId) : undefined,
         rating: product.rating || "0",
         reviewCount: product.reviewCount || 0,
         features: product.features || [],
@@ -412,7 +412,7 @@ export default function AdminProductForm() {
                           </FormControl>
                           <SelectContent>
                             {categories?.map((category) => (
-                              <SelectItem key={category.id} value={category.id.toString()}>
+                              <SelectItem key={category.id} value={String(category.id)}>
                                 {category.name}
                               </SelectItem>
                             ))}
