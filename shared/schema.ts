@@ -20,8 +20,11 @@ export const categorySchema = z.object({
 export const productSchema = z.object({
   id: z.string(),
   name: z.string(),
+  slug: z.string(),
   description: z.string().optional(),
+  longDescription: z.string().optional(),
   price: z.number(),
+  originalPrice: z.number().optional().nullable(),
   categoryId: z.string(),
   image: z.string().optional(),
   images: z.array(z.string()).default([]),
@@ -30,6 +33,8 @@ export const productSchema = z.object({
   inStock: z.boolean().default(true),
   rating: z.string().default("0"),
   reviewCount: z.number().default(0),
+  features: z.array(z.string()).default([]),
+  specifications: z.record(z.string()).default({}),
 });
 
 export const userSchema = z.object({
