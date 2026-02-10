@@ -26,7 +26,7 @@ export const uploadFile = async (file, folder = "uploads", onProgress) => {
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", cloudinaryConfig.uploadUrl);
+    xhr.open("POST", cloudinaryConfig.uploadEndpoint);
 
     if (onProgress) {
       xhr.upload.onprogress = (event) => {
