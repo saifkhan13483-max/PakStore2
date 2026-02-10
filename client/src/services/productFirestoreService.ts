@@ -35,16 +35,14 @@ export class ProductFirestoreService {
     try {
       const constraints: QueryConstraint[] = [];
 
-      if (filters.category) {
+      // Only add constraints if values are truthy to avoid empty filters causing issues
+      if (filters.category && filters.category !== 'all' as any) {
         constraints.push(where("categoryId", "==", filters.category));
       }
 
       if (filters.sortBy) {
-        // Example: "price-asc", "price-desc", "name-asc"
         const [field, direction] = filters.sortBy.split("-");
         constraints.push(orderBy(field, direction as "asc" | "desc"));
-      } else {
-        constraints.push(orderBy("name", "asc"));
       }
 
       if (filters.startAfter) {
@@ -53,8 +51,6 @@ export class ProductFirestoreService {
 
       if (filters.limit) {
         constraints.push(limit(filters.limit));
-      } else {
-        constraints.push(limit(20));
       }
 
       const q = query(collection(db, PRODUCTS_COLLECTION), ...constraints);
@@ -62,18 +58,19 @@ export class ProductFirestoreService {
       
       const products: Product[] = [];
       querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() } as unknown as Product);
+        products.push({ ...doc.data(), id: doc.id } as unknown as Product);
       });
 
       const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
-      // Client-side search fallback since Firestore doesn't support full-text search directly without 3rd party
+      // Client-side search fallback
       let filteredProducts = products;
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
         filteredProducts = products.filter(p => 
-          p.name.toLowerCase().includes(searchLower) || 
-          p.description.toLowerCase().includes(searchLower)
+          (p.name?.toLowerCase().includes(searchLower)) || 
+          (p.description?.toLowerCase().includes(searchLower)) ||
+          (p.slug?.toLowerCase().includes(searchLower))
         );
       }
 

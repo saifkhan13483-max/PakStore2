@@ -49,9 +49,10 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useState, useMemo } from "react";
 import { Product, Category } from "@shared/schema";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,20 +61,25 @@ export default function AdminProducts() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const { toast } = useToast();
 
-  const { data: products, isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+  const { data: productsData, isLoading } = useQuery({
+    queryKey: ["products", categoryFilter],
+    queryFn: () => productFirestoreService.getAllProducts({
+      category: categoryFilter === "all" ? undefined : categoryFilter as any,
+    }),
   });
+
+  const products = productsData?.products || [];
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/products/${id}`);
+    mutationFn: async (id: string | number) => {
+      await productFirestoreService.deleteProduct(id.toString());
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Product deleted",
         description: "The product has been successfully removed.",
@@ -96,11 +102,10 @@ export default function AdminProducts() {
         name: `${rest.name} (Copy)`,
         slug: `${rest.slug}-copy-${Date.now()}`,
       };
-      const res = await apiRequest("POST", "/api/products", duplicatedProduct);
-      return res.json();
+      return await productFirestoreService.createProduct(duplicatedProduct);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: "Product duplicated",
         description: "A copy of the product has been created.",
@@ -116,28 +121,24 @@ export default function AdminProducts() {
   });
 
   const filteredProducts = useMemo(() => {
-    if (!products) return [];
-    
     return products.filter((product) => {
       const matchesSearch = 
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.description?.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      const matchesCategory = categoryFilter === "all" || product.categoryId?.toString() === categoryFilter;
-      
       const matchesStock = stockFilter === "all" || 
         (stockFilter === "in_stock" && product.inStock) || 
-        (stockFilter === "low_stock" && product.inStock && (product.reviewCount || 0) < 5) || // Using reviewCount as mock stock for logic
+        (stockFilter === "low_stock" && product.inStock && (product.reviewCount || 0) < 5) ||
         (stockFilter === "out_of_stock" && !product.inStock);
 
       const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
 
-      return matchesSearch && matchesCategory && matchesStock && matchesPrice;
+      return matchesSearch && matchesStock && matchesPrice;
     });
-  }, [products, searchTerm, categoryFilter, stockFilter, priceRange]);
+  }, [products, searchTerm, stockFilter, priceRange]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     if (confirm("Are you sure you want to delete this product?")) {
       deleteMutation.mutate(id);
     }
