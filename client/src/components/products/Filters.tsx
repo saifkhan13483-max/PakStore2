@@ -9,7 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { products } from "@/data/products";
+import { useQuery } from "@tanstack/react-query";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 const PRICE_RANGES = [
   { label: "Under Rs. 1,000", min: 0, max: 1000 },
@@ -34,11 +35,16 @@ export function Filters({ onFilterChange }: FiltersProps) {
   const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  // Get unique categories with counts
-  const categories = Array.from(new Set(products.map((p) => p.category))).map(
-    (category) => ({
-      name: category,
-      count: products.filter((p) => p.category === category).length,
+  // Fetch actual categories from database
+  const { data: allProducts } = useQuery({
+    queryKey: ["products-for-filters"],
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 1000 })
+  });
+
+  const categories = Array.from(new Set(allProducts?.map((p) => p.categoryId) || [])).map(
+    (categoryId) => ({
+      name: categoryId,
+      count: allProducts?.filter((p) => p.categoryId === categoryId).length || 0,
     })
   );
 

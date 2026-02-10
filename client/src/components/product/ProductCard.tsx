@@ -36,7 +36,8 @@ export function ProductCard({ product }: ProductCardProps) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="group relative bg-white dark:bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-transparent hover:border-primary/10"
+      whileHover={{ y: -8 }}
+      className="group relative bg-white dark:bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-primary/20"
     >
       {/* Image Container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
@@ -44,26 +45,28 @@ export function ProductCard({ product }: ProductCardProps) {
           <img
             src={getOptimizedImageUrl(product.images[0], { width: 400, height: 500 })}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             loading="lazy"
           />
         )}
         
-        {/* Overlay Actions */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-          <Link href={`/products/${product.slug}`}>
-            <Button variant="secondary" size="icon" className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:scale-110 transition-transform">
-              <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+        {/* Modern Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-6">
+          <div className="flex items-center justify-center gap-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+            <Link href={`/products/${product.slug}`}>
+              <Button variant="secondary" size="icon" className="rounded-full h-12 w-12 hover:bg-white hover:text-black transition-colors shadow-lg">
+                <Eye className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Button 
+              onClick={handleAddToCart}
+              variant="default" 
+              size="icon" 
+              className="rounded-full h-12 w-12 bg-primary text-primary-foreground hover:scale-110 transition-all shadow-lg"
+            >
+              <ShoppingCart className="h-5 w-5" />
             </Button>
-          </Link>
-          <Button 
-            onClick={handleAddToCart}
-            variant="default" 
-            size="icon" 
-            className="rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:scale-110 transition-transform bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
+          </div>
         </div>
 
         {/* Badges */}
