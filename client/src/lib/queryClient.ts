@@ -34,7 +34,7 @@ export const getQueryFn: <T>(options: QueryOptions) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior = "throw" }) =>
   async ({ queryKey, queryFn }) => {
     // If an explicit queryFn is provided (e.g. for Firestore), use it
-    if (queryFn && queryFn !== getQueryFn({ on401: unauthorizedBehavior })) {
+    if (queryFn) {
       return await queryFn({ queryKey, meta: {} } as any);
     }
 
