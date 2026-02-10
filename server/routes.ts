@@ -9,10 +9,14 @@ export function registerRoutes(app: Express): Server {
       console.log("Received order request:", JSON.stringify(req.body, null, 2));
       const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
+      console.log("Order created successfully:", order.id);
       res.json(order);
     } catch (error: any) {
       console.error("Order creation error details:", error);
-      res.status(400).json({ message: error.message });
+      res.status(400).json({ 
+        message: error.message || "Failed to create order",
+        details: error.toString()
+      });
     }
   });
 
