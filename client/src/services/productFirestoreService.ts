@@ -89,13 +89,25 @@ export const productFirestoreService = {
         ...productData,
         createdAt: new Date(),
         inStock: (productData.stock ?? 0) > 0,
-        rating: "0",
-        reviewCount: 0
+        rating: productData.rating ?? 0,
+        reviewCount: productData.reviewCount ?? 0
       });
       return { id: docRef.id, ...productData } as Product;
     } catch (error: any) {
       console.error("Error creating product:", error);
       throw new Error(`Failed to create product: ${error.message}`);
+    }
+  },
+
+  async deleteAllProducts() {
+    try {
+      const querySnapshot = await getDocs(productsRef);
+      const deletePromises = querySnapshot.docs.map(document => deleteDoc(doc(db, COLLECTION_NAME, document.id)));
+      await Promise.all(deletePromises);
+      return true;
+    } catch (error: any) {
+      console.error("Error deleting all products:", error);
+      throw new Error(`Failed to clear products: ${error.message}`);
     }
   },
 
