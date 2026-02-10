@@ -72,6 +72,10 @@ export default function AdminProducts() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const { categoryFirestoreService } = await import("@/services/categoryFirestoreService");
+      return categoryFirestoreService.getAllCategories();
+    }
   });
 
   const deleteMutation = useMutation({

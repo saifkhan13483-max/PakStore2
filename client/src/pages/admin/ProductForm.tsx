@@ -47,6 +47,10 @@ export default function AdminProductForm() {
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const { categoryFirestoreService } = await import("@/services/categoryFirestoreService");
+      return categoryFirestoreService.getAllCategories();
+    }
   });
 
   const form = useForm<InsertProduct>({
