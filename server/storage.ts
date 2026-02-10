@@ -1,4 +1,4 @@
-import { db, auth } from "./config/firebase";
+import { db, auth } from "./config/firebase.js";
 import { 
   ParentCategory, 
   Category, 
@@ -7,11 +7,6 @@ import {
   User,
   Order,
   InsertOrder,
-  parentCategorySchema,
-  categorySchema,
-  productSchema,
-  userSchema,
-  insertOrderSchema
 } from "@shared/schema";
 
 export interface IStorage {
@@ -38,10 +33,9 @@ export interface IStorage {
 }
 
 export class FirestoreStorage implements IStorage {
-  // ... existing methods ...
   async getParentCategories(): Promise<ParentCategory[]> {
     const snapshot = await db.collection("parent_categories").get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ParentCategory));
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as ParentCategory));
   }
 
   async getParentCategory(id: string): Promise<ParentCategory | null> {
@@ -55,7 +49,7 @@ export class FirestoreStorage implements IStorage {
       query = query.where("parentId", "==", parentId);
     }
     const snapshot = await query.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Category));
   }
 
   async getCategory(id: string): Promise<Category | null> {
@@ -69,7 +63,7 @@ export class FirestoreStorage implements IStorage {
       query = query.where("categoryId", "==", categoryId);
     }
     const snapshot = await query.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Product));
   }
 
   async getProduct(id: string): Promise<Product | null> {
@@ -85,7 +79,7 @@ export class FirestoreStorage implements IStorage {
   async deleteAllProducts(): Promise<void> {
     const snapshot = await db.collection("products").get();
     const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
+    snapshot.docs.forEach((doc: any) => {
       batch.delete(doc.ref);
     });
     await batch.commit();

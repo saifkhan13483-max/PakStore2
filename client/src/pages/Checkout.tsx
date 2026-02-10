@@ -55,8 +55,13 @@ export default function Checkout() {
       // 1. Prepare order data
       const orderData = {
         ...data,
-        items,
-        total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        items: items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          name: (item as any).name,
+          price: (item as any).price
+        })),
+        total: items.reduce((sum, item) => sum + ((item as any).price * item.quantity), 0),
         status: "pending",
         createdAt: new Date().toISOString(),
         orderId: "PC" + Math.floor(Math.random() * 100000)
