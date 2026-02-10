@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Calendar, ShieldCheck, Phone, AlertCircle } from "lucide-react";
+import { User, Mail, Calendar, ShieldCheck, Phone, AlertCircle, Camera } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, type ProfileValues } from "@/lib/validations/auth";
@@ -14,6 +14,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { MediaUpload } from "../../components/MediaUpload";
+import { CloudinaryImage } from "../../components/CloudinaryImage";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const PAKISTAN_CITIES = [
   "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", 
@@ -24,6 +27,7 @@ export default function Profile() {
   const { user } = useAuthStore();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
 
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -37,6 +41,34 @@ export default function Profile() {
   });
 
   if (!user) return null;
+
+  const onAvatarUploadComplete = async (cloudinaryData: any) => {
+    if (!cloudinaryData || !cloudinaryData.secure_url) return;
+    
+    setIsUpdating(true);
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        photoURL: cloudinaryData.secure_url,
+        updatedAt: serverTimestamp(),
+      });
+      
+      setIsAvatarDialogOpen(false);
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error) {
+      console.error("Profile picture update error:", error);
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not save profile picture to your account.",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const onSubmit = async (data: ProfileValues) => {
     setIsUpdating(true);
@@ -83,8 +115,44 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6 pb-6 border-b">
-              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary border-2 border-primary/20">
-                {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
+              <div className="relative group">
+                {user.photoURL ? (
+                  <CloudinaryImage 
+                    publicId={user.photoURL.split('/').pop()?.split('.')[0]} 
+                    className="h-20 w-20 rounded-full border-2 border-primary/20"
+                    width={80}
+                    height={80}
+                    alt={user.displayName || "User"}
+                    fallbackSrc={user.photoURL}
+                  />
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary border-2 border-primary/20">
+                    {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
+                  </div>
+                )}
+                <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="icon" 
+                      variant="secondary" 
+                      className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Update Profile Picture</DialogTitle>
+                    </DialogHeader>
+                    <MediaUpload 
+                      onUploadComplete={onAvatarUploadComplete}
+                      acceptedTypes={['image/*']}
+                      maxSize={2 * 1024 * 1024} // 2MB for profile images
+                      folder={`users/${user.uid}/profile`}
+                      multiple={false}
+                    />
+                  </DialogContent>
+                </Dialog>
               </div>
               <div>
                 <h3 className="text-xl font-semibold">{user.displayName || "Valued Customer"}</h3>
@@ -111,7 +179,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Member Since</p>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-wrap">
                     {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-PK', {
                       year: 'numeric',
                       month: 'long',
