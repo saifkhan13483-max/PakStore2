@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema, type Product, type InsertProduct, type Category } from "@shared/schema";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   Form,
@@ -29,26 +29,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { MediaUpload } from "@/components/MediaUpload";
-import { CloudinaryImage } from "@/components/CloudinaryImage";
 import { useEffect } from "react";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function AdminProductForm() {
   const [, params] = useRoute("/admin/products/:id/edit");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const id = params?.id ? parseInt(params.id) : null;
+  const id = params?.id ? params.id : null;
   const isEditing = !!id;
 
-  const { data: product, isLoading: isProductLoading } = useQuery<Product>({
-    queryKey: [`/api/products-by-id/${id}`],
-    queryFn: async () => {
-      const res = await fetch(`/api/products`);
-      if (!res.ok) throw new Error("Failed to fetch products");
-      const products: Product[] = await res.json();
-      const p = products.find(p => p.id === id);
-      if (!p) throw new Error("Product not found");
-      return p;
-    },
+  const { data: product, isLoading: isProductLoading } = useQuery<Product | null>({
+    queryKey: ["products", id],
+    queryFn: () => productFirestoreService.getProductById(id!),
     enabled: isEditing,
   });
 
@@ -97,14 +90,14 @@ export default function AdminProductForm() {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertProduct) => {
-      if (isEditing) {
-        await apiRequest("PATCH", `/api/products/${id}`, data);
+      if (isEditing && id) {
+        await productFirestoreService.updateProduct(id, data);
       } else {
-        await apiRequest("POST", `/api/products`, data);
+        await productFirestoreService.createProduct(data);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       toast({
         title: isEditing ? "Product updated" : "Product created",
         description: `Successfully ${isEditing ? "updated" : "created"} the product.`,
@@ -407,7 +400,7 @@ export default function AdminProductForm() {
                       <FormItem>
                         <FormLabel>Category</FormLabel>
                         <Select 
-                          onValueChange={(val) => field.onChange(parseInt(val))} 
+                          onValueChange={(val) => field.onChange(val)} 
                           value={field.value?.toString()}
                         >
                           <FormControl>
