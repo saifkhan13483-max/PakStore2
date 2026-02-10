@@ -6,10 +6,12 @@ import { insertOrderSchema } from "@shared/schema";
 export function registerRoutes(app: Express): Server {
   app.post("/api/orders", async (req, res) => {
     try {
+      console.log("Received order request:", JSON.stringify(req.body, null, 2));
       const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
       res.json(order);
     } catch (error: any) {
+      console.error("Order creation error details:", error);
       res.status(400).json({ message: error.message });
     }
   });

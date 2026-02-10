@@ -82,11 +82,13 @@ export default function Checkout() {
         body: JSON.stringify(orderData),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to place order");
+        throw new Error(responseData.message || "Failed to place order");
       }
 
-      console.log("Order placed:", orderData);
+      console.log("Order placed:", responseData);
       
       toast({
         title: "Order Placed Successfully!",
