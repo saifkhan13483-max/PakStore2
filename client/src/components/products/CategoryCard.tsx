@@ -11,15 +11,6 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
-  // Map category names to professional solid colors
-  const bgColorMap: Record<string, string> = {
-    "Electronics": "bg-[#1a365d]", // Deep blue
-    "Home & Kitchen": "bg-[#2d3748]", // Charcoal
-    "Fashion": "bg-[#22543d]", // Dark green
-  };
-
-  const bgColor = bgColorMap[name] || "bg-primary";
-
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -27,9 +18,14 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
       className="h-full"
     >
       <Link href={`/products?category=${slug}`}>
-        <Card className={`overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative ${bgColor}`}>
-          <CardContent className="p-0 relative aspect-[3/4] flex flex-col justify-end">
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500" />
+        <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative">
+          <CardContent className="p-0 relative aspect-[16/9] sm:aspect-[4/3] flex flex-col justify-end">
+            <img 
+              src={image} 
+              alt={name} 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent group-hover:via-black/50 transition-colors duration-500" />
             <div className="relative z-10 p-6 text-white">
               <div className="overflow-hidden">
                 <h3 className="font-display text-2xl sm:text-3xl font-bold mb-3 transform transition-transform duration-500 group-hover:translate-y-[-2px]">
