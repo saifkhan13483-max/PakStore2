@@ -1,21 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, ShoppingCart, BarChart, Tags, Loader2 } from "lucide-react";
+import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-
-interface AdminStats {
-  totalProducts: number;
-  totalUsers: number;
-  totalOrders: number;
-  totalRevenue: number;
-}
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { adminStatsService, type AdminStats } from "@/services/adminStatsService";
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useQuery<AdminStats>({
-    queryKey: ["/api/admin/stats"],
-    refetchInterval: 5000, // Real-time updates every 5 seconds
+  const queryClient = useQueryClient();
+  const { data: stats, isLoading, isRefetching } = useQuery<AdminStats>({
+    queryKey: ["admin-stats"],
+    queryFn: () => adminStatsService.getAdminStats(),
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+  };
 
   if (isLoading) {
     return (
@@ -33,10 +33,10 @@ export default function AdminDashboard() {
       color: "text-blue-500" 
     },
     { 
-      title: "Total Users", 
-      value: stats?.totalUsers?.toLocaleString() ?? "0", 
-      icon: Users, 
-      color: "text-green-500" 
+      title: "Total Categories", 
+      value: stats?.totalCategories ?? 0, 
+      icon: Tags, 
+      color: "text-orange-500" 
     },
     { 
       title: "Total Orders", 
@@ -54,6 +54,19 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          Refresh Stats
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
           <Card key={stat.title}>
