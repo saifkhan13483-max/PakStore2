@@ -1,11 +1,7 @@
-import { type Product, type CartItem } from "@shared/schema";
+import { type Product, type CartItem, type Category as SharedCategory } from "@shared/schema";
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  image: string;
-  productCount: number;
+export interface Category extends SharedCategory {
+  // Any additional client-specific fields if needed
 }
 
 export interface User {
