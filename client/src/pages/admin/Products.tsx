@@ -53,6 +53,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,11 +72,8 @@ export default function AdminProducts() {
   const products = Array.isArray(productsData) ? productsData : [];
 
   const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
-    queryFn: async () => {
-      const { categoryFirestoreService } = await import("@/services/categoryFirestoreService");
-      return categoryFirestoreService.getAllCategories();
-    }
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories(),
   });
 
   const deleteMutation = useMutation({

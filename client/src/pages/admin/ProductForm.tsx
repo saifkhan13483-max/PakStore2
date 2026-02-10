@@ -31,6 +31,7 @@ import { Link } from "wouter";
 import { MediaUpload } from "@/components/MediaUpload";
 import { useEffect } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 
 export default function AdminProductForm() {
   const [, params] = useRoute("/admin/products/:id/edit");
@@ -46,11 +47,8 @@ export default function AdminProductForm() {
   });
 
   const { data: categories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
-    queryFn: async () => {
-      const { categoryFirestoreService } = await import("@/services/categoryFirestoreService");
-      return categoryFirestoreService.getAllCategories();
-    }
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories(),
   });
 
   const form = useForm<InsertProduct>({
