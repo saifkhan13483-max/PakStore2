@@ -245,6 +245,7 @@ export default function Signup() {
         uid: user.uid,
         email: data.email,
         displayName: data.fullName,
+        photoURL: "/src/assets/images/default-avatar.png",
         phoneNumber: "",
         createdAt: serverTimestamp(),
         lastLoginAt: serverTimestamp(),

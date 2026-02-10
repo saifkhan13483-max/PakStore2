@@ -26,13 +26,15 @@ interface AuthState {
   logout: () => Promise<void>;
 }
 
+import defaultAvatar from '@/assets/images/default-avatar.png';
+
 const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'saifkhan16382@gmail.com'];
 
 const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   uid: user.uid,
   email: user.email,
   displayName: user.displayName,
-  photoURL: user.photoURL,
+  photoURL: user.photoURL || defaultAvatar,
   phoneNumber: user.phoneNumber,
   emailVerified: user.emailVerified,
   createdAt: user.metadata.creationTime || new Date().toISOString(),
