@@ -28,6 +28,17 @@ export interface ProductFilters {
 }
 
 export const productFirestoreService = {
+  async getProductsByCategory(categoryId: string) {
+    try {
+      const q = query(productsRef, where("categoryId", "==", categoryId));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    } catch (error: any) {
+      console.error("Error getting products by category:", error);
+      throw new Error(`Failed to fetch products: ${error.message}`);
+    }
+  },
+
   async getAllProducts(filters: ProductFilters = {}) {
     try {
       const constraints: QueryConstraint[] = [];
@@ -48,6 +59,19 @@ export const productFirestoreService = {
     } catch (error: any) {
       console.error("Error getting products:", error);
       throw new Error(`Failed to fetch products: ${error.message}`);
+    }
+  },
+
+  async getProductBySlug(slug: string) {
+    try {
+      const q = query(productsRef, where("slug", "==", slug), limit(1));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) throw new Error("Product not found");
+      const doc = querySnapshot.docs[0];
+      return { id: doc.id, ...doc.data() } as Product;
+    } catch (error: any) {
+      console.error("Error getting product by slug:", error);
+      throw new Error(`Failed to fetch product: ${error.message}`);
     }
   },
 

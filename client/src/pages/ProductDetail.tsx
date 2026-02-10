@@ -15,11 +15,11 @@ import { productFirestoreService } from "@/services/productFirestoreService";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
-  const productId = params?.slug || ""; // In this migration, we are often using slug as id or mapping it
+  const slug = params?.slug || "";
   
   const { data: product, isLoading, error } = useQuery({
-    queryKey: ["product", productId],
-    queryFn: () => productFirestoreService.getProductById(productId),
+    queryKey: ["product", slug],
+    queryFn: () => productFirestoreService.getProductBySlug(slug),
   });
 
   const { data: relatedProductsData } = useQuery({
