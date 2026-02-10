@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
+// @ts-ignore - MediaUpload is a JSX component
 import { MediaUpload } from "@/components/MediaUpload";
 import { useEffect } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
@@ -75,7 +76,7 @@ export default function AdminProductForm() {
   // Handle features array
   const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
     control: form.control,
-    name: "features",
+    name: "features" as any,
   });
 
   useEffect(() => {

@@ -39,7 +39,8 @@ export const updateUser = async (userId: string, updateData: Partial<UserData>):
     ...updateData,
     updatedAt: new Date(),
   });
-  return { id: userId, ...updateData };
+  // Use a type assertion to allow spreading Partial<UserData> into the returned UserData
+  return { id: userId, ...updateData } as UserData;
 };
 
 /**

@@ -24,84 +24,28 @@ const PARENT_CATEGORIES_COLLECTION = "parentCategories";
 const PRODUCTS_COLLECTION = "products";
 
 export class CategoryFirestoreService {
-  /**
-   * Get all categories
-   */
   async getAllCategories(): Promise<Category[]> {
     try {
       const q = query(collection(db, CATEGORIES_COLLECTION), orderBy("name", "asc"));
       const querySnapshot = await getDocs(q);
-      const categories: Category[] = [];
-      querySnapshot.forEach((doc) => {
-        categories.push({ id: doc.id, ...doc.data() } as unknown as Category);
-      });
-      return categories;
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as Category));
     } catch (error: any) {
       console.error("Error getting categories:", error);
       throw new Error(`Failed to fetch categories: ${error.message}`);
     }
   }
 
-  /**
-   * Get all parent categories
-   */
   async getAllParentCategories(): Promise<ParentCategory[]> {
     try {
       const q = query(collection(db, PARENT_CATEGORIES_COLLECTION), orderBy("name", "asc"));
       const querySnapshot = await getDocs(q);
-      const parents: ParentCategory[] = [];
-      querySnapshot.forEach((doc) => {
-        parents.push({ id: doc.id, ...doc.data() } as unknown as ParentCategory);
-      });
-      return parents;
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as ParentCategory));
     } catch (error: any) {
       console.error("Error getting parent categories:", error);
       throw new Error(`Failed to fetch parent categories: ${error.message}`);
     }
   }
 
-  /**
-   * Get categories by parent ID
-   */
-  async getCategoriesByParent(parentId: string): Promise<Category[]> {
-    try {
-      const q = query(
-        collection(db, CATEGORIES_COLLECTION),
-        where("parentId", "==", parentId),
-        orderBy("name", "asc")
-      );
-      const querySnapshot = await getDocs(q);
-      const categories: Category[] = [];
-      querySnapshot.forEach((doc) => {
-        categories.push({ id: doc.id, ...doc.data() } as unknown as Category);
-      });
-      return categories;
-    } catch (error: any) {
-      console.error("Error getting categories by parent:", error);
-      throw new Error(`Failed to fetch categories: ${error.message}`);
-    }
-  }
-
-  /**
-   * Get a single category by ID
-   */
-  async getCategoryById(categoryId: string): Promise<Category | null> {
-    try {
-      const docRef = doc(db, CATEGORIES_COLLECTION, categoryId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as unknown as Category;
-      }
-      return null;
-    } catch (error: any) {
-      console.error("Error getting category by ID:", error);
-      throw new Error(`Failed to fetch category: ${error.message}`);
-    }
-  }
-
-  /**
-   * Create a new category (Admin only)
-   */
   async createCategory(categoryData: any): Promise<Category> {
     try {
       const validatedData = insertCategorySchema.parse(categoryData);
@@ -113,47 +57,20 @@ export class CategoryFirestoreService {
     }
   }
 
-  /**
-   * Update an existing category (Admin only)
-   */
-  async updateCategory(categoryId: string, updates: any): Promise<void> {
-    try {
-      const docRef = doc(db, CATEGORIES_COLLECTION, categoryId);
-      await updateDoc(docRef, updates);
-    } catch (error: any) {
-      console.error("Error updating category:", error);
-      throw new Error(`Failed to update category: ${error.message}`);
-    }
-  }
-
-  /**
-   * Delete a category (Admin only)
-   * Includes validation to prevent deleting categories with products
-   */
   async deleteCategory(categoryId: string): Promise<void> {
     try {
-      // Validation: Check if any products use this category
-      const productsQuery = query(
-        collection(db, PRODUCTS_COLLECTION),
-        where("categoryId", "==", categoryId),
-        limit(1)
-      );
+      const productsQuery = query(collection(db, PRODUCTS_COLLECTION), where("categoryId", "==", categoryId), limit(1));
       const productsSnapshot = await getDocs(productsQuery);
-      
       if (!productsSnapshot.empty) {
-        throw new Error("Cannot delete category because it contains products. Please move or delete the products first.");
+        throw new Error("Cannot delete category because it contains products.");
       }
-
-      const docRef = doc(db, CATEGORIES_COLLECTION, categoryId);
-      await deleteDoc(docRef);
+      await deleteDoc(doc(db, CATEGORIES_COLLECTION, categoryId));
     } catch (error: any) {
       console.error("Error deleting category:", error);
       throw new Error(error.message || "Failed to delete category");
     }
   }
-  /**
-   * Create a new parent category (Admin only)
-   */
+
   async createParentCategory(categoryData: any): Promise<ParentCategory> {
     try {
       const validatedData = insertParentCategorySchema.parse(categoryData);
@@ -165,42 +82,21 @@ export class CategoryFirestoreService {
     }
   }
 
-  /**
-   * Update an existing parent category (Admin only)
-   */
-  async updateParentCategory(categoryId: string, updates: any): Promise<void> {
-    try {
-      const docRef = doc(db, PARENT_CATEGORIES_COLLECTION, categoryId);
-      await updateDoc(docRef, updates);
-    } catch (error: any) {
-      console.error("Error updating parent category:", error);
-      throw new Error(`Failed to update parent category: ${error.message}`);
-    }
+  async updateParentCategory(id: string, data: any): Promise<void> {
+    await updateDoc(doc(db, PARENT_CATEGORIES_COLLECTION, id), data);
   }
 
-  /**
-   * Delete a parent category (Admin only)
-   */
-  async deleteParentCategory(categoryId: string): Promise<void> {
-    try {
-      // Validation: Check if any subcategories use this parent
-      const subCategoriesQuery = query(
-        collection(db, CATEGORIES_COLLECTION),
-        where("parentId", "==", categoryId),
-        limit(1)
-      );
-      const subCategoriesSnapshot = await getDocs(subCategoriesQuery);
-      
-      if (!subCategoriesSnapshot.empty) {
-        throw new Error("Cannot delete parent category because it contains sub-categories.");
-      }
+  async updateCategory(id: string, data: any): Promise<void> {
+    await updateDoc(doc(db, CATEGORIES_COLLECTION, id), data);
+  }
 
-      const docRef = doc(db, PARENT_CATEGORIES_COLLECTION, categoryId);
-      await deleteDoc(docRef);
-    } catch (error: any) {
-      console.error("Error deleting parent category:", error);
-      throw new Error(error.message || "Failed to delete parent category");
+  async deleteParentCategory(id: string): Promise<void> {
+    const subCategoriesQuery = query(collection(db, CATEGORIES_COLLECTION), where("parentId", "==", id), limit(1));
+    const subCategoriesSnapshot = await getDocs(subCategoriesQuery);
+    if (!subCategoriesSnapshot.empty) {
+      throw new Error("Cannot delete parent category because it contains sub-categories.");
     }
+    await deleteDoc(doc(db, PARENT_CATEGORIES_COLLECTION, id));
   }
 }
 
