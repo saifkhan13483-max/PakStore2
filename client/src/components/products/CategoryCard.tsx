@@ -29,7 +29,7 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-500" />
             <div className="relative z-10 p-6 text-white text-center sm:text-left">
               <div className="overflow-hidden">
-                <h3 className="font-display text-3xl sm:text-4xl font-bold mb-3 drop-shadow-lg transform transition-transform duration-500 group-hover:translate-y-[-2px]">
+                <h3 className="font-display text-3xl sm:text-4xl font-bold mb-3 text-white drop-shadow-lg transform transition-transform duration-500 group-hover:translate-y-[-2px]">
                   {name}
                 </h3>
               </div>
