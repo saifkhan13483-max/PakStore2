@@ -54,17 +54,23 @@ export default function Checkout() {
     try {
       // 1. Prepare order data
       const orderData = {
-        ...data,
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        area: data.area,
+        notes: data.notes || "",
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          name: (item as any).name,
-          price: (item as any).price
+          name: (item as any).name || "Unknown Product",
+          price: (item as any).price || 0
         })),
-        total: items.reduce((sum, item) => sum + ((item as any).price * item.quantity), 0),
+        total: items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0),
         status: "pending",
         createdAt: new Date().toISOString(),
-        orderId: "PC" + Math.floor(Math.random() * 100000)
+        orderId: "PC" + Math.floor(100000 + Math.random() * 900000)
       };
       
       // 2. Send order to backend API instead of direct Firestore call
