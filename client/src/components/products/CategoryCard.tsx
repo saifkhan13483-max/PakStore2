@@ -11,6 +11,15 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
+  // Map category names to professional solid colors
+  const bgColorMap: Record<string, string> = {
+    "Electronics": "bg-[#1a365d]", // Deep blue
+    "Home & Kitchen": "bg-[#2d3748]", // Charcoal
+    "Fashion": "bg-[#22543d]", // Dark green
+  };
+
+  const bgColor = bgColorMap[name] || "bg-primary";
+
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -18,25 +27,28 @@ export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
       className="h-full"
     >
       <Link href={`/products?category=${slug}`}>
-        <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative">
-          <CardContent className="p-0 relative aspect-[3/4]">
-            <img
-              src={getOptimizedImageUrl(image, { width: 600, height: 800, crop: 'fill' })}
-              alt={name}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute inset-0 flex flex-col justify-end p-6 text-white transform transition-transform duration-500 group-hover:translate-y-[-4px]">
+        <Card className={`overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative ${bgColor}`}>
+          <CardContent className="p-0 relative aspect-[3/4] flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500" />
+            <div className="relative z-10 p-6 text-white">
               <div className="overflow-hidden">
-                <h3 className="font-display text-xl sm:text-2xl font-bold mb-1 transform transition-transform duration-500 translate-y-0 group-hover:translate-y-[-2px]">{name}</h3>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold mb-3 transform transition-transform duration-500 group-hover:translate-y-[-2px]">
+                  {name}
+                </h3>
               </div>
-              <div className="flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
-                <span className="h-[2px] w-4 bg-secondary rounded-full" />
-                <p className="text-xs sm:text-sm font-medium tracking-wide uppercase text-secondary">{count} Products</p>
+              <div className="flex items-center gap-2">
+                <span className="h-[2px] w-6 bg-secondary rounded-full" />
+                <p className="text-sm sm:text-base font-bold tracking-wider uppercase text-secondary">
+                  {count} PRODUCTS
+                </p>
               </div>
             </div>
             
+            {/* Professional glass effect corner */}
+            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+               <div className="w-12 h-12 rounded-full border-2 border-white/30" />
+            </div>
+
             {/* Subtle border overlay for professional finish */}
             <div className="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none" />
           </CardContent>
