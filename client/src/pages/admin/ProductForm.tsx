@@ -61,7 +61,9 @@ export default function AdminProductForm() {
       price: 0,
       originalPrice: 0,
       images: [],
-      categoryId: undefined,
+      categoryId: "",
+      stock: 0,
+      active: true,
       inStock: true,
       rating: "0",
       reviewCount: 0,
@@ -73,7 +75,7 @@ export default function AdminProductForm() {
   // Handle features array
   const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
     control: form.control,
-    name: "features" as any,
+    name: "features",
   });
 
   useEffect(() => {
