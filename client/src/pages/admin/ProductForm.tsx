@@ -76,7 +76,7 @@ export default function AdminProductForm() {
   // Handle features array
   const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
     control: form.control,
-    name: "features" as any,
+    name: "features" as "features",
   });
 
   useEffect(() => {
