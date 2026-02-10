@@ -29,28 +29,38 @@ if (isConfigValid) {
     db = getFirestore(app);
   } catch (e) {
     console.error("Firebase initialization error:", e);
-    // Fallback to proxy objects to prevent "Expected first argument to collection() to be a FirebaseFirestore" errors
-    db = new Proxy({}, {
-      get: () => { throw new Error("Firebase not initialized. Check your environment variables."); }
-    }) as Firestore;
-    auth = {} as Auth;
+    
+    const createErrorProxy = (name: string) => new Proxy({}, {
+      get: (_, prop) => {
+        if (prop === 'then') return undefined;
+        return () => {
+          throw new Error(`${name} failed to initialize. Please check your Firebase console and environment variables.`);
+        };
+      }
+    });
+
+    db = createErrorProxy("Firestore") as unknown as Firestore;
+    auth = createErrorProxy("Auth") as unknown as Auth;
     app = {} as FirebaseApp;
     googleProvider = {} as GoogleAuthProvider;
   }
 } else {
   console.warn("Firebase environment variables are missing. Initialization skipped.");
-  // Use proxies that throw descriptive errors when accessed
-  const createProxy = (name: string) => new Proxy({}, {
+  
+  const createMissingConfigProxy = (name: string) => new Proxy({}, {
     get: (_, prop) => {
-      if (prop === 'then') return undefined; // Avoid issues with async/await
-      return () => {
-        throw new Error(`${name} is not initialized because environment variables are missing. Please set VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, and VITE_FIREBASE_APP_ID.`);
-      };
+      // Allow access to auth methods by returning a dummy function that throws
+      if (typeof prop === 'string') {
+        return () => {
+          throw new Error(`${name} is not initialized because environment variables are missing. Please set VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, and VITE_FIREBASE_APP_ID in your Secrets.`);
+        };
+      }
+      return undefined;
     }
   });
 
-  db = createProxy("Firestore") as unknown as Firestore;
-  auth = createProxy("Auth") as unknown as Auth;
+  db = createMissingConfigProxy("Firestore") as unknown as Firestore;
+  auth = createMissingConfigProxy("Auth") as unknown as Auth;
   app = {} as FirebaseApp;
   googleProvider = {} as GoogleAuthProvider;
 }
