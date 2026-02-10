@@ -28,7 +28,8 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-import { ImageUploader } from "@/components/admin/ImageUploader";
+import { MediaUpload } from "@/components/MediaUpload";
+import { CloudinaryImage } from "@/components/CloudinaryImage";
 import { useEffect } from "react";
 
 export default function AdminProductForm() {
@@ -238,17 +239,51 @@ export default function AdminProductForm() {
                 <CardHeader>
                   <CardTitle>Product Media</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <FormField
                     control={form.control}
                     name="images"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <ImageUploader 
-                            value={field.value || []} 
-                            onChange={field.onChange}
-                          />
+                          <div className="space-y-4">
+                            <MediaUpload 
+                              multiple={true}
+                              folder="products"
+                              onUploadComplete={(results) => {
+                                const newUrls = Array.isArray(results) 
+                                  ? results.map(r => r.secure_url)
+                                  : [results.secure_url];
+                                field.onChange([...(field.value || []), ...newUrls]);
+                              }}
+                            />
+                            {field.value && field.value.length > 0 && (
+                              <div className="grid grid-cols-3 gap-4 mt-4">
+                                {field.value.map((url: string, index: number) => (
+                                  <div key={index} className="relative group">
+                                    <img 
+                                      src={url} 
+                                      alt={`Product ${index}`} 
+                                      className="w-full h-24 object-cover rounded-md border"
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size="icon"
+                                      className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => {
+                                        const newVal = [...field.value];
+                                        newVal.splice(index, 1);
+                                        field.onChange(newVal);
+                                      }}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
