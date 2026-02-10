@@ -250,12 +250,12 @@ export default function AdminProductForm() {
                             <MediaUpload 
                               multiple={true}
                               folder="products"
-                              onUploadComplete={(results) => {
-                                const newUrls = Array.isArray(results) 
-                                  ? results.map(r => r.secure_url)
-                                  : [results.secure_url];
-                                field.onChange([...(field.value || []), ...newUrls]);
-                              }}
+                                onUploadComplete={(results: any) => {
+                                  const newUrls = Array.isArray(results) 
+                                    ? results.map((r: any) => r.secure_url)
+                                    : [results.secure_url];
+                                  field.onChange([...(Array.isArray(field.value) ? field.value : []), ...newUrls]);
+                                }}
                             />
                             {field.value && field.value.length > 0 && (
                               <div className="grid grid-cols-3 gap-4 mt-4">
