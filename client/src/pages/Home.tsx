@@ -122,36 +122,70 @@ export default function Home() {
         </section>
 
         {/* Featured Categories */}
-        <section className="py-16 sm:py-24 bg-muted/30">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="font-display text-4xl sm:text-5xl font-bold mb-6 tracking-tight">Shop by Category</h2>
-              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Discover our curated collection of electronics, home essentials, and fashion accessories.
-              </p>
+        <section className="py-20 sm:py-28 bg-muted/20 overflow-hidden relative">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">Curated Collections</span>
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Shop by Category</h2>
+                <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Explore our meticulously selected categories featuring artisanal craftsmanship and premium global brands tailored for your lifestyle.
+                </p>
+              </motion.div>
             </div>
             
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-w-4xl mx-auto">
-              <CategoryCard 
-                name="Electronics" 
-                slug="electronics-gadgets" 
-                count={5} 
-                image="https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=800"
-              />
-              <CategoryCard 
-                name="Home & Kitchen" 
-                slug="home-kitchen" 
-                count={5} 
-                image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800"
-              />
-              <CategoryCard 
-                name="Fashion" 
-                slug="fashion-accessories" 
-                count={5} 
-                image="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <CategoryCard 
+                  name="Electronics" 
+                  slug="electronics-gadgets" 
+                  count={5} 
+                  image="https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=800"
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <CategoryCard 
+                  name="Home & Kitchen" 
+                  slug="home-kitchen" 
+                  count={5} 
+                  image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800"
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <CategoryCard 
+                  name="Fashion" 
+                  slug="fashion-accessories" 
+                  count={5} 
+                  image="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800"
+                />
+              </motion.div>
             </div>
           </div>
+          
+          {/* Subtle background decoration */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
         </section>
 
         {/* Featured Products */}
