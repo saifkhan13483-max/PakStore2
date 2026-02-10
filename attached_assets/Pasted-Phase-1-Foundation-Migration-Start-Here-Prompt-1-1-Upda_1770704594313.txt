@@ -1,0 +1,114 @@
+Phase 1: Foundation Migration (Start Here)
+Prompt 1.1 - Update Query Client Infrastructure
+
+I need to update my React Query infrastructure to support both API and Firestore during migration.
+
+File to modify: client/src/lib/queryClient.ts
+
+Requirements:
+1. Keep the existing apiRequest function for backward compatibility
+2. Add a new queryFn router that can handle both "/api/" keys and Firestore service keys
+3. When query key starts with "/api/", use apiRequest
+4. When query key is a simple string (like "categories"), allow explicit queryFn
+5. Add TypeScript types for the different query patterns
+6. Include error handling for both API and Firestore errors
+
+This allows gradual migration without breaking existing functionality.
+Phase 2: Navigation Components (High Impact, Low Risk)
+Prompt 2.1 - Migrate Navigation Components
+
+Convert navigation components from Express API to Firestore services.
+
+Files to modify:
+1. client/src/components/layout/Navbar.tsx
+2. client/src/components/layout/Header.tsx
+
+Requirements:
+1. Import getAllParentCategories and getAllCategories from categoryFirestoreService
+2. Replace query keys ["/api/parent-categories"] with ["parent-categories"]
+3. Replace query keys ["/api/categories"] with ["categories"]  
+4. Explicitly provide service functions as queryFn
+5. Ensure data structure matches component expectations
+6. Maintain all existing UI and styling
+7. Keep loading states and error handling
+
+Example transformation:
+// Before
+useQuery({ queryKey: ["/api/categories"] })
+
+// After  
+useQuery({ 
+  queryKey: ["categories"], 
+  queryFn: getAllCategories 
+})
+
+Only modify these two navigation files.
+Phase 3: Public Product Pages (Critical User Experience)
+Prompt 3.1 - Migrate Public Product Pages
+
+Convert public product pages from Express API to Firestore services.
+
+Files to modify:
+1. client/src/pages/Home.tsx
+2. client/src/pages/Products.tsx  
+3. client/src/pages/ProductDetail.tsx
+
+Requirements:
+1. Import getAllProducts and getProductById from productFirestoreService
+2. In Home.tsx: Replace ["/api/products", { limit: 4 }] with ["featured-products"] and use getAllProducts({ limit: 4 })
+3. In Products.tsx: Replace main product feed query with getAllProducts(filters)
+4. In ProductDetail.tsx: Replace ["/api/products", id] with ["product", id] and use getProductById(id)
+5. Maintain all filtering, pagination, and search functionality
+6. Preserve loading states and error handling
+7. Keep exact same UI and user experience
+
+Test thoroughly: featured products display, product listing works, individual product pages load correctly.
+Phase 4: Admin Category Management (Complex CRUD)
+Prompt 4.1 - Migrate Admin Category Management
+
+Convert admin category management from Express API to Firestore services.
+
+File to modify: client/src/pages/admin/Categories.tsx
+
+Requirements:
+1. Import all category service functions: getAllCategories, getAllParentCategories, createCategory, updateCategory, deleteCategory
+2. Replace query keys with ["categories"] and ["parent-categories"]
+3. Replace useMutation apiRequest calls with Firestore service mutations
+4. Update onSuccess handlers to invalidate new query keys
+5. Maintain parent-child category relationships in UI
+6. Keep all form validation and error handling
+7. Preserve create, edit, and delete functionality
+
+Test: category creation, editing, deletion, parent-child relationships work correctly.
+Phase 5: Admin Product Dependencies (Final Admin Features)
+Prompt 5.1 - Fix Admin Product Form Dependencies
+
+Remove remaining API dependencies from admin product management.
+
+Files to modify:
+1. client/src/pages/admin/Products.tsx
+2. client/src/pages/admin/ProductForm.tsx
+
+Requirements:
+1. In Products.tsx: Update category filter dropdown to use categoryFirestoreService
+2. In ProductForm.tsx: Update category selection dropdown to use categoryFirestoreService  
+3. Use query key ["categories"] to leverage caching from other migrated pages
+4. Maintain all existing form functionality and validation
+5. Keep product CRUD operations unchanged (assuming they were migrated in earlier phases)
+6. Preserve admin UI and user experience
+
+Test: category filtering works in product list, category dropdown populates in product form.
+Phase 6: Cleanup and Verification
+Prompt 6.1 - Disable Legacy API Infrastructure
+
+Now that all components are migrated, disable the legacy API client to prevent accidental usage.
+
+File to modify: client/src/lib/queryClient.ts
+
+Requirements:
+1. Modify apiRequest to log a warning: "apiRequest is deprecated. Use Firestore services."
+2. Remove or comment out the default queryFn that automatically fetches from /api/
+3. Add runtime checks to detect any remaining /api/ query keys
+4. Throw descriptive errors if legacy patterns are detected
+
+This ensures any missed migrations fail explicitly rather than silently hitting the backend.
