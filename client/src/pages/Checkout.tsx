@@ -52,13 +52,25 @@ export default function Checkout() {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Order placed:", data);
+      // 1. Save order to Firestore
+      const orderData = {
+        ...data,
+        items,
+        total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        orderId: "PC" + Math.floor(Math.random() * 100000)
+      };
+      
+      const { db } = await import("@/lib/firebase");
+      const { collection, addDoc } = await import("firebase/firestore");
+      await addDoc(collection(db, "orders"), orderData);
+
+      console.log("Order placed:", orderData);
       
       toast({
         title: "Order Placed Successfully!",
-        description: "Thank you for shopping with PakCart. Your order ID is #PC" + Math.floor(Math.random() * 100000),
+        description: `Thank you for shopping with PakCart. Your order ID is #${orderData.orderId}`,
       });
 
       clearCart();
