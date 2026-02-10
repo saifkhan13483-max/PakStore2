@@ -30,9 +30,11 @@ export interface IStorage {
 
   // Orders
   createOrder(order: InsertOrder): Promise<Order>;
+  getOrders(): Promise<Order[]>;
 }
 
 export class FirestoreStorage implements IStorage {
+  // ... existing methods ...
   async getParentCategories(): Promise<ParentCategory[]> {
     const snapshot = await db.collection("parent_categories").get();
     return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as ParentCategory));
@@ -98,6 +100,11 @@ export class FirestoreStorage implements IStorage {
   async createOrder(order: InsertOrder): Promise<Order> {
     const docRef = await db.collection("orders").add(order);
     return { id: docRef.id, ...order } as Order;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    const snapshot = await db.collection("orders").orderBy("createdAt", "desc").get();
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Order));
   }
 }
 

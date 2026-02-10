@@ -14,6 +14,15 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/orders", async (_req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

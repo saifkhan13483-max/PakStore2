@@ -27,6 +27,7 @@ const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminProducts = lazy(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazy(() => import("@/pages/admin/ProductForm"));
 const AdminCategories = lazy(() => import("@/pages/admin/ManageCategories"));
+const AdminOrders = lazy(() => import("@/pages/admin/Orders"));
 
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
@@ -104,6 +105,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminCategories />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/orders">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminOrders />
           </AdminLayout>
         </AdminRoute>
       </Route>

@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingBag, Tags, Home } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Tags, Home, ShoppingCart } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ const adminItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Products", url: "/admin/products", icon: ShoppingBag },
   { title: "Categories", url: "/admin/categories", icon: Tags },
+  { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
   { title: "Back to Shop", url: "/", icon: Home },
 ];
 
@@ -32,7 +33,7 @@ export function AdminSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    active={location === item.url}
+                    isActive={location === item.url}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
