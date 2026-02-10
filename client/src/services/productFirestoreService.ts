@@ -1,205 +1,142 @@
 import { 
   collection, 
+  query, 
+  where, 
+  orderBy, 
+  limit, 
   getDocs, 
   getDoc, 
   doc, 
   addDoc, 
   updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  startAfter, 
-  type DocumentData,
-  type QueryConstraint
+  deleteDoc,
+  startAfter,
+  QueryConstraint
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { type Product, insertProductSchema } from "@shared/schema";
+import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
 
-const PRODUCTS_COLLECTION = "products";
+const COLLECTION_NAME = "products";
+const productsRef = collection(db, COLLECTION_NAME);
 
 export interface ProductFilters {
-  category?: number;
+  category?: string;
   search?: string;
-  sortBy?: string;
+  sortBy?: "price-asc" | "price-desc" | "newest";
   limit?: number;
-  startAfter?: any;
+  startAfterDoc?: any;
 }
 
-export class ProductFirestoreService {
-  /**
-   * Get all products with optional filtering and pagination
-   */
-  async getAllProducts(filters: ProductFilters = {}): Promise<{ products: Product[], lastVisible: any }> {
+export const productFirestoreService = {
+  async getAllProducts(filters: ProductFilters = {}) {
     try {
       const constraints: QueryConstraint[] = [];
 
-      // Only add constraints if values are truthy to avoid empty filters causing issues
-      if (filters.category && filters.category !== 'all' as any) {
-        constraints.push(where("categoryId", "==", filters.category));
+      if (filters.category) {
+        constraints.push(where("categoryId", "==", parseInt(filters.category)));
       }
 
       if (filters.sortBy) {
-        const [field, direction] = filters.sortBy.split("-");
-        constraints.push(orderBy(field, direction as "asc" | "desc"));
-      }
-
-      if (filters.startAfter) {
-        constraints.push(startAfter(filters.startAfter));
+        if (filters.sortBy === "price-asc") constraints.push(orderBy("price", "asc"));
+        else if (filters.sortBy === "price-desc") constraints.push(orderBy("price", "desc"));
+        else constraints.push(orderBy("id", "desc"));
+      } else {
+        constraints.push(orderBy("id", "asc"));
       }
 
       if (filters.limit) {
         constraints.push(limit(filters.limit));
       }
 
-      const q = query(collection(db, PRODUCTS_COLLECTION), ...constraints);
+      if (filters.startAfterDoc) {
+        constraints.push(startAfter(filters.startAfterDoc));
+      }
+
+      const q = query(productsRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
-      const products: Product[] = [];
-      querySnapshot.forEach((doc) => {
-        products.push({ ...doc.data(), id: doc.id } as unknown as Product);
-      });
+      let results = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id === doc.data().id?.toString() ? doc.data().id : doc.id
+      })) as Product[];
 
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-
-      // Client-side search fallback
-      let filteredProducts = products;
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        filteredProducts = products.filter(p => 
-          (p.name?.toLowerCase().includes(searchLower)) || 
-          (p.description?.toLowerCase().includes(searchLower)) ||
-          (p.slug?.toLowerCase().includes(searchLower))
+        results = results.filter(p => 
+          p.name.toLowerCase().includes(searchLower) || 
+          p.description.toLowerCase().includes(searchLower)
         );
       }
 
-      return { products: filteredProducts, lastVisible };
+      return results;
     } catch (error: any) {
       console.error("Error getting products:", error);
       throw new Error(`Failed to fetch products: ${error.message}`);
     }
-  }
+  },
 
-  /**
-   * Get a single product by ID
-   */
-  async getProductById(productId: string): Promise<Product | null> {
+  async getProductById(productId: string) {
     try {
-      const docRef = doc(db, PRODUCTS_COLLECTION, productId);
+      const docRef = doc(db, COLLECTION_NAME, productId);
       const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as unknown as Product;
+      if (!docSnap.exists()) {
+        throw new Error("Product not found");
       }
-      return null;
+
+      return { ...docSnap.data(), id: docSnap.id } as Product;
     } catch (error: any) {
-      console.error("Error getting product by ID:", error);
+      console.error("Error getting product:", error);
       throw new Error(`Failed to fetch product: ${error.message}`);
     }
-  }
+  },
 
-  /**
-   * Get products by category ID
-   */
-  async getProductsByCategory(categoryId: number): Promise<Product[]> {
+  async getProductsByCategory(categoryId: string) {
+    return this.getAllProducts({ category: categoryId });
+  },
+
+  async searchProducts(searchTerm: string) {
+    return this.getAllProducts({ search: searchTerm });
+  },
+
+  async createProduct(productData: InsertProduct) {
     try {
-      const q = query(
-        collection(db, PRODUCTS_COLLECTION), 
-        where("categoryId", "==", categoryId),
-        orderBy("name", "asc")
-      );
-      const querySnapshot = await getDocs(q);
-      
-      const products: Product[] = [];
-      querySnapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() } as unknown as Product);
+      // Client-side validation
+      insertProductSchema.parse(productData);
+
+      const docRef = await addDoc(productsRef, {
+        ...productData,
+        inStock: productData.inStock ?? true,
+        rating: "0",
+        reviewCount: 0
       });
 
-      return products;
-    } catch (error: any) {
-      console.error("Error getting products by category:", error);
-      throw new Error(`Failed to fetch products for category: ${error.message}`);
-    }
-  }
-
-  /**
-   * Search products by search term
-   */
-  async searchProducts(searchTerm: string): Promise<Product[]> {
-    // Note: Standard Firestore doesn't support full-text search.
-    // We implement a simple search by fetching and filtering, or prefix matching.
-    try {
-      const searchLower = searchTerm.toLowerCase();
-      const q = query(collection(db, PRODUCTS_COLLECTION), limit(100));
-      const querySnapshot = await getDocs(q);
-      
-      const products: Product[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (
-          data.name.toLowerCase().includes(searchLower) || 
-          data.description.toLowerCase().includes(searchLower)
-        ) {
-          products.push({ id: doc.id, ...data } as unknown as Product);
-        }
-      });
-
-      return products;
-    } catch (error: any) {
-      console.error("Error searching products:", error);
-      throw new Error(`Search failed: ${error.message}`);
-    }
-  }
-
-  /**
-   * Create a new product (Admin only)
-   */
-  async createProduct(productData: any): Promise<Product> {
-    try {
-      // Client-side validation using shared schema
-      const validatedData = insertProductSchema.parse(productData);
-
-      // Firestore specific validation
-      if (validatedData.price <= 0) {
-        throw new Error("Price must be a positive number");
-      }
-
-      const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), validatedData);
-      return { id: docRef.id, ...validatedData } as unknown as Product;
+      return { ...productData, id: docRef.id };
     } catch (error: any) {
       console.error("Error creating product:", error);
       throw new Error(`Failed to create product: ${error.message}`);
     }
-  }
+  },
 
-  /**
-   * Update an existing product (Admin only)
-   */
-  async updateProduct(productId: string, updates: any): Promise<void> {
+  async updateProduct(productId: string, updates: Partial<InsertProduct>) {
     try {
-      // Optional: partial validation or full validation depending on use case
-      // For now, we allow partial updates
-      const docRef = doc(db, PRODUCTS_COLLECTION, productId);
+      const docRef = doc(db, COLLECTION_NAME, productId);
       await updateDoc(docRef, updates);
+      return { id: productId, ...updates };
     } catch (error: any) {
       console.error("Error updating product:", error);
       throw new Error(`Failed to update product: ${error.message}`);
     }
-  }
+  },
 
-  /**
-   * Delete a product (Admin only)
-   */
-  async deleteProduct(productId: string): Promise<void> {
+  async deleteProduct(productId: string) {
     try {
-      const docRef = doc(db, PRODUCTS_COLLECTION, productId);
+      const docRef = doc(db, COLLECTION_NAME, productId);
       await deleteDoc(docRef);
+      return true;
     } catch (error: any) {
       console.error("Error deleting product:", error);
       throw new Error(`Failed to delete product: ${error.message}`);
     }
   }
-}
-
-export const productFirestoreService = new ProductFirestoreService();
+};
