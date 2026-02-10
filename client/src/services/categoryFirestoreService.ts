@@ -151,6 +151,57 @@ export class CategoryFirestoreService {
       throw new Error(error.message || "Failed to delete category");
     }
   }
+  /**
+   * Create a new parent category (Admin only)
+   */
+  async createParentCategory(categoryData: any): Promise<ParentCategory> {
+    try {
+      const validatedData = insertParentCategorySchema.parse(categoryData);
+      const docRef = await addDoc(collection(db, PARENT_CATEGORIES_COLLECTION), validatedData);
+      return { id: docRef.id, ...validatedData } as unknown as ParentCategory;
+    } catch (error: any) {
+      console.error("Error creating parent category:", error);
+      throw new Error(`Failed to create parent category: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update an existing parent category (Admin only)
+   */
+  async updateParentCategory(categoryId: string, updates: any): Promise<void> {
+    try {
+      const docRef = doc(db, PARENT_CATEGORIES_COLLECTION, categoryId);
+      await updateDoc(docRef, updates);
+    } catch (error: any) {
+      console.error("Error updating parent category:", error);
+      throw new Error(`Failed to update parent category: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete a parent category (Admin only)
+   */
+  async deleteParentCategory(categoryId: string): Promise<void> {
+    try {
+      // Validation: Check if any subcategories use this parent
+      const subCategoriesQuery = query(
+        collection(db, CATEGORIES_COLLECTION),
+        where("parentId", "==", categoryId),
+        limit(1)
+      );
+      const subCategoriesSnapshot = await getDocs(subCategoriesQuery);
+      
+      if (!subCategoriesSnapshot.empty) {
+        throw new Error("Cannot delete parent category because it contains sub-categories.");
+      }
+
+      const docRef = doc(db, PARENT_CATEGORIES_COLLECTION, categoryId);
+      await deleteDoc(docRef);
+    } catch (error: any) {
+      console.error("Error deleting parent category:", error);
+      throw new Error(error.message || "Failed to delete parent category");
+    }
+  }
 }
 
 export const categoryFirestoreService = new CategoryFirestoreService();

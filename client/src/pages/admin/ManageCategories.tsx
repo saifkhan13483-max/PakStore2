@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Edit2, Loader2 } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -12,6 +12,7 @@ import { Form, FormControl,FormField, FormItem, FormLabel, FormMessage } from "@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 
 export default function ManageCategories() {
   const { toast } = useToast();
@@ -19,76 +20,70 @@ export default function ManageCategories() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   const { data: parentCategories, isLoading: loadingParents } = useQuery<ParentCategory[]>({
-    queryKey: ["/api/parent-categories"],
+    queryKey: ["parent-categories"],
+    queryFn: () => categoryFirestoreService.getAllParentCategories(),
   });
 
   const { data: categories, isLoading: loadingCategories } = useQuery<Category[]>({
-    queryKey: ["/api/categories"],
+    queryKey: ["categories"],
+    queryFn: () => categoryFirestoreService.getAllCategories(),
   });
 
   const createParentMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/parent-categories", data);
-      return res.json();
-    },
+    mutationFn: (data: any) => categoryFirestoreService.createParentCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       toast({ title: "Success", description: "Parent category created" });
     },
   });
 
   const updateParentMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const res = await apiRequest("PATCH", `/api/parent-categories/${id}`, data);
-      return res.json();
-    },
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      categoryFirestoreService.updateParentCategory(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       setEditingParent(null);
       toast({ title: "Success", description: "Parent category updated" });
     },
   });
 
   const deleteParentMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/parent-categories/${id}`);
-    },
+    mutationFn: (id: string) => categoryFirestoreService.deleteParentCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       toast({ title: "Success", description: "Parent category deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/categories", data);
-      return res.json();
-    },
+    mutationFn: (data: any) => categoryFirestoreService.createCategory(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Category created" });
     },
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const res = await apiRequest("PATCH", `/api/categories/${id}`, data);
-      return res.json();
-    },
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      categoryFirestoreService.updateCategory(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       setEditingCategory(null);
       toast({ title: "Success", description: "Category updated" });
     },
   });
 
   const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/categories/${id}`);
-    },
+    mutationFn: (id: string) => categoryFirestoreService.deleteCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Category deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -120,12 +115,12 @@ export default function ManageCategories() {
                   <div className="flex gap-2">
                     <ParentCategoryDialog 
                       category={cat} 
-                      onSubmit={(data) => updateParentMutation.mutate({ id: cat.id, data })} 
+                      onSubmit={(data) => updateParentMutation.mutate({ id: cat.id.toString(), data })} 
                     />
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => deleteParentMutation.mutate(cat.id)}
+                      onClick={() => deleteParentMutation.mutate(cat.id.toString())}
                       disabled={deleteParentMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -159,12 +154,12 @@ export default function ManageCategories() {
                     <CategoryDialog 
                       category={cat}
                       parentCategories={parentCategories || []}
-                      onSubmit={(data) => updateCategoryMutation.mutate({ id: cat.id, data })} 
+                      onSubmit={(data) => updateCategoryMutation.mutate({ id: cat.id.toString(), data })} 
                     />
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => deleteCategoryMutation.mutate(cat.id)}
+                      onClick={() => deleteCategoryMutation.mutate(cat.id.toString())}
                       disabled={deleteCategoryMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -299,7 +294,7 @@ function CategoryDialog({ category, parentCategories, onSubmit }: { category?: C
                 <FormItem>
                   <FormLabel>Parent Category</FormLabel>
                   <Select 
-                    onValueChange={(val) => field.onChange(parseInt(val))} 
+                    onValueChange={(val) => field.onChange(val)} 
                     defaultValue={field.value?.toString()}
                   >
                     <FormControl>
