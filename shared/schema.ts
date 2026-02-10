@@ -1,47 +1,54 @@
-import { pgTable, text, integer, boolean } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const parentCategories = pgTable("parent_categories", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull(),
-  image: text("image"),
+// NoSQL Firestore Schema representation using Zod
+export const parentCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  image: z.string().optional(),
 });
 
-export const categories = pgTable("categories", {
-  id: text("id").primaryKey(),
-  parentId: text("parent_id").references(() => parentCategories.id),
-  name: text("name").notNull(),
-  slug: text("slug").notNull(),
-  image: text("image"),
-  productCount: integer("product_count").default(0),
+export const categorySchema = z.object({
+  id: z.string(),
+  parentId: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  image: z.string().optional(),
+  productCount: z.number().default(0),
 });
 
-export const products = pgTable("products", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
-  price: integer("price").notNull(),
-  categoryId: text("category_id").references(() => categories.id),
-  image: text("image"),
-  images: text("images").array(),
-  stock: integer("stock").default(0),
-  active: boolean("active").default(true),
-  inStock: boolean("in_stock").default(true),
-  rating: text("rating").default("0"),
-  reviewCount: integer("review_count").default(0),
+export const productSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  price: z.number(),
+  categoryId: z.string(),
+  image: z.string().optional(),
+  images: z.array(z.string()).default([]),
+  stock: z.number().default(0),
+  active: z.boolean().default(true),
+  inStock: z.boolean().default(true),
+  rating: z.string().default("0"),
+  reviewCount: z.number().default(0),
 });
 
-// Use createInsertSchema but cast to any to bypass type issues in fast mode
-export const insertParentCategorySchema = createInsertSchema(parentCategories) as any;
-export const insertCategorySchema = createInsertSchema(categories) as any;
-export const insertProductSchema = createInsertSchema(products) as any;
+export const userSchema = z.object({
+  uid: z.string(),
+  email: z.string().email(),
+  displayName: z.string().optional(),
+  photoURL: z.string().optional(),
+  createdAt: z.string(),
+});
 
-export type ParentCategory = typeof parentCategories.$inferSelect;
-export type Category = typeof categories.$inferSelect;
-export type Product = typeof products.$inferSelect;
+export const insertParentCategorySchema = parentCategorySchema.omit({ id: true });
+export const insertCategorySchema = categorySchema.omit({ id: true });
+export const insertProductSchema = productSchema.omit({ id: true });
+
+export type ParentCategory = z.infer<typeof parentCategorySchema>;
+export type Category = z.infer<typeof categorySchema>;
+export type Product = z.infer<typeof productSchema>;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type User = z.infer<typeof userSchema>;
 
 export const cartItemsSchema = z.object({
   productId: z.string(),
