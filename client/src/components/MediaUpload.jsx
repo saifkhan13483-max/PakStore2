@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { Upload, X, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCloudinaryUpload } from '../hooks/use-cloudinary';
+import { useCloudinary } from '../hooks/use-cloudinary';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,7 +20,8 @@ export function MediaUpload({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   
-  const { upload, progress, isUploading, uploadedData, error, reset } = useCloudinaryUpload();
+  const { upload, progress, isUploading, error, reset } = useCloudinary();
+  const [uploadedData, setUploadedData] = useState(null);
 
   const handleFiles = useCallback((files) => {
     const validFiles = Array.from(files).filter(file => {
@@ -76,11 +77,14 @@ export function MediaUpload({
     try {
       if (multiple) {
         const results = await Promise.all(
-          selectedFiles.map(file => upload(file, { folder }))
+          selectedFiles.map(file => upload(file))
         );
-        onUploadComplete?.(results);
+        const successfulUploads = results.filter(Boolean);
+        setUploadedData(successfulUploads.length > 0 ? successfulUploads : null);
+        onUploadComplete?.(successfulUploads);
       } else {
-        const result = await upload(selectedFiles[0], { folder });
+        const result = await upload(selectedFiles[0]);
+        setUploadedData(result);
         onUploadComplete?.(result);
       }
     } catch (err) {
@@ -185,9 +189,9 @@ export function MediaUpload({
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
             <span>Overall Progress</span>
-            <span>{Math.round(progress)}%</span>
+            <span>{Math.round(progress?.percentage || 0)}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress?.percentage || 0} className="h-2" />
         </div>
       )}
 
@@ -230,6 +234,7 @@ export function MediaUpload({
           className="w-full"
           onClick={() => {
             setSelectedFiles([]);
+            setUploadedData(null);
             reset();
           }}
         >
