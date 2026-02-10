@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-image.jpg";
+import electronicsImage from "@assets/800b13d6-d66a-4bd3-a094-d8b8ccb22df6_(1)_1770740841232.png";
+import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
+import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
@@ -151,7 +154,7 @@ export default function Home() {
                   name="Electronics" 
                   slug="electronics-gadgets" 
                   count={5} 
-                  image="https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=800"
+                  image={electronicsImage}
                 />
               </motion.div>
               <motion.div
@@ -164,7 +167,7 @@ export default function Home() {
                   name="Home & Kitchen" 
                   slug="home-kitchen" 
                   count={5} 
-                  image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=800"
+                  image={homeKitchenImage}
                 />
               </motion.div>
               <motion.div
@@ -177,7 +180,7 @@ export default function Home() {
                   name="Fashion" 
                   slug="fashion-accessories" 
                   count={5} 
-                  image="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=800"
+                  image={fashionImage}
                 />
               </motion.div>
             </div>
