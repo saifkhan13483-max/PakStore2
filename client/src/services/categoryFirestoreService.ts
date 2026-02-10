@@ -106,7 +106,7 @@ export class CategoryFirestoreService {
     try {
       const validatedData = insertCategorySchema.parse(categoryData);
       const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), validatedData);
-      return { id: docRef.id, ...validatedData } as unknown as Category;
+      return { ...validatedData, id: docRef.id } as unknown as Category;
     } catch (error: any) {
       console.error("Error creating category:", error);
       throw new Error(`Failed to create category: ${error.message}`);
@@ -158,7 +158,7 @@ export class CategoryFirestoreService {
     try {
       const validatedData = insertParentCategorySchema.parse(categoryData);
       const docRef = await addDoc(collection(db, PARENT_CATEGORIES_COLLECTION), validatedData);
-      return { id: docRef.id, ...validatedData } as unknown as ParentCategory;
+      return { ...validatedData, id: docRef.id } as unknown as ParentCategory;
     } catch (error: any) {
       console.error("Error creating parent category:", error);
       throw new Error(`Failed to create parent category: ${error.message}`);

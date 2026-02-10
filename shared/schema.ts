@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -30,14 +30,22 @@ export const products = pgTable("products", {
   active: boolean("active").default(true),
 });
 
+export const insertParentCategorySchema = createInsertSchema(parentCategories);
+export const insertCategorySchema = createInsertSchema(categories);
+export const insertProductSchema = createInsertSchema(products);
+
+export type ParentCategory = typeof parentCategories.$inferSelect;
+export type Category = typeof categories.$inferSelect;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+
 export const cartItemsSchema = z.object({
   productId: z.string(),
   quantity: z.number().min(1),
 });
 
 export const checkoutInfoSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  fullName: z.string().min(1, "Full name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
   address: z.string().min(1, "Address is required"),

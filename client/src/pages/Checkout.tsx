@@ -39,6 +39,7 @@ export default function Checkout() {
       address: "",
       area: "",
       city: "",
+      notes: "",
     },
   });
 

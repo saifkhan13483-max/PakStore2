@@ -33,7 +33,7 @@ export const productFirestoreService = {
       const constraints: QueryConstraint[] = [];
 
       if (filters.category) {
-        constraints.push(where("categoryId", "==", parseInt(filters.category)));
+        constraints.push(where("categoryId", "==", filters.category));
       }
 
       if (filters.sortBy) {
@@ -106,7 +106,7 @@ export const productFirestoreService = {
 
       const docRef = await addDoc(productsRef, {
         ...productData,
-        inStock: productData.inStock ?? true,
+        inStock: productData.stock && productData.stock > 0,
         rating: "0",
         reviewCount: 0
       });
