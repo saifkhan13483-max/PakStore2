@@ -24,6 +24,19 @@ const PARENT_CATEGORIES_COLLECTION = "parentCategories";
 const PRODUCTS_COLLECTION = "products";
 
 export class CategoryFirestoreService {
+  async getCategory(id: string): Promise<Category> {
+    try {
+      const docSnap = await getDoc(doc(db, CATEGORIES_COLLECTION, id));
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as unknown as Category;
+      }
+      throw new Error("Category not found");
+    } catch (error: any) {
+      console.error("Error getting category:", error);
+      throw new Error(`Failed to fetch category: ${error.message}`);
+    }
+  }
+
   async getAllCategories(): Promise<Category[]> {
     try {
       const q = query(collection(db, CATEGORIES_COLLECTION), orderBy("name", "asc"));

@@ -100,6 +100,8 @@ export const commentSchema = z.object({
 
 export const insertCommentSchema = commentSchema.omit({ id: true, createdAt: true });
 
+export const insertOrderSchema = orderSchema.omit({ id: true, createdAt: true, orderId: true });
+
 export type Order = z.infer<typeof orderSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;

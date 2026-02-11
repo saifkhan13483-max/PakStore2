@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, Truck, ShieldCheck, ChevronLeft, Star, RotateCcw } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
@@ -12,9 +12,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CommentSection } from "@/components/product/CommentSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -23,6 +25,12 @@ export default function ProductDetail() {
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", slug],
     queryFn: () => productFirestoreService.getProductBySlug(slug),
+  });
+
+  const { data: category } = useQuery({
+    queryKey: ["category", product?.categoryId],
+    enabled: !!product?.categoryId,
+    queryFn: () => categoryFirestoreService.getCategory(String(product!.categoryId!)),
   });
 
   const { data: relatedProductsData } = useQuery({
@@ -159,9 +167,16 @@ export default function ProductDetail() {
         {/* Info Section */}
         <div className="flex flex-col">
           <div className="space-y-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
-              {product.name}
-            </h1>
+            <div className="space-y-1">
+              {category && (
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                  {category.name}
+                </p>
+              )}
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+                {product.name}
+              </h1>
+            </div>
 
             <div className="flex items-center gap-2">
               <div className="flex items-center text-yellow-500">
@@ -184,7 +199,7 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className="text-muted-foreground text-lg leading-relaxed line-clamp-5 min-h-[7.5rem]">
+            <div className="text-muted-foreground text-lg leading-relaxed">
               {product.description}
             </div>
 
@@ -202,7 +217,7 @@ export default function ProductDetail() {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border/50">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border/50 mt-auto">
               <div className="flex items-center border rounded-md bg-background p-1 w-fit">
                 <Button 
                   variant="ghost" 
@@ -237,21 +252,32 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <Separator className="my-12" />
-
-      {/* Middle Section: Long Description */}
+      {/* Middle Section: Tabs for Description and Reviews */}
       <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">Product Long Description:</h2>
-        <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed">
-          <p>{product.longDescription || "No detailed description available for this product."}</p>
-        </div>
-      </section>
-
-      <Separator className="my-12" />
-
-      {/* Comments Section */}
-      <section className="mb-16">
-        <CommentSection productId={product.id} />
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+            <TabsTrigger 
+              value="description" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3 font-semibold text-base transition-none"
+            >
+              Product long description:
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reviews" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3 font-semibold text-base transition-none"
+            >
+              Customer Reviews
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="description" className="pt-8 focus-visible:ring-0">
+            <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed">
+              <p>{product.longDescription || "No detailed description available for this product."}</p>
+            </div>
+          </TabsContent>
+          <TabsContent value="reviews" className="pt-8 focus-visible:ring-0">
+            <CommentSection productId={product.id} />
+          </TabsContent>
+        </Tabs>
       </section>
 
       <Separator className="my-12" />
