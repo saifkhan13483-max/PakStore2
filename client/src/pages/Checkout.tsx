@@ -58,7 +58,7 @@ export default function Checkout() {
       
       // 1. Prepare order data
       const subtotal = items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0);
-      const shipping = 250; // Flat rate for Pakistan
+      const shipping = subtotal > 5000 ? 0 : 250; // Corrected: FREE shipping on orders over 5,000
       const total = subtotal + shipping;
 
       const orderData = {
@@ -89,26 +89,33 @@ export default function Checkout() {
       console.log("DEBUG Order Payload:", orderData);
       
       // 2. Send order to backend API instead of direct Firestore call
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
+      let response;
+      try {
+        response = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderData),
+        });
+      } catch (fetchError: any) {
+        console.error("DEBUG Network/Fetch error:", fetchError);
+        throw new Error("No response from server. Please check your internet connection.");
+      }
 
-      const responseData = await response.text().then(text => {
-        try {
-          return text ? JSON.parse(text) : { message: "No response from server" };
-        } catch (e) {
-          console.error("DEBUG JSON parse error:", text);
-          return { message: "Invalid server response", raw: text };
-        }
-      });
+      const responseText = await response.text();
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : { message: "No response body from server" };
+      } catch (e) {
+        console.error("DEBUG JSON parse error:", responseText);
+        responseData = { message: "Invalid server response", raw: responseText };
+      }
+      
       console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
 
       if (!response.ok) {
-        throw new Error(responseData.message || "Failed to place order");
+        throw new Error(responseData.message || `Server error (${response.status})`);
       }
 
       toast({
