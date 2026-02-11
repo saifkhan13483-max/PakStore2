@@ -115,6 +115,11 @@ export default function Checkout() {
       console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
 
       if (!response.ok) {
+        // Handle explicit validation errors from backend
+        if (responseData.message === "Validation failed" && responseData.details) {
+          const firstError = responseData.details[0];
+          throw new Error(`Validation Error: ${firstError.path.join('.')} - ${firstError.message}`);
+        }
         throw new Error(responseData.message || `Server error (${response.status})`);
       }
 

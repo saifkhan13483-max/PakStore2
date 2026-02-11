@@ -10,7 +10,13 @@ export function registerRoutes(app: Express): Server {
       const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
       console.log("Order created successfully:", order.id);
-      return res.status(201).json(order);
+      return res.status(201).json({ 
+        success: true, 
+        message: "Order placed successfully", 
+        orderId: order.orderId,
+        id: order.id,
+        ...order 
+      });
     } catch (error: any) {
       console.error("Order creation error details:", error);
       // If it's a Zod error, provide more details
