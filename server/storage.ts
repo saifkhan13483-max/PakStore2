@@ -42,7 +42,6 @@ export interface IStorage {
 }
 
 export class FirestoreStorage implements IStorage {
-  // ... existing methods ...
   async getParentCategories(): Promise<ParentCategory[]> {
     const snapshot = await db.collection("parent_categories").get();
     return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as ParentCategory));
@@ -162,8 +161,16 @@ export class FirestoreStorage implements IStorage {
       return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Comment));
     } catch (error) {
       console.error("DEBUG Firestore getComments Error:", error);
-      // If index is missing, it might fail. Fallback to unsorted if needed, or just throw
-      throw error;
+      // Fallback to unsorted
+      try {
+        const snapshot = await db.collection("comments")
+          .where("productId", "==", productId)
+          .get();
+        const comments = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Comment));
+        return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (e) {
+        throw error;
+      }
     }
   }
 

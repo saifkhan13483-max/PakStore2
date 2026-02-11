@@ -97,7 +97,14 @@ export default function Checkout() {
         body: JSON.stringify(orderData),
       });
 
-      const responseData = await response.json();
+      const responseData = await response.text().then(text => {
+        try {
+          return text ? JSON.parse(text) : { message: "No response from server" };
+        } catch (e) {
+          console.error("DEBUG JSON parse error:", text);
+          return { message: "Invalid server response", raw: text };
+        }
+      });
       console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
 
       if (!response.ok) {
