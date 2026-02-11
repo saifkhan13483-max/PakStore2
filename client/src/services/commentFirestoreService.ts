@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase";
+import { queryClient } from "@/lib/queryClient";
 import { 
   collection, 
   addDoc, 
@@ -109,6 +110,11 @@ export const commentFirestoreService = {
         reviewCount: comments.length,
         updatedAt: Timestamp.now()
       });
+
+      // Invalidate queries
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+      await queryClient.invalidateQueries({ queryKey: ["product", commentData.productId] });
+      await queryClient.invalidateQueries({ queryKey: ["product"] });
     } catch (error) {
       console.error("Error updating comment in Firestore:", error);
       throw error;
@@ -148,6 +154,11 @@ export const commentFirestoreService = {
           updatedAt: Timestamp.now()
         });
       }
+
+      // Invalidate queries
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+      await queryClient.invalidateQueries({ queryKey: ["product", commentData.productId] });
+      await queryClient.invalidateQueries({ queryKey: ["product"] });
     } catch (error) {
       console.error("Error deleting comment from Firestore:", error);
       throw error;
