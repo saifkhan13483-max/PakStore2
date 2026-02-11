@@ -22,15 +22,18 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [rating, setRating] = useState(5);
   const [images, setImages] = useState<string[]>([]);
 
-  const { data: comments, isLoading } = useQuery<Comment[]>({
+  const { data: comments, isLoading, refetch } = useQuery<Comment[]>({
     queryKey: ["comments", productId],
     queryFn: () => commentFirestoreService.getComments(productId),
+    // Increase frequency or disable cache for testing if needed
+    staleTime: 0,
   });
 
   const mutation = useMutation({
     mutationFn: (newComment: any) => commentFirestoreService.createComment(newComment),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
+    onSuccess: async () => {
+      // Force an immediate refetch from Firestore
+      await refetch();
       setContent("");
       setImages([]);
       setRating(5);

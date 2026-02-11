@@ -34,11 +34,16 @@ export const commentFirestoreService = {
       ...comment,
       createdAt: Timestamp.now()
     };
-    const docRef = await addDoc(collection(db, "comments"), data);
-    return {
-      id: docRef.id,
-      ...data,
-      createdAt: data.createdAt.toDate().toISOString()
-    } as Comment;
+    try {
+      const docRef = await addDoc(collection(db, "comments"), data);
+      return {
+        id: docRef.id,
+        ...data,
+        createdAt: data.createdAt.toDate().toISOString()
+      } as Comment;
+    } catch (error) {
+      console.error("Error creating comment in Firestore:", error);
+      throw error;
+    }
   }
 };
