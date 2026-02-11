@@ -365,7 +365,7 @@ export default function AdminProducts() {
                     <div className="flex flex-col">
                       <span className="truncate max-w-[200px]">{product.name}</span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        {categories?.find(c => String(c.id) === String(product.categoryId))?.name || 'Uncategorized'}
+                        {categories?.find(c => String(c.id) === String(product.categoryId) || c.slug === product.categoryId)?.name || 'Uncategorized'}
                       </span>
                     </div>
                   </TableCell>

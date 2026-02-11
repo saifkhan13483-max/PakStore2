@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { productService } from "@/services/productService";
+import { productFirestoreService } from "@/services/productFirestoreService";
 
-export function useProducts() {
+export function useProducts(categoryId?: string) {
   return useQuery({
-    queryKey: ["products"],
-    queryFn: () => productService.getProducts(),
+    queryKey: ["products", categoryId],
+    queryFn: () => productFirestoreService.getAllProducts({ category: categoryId }),
     refetchInterval: 30000,
   });
 }
@@ -12,7 +12,7 @@ export function useProducts() {
 export function useProduct(slug: string) {
   return useQuery({
     queryKey: ["products", slug],
-    queryFn: () => productService.getProductBySlug(slug),
+    queryFn: () => productFirestoreService.getProductBySlug(slug),
     enabled: !!slug,
   });
 }

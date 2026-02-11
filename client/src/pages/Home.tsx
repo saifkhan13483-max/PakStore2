@@ -15,17 +15,21 @@ import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_17
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { useProducts } from "@/hooks/use-products";
 
 export default function Home() {
-  const { data: featuredProducts, isLoading: isFeaturedLoading } = useQuery({
-    queryKey: ["featured-products"],
-    queryFn: () => productFirestoreService.getAllProducts({ limit: 4 }),
-  });
+  const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
 
-  const { data: newArrivals, isLoading: isNewArrivalsLoading } = useQuery({
-    queryKey: ["new-arrivals"],
-    queryFn: () => productFirestoreService.getAllProducts({ limit: 4, sortBy: "newest" }),
-  });
+  const featuredProducts = useMemo(() => {
+    return allProducts?.slice(0, 4) || [];
+  }, [allProducts]);
+
+  const newArrivals = useMemo(() => {
+    return allProducts?.slice(0, 4) || [];
+  }, [allProducts]);
+
+  const isFeaturedLoading = isAllProductsLoading;
+  const isNewArrivalsLoading = isAllProductsLoading;
 
   return (
     <div className="min-h-screen flex flex-col font-body">
