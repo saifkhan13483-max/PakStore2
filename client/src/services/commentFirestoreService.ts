@@ -20,11 +20,14 @@ export const commentFirestoreService = {
     try {
       if (!productId) return [];
       
+      console.log("DEBUG client getComments productId:", productId);
       const q = query(
         collection(db, "comments"),
-        where("productId", "==", productId)
+        where("productId", "==", productId),
+        orderBy("createdAt", "desc")
       );
       const snapshot = await getDocs(q);
+      console.log("DEBUG client getComments snapshot size:", snapshot.size);
       const comments = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -33,21 +36,42 @@ export const commentFirestoreService = {
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
         } as Comment;
       });
-      // Sort manually to avoid needing a composite index in Firestore
-      return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return comments;
     } catch (error) {
-      console.error("Error fetching comments:", error);
-      return [];
+      console.error("DEBUG Error fetching comments:", { productId, error });
+      // Fallback: try without orderBy in case index is missing
+      try {
+        console.log("DEBUG client getComments fallback (no orderBy)");
+        const q = query(
+          collection(db, "comments"),
+          where("productId", "==", productId)
+        );
+        const snapshot = await getDocs(q);
+        const comments = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+          } as Comment;
+        });
+        return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (fallbackError) {
+        console.error("DEBUG client getComments fallback failed:", fallbackError);
+        return [];
+      }
     }
   },
 
   async createComment(comment: InsertComment): Promise<Comment> {
+    console.log("DEBUG Creating Comment:", comment);
     const data = {
       ...comment,
       createdAt: Timestamp.now()
     };
     try {
       const docRef = await addDoc(collection(db, "comments"), data);
+      console.log("DEBUG Comment Doc Created:", docRef.id);
       
       // Aggregate rating on product
       const q = query(
@@ -55,9 +79,10 @@ export const commentFirestoreService = {
         where("productId", "==", comment.productId)
       );
       const snapshot = await getDocs(q);
+      console.log("DEBUG Comments Snapshot size for aggregation:", snapshot.size);
       const comments = snapshot.docs.map(d => d.data());
       const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
-      const averageRating = totalRating / comments.length;
+      const averageRating = totalRating / (comments.length || 1);
       
       const productRef = doc(db, "products", comment.productId);
       await updateDoc(productRef, {
@@ -67,9 +92,9 @@ export const commentFirestoreService = {
       });
       
       // Invalidate queries to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ["comments", comment.productId] });
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       await queryClient.invalidateQueries({ queryKey: ["product", comment.productId] });
-      await queryClient.invalidateQueries({ queryKey: ["product"] }); // For slug-based queries
 
       return {
         id: docRef.id,
@@ -77,7 +102,7 @@ export const commentFirestoreService = {
         createdAt: data.createdAt.toDate().toISOString()
       } as Comment;
     } catch (error) {
-      console.error("Error creating comment in Firestore:", error);
+      console.error("DEBUG Error creating comment in Firestore:", error);
       throw error;
     }
   },

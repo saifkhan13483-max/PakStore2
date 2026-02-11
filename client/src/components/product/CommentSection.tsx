@@ -58,13 +58,21 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
   const { data: comments, isLoading, refetch } = useQuery<Comment[]>({
     queryKey: ["comments", productId],
-    queryFn: () => commentFirestoreService.getComments(productId),
+    queryFn: () => {
+      console.log("DEBUG Querying comments for:", productId);
+      return commentFirestoreService.getComments(productId);
+    },
     staleTime: 0,
+    gcTime: 0,
   });
 
   const mutation = useMutation({
-    mutationFn: (newComment: any) => commentFirestoreService.createComment(newComment),
+    mutationFn: (newComment: any) => {
+      console.log("DEBUG Mutation creating comment:", newComment);
+      return commentFirestoreService.createComment(newComment);
+    },
     onSuccess: async () => {
+      console.log("DEBUG Mutation success, invalidating comments for:", productId);
       await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
       await refetch();
       setContent("");
@@ -73,6 +81,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
       toast({ title: "Success", description: "Comment added successfully" });
     },
     onError: (error: any) => {
+      console.error("DEBUG Mutation error:", error);
       toast({ variant: "destructive", title: "Error", description: error.message });
     },
   });

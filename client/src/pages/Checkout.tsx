@@ -61,7 +61,7 @@ export default function Checkout() {
       const total = subtotal + shipping;
 
       const orderData = {
-        userId: user?.uid,
+        userId: user?.uid || "guest",
         fullName: data.fullName,
         email: data.email,
         phone: data.phone,
@@ -85,6 +85,8 @@ export default function Checkout() {
         status: "pending",
       };
       
+      console.log("DEBUG Order Payload:", orderData);
+      
       // 2. Send order to backend API instead of direct Firestore call
       const response = await fetch("/api/orders", {
         method: "POST",
@@ -95,25 +97,24 @@ export default function Checkout() {
       });
 
       const responseData = await response.json();
+      console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
 
       if (!response.ok) {
         throw new Error(responseData.message || "Failed to place order");
       }
 
-      console.log("Order placed:", responseData);
-      
       toast({
         title: "Order Placed Successfully!",
-        description: `Thank you for shopping with PakCart. Your order ID is #${orderData.orderId}`,
+        description: `Thank you for shopping with PakCart. Your order ID is #${responseData.orderId || responseData.id}`,
       });
 
       clearCart();
       setLocation("/thank-you");
-    } catch (error) {
-      console.error("Order error:", error);
+    } catch (error: any) {
+      console.error("DEBUG Order error:", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {

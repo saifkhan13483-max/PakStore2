@@ -116,26 +116,55 @@ export class FirestoreStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
-    const data = {
-      ...order,
-      createdAt: new Date().toISOString(),
-      orderId: "PC" + Math.floor(100000 + Math.random() * 900000)
-    };
-    const docRef = await db.collection("orders").add(data);
-    return { id: docRef.id, ...data } as Order;
+    try {
+      const data = {
+        ...order,
+        createdAt: new Date().toISOString(),
+        orderId: "PC" + Math.floor(100000 + Math.random() * 900000)
+      };
+      console.log("DEBUG Firestore createOrder Attempt:", JSON.stringify(data, null, 2));
+      const docRef = await db.collection("orders").add(data);
+      console.log("DEBUG Firestore createOrder Success:", docRef.id);
+      return { id: docRef.id, ...data } as Order;
+    } catch (error: any) {
+      console.error("DEBUG Firestore createOrder Error:", error);
+      throw error;
+    }
   }
 
   async getOrders(): Promise<Order[]> {
-    const snapshot = await db.collection("orders").orderBy("createdAt", "desc").get();
-    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Order));
+    try {
+      console.log("DEBUG Firestore getOrders Attempt");
+      const snapshot = await db.collection("orders").orderBy("createdAt", "desc").get();
+      console.log("DEBUG Firestore getOrders Success, count:", snapshot.size);
+      return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Order));
+    } catch (error: any) {
+      console.error("DEBUG Firestore getOrders Error:", error);
+      // Fallback if orderBy fails due to missing index
+      try {
+        console.log("DEBUG Firestore getOrders Fallback (no orderBy)");
+        const snapshot = await db.collection("orders").get();
+        const orders = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Order));
+        return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (fallbackError) {
+        console.error("DEBUG Firestore getOrders Fallback failed:", fallbackError);
+        throw fallbackError;
+      }
+    }
   }
 
   async getComments(productId: string): Promise<Comment[]> {
-    const snapshot = await db.collection("comments")
-      .where("productId", "==", productId)
-      .orderBy("createdAt", "desc")
-      .get();
-    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Comment));
+    try {
+      const snapshot = await db.collection("comments")
+        .where("productId", "==", productId)
+        .orderBy("createdAt", "desc")
+        .get();
+      return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Comment));
+    } catch (error) {
+      console.error("DEBUG Firestore getComments Error:", error);
+      // If index is missing, it might fail. Fallback to unsorted if needed, or just throw
+      throw error;
+    }
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {

@@ -6,16 +6,24 @@ import { insertOrderSchema, insertCommentSchema } from "@shared/schema";
 export function registerRoutes(app: Express): Server {
   app.post("/api/orders", async (req, res) => {
     try {
-      console.log("Received order request:", JSON.stringify(req.body, null, 2));
+      console.log("Received order request body:", JSON.stringify(req.body, null, 2));
       const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
       console.log("Order created successfully:", order.id);
       res.json(order);
     } catch (error: any) {
       console.error("Order creation error details:", error);
+      // If it's a Zod error, provide more details
+      if (error.name === "ZodError") {
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          details: error.errors 
+        });
+      }
       res.status(400).json({ 
         message: error.message || "Failed to create order",
-        details: error.toString()
+        details: error.toString(),
+        stack: error.stack
       });
     }
   });
@@ -25,6 +33,7 @@ export function registerRoutes(app: Express): Server {
       const orders = await storage.getOrders();
       res.json(orders);
     } catch (error: any) {
+      console.error("DEBUG Fetch Orders Error:", error);
       res.status(500).json({ message: error.message });
     }
   });
