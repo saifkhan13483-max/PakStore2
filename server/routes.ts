@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { insertOrderSchema, insertCommentSchema } from "../shared/schema";
 
 export function registerRoutes(app: Express): Server {
+  // Add a simple health check or root route if needed, 
+  // but let's focus on the API routes.
+
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
       console.log("Received order request body:", JSON.stringify(req.body, null, 2));
