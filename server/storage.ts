@@ -22,6 +22,8 @@ export interface IStorage {
   getProducts(categoryId?: string): Promise<Product[]>;
   getProduct(id: string): Promise<Product | null>;
   createProduct(product: InsertProduct): Promise<Product>;
+  createParentCategory(pc: any): Promise<ParentCategory>;
+  createCategory(cat: any): Promise<Category>;
   deleteAllProducts(): Promise<void>;
   
   // Users
@@ -76,6 +78,16 @@ export class FirestoreStorage implements IStorage {
   async createProduct(product: InsertProduct): Promise<Product> {
     const docRef = await db.collection("products").add(product);
     return { id: docRef.id, ...product } as Product;
+  }
+
+  async createParentCategory(pc: any): Promise<ParentCategory> {
+    const docRef = await db.collection("parent_categories").add(pc);
+    return { id: docRef.id, ...pc } as ParentCategory;
+  }
+
+  async createCategory(cat: any): Promise<Category> {
+    const docRef = await db.collection("categories").add(cat);
+    return { id: docRef.id, ...cat } as Category;
   }
 
   async deleteAllProducts(): Promise<void> {
