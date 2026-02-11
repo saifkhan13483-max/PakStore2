@@ -257,26 +257,26 @@ export default function ProductDetail() {
       {/* Middle Section: Tabs for Description and Reviews */}
       <section className="mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+          <TabsList className="w-full flex flex-col sm:flex-row justify-start border-b rounded-none h-auto p-0 bg-transparent">
             <TabsTrigger 
               value="description" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3 font-semibold text-base transition-none"
+              className="w-full sm:w-auto text-left justify-start sm:justify-center rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-none"
             >
               Product long description:
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3 font-semibold text-base transition-none"
+              className="w-full sm:w-auto text-left justify-start sm:justify-center rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-none"
             >
               Customer Reviews
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="pt-8 focus-visible:ring-0">
-            <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-lg leading-relaxed">
+          <TabsContent value="description" className="pt-6 sm:pt-8 focus-visible:ring-0">
+            <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed">
               <p>{product.longDescription || "No detailed description available for this product."}</p>
             </div>
           </TabsContent>
-          <TabsContent value="reviews" className="pt-8 focus-visible:ring-0">
+          <TabsContent value="reviews" className="pt-6 sm:pt-8 focus-visible:ring-0">
             <CommentSection productId={product.id} />
           </TabsContent>
         </Tabs>
