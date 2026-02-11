@@ -73,6 +73,11 @@ export default function Products() {
     let result = [...productsData];
 
     // Client-side additional filters if not handled by Firestore service
+    // Filter by category (double check client side)
+    if (filterState.categories.length > 0) {
+      result = result.filter(p => filterState.categories.includes(String(p.categoryId)));
+    }
+
     // Filter by price range
     if (filterState.priceRange) {
       const ranges: Record<string, { min: number; max: number }> = {

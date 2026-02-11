@@ -127,9 +127,9 @@ export default function AdminProducts() {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch = 
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.description?.toLowerCase().includes(searchTerm.toLowerCase()));
+        (product.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (product.slug?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (product.description?.toLowerCase() || "").includes(searchTerm.toLowerCase());
       
       const matchesStock = stockFilter === "all" || 
         (stockFilter === "in_stock" && product.inStock) || 
@@ -363,9 +363,9 @@ export default function AdminProducts() {
                   </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex flex-col">
-                      <span className="truncate max-w-[200px]">{product.name}</span>
+                      <span className="truncate max-w-[200px]">{product.name || 'Unnamed Product'}</span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                        {categories?.find(c => String(c.id) === String(product.categoryId) || c.slug === product.categoryId)?.name || 'Uncategorized'}
+                        {categories?.find(c => String(c.id) === String(product.categoryId) || c.slug === product.categoryId)?.name || product.categoryId || 'Uncategorized'}
                       </span>
                     </div>
                   </TableCell>

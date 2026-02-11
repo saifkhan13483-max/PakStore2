@@ -42,20 +42,40 @@ export const productFirestoreService = {
   async getAllProducts(filters: ProductFilters = {}) {
     try {
       const constraints: QueryConstraint[] = [];
-      if (filters.category) constraints.push(where("categoryId", "==", filters.category));
-      if (filters.sortBy) {
-        if (filters.sortBy === "price-asc") constraints.push(orderBy("price", "asc"));
-        else if (filters.sortBy === "price-desc") constraints.push(orderBy("price", "desc"));
-        else constraints.push(orderBy("createdAt", "desc"));
-      } else {
-        constraints.push(orderBy("createdAt", "desc"));
+      if (filters.category && filters.category !== "all") {
+        constraints.push(where("categoryId", "==", filters.category));
       }
-      if (filters.limit) constraints.push(limit(filters.limit));
-      if (filters.startAfterDoc) constraints.push(startAfter(filters.startAfterDoc));
 
       const q = query(productsRef, ...constraints);
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
+      // Client-side sorting and searching if needed, but for now just return all
+      // to ensure visibility
+      let result = products;
+
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        result = result.filter(p => 
+          (p.name?.toLowerCase() || "").includes(searchLower) ||
+          (p.description?.toLowerCase() || "").includes(searchLower)
+        );
+      }
+
+      if (filters.sortBy) {
+        result.sort((a, b) => {
+          if (filters.sortBy === "price-asc") return (a.price || 0) - (b.price || 0);
+          if (filters.sortBy === "price-desc") return (b.price || 0) - (a.price || 0);
+          if (filters.sortBy === "newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          return 0;
+        });
+      }
+
+      if (filters.limit) {
+        result = result.slice(0, filters.limit);
+      }
+
+      return result;
     } catch (error: any) {
       console.error("Error getting products:", error);
       throw new Error(`Failed to fetch products: ${error.message}`);
