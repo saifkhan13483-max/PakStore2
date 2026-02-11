@@ -125,16 +125,16 @@ export default function ProductDetail() {
       </Button>
 
       {/* Top Section: Images and Primary Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 mb-12 lg:mb-20">
         {/* Gallery Section */}
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4 lg:sticky lg:top-24 h-fit">
           {images.length > 1 && (
-            <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[500px] order-2 md:order-1">
+            <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[400px] lg:max-h-[500px] order-2 md:order-1">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImage(idx)}
-                  className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
                     activeImage === idx 
                       ? "border-primary ring-2 ring-primary/10" 
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
@@ -165,86 +165,88 @@ export default function ProductDetail() {
         </div>
 
         {/* Info Section */}
-        <div className="flex flex-col">
-          <div className="space-y-4">
-            <div className="space-y-1">
+        <div className="flex flex-col justify-center">
+          <div className="space-y-6">
+            <div className="space-y-2">
               {category && (
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   {category.name}
                 </p>
               )}
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
                 {product.name}
               </h1>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex items-center text-yellow-500">
-                <Star className="w-5 h-5 fill-current" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
+                <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                <span className="font-bold text-yellow-700 dark:text-yellow-500">{product.rating || "0.0"}</span>
               </div>
-              <span className="font-bold">{product.rating || "0.0"}</span>
               <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
-              <Separator orientation="vertical" className="h-4 mx-2" />
-              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full text-xs">
+              <Separator orientation="vertical" className="h-4 hidden sm:block" />
+              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
                 {product.inStock ? "In Stock" : "Out of Stock"}
               </Badge>
             </div>
             
-            <div className="text-3xl font-bold text-primary">
-              {formatPrice(product.price)}
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl md:text-4xl font-bold text-primary">
+                {formatPrice(product.price)}
+              </span>
               {product.originalPrice && (
-                <span className="ml-3 text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
+                <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
 
-            <div className="text-muted-foreground text-lg leading-relaxed">
+            <div className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-2xl">
               {product.description}
             </div>
 
             {product.features && product.features.length > 0 && (
-              <div className="py-4">
-                <h3 className="font-semibold text-foreground mb-3">Key Features</h3>
-                <ul className="space-y-2">
+              <div className="py-2">
+                <h3 className="font-semibold text-foreground mb-4">Key Features</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                   {product.features.map((feature, i) => (
-                    <li key={i} className="flex items-start text-sm text-muted-foreground">
+                    <div key={i} className="flex items-start text-sm text-muted-foreground">
                       <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 mr-3 flex-shrink-0" />
                       {feature}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border/50 mt-auto">
-              <div className="flex items-center border rounded-md bg-background p-1 w-fit">
+            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border/50">
+              <div className="flex items-center border rounded-md bg-background p-1 w-full sm:w-fit justify-between sm:justify-start">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 no-default-hover-elevate"
+                  className="h-9 w-9 no-default-hover-elevate"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
                 >
-                  <Minus className="w-3 h-3" />
+                  <Minus className="w-4 h-4" />
                 </Button>
-                <span className="w-10 text-center font-bold">{quantity}</span>
+                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 no-default-hover-elevate"
+                  className="h-9 w-9 no-default-hover-elevate"
                   onClick={() => setQuantity(quantity + 1)}
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-4 h-4" />
                 </Button>
               </div>
               <Button 
                 size="lg"
-                className="flex-1 h-11 bg-[#1A4D2E] hover:bg-[#1A4D2E]/90 text-white rounded-md gap-2 font-semibold" 
+                className="flex-1 h-12 bg-[#1A4D2E] hover:bg-[#1A4D2E]/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-5 h-5" />
                 {product.inStock ? "Add to Cart" : "Out of Stock"}
               </Button>
             </div>
