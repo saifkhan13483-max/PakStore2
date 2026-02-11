@@ -10,7 +10,7 @@ service cloud.firestore {
         && request.resource.data.rating <= 5
         && request.resource.data.content is string
         && request.resource.data.content.size() <= 2000;
-      allow update, delete: if false; // Only admin or owner via Cloud Functions if needed
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
     }
     
     // Users collection
