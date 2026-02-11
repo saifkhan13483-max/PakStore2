@@ -257,16 +257,16 @@ export default function ProductDetail() {
       {/* Middle Section: Tabs for Description and Reviews */}
       <section className="mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="w-full flex flex-col sm:flex-row justify-start border-b rounded-none h-auto p-0 bg-transparent">
+          <TabsList className="w-full flex flex-row justify-start border-b rounded-none h-auto p-0 bg-transparent overflow-x-auto scrollbar-hide">
             <TabsTrigger 
               value="description" 
-              className="w-full sm:w-auto text-left justify-start sm:justify-center rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-none"
+              className="flex-shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-3 sm:px-6 py-3 font-semibold text-xs sm:text-base transition-none whitespace-nowrap"
             >
               Product long description:
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
-              className="w-full sm:w-auto text-left justify-start sm:justify-center rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base transition-none"
+              className="flex-shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-3 sm:px-6 py-3 font-semibold text-xs sm:text-base transition-none whitespace-nowrap"
             >
               Customer Reviews
             </TabsTrigger>
