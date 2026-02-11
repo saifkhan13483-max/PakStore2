@@ -9,7 +9,7 @@ import {
   InsertOrder,
   Comment,
   InsertComment,
-} from "@shared/schema";
+} from "../shared/schema";
 
 export interface IStorage {
   // Parent Categories

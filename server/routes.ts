@@ -1,10 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertCommentSchema } from "@shared/schema";
+import { insertOrderSchema, insertCommentSchema } from "../shared/schema";
 
 export function registerRoutes(app: Express): Server {
-  app.post("/api/orders", async (req, res) => {
+  app.post("/api/orders", async (req: any, res: any) => {
     try {
       console.log("Received order request body:", JSON.stringify(req.body, null, 2));
       const orderData = insertOrderSchema.parse(req.body);
@@ -28,7 +28,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get("/api/orders", async (_req, res) => {
+  app.get("/api/orders", async (_req: any, res: any) => {
     try {
       const orders = await storage.getOrders();
       res.json(orders);
@@ -38,7 +38,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get("/api/products/:productId/comments", async (req, res) => {
+  app.get("/api/products/:productId/comments", async (req: any, res: any) => {
     try {
       const comments = await storage.getComments(req.params.productId);
       res.json(comments);
@@ -47,7 +47,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.post("/api/products/:productId/comments", async (req, res) => {
+  app.post("/api/products/:productId/comments", async (req: any, res: any) => {
     try {
       const commentData = insertCommentSchema.parse({
         ...req.body,

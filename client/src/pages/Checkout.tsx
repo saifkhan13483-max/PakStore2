@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
