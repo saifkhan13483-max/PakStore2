@@ -74,6 +74,18 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get("/api/orders/:id", async (req: Request, res: Response) => {
+    try {
+      const order = await storage.getOrders().then(orders => orders.find(o => o.id === req.params.id || o.orderId === req.params.id));
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      return res.json(order);
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
