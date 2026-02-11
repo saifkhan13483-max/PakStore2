@@ -6,7 +6,10 @@ import {
   query, 
   where, 
   orderBy, 
-  Timestamp 
+  Timestamp,
+  doc,
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore";
 import { Comment, InsertComment } from "@shared/schema";
 
@@ -50,6 +53,29 @@ export const commentFirestoreService = {
       } as Comment;
     } catch (error) {
       console.error("Error creating comment in Firestore:", error);
+      throw error;
+    }
+  },
+
+  async updateComment(commentId: string, updates: Partial<InsertComment>): Promise<void> {
+    try {
+      const docRef = doc(db, "comments", commentId);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: Timestamp.now()
+      });
+    } catch (error) {
+      console.error("Error updating comment in Firestore:", error);
+      throw error;
+    }
+  },
+
+  async deleteComment(commentId: string): Promise<void> {
+    try {
+      const docRef = doc(db, "comments", commentId);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error("Error deleting comment from Firestore:", error);
       throw error;
     }
   }

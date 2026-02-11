@@ -5,13 +5,36 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Loader2, Send } from "lucide-react";
+import { Star, Loader2, Send, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { Comment } from "@shared/schema";
 import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
 import { useAuthStore } from "@/store/authStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 
@@ -25,6 +48,13 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(5);
   const [images, setImages] = useState<string[]>([]);
+
+  // Edit/Delete states
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editRating, setEditRating] = useState(5);
+  const [editImages, setEditImages] = useState<string[]>([]);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
   const { data: comments, isLoading, refetch } = useQuery<Comment[]>({
     queryKey: ["comments", productId],
@@ -41,6 +71,33 @@ export function CommentSection({ productId }: CommentSectionProps) {
       setImages([]);
       setRating(5);
       toast({ title: "Success", description: "Comment added successfully" });
+    },
+    onError: (error: any) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: any }) =>
+      commentFirestoreService.updateComment(id, updates),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
+      await refetch();
+      setEditingComment(null);
+      toast({ title: "Success", description: "Comment updated successfully" });
+    },
+    onError: (error: any) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => commentFirestoreService.deleteComment(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
+      await refetch();
+      setDeletingCommentId(null);
+      toast({ title: "Success", description: "Comment deleted successfully" });
     },
     onError: (error: any) => {
       toast({ variant: "destructive", title: "Error", description: error.message });
@@ -75,6 +132,25 @@ export function CommentSection({ productId }: CommentSectionProps) {
       rating,
       images,
     });
+  };
+
+  const handleEditSubmit = () => {
+    if (!editingComment) return;
+    updateMutation.mutate({
+      id: editingComment.id,
+      updates: {
+        content: editContent,
+        rating: editRating,
+        images: editImages,
+      },
+    });
+  };
+
+  const startEdit = (comment: Comment) => {
+    setEditingComment(comment);
+    setEditContent(comment.content);
+    setEditRating(comment.rating);
+    setEditImages(comment.images || []);
   };
 
   return (
@@ -146,9 +222,33 @@ export function CommentSection({ productId }: CommentSectionProps) {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold">{comment.userName}</h4>
-                      <span className="text-sm text-muted-foreground">
-                        {comment.createdAt ? format(new Date(comment.createdAt), "MMM d, yyyy") : "Just now"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {comment.createdAt ? format(new Date(comment.createdAt), "MMM d, yyyy") : "Just now"}
+                        </span>
+                        {user?.uid === comment.userId && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => startEdit(comment)}>
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setDeletingCommentId(comment.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                     </div>
                     <div className="flex text-yellow-500">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -175,6 +275,69 @@ export function CommentSection({ productId }: CommentSectionProps) {
           ))
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingComment} onOpenChange={(open) => !open && setEditingComment(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Review</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setEditRating(star)}
+                  className={`p-1 transition-colors ${editRating >= star ? "text-yellow-500" : "text-muted"}`}
+                >
+                  <Star className={`w-6 h-6 ${editRating >= star ? "fill-current" : ""}`} />
+                </button>
+              ))}
+            </div>
+            <Textarea
+              placeholder="Update your review..."
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="min-h-[100px]"
+            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Update Images</label>
+              <ImageUploader value={editImages} onChange={setEditImages} maxImages={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingComment(null)}>Cancel</Button>
+            <Button onClick={handleEditSubmit} disabled={updateMutation.isPending}>
+              {updateMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deletingCommentId} onOpenChange={(open) => !open && setDeletingCommentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your review.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deletingCommentId && deleteMutation.mutate(deletingCommentId)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
