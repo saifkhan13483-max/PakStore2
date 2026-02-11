@@ -1,0 +1,121 @@
+Part 1: Project Foundation & Initial Setup
+Prompt: "I'm starting a migration from React+Express+PostgreSQL to Next.js+Firebase. Help me with the initial project setup:
+
+Provide the exact command to create a Next.js 14+ project with TypeScript, Tailwind, ESLint, and App Router enabled
+Show me how to structure the project folders following App Router conventions (app/, components/, lib/, etc.)
+List which dependencies I should remove (express, drizzle-orm, vite, wouter) and which to keep (zod, framer-motion, lucide-react, @dnd-kit)
+Create a basic next.config.js with Cloudinary image domain configuration
+Set up the initial TypeScript configuration for strict mode
+Provide a template for environment variables I'll need for Firebase and Cloudinary"
+Part 2: Firebase Configuration & SDK Setup
+Prompt: "Now I need to set up Firebase properly for Next.js. My current Firebase setup is basic and needs a complete overhaul:
+
+Create a comprehensive lib/firebase.ts file using Firebase v9+ modular SDK for client-side operations
+Create a lib/firebase-admin.ts file for server-side operations using firebase-admin SDK
+Explain the difference between client and server Firebase usage in Next.js App Router
+Show me how to properly configure environment variables (NEXT_PUBLIC_ vs regular env vars)
+Create TypeScript interfaces for Firebase configuration
+Explain Firebase project setup requirements (Authentication, Firestore, Security Rules)
+Provide error handling patterns for Firebase operations"
+Part 3: Database Schema Migration (PostgreSQL to Firestore)
+Prompt: "This is the critical step - migrating from relational PostgreSQL to NoSQL Firestore. I need help with data modeling:
+
+Explain the fundamental differences between SQL normalization and NoSQL denormalization strategies
+Design Firestore collections structure for common patterns (users, posts, comments, relationships)
+Create TypeScript interfaces for all Firestore document types
+Explain when to use subcollections vs root collections vs embedded documents
+Design data access patterns to minimize reads and optimize for Firestore pricing
+Create a strategy for migrating existing PostgreSQL data to Firestore
+Provide basic Firestore security rules template
+Show examples of handling relationships in NoSQL (one-to-many, many-to-many)"
+Part 4: Authentication System Overhaul
+Prompt: "I need to upgrade from basic Firebase Auth to a complete authentication system for Next.js:
+
+Create a comprehensive AuthContext provider using Firebase Auth v9+ with TypeScript
+Build custom hooks (useAuth, useUser, useAuthState) with proper loading and error states
+Implement authentication functions (signUp, signIn, signOut, resetPassword, updateProfile)
+Create a Next.js middleware (middleware.ts) for route protection instead of client-side guards
+Show how to handle authentication state in both Server and Client Components
+Create reusable authentication UI components (LoginForm, SignupForm, AuthGuard)
+Implement proper error handling and user feedback for auth operations
+Explain session management and token refresh in Next.js App Router"
+Part 5: Backend Logic Migration (Express to Server Actions)
+Prompt: "I need to eliminate my Express backend and migrate to Next.js Server Actions and API Routes:
+
+Analyze typical Express route patterns and show equivalent Next.js implementations
+Create Server Actions for CRUD operations using firebase-admin SDK
+Show how to call Server Actions from Client Components (forms, buttons)
+Implement proper error handling and validation in Server Actions using Zod
+Create API Routes for operations that need REST endpoints (webhooks, third-party integrations)
+Implement authentication checks in Server Actions and API Routes
+Show examples of complex operations (transactions, batch operations) in Firestore
+Explain when to use Server Actions vs API Routes vs Server Components"
+Part 6: Data Fetching Strategy Migration
+Prompt: "I currently use TanStack React Query for data fetching. Help me adapt this for Next.js + Firestore:
+
+Show how to fetch data in Server Components using firebase-admin (for initial page loads)
+Implement real-time data fetching in Client Components using Firestore's onSnapshot
+Decide when to keep React Query vs use native Next.js/Firestore patterns
+Create custom hooks for common Firestore operations (useDocument, useCollection, useRealtimeQuery)
+Implement proper loading states, error handling, and optimistic updates
+Show pagination patterns using Firestore cursors
+Handle complex queries (where clauses, compound queries, array queries)
+Implement caching strategies for Firestore data in Next.js"
+Part 7: UI Components & State Management Migration
+Prompt: "I need to migrate my existing UI components and Zustand state management to Next.js:
+
+Migrate Shadcn UI components to Next.js (re-initialize and configure)
+Handle client-side interactive components (Framer Motion, @dnd-kit) with 'use client' directive
+Convert Wouter routing to Next.js App Router (file-based routing, dynamic routes, layouts)
+Adapt Zustand stores for Next.js App Router, handling SSR and hydration issues
+Create proper client/server component boundaries
+Implement Zustand persistence that works with Next.js
+Integrate state management with Firebase Authentication state
+Handle hydration mismatches and provide solutions
+Create reusable layout components with proper TypeScript types"
+Part 8: Forms & Validation Migration
+Prompt: "I use React Hook Form with Zod validation. Help me integrate this with Next.js Server Actions:
+
+Create form components that work with both Client Components and Server Actions
+Show how to connect React Hook Form to Server Actions for form submission
+Implement server-side validation using Zod in Server Actions
+Handle and display server-side validation errors in the form UI
+Create reusable form patterns for common operations (create, update, delete)
+Implement progressive enhancement (forms work without JavaScript)
+Add proper loading states, success feedback, and error handling
+Show examples for different form types (user registration, data entry, file uploads)
+Integrate form operations with Firestore CRUD operations"
+Part 9: Media Management & Cloudinary Integration
+Prompt: "I need to implement secure Cloudinary integration in Next.js:
+
+Create Server Actions for generating signed Cloudinary upload URLs
+Implement secure file upload components with drag-and-drop support (@dnd-kit integration)
+Show both direct client uploads and server-proxied uploads
+Create image gallery components using Next.js Image component with Cloudinary optimization
+Implement upload progress indicators and preview functionality
+Handle multiple file uploads and batch operations
+Store Cloudinary URLs and metadata in Firestore documents
+Implement image deletion and management features
+Add proper error handling, file validation, and size limits
+Configure Next.js Image component for Cloudinary transformations"
+Part 10: Testing, Deployment & Production Optimization
+Prompt: "Final step - prepare for production deployment on Vercel:
+
+Migrate existing Jest tests to work with Next.js (replace Supertest with appropriate testing for Server Actions)
+Create comprehensive test suites for Server Actions, Firebase operations, and components
+Set up Vercel deployment configuration and environment variables
+Create and deploy Firestore security rules and indexes
+Implement error monitoring and logging (optional: Sentry integration)
+Optimize performance (bundle analysis, image optimization, caching strategies)
+Create a pre-deployment checklist (authentication flows, database operations, API endpoints)
+Document the new architecture and deployment process
+Provide monitoring and maintenance guidelines
+Create a rollback strategy and migration completion verification steps"
+Usage Instructions: Use these prompts sequentially with your AI assistant. Each part builds on the previous ones, so complete them in order. Provide your actual code, schemas, and specific requirements when the AI requests them for more targeted assistance.
+
+Expected Timeline:
+
+Parts 1-3: Foundation setup (1-2 days)
+Parts 4-6: Core functionality migration (3-4 days)
+Parts 7-9: UI and feature completion (2-3 days)
+Part 10: Testing and deployment (1-2 days)
