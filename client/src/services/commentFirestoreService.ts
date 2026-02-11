@@ -60,7 +60,7 @@ export const commentFirestoreService = {
       
       const productRef = doc(db, "products", comment.productId);
       await updateDoc(productRef, {
-        averageRating: Number(averageRating.toFixed(1)),
+        rating: Number(averageRating.toFixed(1)),
         reviewCount: comments.length,
         updatedAt: Timestamp.now()
       });
@@ -100,7 +100,7 @@ export const commentFirestoreService = {
       
       const productRef = doc(db, "products", commentData.productId);
       await updateDoc(productRef, {
-        averageRating: Number(averageRating.toFixed(1)),
+        rating: Number(averageRating.toFixed(1)),
         reviewCount: comments.length,
         updatedAt: Timestamp.now()
       });
@@ -132,13 +132,13 @@ export const commentFirestoreService = {
         const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
         const averageRating = totalRating / comments.length;
         await updateDoc(productRef, {
-          averageRating: Number(averageRating.toFixed(1)),
+          rating: Number(averageRating.toFixed(1)),
           reviewCount: comments.length,
           updatedAt: Timestamp.now()
         });
       } else {
         await updateDoc(productRef, {
-          averageRating: 0,
+          rating: 0,
           reviewCount: 0,
           updatedAt: Timestamp.now()
         });

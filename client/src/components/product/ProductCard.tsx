@@ -92,7 +92,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center gap-1 mb-2">
           <div className="flex items-center text-yellow-500">
             <Star className="w-3.5 h-3.5 fill-current" />
-            <span className="ml-1 text-sm font-medium text-foreground">{(product.averageRating || product.rating || 0).toFixed(1)}</span>
+            <span className="ml-1 text-sm font-medium text-foreground">{(Number(product.rating) || 0).toFixed(1)}</span>
           </div>
           <span className="text-xs text-muted-foreground">({product.reviewCount || 0})</span>
         </div>
