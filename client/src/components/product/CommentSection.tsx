@@ -62,14 +62,18 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold">Customer Reviews</h2>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border">
           <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-          <span className="text-xl font-bold">
-            {comments?.length ? (comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) / comments.length).toFixed(1) : "0.0"}
-          </span>
-          <span className="text-muted-foreground">({comments?.length || 0} reviews)</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-bold leading-none">
+              {comments?.length ? (comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) / comments.length).toFixed(1) : "0.0"}
+            </span>
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              ({comments?.length || 0} reviews)
+            </span>
+          </div>
         </div>
       </div>
 
