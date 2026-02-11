@@ -11,6 +11,7 @@ import { ImageUploader } from "@/components/product/ImageUploader";
 import { Comment } from "@shared/schema";
 import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
+import { useAuthStore } from "@/store/authStore";
 
 interface CommentSectionProps {
   productId: string;
@@ -18,6 +19,7 @@ interface CommentSectionProps {
 
 export function CommentSection({ productId }: CommentSectionProps) {
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuthStore();
   const [content, setContent] = useState("");
   const [rating, setRating] = useState(5);
   const [images, setImages] = useState<string[]>([]);
@@ -25,14 +27,12 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const { data: comments, isLoading, refetch } = useQuery<Comment[]>({
     queryKey: ["comments", productId],
     queryFn: () => commentFirestoreService.getComments(productId),
-    // Increase frequency or disable cache for testing if needed
     staleTime: 0,
   });
 
   const mutation = useMutation({
     mutationFn: (newComment: any) => commentFirestoreService.createComment(newComment),
     onSuccess: async () => {
-      // Force an immediate refetch from Firestore
       await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
       await refetch();
       setContent("");
@@ -47,14 +47,28 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!isAuthenticated || !user) {
+      toast({ 
+        variant: "destructive", 
+        title: "Authentication required", 
+        description: "Please login to post a review" 
+      });
+      return;
+    }
+    if (!content.trim()) {
+      toast({ 
+        variant: "destructive", 
+        title: "Validation error", 
+        description: "Please enter a comment" 
+      });
+      return;
+    }
     
-    // Mock user data since auth is managed externally (firebase)
     mutation.mutate({
       productId,
-      userId: "temp-user",
-      userName: "Guest User",
-      userPhoto: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
+      userId: user.uid,
+      userName: user.displayName || "Anonymous User",
+      userPhoto: user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`,
       content,
       rating,
       images,
