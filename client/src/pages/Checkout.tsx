@@ -100,16 +100,21 @@ export default function Checkout() {
         });
       } catch (fetchError: any) {
         console.error("DEBUG Network/Fetch error:", fetchError);
-        throw new Error("No response from server. Please check your internet connection.");
+        throw new Error("Could not connect to the server. Please check your internet connection and try again.");
       }
 
-      const responseText = await response.text();
       let responseData;
+      const responseText = await response.text();
+      
       try {
-        responseData = responseText ? JSON.parse(responseText) : { message: "No response body from server" };
+        responseData = responseText ? JSON.parse(responseText) : null;
       } catch (e) {
         console.error("DEBUG JSON parse error:", responseText);
-        responseData = { message: "Invalid server response", raw: responseText };
+        throw new Error("The server returned an invalid response. Please try again later.");
+      }
+      
+      if (!responseData) {
+        throw new Error("No response received from the server. Please try again.");
       }
       
       console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
@@ -119,14 +124,15 @@ export default function Checkout() {
         if (responseData.message === "Validation failed" && responseData.details) {
           console.error("DEBUG Validation details:", responseData.details);
           const firstError = responseData.details[0];
-          throw new Error(`Validation Error: ${firstError.path.join('.')} - ${firstError.message}`);
+          const path = firstError.path ? firstError.path.join('.') : 'Field';
+          throw new Error(`Validation Error: ${path} - ${firstError.message}`);
         }
-        throw new Error(responseData.message || `Server error (${response.status})`);
+        throw new Error(responseData.message || `Order failed (Server status: ${response.status})`);
       }
 
       toast({
         title: "Order Placed Successfully!",
-        description: `Thank you for shopping with PakCart. Your order ID is #${responseData.orderId || responseData.id}`,
+        description: `Thank you for shopping with us. Your order ID is #${responseData.orderId || responseData.id}`,
       });
 
       clearCart();
