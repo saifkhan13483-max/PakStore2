@@ -8,8 +8,9 @@ export function registerRoutes(app: Express): Server {
     try {
       console.log("Received order request body:", JSON.stringify(req.body, null, 2));
       const orderData = insertOrderSchema.parse(req.body);
+      console.log("Order data parsed successfully");
       const order = await storage.createOrder(orderData);
-      console.log("Order created successfully:", order.id);
+      console.log("Order created successfully in storage:", order.id);
       
       // Ensure we always return a clear JSON response
       return res.status(201).json({ 
