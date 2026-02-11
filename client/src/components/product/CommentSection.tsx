@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { Comment } from "@shared/schema";
 import { format } from "date-fns";
+import { commentFirestoreService } from "@/services/commentFirestoreService";
 
 interface CommentSectionProps {
   productId: string;
@@ -22,16 +23,14 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [images, setImages] = useState<string[]>([]);
 
   const { data: comments, isLoading } = useQuery<Comment[]>({
-    queryKey: ["/api/products", productId, "comments"],
+    queryKey: ["comments", productId],
+    queryFn: () => commentFirestoreService.getComments(productId),
   });
 
   const mutation = useMutation({
-    mutationFn: async (newComment: any) => {
-      const res = await apiRequest("POST", `/api/products/${productId}/comments`, newComment);
-      return res.json();
-    },
+    mutationFn: (newComment: any) => commentFirestoreService.createComment(newComment),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products", productId, "comments"] });
+      queryClient.invalidateQueries({ queryKey: ["comments", productId] });
       setContent("");
       setImages([]);
       setRating(5);
