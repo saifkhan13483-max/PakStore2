@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";

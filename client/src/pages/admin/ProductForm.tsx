@@ -84,7 +84,7 @@ export default function AdminProductForm() {
       form.reset({
         ...product,
         images: product.images || [],
-        categoryId: product.categoryId ? String(product.categoryId) : undefined,
+        categoryId: product.categoryId ? String(product.categoryId) : "",
         rating: typeof product.rating === 'string' ? parseFloat(product.rating) : (product.rating || 0),
         reviewCount: product.reviewCount || 0,
         features: product.features || [],
