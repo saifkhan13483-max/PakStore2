@@ -14,8 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { MediaUpload } from "../../components/MediaUpload";
-import { CloudinaryImage } from "../../components/CloudinaryImage";
+import { UserAvatar } from "../../components/auth/UserAvatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const PAKISTAN_CITIES = [
@@ -142,20 +141,12 @@ export default function Profile() {
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6 pb-6 border-b">
               <div className="relative group">
-                {user.photoURL ? (
-                  <CloudinaryImage 
-                    publicId={user.photoURL.split('/').pop()?.split('.')[0]} 
-                    className="h-20 w-20 rounded-full border-2 border-primary/20"
-                    width={80}
-                    height={80}
-                    alt={user.displayName || "User"}
-                    fallbackSrc={user.photoURL}
-                  />
-                ) : (
-                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary border-2 border-primary/20">
-                    {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
-                  </div>
-                )}
+                <UserAvatar 
+                  photoURL={user.photoURL}
+                  displayName={user.displayName}
+                  email={user.email}
+                  className="h-20 w-20 border-2 border-primary/20"
+                />
                 <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
