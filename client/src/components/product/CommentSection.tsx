@@ -47,6 +47,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
     
     // Mock user data since auth is managed externally (firebase)
     mutation.mutate({
+      productId,
       userId: "temp-user",
       userName: "Guest User",
       userPhoto: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
