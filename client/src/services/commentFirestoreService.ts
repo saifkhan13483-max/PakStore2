@@ -18,21 +18,27 @@ export const commentFirestoreService = {
       orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Comment));
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Ensure createdAt is a string if it's a Firestore Timestamp
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+      } as Comment;
+    });
   },
 
   async createComment(comment: InsertComment): Promise<Comment> {
     const data = {
       ...comment,
-      createdAt: new Timestamp(Math.floor(Date.now() / 1000), 0).toDate().toISOString()
+      createdAt: Timestamp.now()
     };
     const docRef = await addDoc(collection(db, "comments"), data);
     return {
       id: docRef.id,
-      ...data
+      ...data,
+      createdAt: data.createdAt.toDate().toISOString()
     } as Comment;
   }
 };

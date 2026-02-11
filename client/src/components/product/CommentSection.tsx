@@ -49,6 +49,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
     mutation.mutate({
       userId: "temp-user",
       userName: "Guest User",
+      userPhoto: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
       content,
       rating,
       images,
@@ -62,7 +63,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
         <div className="flex items-center gap-1">
           <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
           <span className="text-xl font-bold">
-            {comments?.length ? (comments.reduce((acc, c) => acc + c.rating, 0) / comments.length).toFixed(1) : "0.0"}
+            {comments?.length ? (comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) / comments.length).toFixed(1) : "0.0"}
           </span>
           <span className="text-muted-foreground">({comments?.length || 0} reviews)</span>
         </div>
