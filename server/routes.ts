@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema } from "@shared/schema";
+import { insertOrderSchema, insertCommentSchema } from "@shared/schema";
 
 export function registerRoutes(app: Express): Server {
   app.post("/api/orders", async (req, res) => {
@@ -26,6 +26,28 @@ export function registerRoutes(app: Express): Server {
       res.json(orders);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/products/:productId/comments", async (req, res) => {
+    try {
+      const comments = await storage.getComments(req.params.productId);
+      res.json(comments);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/products/:productId/comments", async (req, res) => {
+    try {
+      const commentData = insertCommentSchema.parse({
+        ...req.body,
+        productId: req.params.productId
+      });
+      const comment = await storage.createComment(commentData);
+      res.json(comment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   });
 

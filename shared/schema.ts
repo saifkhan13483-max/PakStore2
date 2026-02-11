@@ -86,9 +86,23 @@ export const orderSchema = z.object({
   orderId: z.string(),
 });
 
-export const insertOrderSchema = orderSchema.omit({ id: true });
+export const commentSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+  userName: z.string(),
+  userPhoto: z.string().optional(),
+  content: z.string(),
+  images: z.array(z.string()).default([]),
+  rating: z.number().min(1).max(5),
+  createdAt: z.string(),
+});
+
+export const insertCommentSchema = commentSchema.omit({ id: true, createdAt: true });
 
 export type Order = z.infer<typeof orderSchema>;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
 export type CartItem = z.infer<typeof cartItemsSchema>;
+export type Comment = z.infer<typeof commentSchema>;
+export type InsertComment = z.infer<typeof insertCommentSchema>;

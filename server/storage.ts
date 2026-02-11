@@ -7,6 +7,8 @@ import {
   User,
   Order,
   InsertOrder,
+  Comment,
+  InsertComment,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -33,6 +35,10 @@ export interface IStorage {
   // Orders
   createOrder(order: InsertOrder): Promise<Order>;
   getOrders(): Promise<Order[]>;
+
+  // Comments
+  getComments(productId: string): Promise<Comment[]>;
+  createComment(comment: InsertComment): Promise<Comment>;
 }
 
 export class FirestoreStorage implements IStorage {
@@ -117,6 +123,23 @@ export class FirestoreStorage implements IStorage {
   async getOrders(): Promise<Order[]> {
     const snapshot = await db.collection("orders").orderBy("createdAt", "desc").get();
     return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Order));
+  }
+
+  async getComments(productId: string): Promise<Comment[]> {
+    const snapshot = await db.collection("comments")
+      .where("productId", "==", productId)
+      .orderBy("createdAt", "desc")
+      .get();
+    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Comment));
+  }
+
+  async createComment(comment: InsertComment): Promise<Comment> {
+    const data = {
+      ...comment,
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await db.collection("comments").add(data);
+    return { id: docRef.id, ...data } as Comment;
   }
 }
 
