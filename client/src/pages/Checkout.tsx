@@ -52,8 +52,12 @@ export default function Checkout() {
 
     setIsSubmitting(true);
     try {
+      // Get current user from store
+      const user = useAuthStore.getState().user;
+      
       // 1. Prepare order data
       const orderData = {
+        userId: user?.uid,
         fullName: data.fullName,
         email: data.email,
         phone: data.phone,
@@ -61,16 +65,16 @@ export default function Checkout() {
         city: data.city,
         area: data.area,
         notes: data.notes || "",
+        paymentMethod: "COD",
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
           name: (item as any).name || "Unknown Product",
-          price: (item as any).price || 0
+          price: (item as any).price || 0,
+          image: (item as any).images?.[0] || ""
         })),
         total: items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0),
         status: "pending",
-        createdAt: new Date().toISOString(),
-        orderId: "PC" + Math.floor(100000 + Math.random() * 900000)
       };
       
       // 2. Send order to backend API instead of direct Firestore call

@@ -72,6 +72,7 @@ export const checkoutInfoSchema = z.object({
 
 export const orderSchema = z.object({
   id: z.string(),
+  userId: z.string().optional(),
   fullName: z.string(),
   email: z.string(),
   phone: z.string(),
@@ -79,9 +80,16 @@ export const orderSchema = z.object({
   city: z.string(),
   area: z.string(),
   notes: z.string().optional(),
-  items: z.array(z.any()),
+  items: z.array(z.object({
+    productId: z.string(),
+    quantity: z.number(),
+    name: z.string(),
+    price: z.number(),
+    image: z.string().optional(),
+  })),
   total: z.number(),
-  status: z.string(),
+  status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
+  paymentMethod: z.enum(["COD", "ONLINE"]),
   createdAt: z.string(),
   orderId: z.string(),
 });

@@ -116,8 +116,13 @@ export class FirestoreStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
-    const docRef = await db.collection("orders").add(order);
-    return { id: docRef.id, ...order } as Order;
+    const data = {
+      ...order,
+      createdAt: new Date().toISOString(),
+      orderId: "PC" + Math.floor(100000 + Math.random() * 900000)
+    };
+    const docRef = await db.collection("orders").add(data);
+    return { id: docRef.id, ...data } as Order;
   }
 
   async getOrders(): Promise<Order[]> {
