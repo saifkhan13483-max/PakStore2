@@ -181,7 +181,7 @@ export default function ProductDetail() {
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
                 <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                <span className="font-bold text-yellow-700 dark:text-yellow-500">{product.rating || "0.0"}</span>
+                <span className="font-bold text-yellow-700 dark:text-yellow-500">{(product.averageRating || product.rating || 0).toFixed(1)}</span>
               </div>
               <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
               <Separator orientation="vertical" className="h-4 hidden sm:block" />

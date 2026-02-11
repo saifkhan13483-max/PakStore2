@@ -3,6 +3,7 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
   query, 
   where, 
   orderBy, 
@@ -46,6 +47,24 @@ export const commentFirestoreService = {
     };
     try {
       const docRef = await addDoc(collection(db, "comments"), data);
+      
+      // Aggregate rating on product
+      const q = query(
+        collection(db, "comments"),
+        where("productId", "==", comment.productId)
+      );
+      const snapshot = await getDocs(q);
+      const comments = snapshot.docs.map(d => d.data());
+      const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+      const averageRating = totalRating / comments.length;
+      
+      const productRef = doc(db, "products", comment.productId);
+      await updateDoc(productRef, {
+        averageRating: Number(averageRating.toFixed(1)),
+        reviewCount: comments.length,
+        updatedAt: Timestamp.now()
+      });
+
       return {
         id: docRef.id,
         ...data,
@@ -60,8 +79,29 @@ export const commentFirestoreService = {
   async updateComment(commentId: string, updates: Partial<InsertComment>): Promise<void> {
     try {
       const docRef = doc(db, "comments", commentId);
+      const commentSnap = await getDoc(docRef);
+      if (!commentSnap.exists()) throw new Error("Comment not found");
+      const commentData = commentSnap.data();
+
       await updateDoc(docRef, {
         ...updates,
+        updatedAt: Timestamp.now()
+      });
+
+      // Re-aggregate
+      const q = query(
+        collection(db, "comments"),
+        where("productId", "==", commentData.productId)
+      );
+      const snapshot = await getDocs(q);
+      const comments = snapshot.docs.map(d => d.data());
+      const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+      const averageRating = totalRating / comments.length;
+      
+      const productRef = doc(db, "products", commentData.productId);
+      await updateDoc(productRef, {
+        averageRating: Number(averageRating.toFixed(1)),
+        reviewCount: comments.length,
         updatedAt: Timestamp.now()
       });
     } catch (error) {
@@ -73,7 +113,36 @@ export const commentFirestoreService = {
   async deleteComment(commentId: string): Promise<void> {
     try {
       const docRef = doc(db, "comments", commentId);
+      const commentSnap = await getDoc(docRef);
+      if (!commentSnap.exists()) throw new Error("Comment not found");
+      const commentData = commentSnap.data();
+
       await deleteDoc(docRef);
+
+      // Re-aggregate
+      const q = query(
+        collection(db, "comments"),
+        where("productId", "==", commentData.productId)
+      );
+      const snapshot = await getDocs(q);
+      const comments = snapshot.docs.map(d => d.data());
+      
+      const productRef = doc(db, "products", commentData.productId);
+      if (comments.length > 0) {
+        const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+        const averageRating = totalRating / comments.length;
+        await updateDoc(productRef, {
+          averageRating: Number(averageRating.toFixed(1)),
+          reviewCount: comments.length,
+          updatedAt: Timestamp.now()
+        });
+      } else {
+        await updateDoc(productRef, {
+          averageRating: 0,
+          reviewCount: 0,
+          updatedAt: Timestamp.now()
+        });
+      }
     } catch (error) {
       console.error("Error deleting comment from Firestore:", error);
       throw error;
