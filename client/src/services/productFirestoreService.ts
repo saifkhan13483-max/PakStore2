@@ -66,7 +66,11 @@ export const productFirestoreService = {
         result.sort((a, b) => {
           if (filters.sortBy === "price-asc") return (a.price || 0) - (b.price || 0);
           if (filters.sortBy === "price-desc") return (b.price || 0) - (a.price || 0);
-          if (filters.sortBy === "newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+          if (filters.sortBy === "newest") {
+            const dateA = (a as any).createdAt?.toDate?.() || new Date((a as any).createdAt || 0);
+            const dateB = (b as any).createdAt?.toDate?.() || new Date((b as any).createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          }
           return 0;
         });
       }
