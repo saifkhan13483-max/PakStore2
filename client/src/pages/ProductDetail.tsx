@@ -127,26 +127,9 @@ export default function ProductDetail() {
       {/* Top Section: Images and Primary Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-12">
         {/* Gallery Section */}
-        <div className="space-y-4">
-          <Card className="overflow-hidden border border-border/50 shadow-sm rounded-2xl">
-            <CardContent className="p-0 aspect-square relative">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={activeImage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  src={getOptimizedImageUrl(images[activeImage], { width: 800, height: 800 })}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </AnimatePresence>
-            </CardContent>
-          </Card>
-          
+        <div className="flex flex-col md:flex-row gap-4">
           {images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[500px] order-2 md:order-1">
               {images.map((img, idx) => (
                 <button
                   key={idx}
@@ -162,6 +145,23 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+          
+          <Card className="flex-1 overflow-hidden border border-border/50 shadow-sm rounded-2xl order-1 md:order-2">
+            <CardContent className="p-0 aspect-square relative">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  src={getOptimizedImageUrl(images[activeImage], { width: 800, height: 800 })}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </AnimatePresence>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Info Section */}
