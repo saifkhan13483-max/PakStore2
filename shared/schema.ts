@@ -87,7 +87,11 @@ export const orderSchema = z.object({
     price: z.number(),
     image: z.string().optional(),
   })),
-  total: z.number(),
+  totals: z.object({
+    subtotal: z.number(),
+    shipping: z.number(),
+    total: z.number(),
+  }),
   status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
   paymentMethod: z.enum(["COD", "ONLINE"]),
   createdAt: z.string(),

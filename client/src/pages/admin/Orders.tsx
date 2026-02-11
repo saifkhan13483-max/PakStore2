@@ -68,7 +68,7 @@ export default function AdminOrders() {
                     </TableCell>
                     <TableCell className="text-emerald-800">{order.city}</TableCell>
                     <TableCell className="text-right font-bold text-emerald-900">
-                      Rs. {order.total.toLocaleString()}
+                      Rs. {order.totals.total.toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -124,10 +124,18 @@ export default function AdminOrders() {
                                   </div>
                                 ))}
                               </div>
-                              <div className="pt-2 border-t border-emerald-200">
-                                <div className="flex justify-between items-center font-bold text-emerald-900">
+                              <div className="pt-2 border-t border-emerald-200 space-y-1">
+                                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                  <span>Subtotal</span>
+                                  <span>Rs. {order.totals.subtotal.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                  <span>Shipping</span>
+                                  <span>Rs. {order.totals.shipping.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center font-bold text-emerald-900 pt-1">
                                   <span>Total Amount</span>
-                                  <span>Rs. {order.total.toLocaleString()}</span>
+                                  <span>Rs. {order.totals.total.toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>

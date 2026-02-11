@@ -56,6 +56,10 @@ export default function Checkout() {
       const user = useAuthStore.getState().user;
       
       // 1. Prepare order data
+      const subtotal = items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0);
+      const shipping = 250; // Flat rate for Pakistan
+      const total = subtotal + shipping;
+
       const orderData = {
         userId: user?.uid,
         fullName: data.fullName,
@@ -73,7 +77,11 @@ export default function Checkout() {
           price: (item as any).price || 0,
           image: (item as any).images?.[0] || ""
         })),
-        total: items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0),
+        totals: {
+          subtotal,
+          shipping,
+          total
+        },
         status: "pending",
       };
       
