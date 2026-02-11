@@ -14,8 +14,6 @@ import electronicsImage from "@assets/800b13d6-d66a-4bd3-a094-d8b8ccb22df6_(1)_1
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
-import { useQuery } from "@tanstack/react-query";
-import { productFirestoreService } from "@/services/productFirestoreService";
 import { useProducts } from "@/hooks/use-products";
 
 export default function Home() {
