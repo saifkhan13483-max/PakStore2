@@ -64,6 +64,11 @@ export const commentFirestoreService = {
         reviewCount: comments.length,
         updatedAt: Timestamp.now()
       });
+      
+      // Invalidate queries to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+      await queryClient.invalidateQueries({ queryKey: ["product", comment.productId] });
+      await queryClient.invalidateQueries({ queryKey: ["product"] }); // For slug-based queries
 
       return {
         id: docRef.id,

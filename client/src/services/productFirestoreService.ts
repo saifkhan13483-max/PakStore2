@@ -32,7 +32,15 @@ export const productFirestoreService = {
     try {
       const q = query(productsRef, where("categoryId", "==", categoryId));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          rating: Number(data.rating) || 0,
+          reviewCount: Number(data.reviewCount) || 0
+        } as Product;
+      });
     } catch (error: any) {
       console.error("Error getting products by category:", error);
       throw new Error(`Failed to fetch products: ${error.message}`);
@@ -48,7 +56,15 @@ export const productFirestoreService = {
 
       const q = query(productsRef, ...constraints);
       const querySnapshot = await getDocs(q);
-      const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      const products = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          rating: Number(data.rating) || 0,
+          reviewCount: Number(data.reviewCount) || 0
+        } as Product;
+      });
 
       // Client-side sorting and searching if needed, but for now just return all
       // to ensure visibility
@@ -92,7 +108,13 @@ export const productFirestoreService = {
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) throw new Error("Product not found");
       const doc = querySnapshot.docs[0];
-      return { id: doc.id, ...doc.data() } as Product;
+      const data = doc.data();
+      return { 
+        id: doc.id, 
+        ...data,
+        rating: Number(data.rating) || 0,
+        reviewCount: Number(data.reviewCount) || 0
+      } as Product;
     } catch (error: any) {
       console.error("Error getting product by slug:", error);
       throw new Error(`Failed to fetch product: ${error.message}`);
@@ -103,7 +125,13 @@ export const productFirestoreService = {
     const docRef = doc(db, COLLECTION_NAME, productId);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) throw new Error("Product not found");
-    return { id: docSnap.id, ...docSnap.data() } as Product;
+    const data = docSnap.data();
+    return { 
+      id: docSnap.id, 
+      ...data,
+      rating: Number(data.rating) || 0,
+      reviewCount: Number(data.reviewCount) || 0
+    } as Product;
   },
 
   async createProduct(productData: InsertProduct) {

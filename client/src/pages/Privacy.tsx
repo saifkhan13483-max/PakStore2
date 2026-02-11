@@ -55,7 +55,7 @@ export default function Privacy() {
           <p>
             If you have any questions about this privacy policy or our privacy practices, please contact our data privacy manager at:
             <br />
-            Email: <a href="mailto:privacy@pakcart.pk">privacy@pakcart.pk</a>
+            Email: <a href="mailto:privacy@pakcart.store">privacy@pakcart.store</a>
           </p>
         </section>
       </div>
