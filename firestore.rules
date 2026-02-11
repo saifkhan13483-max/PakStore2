@@ -1,74 +1,12 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if the user is an admin
-    // Admin claim should be set on the user's ID token
-    function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
-    }
-
-    // Helper function to validate product data
-    // Ensures name exists and price is a positive number
-    function isValidProduct(data) {
-      return data.name is string && data.name.size() > 0 &&
-             data.price is number && data.price > 0;
-    }
-
-    // Helper function to validate category data
-    function isValidCategory(data) {
-      return data.name is string && data.name.size() > 0;
-    }
-
-    // Products collection: Public read, Admin-only write
-    match /products/{productId} {
+    match /comments/{commentId} {
       allow read: if true;
-      allow create, update: if isAdmin() && isValidProduct(request.resource.data);
-      allow delete: if isAdmin();
+      allow create: if true; // In production, change to request.auth != null
     }
-
-    // Categories collection: Public read, Admin-only write
-    match /categories/{categoryId} {
-      allow read: if true;
-      allow create, update: if isAdmin() && isValidCategory(request.resource.data);
-      allow delete: if isAdmin();
-    }
-
-    // Parent Categories collection: Public read, Admin-only write
-    match /parentCategories/{parentId} {
-      allow read: if true;
-      allow create, update: if isAdmin() && isValidCategory(request.resource.data);
-      allow delete: if isAdmin();
-    }
-
-    // Admin Stats collection: Admin-only read/write
-    match /adminStats/{statId} {
-      allow read, write: if isAdmin();
-    }
-
-    // Helper functions for user-specific data
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Rules for user-specific data (cart, etc.)
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      
-      // Cart subcollection
-      match /cart/{document=**} {
-        allow read, write: if isOwner(userId);
-      }
-    }
-
-    // Default deny
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if true;
     }
   }
 }

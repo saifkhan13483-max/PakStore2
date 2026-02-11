@@ -33,6 +33,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
     mutationFn: (newComment: any) => commentFirestoreService.createComment(newComment),
     onSuccess: async () => {
       // Force an immediate refetch from Firestore
+      await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
       await refetch();
       setContent("");
       setImages([]);

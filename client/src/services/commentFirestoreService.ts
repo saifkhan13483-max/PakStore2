@@ -14,19 +14,21 @@ export const commentFirestoreService = {
   async getComments(productId: string): Promise<Comment[]> {
     const q = query(
       collection(db, "comments"),
-      where("productId", "==", productId),
-      orderBy("createdAt", "desc")
+      where("productId", "==", productId)
+      // Temporarily remove orderBy to check if index is the issue
+      // orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => {
+    const comments = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
         ...data,
-        // Ensure createdAt is a string if it's a Firestore Timestamp
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
       } as Comment;
     });
+    // Sort manually if needed
+    return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
   async createComment(comment: InsertComment): Promise<Comment> {
