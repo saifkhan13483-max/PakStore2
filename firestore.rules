@@ -19,6 +19,18 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Products collection
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null; // In a production app, you'd check for an admin flag in the user document or custom claims
+    }
+
+    // Categories collection
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     // Default deny
     match /{document=**} {
       allow read: if true;
