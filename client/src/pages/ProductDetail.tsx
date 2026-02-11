@@ -12,6 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { Separator } from "@/components/ui/separator";
+import { ProductCard } from "@/components/product/ProductCard";
+import { CommentSection } from "@/components/product/CommentSection";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -246,6 +249,13 @@ export default function ProductDetail() {
 
       <Separator className="my-12" />
 
+      {/* Comments Section */}
+      <section className="mb-16">
+        <CommentSection productId={product.id} />
+      </section>
+
+      <Separator className="my-12" />
+
       {/* Bottom Section: Related Products */}
       {relatedProducts.length > 0 && (
         <section className="mb-12">
@@ -265,6 +275,3 @@ export default function ProductDetail() {
     </div>
   );
 }
-
-import { Separator } from "@/components/ui/separator";
-import { ProductCard } from "@/components/product/ProductCard";
