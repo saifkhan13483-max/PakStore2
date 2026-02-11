@@ -37,8 +37,8 @@ export const productFirestoreService = {
         return { 
           id: doc.id, 
           ...data,
-          rating: Number(data.rating) || 0,
-          reviewCount: Number(data.reviewCount) || 0
+          rating: Number(data.rating || data.averageRating) || 0,
+          reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
         } as Product;
       });
     } catch (error: any) {
@@ -61,8 +61,8 @@ export const productFirestoreService = {
         return { 
           id: doc.id, 
           ...data,
-          rating: Number(data.rating) || 0,
-          reviewCount: Number(data.reviewCount) || 0
+          rating: Number(data.rating || data.averageRating) || 0,
+          reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
         } as Product;
       });
 
@@ -112,8 +112,8 @@ export const productFirestoreService = {
       return { 
         id: doc.id, 
         ...data,
-        rating: Number(data.rating) || 0,
-        reviewCount: Number(data.reviewCount) || 0
+        rating: Number(data.rating || data.averageRating) || 0,
+        reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
       } as Product;
     } catch (error: any) {
       console.error("Error getting product by slug:", error);
@@ -129,8 +129,8 @@ export const productFirestoreService = {
     return { 
       id: docSnap.id, 
       ...data,
-      rating: Number(data.rating) || 0,
-      reviewCount: Number(data.reviewCount) || 0
+      rating: Number(data.rating || data.averageRating) || 0,
+      reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
     } as Product;
   },
 
