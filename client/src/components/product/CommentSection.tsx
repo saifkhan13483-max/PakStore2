@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
 import { useAuthStore } from "@/store/authStore";
 
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
+
 interface CommentSectionProps {
   productId: string;
 }
@@ -145,7 +147,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold">{comment.userName}</h4>
                       <span className="text-sm text-muted-foreground">
-                        {format(new Date(comment.createdAt), "MMM d, yyyy")}
+                        {comment.createdAt ? format(new Date(comment.createdAt), "MMM d, yyyy") : "Just now"}
                       </span>
                     </div>
                     <div className="flex text-yellow-500">
@@ -159,7 +161,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                         {comment.images.map((img, i) => (
                           <img
                             key={i}
-                            src={img}
+                            src={getOptimizedImageUrl(img, { width: 200, height: 200 })}
                             alt={`Review image ${i + 1}`}
                             className="w-20 h-20 object-cover rounded-md border"
                           />
