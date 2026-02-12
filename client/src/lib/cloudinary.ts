@@ -21,29 +21,44 @@ interface CloudinaryOptions {
  */
 export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {}) {
   if (!url) return url;
-  if (!url.includes('cloudinary.com')) return url;
+  
+  // Normalization logic for different URL types
+  let normalizedUrl = url;
+
+  // Handle Cloudinary short IDs or incomplete paths if they were stored that way
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  if (!url.startsWith('http') && !url.startsWith('/') && !url.startsWith('attached_assets') && cloudName) {
+    // If it's just an ID, construct a full Cloudinary URL
+    normalizedUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
+  }
+
+  if (!normalizedUrl.includes('cloudinary.com')) {
+    // Handle attached assets
+    if (normalizedUrl.startsWith('attached_assets/') || normalizedUrl.startsWith('/attached_assets/')) {
+      return normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    }
+
+    // Handle local public assets
+    if (normalizedUrl.startsWith('/images/') || normalizedUrl.startsWith('images/')) {
+      return normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
+    }
+
+    // If it's a relative path from old Express (e.g. /uploads/...), we can't resolve it easily 
+    // without a base URL, so we return as is and let the fallback handle it
+    return normalizedUrl;
+  }
 
   const {
     width,
     height,
     crop = 'fill',
-    quality = 'auto', // Cloudinary auto quality handles bandwidth vs visual quality
+    quality = 'auto',
     format = 'auto',
-    dpr = 'auto' // Added Device Pixel Ratio for sharp images on mobile
+    dpr = 'auto'
   } = options;
 
-  // Split URL into parts: base, upload, and path
-  if (url.startsWith('attached_assets/') || url.startsWith('/attached_assets/')) {
-    return url.startsWith('/') ? url : `/${url}`;
-  }
-
-  // Handle local public assets
-  if (url.startsWith('/images/') || url.startsWith('images/')) {
-    return url.startsWith('/') ? url : `/${url}`;
-  }
-
-  const parts = url.split('/upload/');
-  if (parts.length !== 2) return url;
+  const parts = normalizedUrl.split('/upload/');
+  if (parts.length !== 2) return normalizedUrl;
 
   const transformations = [
     `f_${format}`,
@@ -52,7 +67,7 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
   ];
 
   if (width) transformations.push(`w_${width}`);
-  if (height) transformations.push(`height_${height}`);
+  if (height) transformations.push(`h_${height}`);
   if (width || height) transformations.push(`c_${crop}`);
 
   return `${parts[0]}/upload/${transformations.join(',')}/${parts[1]}`;

@@ -1,11 +1,12 @@
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
-import { ShoppingCart, Eye, Star } from "lucide-react";
+import { ShoppingCart, Eye, Star, ImageOff } from "lucide-react";
 import { type Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +15,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast } = useToast();
+  const [imageError, setImageError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -32,6 +34,8 @@ export function ProductCard({ product }: ProductCardProps) {
     }).format(price);
   };
 
+  const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500 }) : null;
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -40,14 +44,23 @@ export function ProductCard({ product }: ProductCardProps) {
       className="group relative bg-white dark:bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-primary/20"
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-        {product.images?.[0] && (
+      <div className="relative aspect-[4/5] overflow-hidden bg-muted flex items-center justify-center">
+        {imageUrl && !imageError ? (
           <img
-            src={getOptimizedImageUrl(product.images[0], { width: 400, height: 500 })}
+            src={imageUrl}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             loading="lazy"
+            onError={() => {
+              console.error(`Failed to load image for product: ${product.name}`, imageUrl);
+              setImageError(true);
+            }}
           />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-muted-foreground/40">
+            <ImageOff className="h-10 w-10" />
+            <span className="text-xs font-medium">No Image Available</span>
+          </div>
         )}
         
         {/* Modern Gradient Overlay */}
