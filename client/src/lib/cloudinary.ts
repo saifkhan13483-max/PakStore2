@@ -9,6 +9,7 @@ interface CloudinaryOptions {
   crop?: string;
   quality?: string | number;
   format?: string;
+  dpr?: string | number;
 }
 
 /**
