@@ -90,6 +90,11 @@ export const orderSchema = baseDocumentSchema.extend({
   items: z.array(cartItemSchema),
   total: z.coerce.number().positive(),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  customerInfo: z.object({
+    fullName: z.string(),
+    email: z.string().email(),
+    mobileNumber: z.string(),
+  }),
   shippingAddress: z.object({
     street: z.string(),
     area: z.string(),

@@ -56,6 +56,7 @@ export default function AdminOrders() {
               <TableRow className="hover:bg-transparent border-emerald-100">
                 <TableHead className="text-emerald-900 font-bold w-[120px]">Order ID</TableHead>
                 <TableHead className="text-emerald-900 font-bold">Customer</TableHead>
+                <TableHead className="text-emerald-900 font-bold">Contact</TableHead>
                 <TableHead className="text-emerald-900 font-bold">City</TableHead>
                 <TableHead className="text-emerald-900 font-bold text-right">Total</TableHead>
                 <TableHead className="text-emerald-900 font-bold">Status</TableHead>
@@ -65,7 +66,7 @@ export default function AdminOrders() {
             <TableBody>
               {orders?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No orders found
                   </TableCell>
                 </TableRow>
@@ -75,8 +76,14 @@ export default function AdminOrders() {
                     <TableCell className="font-mono text-xs text-emerald-800">#{order.id.slice(0, 8)}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-emerald-900">{order.shippingAddress?.street || "No Address"}</span>
+                        <span className="font-medium text-emerald-900">{order.customerInfo?.fullName || "N/A"}</span>
                         <span className="text-xs text-muted-foreground">{order.userId}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col text-xs text-emerald-800">
+                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {order.customerInfo?.email || "N/A"}</span>
+                        <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {order.customerInfo?.mobileNumber || "N/A"}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-emerald-800">{order.shippingAddress?.city || "N/A"}</TableCell>
@@ -103,12 +110,22 @@ export default function AdminOrders() {
                             <div className="space-y-4">
                               <div>
                                 <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-2 mb-2">
-                                  <Package className="w-4 h-4" /> Shipping Info
+                                  <Package className="w-4 h-4" /> Customer Information
+                                </h3>
+                                <div className="text-sm space-y-1">
+                                  <p className="font-medium">{order.customerInfo?.fullName || "N/A"}</p>
+                                  <p className="flex items-center gap-1 text-muted-foreground"><Mail className="w-3 h-3" /> {order.customerInfo?.email || "N/A"}</p>
+                                  <p className="flex items-center gap-1 text-muted-foreground"><Phone className="w-3 h-3" /> {order.customerInfo?.mobileNumber || "N/A"}</p>
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-bold text-emerald-800 flex items-center gap-2 mb-2">
+                                  <MapPin className="w-4 h-4" /> Shipping Address
                                 </h3>
                                 <div className="text-sm space-y-1">
                                   <p className="font-medium">{order.shippingAddress?.street || "N/A"}</p>
-                                  <p className="flex items-center gap-1 mt-2 font-medium"><MapPin className="w-3 h-3" /> {order.shippingAddress?.street || "N/A"}</p>
-                                  <p className="ml-4">{order.shippingAddress?.area || "N/A"}, {order.shippingAddress?.city || "N/A"}</p>
+                                  <p className="text-muted-foreground">{order.shippingAddress?.area || "N/A"}</p>
+                                  <p className="text-muted-foreground">{order.shippingAddress?.city || "N/A"}</p>
                                 </div>
                               </div>
                               <div>
