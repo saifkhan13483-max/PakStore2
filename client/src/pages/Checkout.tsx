@@ -88,6 +88,11 @@ export default function Checkout() {
         })),
         total: total,
         status: "pending",
+        customerInfo: {
+          fullName: String(data.fullName),
+          email: String(data.email),
+          mobileNumber: String(data.phone),
+        },
         shippingAddress: {
           street: String(data.address),
           area: String(data.area),

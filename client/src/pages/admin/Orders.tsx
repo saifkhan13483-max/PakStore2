@@ -113,9 +113,9 @@ export default function AdminOrders() {
                                   <Package className="w-4 h-4" /> Customer Information
                                 </h3>
                                 <div className="text-sm space-y-1">
-                                  <p className="font-medium">{order.customerInfo?.fullName || "N/A"}</p>
-                                  <p className="flex items-center gap-1 text-muted-foreground"><Mail className="w-3 h-3" /> {order.customerInfo?.email || "N/A"}</p>
-                                  <p className="flex items-center gap-1 text-muted-foreground"><Phone className="w-3 h-3" /> {order.customerInfo?.mobileNumber || "N/A"}</p>
+                                  <p className="font-medium">{order.customerInfo?.fullName || order.shippingAddress?.fullName || "N/A"}</p>
+                                  <p className="flex items-center gap-1 text-muted-foreground"><Mail className="w-3 h-3" /> {order.customerInfo?.email || order.shippingAddress?.email || "N/A"}</p>
+                                  <p className="flex items-center gap-1 text-muted-foreground"><Phone className="w-3 h-3" /> {order.customerInfo?.mobileNumber || order.shippingAddress?.mobileNumber || order.shippingAddress?.phone || "N/A"}</p>
                                 </div>
                               </div>
                               <div>
