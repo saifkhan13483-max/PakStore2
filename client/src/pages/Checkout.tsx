@@ -101,7 +101,8 @@ export default function Checkout() {
       
       // 2. Direct Firestore call instead of backend API
       const { addDocument } = await import("@/lib/firestore");
-      const result = await addDocument("orders", orderData);
+      const { insertOrderSchema } = await import("@shared/schema");
+      const result = await addDocument("orders", orderData, insertOrderSchema);
 
       toast({
         title: "Order Placed Successfully!",

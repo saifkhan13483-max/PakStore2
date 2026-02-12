@@ -9,12 +9,14 @@ import { Loader2, Package, MapPin, Phone, Mail, ShoppingBag } from "lucide-react
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { orderBy } from "firebase/firestore";
 
 export default function AdminOrders() {
-  const { data: orders, isLoading } = useRealtimeCollection<Order>(
+  const { data: orders, isLoading, error } = useRealtimeCollection<Order>(
     "orders",
     orderSchema,
-    ["/api/orders"]
+    ["/api/orders"],
+    [orderBy("createdAt", "desc")]
   );
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -23,6 +25,14 @@ export default function AdminOrders() {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-600">
+        <p>Error loading orders: {error.message}</p>
       </div>
     );
   }

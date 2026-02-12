@@ -156,7 +156,7 @@ export async function addDocument<T extends DocumentData>(
     const collectionRef = collection(db, collectionName);
     const docData = {
       ...data,
-      createdAt: serverTimestamp(),
+      createdAt: data.createdAt || serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
     
