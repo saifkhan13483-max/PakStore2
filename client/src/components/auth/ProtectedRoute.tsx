@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthStore } from "@/store/authStore";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
@@ -8,18 +8,18 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthStore();
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !isAuthenticated) {
       // Encode the current location to redirect back after login
       const redirectParam = encodeURIComponent(location);
       setLocation(`/auth/login?redirect=${redirectParam}`);
     }
-  }, [loading, user, location, setLocation]);
+  }, [isLoading, isAuthenticated, location, setLocation]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
@@ -30,7 +30,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return null; // Will be handled by useEffect redirect
   }
 
