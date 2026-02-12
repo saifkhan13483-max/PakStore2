@@ -93,7 +93,15 @@ export function useRealtimeCollection<T>(
             ...doc.data()
           })) as T[];
           
-          const validatedData = documents.map(doc => schema.parse(doc));
+          const validatedData = documents.map(doc => {
+            try {
+              return schema.parse(doc);
+            } catch (err) {
+              console.error(`Validation error for document ${doc.id} in ${collectionName}:`, err);
+              // Return a partial object or skip if validation fails to prevent the whole collection from failing
+              return doc as unknown as T;
+            }
+          });
           
           // Sync with TanStack Query cache
           queryClient.setQueryData(queryKey, validatedData);
