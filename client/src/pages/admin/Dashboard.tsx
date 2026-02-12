@@ -3,14 +3,24 @@ import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw } from
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
+import { orderSchema, type Order } from "@shared/schema";
 import { adminStatsService, type AdminStats } from "@/services/adminStatsService";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
+  
+  // Use real-time orders for dashboard stats if possible, or stick to query with shorter refetch
+  const { data: orders } = useRealtimeCollection<Order>(
+    "orders",
+    orderSchema,
+    ["admin-orders-realtime"]
+  );
+
   const { data: stats, isLoading, isRefetching } = useQuery<AdminStats>({
     queryKey: ["admin-stats"],
     queryFn: () => adminStatsService.getAdminStats(),
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 10000, // Faster refresh for dashboard
   });
 
   const handleRefresh = () => {

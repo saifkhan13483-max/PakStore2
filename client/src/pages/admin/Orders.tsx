@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { type Order } from "@shared/schema";
+import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
+import { orderSchema, type Order } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +11,11 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function AdminOrders() {
-  const { data: orders, isLoading } = useQuery<Order[]>({
-    queryKey: ["/api/orders"],
-  });
+  const { data: orders, isLoading } = useRealtimeCollection<Order>(
+    "orders",
+    orderSchema,
+    ["/api/orders"]
+  );
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
