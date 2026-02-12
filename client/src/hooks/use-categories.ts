@@ -23,13 +23,13 @@ export function useCategories() {
   const categoriesQuery = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: () => categoryFirestoreService.getAllCategories(),
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 
   const parentCategoriesQuery = useQuery<ParentCategory[]>({
     queryKey: ["parent-categories"],
     queryFn: () => categoryFirestoreService.getAllParentCategories(),
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
   });
 
   return {
