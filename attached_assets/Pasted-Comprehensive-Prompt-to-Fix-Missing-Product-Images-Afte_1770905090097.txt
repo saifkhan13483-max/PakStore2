@@ -1,0 +1,50 @@
+Comprehensive Prompt to Fix Missing Product Images After Serverless Migration
+Based on your screenshot showing product cards with missing images but visible text/pricing, this is most likely caused by relative image paths from your old Express backend that no longer work in the serverless Vercel environment. Here's a detailed, systematic prompt for the Replit AI agent:
+
+Quick Context for Replit AI Agent
+I've migrated from Express/Node.js backend to Vercel/Firebase/Firestore/Cloudinary serverless architecture. Product cards show titles, prices, and sale badges correctly, but images appear as broken/empty. The data is loading from Firestore successfully, but image URLs are likely incorrect. Please systematically diagnose and fix this issue.
+
+Phase 1: Immediate Diagnosis (Parts 1-3)
+Part 1: Inspect Current Image Data Structure
+Locate the React component rendering the "New Arrivals" product cards and add temporary console logging to examine the actual product data being received. Log the complete product object, paying special attention to any image-related fields (image, imageUrl, thumbnail, photo, etc.). Determine if the image field contains relative paths (starting with /uploads/ or /images/), absolute URLs (starting with https://), or is missing entirely. This will immediately reveal if the core issue is data format or something else.
+
+Part 2: Verify Image URL Format and Accessibility
+Take the exact image URL value from the console log and test it directly in a browser. If it's a relative path like /uploads/product.jpg, this explains the issue - Vercel has no /uploads/ directory. If it's an absolute URL, check if it returns a 404, CORS error, or loads successfully. For Cloudinary URLs, verify they follow the correct format: https://res.cloudinary.com/[your-cloud-name]/image/upload/[transformations]/[public-id].[format]. Document exactly what format the URLs currently have versus what they should be.
+
+Part 3: Check Component Image Rendering Logic
+Examine the JSX in the product card component to ensure the image element is actually being rendered. Look for conditional rendering that might prevent image display, incorrect prop names (using product.image when data has product.imageUrl), or missing src attributes. Verify that the img tag or Image component is present in the DOM with the expected src value by inspecting the rendered HTML in browser developer tools.
+
+Phase 2: Fix Data and URL Issues (Parts 4-6)
+Part 4: Implement URL Normalization Logic
+Create a utility function that handles both legacy relative paths and modern absolute URLs. The function should check if an image URL starts with http or https (use as-is), starts with / (either convert to Cloudinary URL if images were migrated there, or show placeholder), or is empty/null (show placeholder). Integrate this normalization function into the product card component so all image sources are processed consistently before rendering.
+
+Part 5: Add Robust Error Handling and Fallbacks
+Implement comprehensive error handling for image loading failures. Add an onError handler to all img elements that automatically switches to a default placeholder image when the primary image fails to load. Create a reusable ImageWithFallback component that handles loading states, error states, and fallback images consistently across the application. Ensure the placeholder image is a valid, accessible URL that won't itself fail to load.
+
+Part 6: Update Firestore Data Migration Strategy
+If the investigation reveals that Firestore contains relative paths or filenames instead of complete URLs, determine the correct approach to fix this. Either update the Firestore documents to contain full Cloudinary URLs, or implement frontend logic to construct complete URLs from the existing data using your Cloudinary configuration. Ensure any data transformation maintains consistency and doesn't break existing functionality.
+
+Phase 3: Technical Implementation (Parts 7-9)
+Part 7: Verify and Fix Cloudinary Integration
+Check that Cloudinary environment variables (VITE_CLOUDINARY_CLOUD_NAME, etc.) are correctly configured in Vercel and accessible in the frontend. Verify that the Cloudinary configuration file properly constructs URLs and doesn't have any syntax errors or missing parameters. Test Cloudinary URL generation with sample data to ensure the resulting URLs are valid and accessible. Confirm that Cloudinary images are set to public access and don't require authentication for basic viewing.
+
+Part 8: Resolve CORS and Security Issues
+Check the browser console for any CORS errors, mixed content warnings (HTTP images on HTTPS site), or Content Security Policy violations that might prevent images from loading. Ensure all image URLs use HTTPS protocol to avoid mixed content issues. If using custom domains for Cloudinary, verify they're properly configured and not blocked by security policies. Test image loading in both development and production environments.
+
+Part 9: Optimize Image Container Styling
+Fix any CSS issues that might hide images or cause layout problems when images fail to load. Ensure image containers have fixed dimensions using Tailwind classes like aspect-square, h-48, or similar to prevent layout shift. Add object-cover or appropriate object-fit properties to handle images of varying aspect ratios. Verify that no CSS properties like display: none, opacity: 0, or overflow: hidden are accidentally hiding the images.
+
+Phase 4: Testing and Production Validation (Parts 10-12)
+Part 10: Comprehensive Local Testing
+Test the fixes with various scenarios: products with valid Cloudinary URLs, products with old relative paths, products with missing image data, and products with invalid URLs. Verify that fallback images display correctly and that the UI remains stable regardless of image loading success or failure. Test on different screen sizes to ensure responsive image display works correctly.
+
+Part 11: Production Environment Validation
+Deploy the fixes to Vercel and thoroughly test in the production environment. Verify that all environment variables are correctly configured in Vercel's dashboard and accessible to the application. Test with real product data to ensure images load correctly from Cloudinary in production. Monitor browser console for any errors specific to the production environment.
+
+Part 12: Create Prevention Documentation
+Document the correct format for product image URLs in your schema and development guidelines. Update any TypeScript interfaces or Zod schemas to clearly specify that image fields should contain complete HTTPS URLs. Create a checklist for future product data entry to ensure images are properly formatted. Add validation in your data entry processes to prevent relative paths from being stored in Firestore.
+
+Expected Outcome
+After completing these steps, your product images should display correctly. The most common resolution will be implementing URL normalization that converts legacy relative paths to proper Cloudinary URLs, combined with robust error handling that shows placeholder images when needed. The systematic approach ensures you identify the exact root cause and implement a solution that works reliably in your serverless architecture.
+
+Note for Replit AI Agent: Work through these parts sequentially, as each builds on the previous findings. Focus on identifying the specific data format issues first, then implement targeted fixes rather than broad changes that might affect other functionality.
