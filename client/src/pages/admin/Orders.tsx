@@ -62,16 +62,16 @@ export default function AdminOrders() {
               ) : (
                 orders?.map((order) => (
                   <TableRow key={order.id} className="hover:bg-emerald-50/30 border-emerald-100">
-                    <TableCell className="font-mono text-xs text-emerald-800">#{order.orderId}</TableCell>
+                    <TableCell className="font-mono text-xs text-emerald-800">#{order.id.slice(0, 8)}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-emerald-900">{order.fullName}</span>
-                        <span className="text-xs text-muted-foreground">{order.email}</span>
+                        <span className="font-medium text-emerald-900">{order.shippingAddress.street}</span>
+                        <span className="text-xs text-muted-foreground">{order.userId}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-emerald-800">{order.city}</TableCell>
+                    <TableCell className="text-emerald-800">{order.shippingAddress.city}</TableCell>
                     <TableCell className="text-right font-bold text-emerald-900">
-                      Rs. {order.totals.total.toLocaleString()}
+                      Rs. {order.total.toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -87,7 +87,7 @@ export default function AdminOrders() {
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
-                            <DialogTitle className="text-emerald-900">Order Details - #{order.orderId}</DialogTitle>
+                            <DialogTitle className="text-emerald-900">Order Details - #{order.id.slice(0, 8)}</DialogTitle>
                           </DialogHeader>
                           <div className="grid grid-cols-2 gap-6 mt-4">
                             <div className="space-y-4">
@@ -96,19 +96,21 @@ export default function AdminOrders() {
                                   <Package className="w-4 h-4" /> Shipping Info
                                 </h3>
                                 <div className="text-sm space-y-1">
-                                  <p className="font-medium">{order.fullName}</p>
-                                  <p className="flex items-center gap-1"><Phone className="w-3 h-3" /> {order.phone}</p>
-                                  <p className="flex items-center gap-1"><Mail className="w-3 h-3" /> {order.email}</p>
-                                  <p className="flex items-center gap-1 mt-2 font-medium"><MapPin className="w-3 h-3" /> {order.address}</p>
-                                  <p className="ml-4">{order.area}, {order.city}</p>
+                                  <p className="font-medium">{order.shippingAddress.street}</p>
+                                  <p className="flex items-center gap-1 mt-2 font-medium"><MapPin className="w-3 h-3" /> {order.shippingAddress.street}</p>
+                                  <p className="ml-4">{order.shippingAddress.area}, {order.shippingAddress.city}</p>
                                 </div>
                               </div>
                               <div>
                                 <h3 className="text-sm font-bold text-emerald-800 mb-2">Order Summary</h3>
                                 <div className="text-sm space-y-1">
                                   <p>Status: <Badge variant="outline" className="ml-1 capitalize">{order.status}</Badge></p>
-                                  <p>Payment: <Badge variant="outline" className="ml-1">{order.paymentMethod}</Badge></p>
-                                  <p>Date: {format(new Date(order.createdAt), "PPP p")}</p>
+                                  <p>Date: {(() => {
+                                    const date = order.createdAt as any;
+                                    if (date?.toDate) return format(date.toDate(), "PPP p");
+                                    if (date instanceof Date) return format(date, "PPP p");
+                                    return "N/A";
+                                  })()}</p>
                                 </div>
                               </div>
                             </div>
@@ -120,25 +122,17 @@ export default function AdminOrders() {
                                 {order.items.map((item, idx) => (
                                   <div key={idx} className="flex justify-between items-start border-b border-emerald-50 pb-2">
                                     <div className="flex-1">
-                                      <p className="text-sm font-medium text-emerald-900">{item.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.price.toLocaleString()}</p>
+                                      <p className="text-sm font-medium text-emerald-900">{item.product.name}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.product.price.toLocaleString()}</p>
                                     </div>
-                                    <p className="text-sm font-bold">Rs. {(item.quantity * item.price).toLocaleString()}</p>
+                                    <p className="text-sm font-bold">Rs. {(item.quantity * item.product.price).toLocaleString()}</p>
                                   </div>
                                 ))}
                               </div>
                               <div className="pt-2 border-t border-emerald-200 space-y-1">
-                                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                                  <span>Subtotal</span>
-                                  <span>Rs. {order.totals.subtotal.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                                  <span>Shipping</span>
-                                  <span>Rs. {order.totals.shipping.toLocaleString()}</span>
-                                </div>
                                 <div className="flex justify-between items-center font-bold text-emerald-900 pt-1">
                                   <span>Total Amount</span>
-                                  <span>Rs. {order.totals.total.toLocaleString()}</span>
+                                  <span>Rs. {order.total.toLocaleString()}</span>
                                 </div>
                               </div>
                             </div>
