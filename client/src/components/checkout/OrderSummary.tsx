@@ -1,6 +1,7 @@
 import { useCartStore } from "@/store/cartStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 
 export function OrderSummary() {
   const { items, getTotalPrice } = useCartStore();
