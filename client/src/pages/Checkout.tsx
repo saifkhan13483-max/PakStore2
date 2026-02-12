@@ -69,32 +69,30 @@ export default function Checkout() {
       const user = useAuthStore.getState().user;
       
       // 1. Prepare order data
-      const subtotal = items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0);
+      const subtotal = items.reduce((sum, item) => sum + (Number((item as any).price || 0) * Number(item.quantity)), 0);
       const shipping = subtotal > 5000 ? 0 : 250; 
-      const total = subtotal + shipping;
+      const total = Number(subtotal + shipping);
 
       const orderData = {
         userId: user?.uid || "guest",
         items: items.map(item => ({
-          id: item.id || Math.random().toString(36).substring(7),
-          productId: item.productId,
-          quantity: Number(item.quantity),
+          id: String(item.id || Math.random().toString(36).substring(7)),
+          productId: String(item.productId),
+          quantity: Math.max(1, Math.floor(Number(item.quantity))),
           product: {
-            name: (item as any).name || "Unknown Product",
+            name: String((item as any).name || "Unknown Product"),
             price: Number((item as any).price || 0),
-            images: (item as any).images || [],
-            slug: (item as any).slug || ""
+            images: Array.isArray((item as any).images) ? (item as any).images : [],
+            slug: String((item as any).slug || "")
           }
         })),
-        total: Number(total),
+        total: total,
         status: "pending",
         shippingAddress: {
           street: String(data.address),
           area: String(data.area),
           city: String(data.city),
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
+        }
       };
       
       console.log("DEBUG Order Payload:", orderData);
