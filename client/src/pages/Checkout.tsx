@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { checkoutInfoSchema, type CheckoutInfo } from "@shared/schema";
+import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,18 @@ import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+
+const checkoutInfoSchema = z.object({
+  fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Valid phone number is required"),
+  address: z.string().min(10, "Full address is required"),
+  area: z.string().min(2, "Area is required"),
+  city: z.string().min(1, "City is required"),
+  notes: z.string().optional(),
+});
+
+type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
 
 const PAKISTANI_CITIES = [
   "Karachi", "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", 

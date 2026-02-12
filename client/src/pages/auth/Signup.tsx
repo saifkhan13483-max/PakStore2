@@ -21,6 +21,7 @@ import { auth, db, googleProvider } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
+import { signupSchema, type SignupValues } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
 
 const passwordRequirements = [
@@ -40,7 +41,7 @@ export default function Signup() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
-  const { register, loginWithGoogle } = useAuthStore();
+  const { register, signInWithGoogle: loginWithGoogle } = useAuthStore();
   
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -157,7 +158,7 @@ export default function Signup() {
   async function onSubmit(data: SignupValues) {
     setIsLoading(true);
     try {
-      const userCredential = await register(data.email, data.password);
+      const userCredential = await (register as any)(data.email, data.password);
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: data.fullName });

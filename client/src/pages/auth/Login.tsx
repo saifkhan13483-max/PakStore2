@@ -30,7 +30,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
-  const { login, signInWithGoogle: loginWithGoogle, resetPassword } = useAuthStore();
+  const { signInWithEmail: login, signInWithGoogle: loginWithGoogle, resetPassword } = useAuthStore();
   const cartStore = useCartStore();
 
   const form = useForm<LoginValues>({
