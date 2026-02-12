@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Loader2, Send, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/product/ImageUploader";
-import { Comment } from "@shared/schema";
+import { Comment, InsertComment } from "@shared/schema";
 import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
 import { useAuthStore } from "@/store/authStore";
@@ -67,7 +67,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: (newComment: any) => {
+    mutationFn: (newComment: InsertComment) => {
       console.log("DEBUG Mutation creating comment:", newComment);
       return commentFirestoreService.createComment(newComment);
     },
@@ -87,7 +87,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<InsertComment> }) =>
       commentFirestoreService.updateComment(id, updates),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
@@ -160,6 +160,17 @@ export function CommentSection({ productId }: CommentSectionProps) {
     setEditContent(comment.content);
     setEditRating(comment.rating);
     setEditImages(comment.images || []);
+  };
+
+  const renderImages = (commentImages: string[]) => {
+    return commentImages.map((img: string, i: number) => (
+      <img
+        key={i}
+        src={getOptimizedImageUrl(img, { width: 200, height: 200 })}
+        alt={`Review image ${i + 1}`}
+        className="w-20 h-20 object-cover rounded-md border"
+      />
+    ));
   };
 
   return (
@@ -267,14 +278,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     <p className="text-muted-foreground">{comment.content}</p>
                     {comment.images && comment.images.length > 0 && (
                       <div className="flex gap-2 pt-2">
-                        {comment.images.map((img, i) => (
-                          <img
-                            key={i}
-                            src={getOptimizedImageUrl(img, { width: 200, height: 200 })}
-                            alt={`Review image ${i + 1}`}
-                            className="w-20 h-20 object-cover rounded-md border"
-                          />
-                        ))}
+                        {renderImages(comment.images)}
                       </div>
                     )}
                   </div>
