@@ -41,7 +41,14 @@ export class CategoryFirestoreService {
     try {
       const q = query(collection(db, CATEGORIES_COLLECTION), orderBy("name", "asc"));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as unknown as Category));
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          parentCategoryId: data.parentId || data.parentCategoryId 
+        } as unknown as Category;
+      });
     } catch (error: any) {
       console.error("Error getting categories:", error);
       throw new Error(`Failed to fetch categories: ${error.message}`);

@@ -118,7 +118,7 @@ const Header = () => {
                       {parent.name}
                     </DropdownMenuLabel>
                     <div className="grid grid-cols-1 gap-1">
-                      {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                      {categoriesData?.filter(c => c.parentCategoryId === parent.id).map((category) => (
                         <DropdownMenuItem key={category.id} asChild>
                           <Link 
                             href={`/products?categoryId=${category.id}`} 
@@ -287,7 +287,7 @@ const Header = () => {
                                 {parent.name}
                               </p>
                               <div className="flex flex-col gap-1 pl-4">
-                                {categoriesData?.filter(c => c.parentId === parent.id).map((category) => (
+                                {categoriesData?.filter(c => c.parentCategoryId === parent.id).map((category) => (
                                   <Link
                                     key={category.id}
                                     href={`/products?categoryId=${category.id}`}
