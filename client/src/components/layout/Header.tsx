@@ -43,6 +43,10 @@ const Header = () => {
   const { categories: categoriesData, parentCategories, isLoading: categoriesLoading } = useCategories();
 
   useEffect(() => {
+    console.log('Header dynamic data:', { categoriesData, parentCategories, categoriesLoading });
+  }, [categoriesData, parentCategories, categoriesLoading]);
+
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };

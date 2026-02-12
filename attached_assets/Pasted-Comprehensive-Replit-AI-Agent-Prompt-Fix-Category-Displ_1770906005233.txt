@@ -1,0 +1,61 @@
+Comprehensive Replit AI Agent Prompt: Fix Category Display in Header Navigation
+Critical Issue Analysis
+The header dropdown is displaying hardcoded categories ("ELECTRONICS & GADGETS", "FASHION & ACCESSORIES", "HOME & KITCHEN") that don't sync with your admin panel. This is a classic case of static data not being replaced with dynamic Firestore integration.
+
+Phase 1: Immediate Diagnostic and Quick Fixes (Execute First)
+Part 1: Locate and Remove Hardcoded Category Data
+Search the entire codebase for the exact strings "ELECTRONICS & GADGETS", "FASHION & ACCESSORIES", "HOME & KITCHEN", and "All Products". These are currently hardcoded somewhere in your header/navigation component. Find the header component file (likely in src/components/layout/Header.tsx, src/components/ui/Navigation.tsx, or similar) and identify where these static values are defined. Remove all hardcoded category arrays, constants, or static strings immediately - this forces the component to rely on dynamic data.
+
+Part 2: Add Emergency Debugging to Header Component
+In the header component, add comprehensive console logging to track the data flow. Log when the component mounts, what data (if any) is being fetched, and what's being rendered. Add console.log('Header categories data:', categories) before the dropdown renders. This will immediately reveal if any dynamic data fetching is happening at all or if the component is completely static.
+
+Part 3: Verify Current Data Fetching Implementation
+Check if the header component has any TanStack Query hooks, Firestore imports, or category fetching logic. Look for useQuery, useCategories, or similar hooks. If no data fetching exists, this explains the issue. If fetching code exists but isn't being used in the render logic, identify why the static data is being rendered instead of the dynamic data.
+
+Part 4: Confirm Admin Panel Data Persistence
+Verify that categories created in the admin panel are actually being saved to Firestore correctly. Check the Firestore collection name, document structure, and field names. Use the browser's developer tools to inspect the Firestore collection directly or add temporary logging to the admin panel's save function to confirm data is persisting with the correct structure.
+
+Phase 2: Implement Dynamic Category Loading
+Part 5: Create or Fix Category Fetching Hook
+Create a dedicated hook src/hooks/use-categories.ts that fetches categories from Firestore using TanStack Query. Ensure this hook uses the exact same Firestore collection and service functions that the admin panel uses for saving categories. The hook should return parent categories in a format suitable for dropdown navigation. Use the same query patterns established elsewhere in your application.
+
+Part 6: Integrate Real-Time Updates
+Implement Firestore's onSnapshot functionality in the category hook to establish real-time synchronization. When categories are added, edited, or deleted in the admin panel, the header should update automatically without requiring page refresh. Ensure proper listener cleanup using useEffect cleanup functions to prevent memory leaks.
+
+Part 7: Update Header Component Data Integration
+Replace the static category rendering in the header component with the dynamic category hook. Remove any hardcoded arrays and use the fetched category data to populate the dropdown menu. Implement proper loading states while categories are being fetched and error handling for fetch failures.
+
+Part 8: Implement Cache Invalidation
+Ensure that category mutations in the admin panel properly invalidate the TanStack Query cache using queryClient.invalidateQueries(['categories']). The query key used for invalidation must match exactly what the header component uses for fetching. This ensures immediate updates when categories are modified in the admin panel.
+
+Phase 3: Advanced UI Implementation and Optimization
+Part 9: Implement Hierarchical Category Display
+If your admin panel supports sub-categories (as suggested by "Power Banks" and "Watches" in your screenshots), upgrade the header dropdown to display the category hierarchy. Use Shadcn UI's DropdownMenuSub, DropdownMenuSubTrigger, and DropdownMenuSubContent components to create nested menus. Parent categories should show sub-categories on hover, while maintaining the ability to click the parent category itself.
+
+Part 10: Optimize Data Structure and Performance
+Structure the category fetching to handle both parent and sub-category relationships efficiently. If categories and sub-categories are stored in separate Firestore collections, implement proper data joining in the hook. Optimize Firestore queries to minimize read operations while maintaining real-time updates.
+
+Part 11: Implement Proper Navigation Logic
+Update the dropdown menu items to navigate correctly using your Wouter routing system. Parent categories should link to filtered product pages (e.g., /products?category=electronics), and sub-categories should provide more specific filtering. Ensure the "All Products" option remains functional and properly styled at the bottom of the dropdown.
+
+Part 12: Add Error Handling and Empty States
+Implement comprehensive error handling for Firestore failures, network issues, and empty category states. If no categories exist, display appropriate fallback content. Ensure the dropdown remains functional even when data loading fails, potentially showing cached data or a basic "All Products" option.
+
+Phase 4: Validation and Testing
+Part 13: Test Complete Data Flow
+Thoroughly test the entire category workflow from admin panel creation to header display. Add a new category through the admin panel and verify it immediately appears in the header dropdown without page refresh. Test editing category names and deleting categories to ensure all operations sync properly.
+
+Part 14: Verify Cross-Component Consistency
+Ensure that category data structure, field names, and fetching patterns are identical between the admin panel and header components. Both should use the same Firestore service layer, schemas, and TypeScript interfaces to prevent future synchronization issues.
+
+Part 15: Performance and Cost Optimization
+Monitor Firestore read operations to ensure the header doesn't generate excessive costs through inefficient queries. Implement appropriate caching strategies that balance real-time updates with performance. Consider using Firestore's offline persistence for better user experience during network issues.
+
+Implementation Priority and Expected Outcomes
+Execute Parts 1-4 immediately - these will identify the root cause within minutes. The console logging from Part 2 is critical for understanding what's actually happening versus what should be happening.
+
+Expected immediate result after Part 1: The dropdown should either show dynamic categories from Firestore OR display nothing/errors, both of which indicate progress from the current hardcoded state.
+
+Expected final result: Categories created in the admin panel appear immediately in the header navigation dropdown with real-time updates, proper hierarchy display, and consistent styling that matches your existing design.
+
+Critical Success Criteria: After completion, adding a category named "Sports & Outdoors" in your admin panel should immediately appear in the header dropdown without any page refresh or manual intervention.
