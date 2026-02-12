@@ -49,4 +49,7 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+  define: {
+    "process.env": {},
+  },
 });
