@@ -31,12 +31,15 @@ export default defineConfig({
     outDir: "../dist",
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000,
+    reportCompressedSize: false,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "wouter"],
           "vendor-query": ["@tanstack/react-query"],
           "vendor-ui": ["lucide-react", "clsx", "tailwind-merge"],
+          "vendor-firebase": ["firebase/app", "firebase/auth", "firebase/firestore"],
         },
       },
     },
