@@ -1,6 +1,6 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,6 +27,19 @@ if (isConfigValid) {
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
     db = getFirestore(app);
+
+    // Enable Offline Persistence (Part 22)
+    if (typeof window !== "undefined") {
+      enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === 'failed-precondition') {
+          // Multiple tabs open, persistence can only be enabled in one tab at a time.
+          console.warn('Firestore persistence failed: Multiple tabs open');
+        } else if (err.code === 'unimplemented') {
+          // The current browser does not support all of the features required to enable persistence
+          console.warn('Firestore persistence is not available in this browser');
+        }
+      });
+    }
   } catch (e) {
     console.error("Firebase initialization error:", e);
     
@@ -49,7 +62,6 @@ if (isConfigValid) {
   
   const createMissingConfigProxy = (name: string) => new Proxy({}, {
     get: (_, prop) => {
-      // Allow access to auth methods by returning a dummy function that throws
       if (typeof prop === 'string') {
         return () => {
           throw new Error(`${name} is not initialized because environment variables are missing. Please set VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, and VITE_FIREBASE_APP_ID in your Secrets.`);

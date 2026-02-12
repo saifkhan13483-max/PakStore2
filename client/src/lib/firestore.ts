@@ -16,14 +16,38 @@ import {
   serverTimestamp,
   Timestamp,
   DocumentData,
-  WithFieldValue
+  WithFieldValue,
+  FirestoreError
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { z } from "zod";
 
 /**
- * Generic Firestore Service Layer with Zod Validation
+ * Enhanced Firestore Service Layer with Zod Validation and Error Handling
  */
+
+function handleFirestoreError(error: any, operation: string, collectionName: string): never {
+  console.error(`Firestore Error [${operation}] on [${collectionName}]:`, error);
+  
+  if (error instanceof FirestoreError) {
+    switch (error.code) {
+      case 'permission-denied':
+        throw new Error(`You don't have permission to perform this action in ${collectionName}.`);
+      case 'unavailable':
+        throw new Error("The service is currently unavailable. Your changes will be synced once you're back online.");
+      case 'not-found':
+        throw new Error(`The requested document in ${collectionName} was not found.`);
+      default:
+        throw new Error(`A database error occurred: ${error.message}`);
+    }
+  }
+  
+  if (error instanceof z.ZodError) {
+    throw new Error(`Data validation failed: ${error.errors.map(e => e.message).join(', ')}`);
+  }
+
+  throw error;
+}
 
 export async function getDocument<T>(
   collectionName: string, 
@@ -40,8 +64,7 @@ export async function getDocument<T>(
     }
     return null;
   } catch (error) {
-    console.error(`Error getting document from ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'getDocument', collectionName);
   }
 }
 
@@ -60,8 +83,7 @@ export async function getCollection<T>(
       return schema.parse(data);
     });
   } catch (error) {
-    console.error(`Error getting collection ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'getCollection', collectionName);
   }
 }
 
@@ -85,8 +107,7 @@ export async function addDocument<T extends DocumentData>(
     const docRef = await addDoc(collectionRef, docData);
     return docRef.id;
   } catch (error) {
-    console.error(`Error adding document to ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'addDocument', collectionName);
   }
 }
 
@@ -109,8 +130,7 @@ export async function setDocument<T extends DocumentData>(
     
     await setDoc(docRef, docData, { merge: true });
   } catch (error) {
-    console.error(`Error setting document in ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'setDocument', collectionName);
   }
 }
 
@@ -121,9 +141,6 @@ export async function updateDocument<T extends DocumentData>(
   schema?: z.ZodSchema<any>
 ): Promise<void> {
   try {
-    // Note: Schema validation for partial updates can be tricky if the schema requires all fields.
-    // We assume the schema provided handles partials or we skip validation for updates.
-    
     const docRef = doc(db, collectionName, id);
     const updateData = {
       ...data,
@@ -132,8 +149,7 @@ export async function updateDocument<T extends DocumentData>(
     
     await updateDoc(docRef, updateData as any);
   } catch (error) {
-    console.error(`Error updating document in ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'updateDocument', collectionName);
   }
 }
 
@@ -145,8 +161,7 @@ export async function deleteDocument(
     const docRef = doc(db, collectionName, id);
     await deleteDoc(docRef);
   } catch (error) {
-    console.error(`Error deleting document from ${collectionName}:`, error);
-    throw error;
+    return handleFirestoreError(error, 'deleteDocument', collectionName);
   }
 }
 

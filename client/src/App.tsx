@@ -8,6 +8,7 @@ import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
 import { Suspense, lazy, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 // Page Imports with Code Splitting
 const Home = lazy(() => import("@/pages/Home"));
@@ -151,21 +152,25 @@ import { AuthProvider } from "@/hooks/use-auth";
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <TooltipProvider>
-            <Helmet>
-              <title>PakCart | Authentic Pakistani Artisanal Products</title>
-              <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
-            </Helmet>
-            <Router />
-            <Toaster />
-          </TooltipProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <HelmetProvider>
+            <TooltipProvider>
+              <Helmet>
+                <title>PakCart | Authentic Pakistani Artisanal Products</title>
+                <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
+              </Helmet>
+              <Router />
+              <Toaster />
+            </TooltipProvider>
+          </HelmetProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
+
+export default App;
 
 export default App;
