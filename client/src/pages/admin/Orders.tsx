@@ -81,7 +81,7 @@ export default function AdminOrders() {
                     </TableCell>
                     <TableCell className="text-emerald-800">{order.shippingAddress?.city || "N/A"}</TableCell>
                     <TableCell className="text-right font-bold text-emerald-900">
-                      Rs. {order.total.toLocaleString()}
+                      Rs. {order.total?.toLocaleString() ?? "0"}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -133,16 +133,16 @@ export default function AdminOrders() {
                                   <div key={idx} className="flex justify-between items-start border-b border-emerald-50 pb-2">
                                     <div className="flex-1">
                                       <p className="text-sm font-medium text-emerald-900">{item.product.name}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.product.price.toLocaleString()}</p>
+                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.product?.price?.toLocaleString() ?? "0"}</p>
                                     </div>
-                                    <p className="text-sm font-bold">Rs. {(item.quantity * item.product.price).toLocaleString()}</p>
+                                    <p className="text-sm font-bold">Rs. {(item.quantity * (item.product?.price ?? 0)).toLocaleString()}</p>
                                   </div>
                                 ))}
                               </div>
                               <div className="pt-2 border-t border-emerald-200 space-y-1">
                                 <div className="flex justify-between items-center font-bold text-emerald-900 pt-1">
                                   <span>Total Amount</span>
-                                  <span>Rs. {order.total.toLocaleString()}</span>
+                                  <span>Rs. {order.total?.toLocaleString() ?? "0"}</span>
                                 </div>
                               </div>
                             </div>
