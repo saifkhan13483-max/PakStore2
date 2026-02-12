@@ -147,7 +147,7 @@ export default function ManageCategories() {
                   <div>
                     <span className="font-medium">{cat.name}</span>
                     <span className="ml-2 text-xs text-muted-foreground">
-                      ({parentCategories?.find(p => p.id === cat.parentId)?.name})
+                      ({parentCategories?.find(p => p.id === cat.parentCategoryId)?.name})
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -239,7 +239,7 @@ function CategoryDialog({ category, parentCategories, onSubmit }: { category?: C
   const [open, setOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(insertCategorySchema),
-    defaultValues: category || { name: "", slug: "", parentId: undefined },
+    defaultValues: category || { name: "", slug: "", parentCategoryId: undefined },
   });
 
   const handleSubmit = (data: any) => {
@@ -289,7 +289,7 @@ function CategoryDialog({ category, parentCategories, onSubmit }: { category?: C
             />
             <FormField
               control={form.control}
-              name="parentId"
+              name="parentCategoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Parent Category</FormLabel>
