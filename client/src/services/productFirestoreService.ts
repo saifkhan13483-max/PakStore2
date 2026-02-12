@@ -54,6 +54,23 @@ export const productFirestoreService = {
         constraints.push(where("categoryId", "==", filters.category));
       }
 
+      // Add default ordering if not specified to ensure consistent pagination
+      if (filters.sortBy === "price-asc") {
+        constraints.push(orderBy("price", "asc"));
+      } else if (filters.sortBy === "price-desc") {
+        constraints.push(orderBy("price", "desc"));
+      } else {
+        constraints.push(orderBy("createdAt", "desc"));
+      }
+
+      if (filters.startAfterDoc) {
+        constraints.push(startAfter(filters.startAfterDoc));
+      }
+
+      if (filters.limit) {
+        constraints.push(limit(filters.limit));
+      }
+
       const q = query(productsRef, ...constraints);
       const querySnapshot = await getDocs(q);
       const products = querySnapshot.docs.map(doc => {
@@ -66,8 +83,6 @@ export const productFirestoreService = {
         } as Product;
       });
 
-      // Client-side sorting and searching if needed, but for now just return all
-      // to ensure visibility
       let result = products;
 
       if (filters.search) {
@@ -76,23 +91,6 @@ export const productFirestoreService = {
           (p.name?.toLowerCase() || "").includes(searchLower) ||
           (p.description?.toLowerCase() || "").includes(searchLower)
         );
-      }
-
-      if (filters.sortBy) {
-        result.sort((a, b) => {
-          if (filters.sortBy === "price-asc") return (a.price || 0) - (b.price || 0);
-          if (filters.sortBy === "price-desc") return (b.price || 0) - (a.price || 0);
-          if (filters.sortBy === "newest") {
-            const dateA = (a as any).createdAt?.toDate?.() || new Date((a as any).createdAt || 0);
-            const dateB = (b as any).createdAt?.toDate?.() || new Date((b as any).createdAt || 0);
-            return dateB.getTime() - dateA.getTime();
-          }
-          return 0;
-        });
-      }
-
-      if (filters.limit) {
-        result = result.slice(0, filters.limit);
       }
 
       return result;
