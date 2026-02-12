@@ -21,6 +21,7 @@ const productsRef = collection(db, COLLECTION_NAME);
 
 export interface ProductFilters {
   category?: string;
+  parentCategoryId?: string;
   search?: string;
   sortBy?: "price-asc" | "price-desc" | "newest";
   limit?: number;
@@ -50,8 +51,20 @@ export const productFirestoreService = {
   async getAllProducts(filters: ProductFilters = {}) {
     try {
       const constraints: QueryConstraint[] = [];
+      
       if (filters.category && filters.category !== "all") {
         constraints.push(where("categoryId", "==", filters.category));
+      } else if (filters.parentCategoryId) {
+        // Fetch sub-categories for this parent
+        const catsQuery = query(collection(db, "categories"), where("parentCategoryId", "==", filters.parentCategoryId));
+        const catsSnapshot = await getDocs(catsQuery);
+        const catIds = catsSnapshot.docs.map(doc => doc.id);
+        
+        if (catIds.length > 0) {
+          constraints.push(where("categoryId", "in", catIds.slice(0, 10)));
+        } else {
+          return [];
+        }
       }
 
       // Add default ordering if not specified to ensure consistent pagination

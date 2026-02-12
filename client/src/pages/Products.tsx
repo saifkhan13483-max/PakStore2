@@ -52,20 +52,31 @@ export default function Products() {
   // Handle URL parameters for initial filters
   useEffect(() => {
     const params = new URLSearchParams(search);
-    const cat = params.get("category");
+    const cat = params.get("category") || params.get("categoryId");
+    const parentCat = params.get("parentCategoryId");
+    
     if (cat) {
       setFilterState(prev => ({ ...prev, categories: [cat] }));
+    } else if (parentCat) {
+      // If a parent category is selected, we might want to filter by all its sub-categories
+      // For now, let's just clear sub-category filters if a parent is explicitly viewed
+      // or handle it by fetching all products for that parent in the query
+      setFilterState(prev => ({ ...prev, categories: [] }));
     }
   }, [search]);
 
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["products", { categories: filterState.categories, sortBy, queryParam }],
-    queryFn: () => productFirestoreService.getAllProducts({
-      category: filterState.categories.length > 0 ? filterState.categories[0] : undefined,
-      search: queryParam,
-      sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "newest" : undefined,
-      limit: 100 
-    })
+    queryKey: ["products", { categories: filterState.categories, sortBy, queryParam, parentCategoryId: new URLSearchParams(search).get("parentCategoryId") }],
+    queryFn: () => {
+      const params = new URLSearchParams(search);
+      return productFirestoreService.getAllProducts({
+        category: filterState.categories.length > 0 ? filterState.categories[0] : undefined,
+        parentCategoryId: params.get("parentCategoryId") || undefined,
+        search: queryParam,
+        sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "newest" : undefined,
+        limit: 100 
+      });
+    }
   });
 
   const filteredAndSortedProducts = useMemo(() => {
