@@ -33,8 +33,13 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
   } = options;
 
   // Split URL into parts: base, upload, and path
-  if (url.startsWith('attached_assets/')) {
-    return `/${url}`;
+  if (url.startsWith('attached_assets/') || url.startsWith('/attached_assets/')) {
+    return url.startsWith('/') ? url : `/${url}`;
+  }
+
+  // Handle local public assets
+  if (url.startsWith('/images/') || url.startsWith('images/')) {
+    return url.startsWith('/') ? url : `/${url}`;
   }
 
   const parts = url.split('/upload/');
