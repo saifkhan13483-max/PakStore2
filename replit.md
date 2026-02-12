@@ -34,3 +34,16 @@ A modern e-commerce application built with React, Vite, and Firebase (Firestore 
 ## User Preferences
 - Clean, modern UI using Shadcn components.
 - Serverless architecture for scalability and low maintenance.
+
+## Cost Optimization & Resource Management
+- **Firestore**:
+  - Implemented offline persistence to reduce unnecessary read operations.
+  - Used paginated queries (`getCollectionPaginated`) for all list views to minimize document reads.
+  - Leveraging TanStack Query's `staleTime` and `gcTime` for efficient client-side caching.
+- **Cloudinary**:
+  - Utilizing `f_auto` and `q_auto` for optimized asset delivery.
+  - Implemented responsive `srcSet` generation to serve appropriately sized images.
+  - Added `dpr_auto` support for high-density displays without over-serving pixels.
+- **Vercel**:
+  - Optimized build process and static asset caching.
+  - Using serverless infrastructure to pay only for actual usage.

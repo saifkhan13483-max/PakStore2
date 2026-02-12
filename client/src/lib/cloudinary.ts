@@ -25,8 +25,9 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
     width,
     height,
     crop = 'fill',
-    quality = 'auto:good', // Optimized for Pakistani networks (slightly more compressed but fast)
-    format = 'auto'
+    quality = 'auto', // Cloudinary auto quality handles bandwidth vs visual quality
+    format = 'auto',
+    dpr = 'auto' // Added Device Pixel Ratio for sharp images on mobile
   } = options;
 
   // Split URL into parts: base, upload, and path
@@ -36,6 +37,7 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
   const transformations = [
     `f_${format}`,
     `q_${quality}`,
+    `dpr_${dpr}`
   ];
 
   if (width) transformations.push(`w_${width}`);

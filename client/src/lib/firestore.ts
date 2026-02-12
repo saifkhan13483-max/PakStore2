@@ -13,15 +13,35 @@ import {
   where, 
   orderBy, 
   limit, 
+  startAfter,
   QueryConstraint,
   serverTimestamp,
   Timestamp,
   DocumentData,
   WithFieldValue,
-  FirestoreError
+  FirestoreError,
+  QueryDocumentSnapshot,
+  enableIndexedDbPersistence
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { z } from "zod";
+
+/**
+ * Enable offline persistence for better user experience and reduced read operations
+ */
+try {
+  enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time.
+      console.warn('Firestore persistence failed: multiple tabs open');
+    } else if (err.code === 'unimplemented') {
+      // The current browser does not support all of the features required to enable persistence
+      console.warn('Firestore persistence failed: browser not supported');
+    }
+  });
+} catch (e) {
+  console.error("Error enabling Firestore persistence", e);
+}
 
 /**
  * Enhanced Firestore Service Layer with Zod Validation and Error Handling
@@ -85,6 +105,41 @@ export async function getCollection<T>(
     });
   } catch (error) {
     return handleFirestoreError(error, 'getCollection', collectionName);
+  }
+}
+
+/**
+ * Paginated collection retrieval to optimize read operations
+ */
+export async function getCollectionPaginated<T>(
+  collectionName: string,
+  schema: z.ZodSchema<T>,
+  pageSize: number = 10,
+  lastDoc: QueryDocumentSnapshot | null = null,
+  additionalConstraints: QueryConstraint[] = []
+): Promise<{ data: T[], lastDoc: QueryDocumentSnapshot | null }> {
+  try {
+    const collectionRef = collection(db, collectionName);
+    const constraints = [...additionalConstraints, limit(pageSize)];
+    
+    if (lastDoc) {
+      constraints.push(startAfter(lastDoc));
+    }
+    
+    const q = query(collectionRef, ...constraints);
+    const querySnapshot = await getDocs(q);
+    
+    const data = querySnapshot.docs.map(doc => {
+      const docData = { id: doc.id, ...doc.data() };
+      return schema.parse(docData);
+    });
+    
+    return {
+      data,
+      lastDoc: querySnapshot.docs[querySnapshot.docs.length - 1] || null
+    };
+  } catch (error) {
+    return handleFirestoreError(error, 'getCollectionPaginated', collectionName);
   }
 }
 
@@ -190,4 +245,4 @@ export async function queryCollection<T>(
 }
 
 // Re-export useful Firebase functions
-export { where, orderBy, limit, serverTimestamp, Timestamp };
+export { where, orderBy, limit, startAfter, serverTimestamp, Timestamp };
