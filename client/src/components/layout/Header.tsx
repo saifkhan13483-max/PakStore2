@@ -203,6 +203,13 @@ const Header = () => {
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="cursor-pointer w-full">Profile Settings</Link>
                   </DropdownMenuItem>
+                  {user?.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="cursor-pointer w-full font-medium text-primary">
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link href="/orders" className="cursor-pointer w-full">My Orders</Link>
                   </DropdownMenuItem>

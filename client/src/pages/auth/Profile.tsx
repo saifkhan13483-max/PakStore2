@@ -17,6 +17,8 @@ import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { UserAvatar } from "../../components/auth/UserAvatar";
 import { MediaUpload } from "../../components/MediaUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { LayoutDashboard } from "lucide-react";
+import { Link } from "wouter";
 
 const PAKISTAN_CITIES = [
   "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", 
@@ -175,8 +177,18 @@ export default function Profile() {
               <div>
                 <h3 className="text-xl font-semibold">{user.displayName || "Valued Customer"}</h3>
                 <p className="text-muted-foreground">{user.email}</p>
-                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                  {user.providerId === 'password' ? 'Email/Password' : 'Google Authentication'}
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                    {user.providerId === 'password' ? 'Email/Password' : 'Google Authentication'}
+                  </div>
+                  {user.role === 'admin' && (
+                    <Link href="/admin">
+                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 border-primary/20 hover:bg-primary/5">
+                        <LayoutDashboard className="h-3 w-3" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
