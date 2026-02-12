@@ -108,11 +108,23 @@ export type User = z.infer<typeof userSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;
 export type Order = z.infer<typeof orderSchema>;
 
-export type InsertProduct = z.infer<ReturnType<typeof productSchema.omit<{ id: true; createdAt: true; updatedAt: true }>>>;
-export type InsertCategory = z.infer<ReturnType<typeof categorySchema.omit<{ id: true; createdAt: true; updatedAt: true }>>>;
-export type InsertParentCategory = z.infer<ReturnType<typeof parentCategorySchema.omit<{ id: true; createdAt: true; updatedAt: true }>>>;
-export type InsertUser = z.infer<ReturnType<typeof userSchema.omit<{ uid: true; createdAt: true }>>>;
-export type InsertOrder = z.infer<ReturnType<typeof orderSchema.omit<{ id: true; createdAt: true; updatedAt: true }>>>;
+export type InsertProduct = z.infer<typeof productSchema>;
+export const insertProductSchema = productSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertCategory = z.infer<typeof categorySchema>;
+export const insertCategorySchema = categorySchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertParentCategory = z.infer<typeof parentCategorySchema>;
+export const insertParentCategorySchema = parentCategorySchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertUser = z.infer<typeof userSchema>;
+export const insertUserSchema = userSchema.omit({ uid: true, createdAt: true });
+
+export type InsertOrder = z.infer<typeof orderSchema>;
+export const insertOrderSchema = orderSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const checkoutInfoSchema = profileSchema;
+export type CheckoutInfo = ProfileValues;
 
 /**
  * UI & Form Validation Schemas

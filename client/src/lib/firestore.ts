@@ -18,10 +18,8 @@ import {
   DocumentData,
   WithFieldValue
 } from "firebase/firestore";
-import { app } from "./firebase";
+import { db } from "./firebase";
 import { z } from "zod";
-
-const db = getFirestore(app);
 
 /**
  * Generic Firestore Service Layer with Zod Validation
