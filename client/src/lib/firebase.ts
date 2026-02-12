@@ -1,7 +1,8 @@
-// @ts-nocheck
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence, type Firestore } from "firebase/firestore";
+import { getAnalytics, type Analytics, logEvent } from "firebase/analytics";
+import { getPerformance, type FirebasePerformance } from "firebase/performance";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -9,12 +10,15 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 let app: FirebaseApp;
 let auth: Auth;
 let googleProvider: GoogleAuthProvider;
 let db: Firestore;
+let analytics: Analytics | null = null;
+let performance: FirebasePerformance | null = null;
 
 const isConfigValid = !!(
   import.meta.env.VITE_FIREBASE_API_KEY &&
@@ -29,14 +33,18 @@ if (isConfigValid) {
     googleProvider = new GoogleAuthProvider();
     db = getFirestore(app);
 
-    // Enable Offline Persistence (Part 22)
+    // Initialize Analytics and Performance if supported
     if (typeof window !== "undefined") {
+      // Analytics measurementId is optional but recommended
+      if (firebaseConfig.measurementId) {
+        analytics = getAnalytics(app);
+      }
+      performance = getPerformance(app);
+
       enableIndexedDbPersistence(db).catch((err) => {
         if (err.code === 'failed-precondition') {
-          // Multiple tabs open, persistence can only be enabled in one tab at a time.
           console.warn('Firestore persistence failed: Multiple tabs open');
         } else if (err.code === 'unimplemented') {
-          // The current browser does not support all of the features required to enable persistence
           console.warn('Firestore persistence is not available in this browser');
         }
       });
@@ -78,5 +86,14 @@ if (isConfigValid) {
   googleProvider = {} as GoogleAuthProvider;
 }
 
-export { auth, googleProvider, db };
+/**
+ * Analytics utility wrapper
+ */
+export const trackEvent = (eventName: string, eventParams?: Record<string, any>) => {
+  if (analytics) {
+    logEvent(analytics, eventName, eventParams);
+  }
+};
+
+export { auth, googleProvider, db, analytics, performance };
 export default app;

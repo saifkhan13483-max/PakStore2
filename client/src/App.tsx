@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import { Suspense, lazy, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { trackEvent } from "@/lib/firebase";
 
 // Page Imports with Code Splitting
 const Home = lazy(() => import("@/pages/Home"));
@@ -45,6 +46,11 @@ function Router() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Track page views (Part 23)
+    trackEvent('page_view', { 
+      page_path: location,
+      page_title: document.title 
+    });
   }, [location]);
 
   const isAdminPath = location.startsWith("/admin");
