@@ -65,7 +65,7 @@ export default function AdminProducts() {
   const { toast } = useToast();
 
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["products", categoryFilter],
+    queryKey: ["products", { categoryFilter }],
     queryFn: () => productFirestoreService.getAllProducts({
       category: categoryFilter === "all" ? undefined : categoryFilter as any,
     }),

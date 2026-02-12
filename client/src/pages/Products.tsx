@@ -59,7 +59,7 @@ export default function Products() {
   }, [search]);
 
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["products", filterState.categories, sortBy, queryParam],
+    queryKey: ["products", { categories: filterState.categories, sortBy, queryParam }],
     queryFn: () => productFirestoreService.getAllProducts({
       category: filterState.categories.length > 0 ? filterState.categories[0] : undefined,
       search: queryParam,
