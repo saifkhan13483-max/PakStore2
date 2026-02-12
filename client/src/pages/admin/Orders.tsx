@@ -132,7 +132,7 @@ export default function AdminOrders() {
                                 {order.items.map((item, idx) => (
                                   <div key={idx} className="flex justify-between items-start border-b border-emerald-50 pb-2">
                                     <div className="flex-1">
-                                      <p className="text-sm font-medium text-emerald-900">{item.product.name}</p>
+                                      <p className="text-sm font-medium text-emerald-900">{item.product?.name || "Unknown Product"}</p>
                                       <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.product?.price?.toLocaleString() ?? "0"}</p>
                                     </div>
                                     <p className="text-sm font-bold">Rs. {(item.quantity * (item.product?.price ?? 0)).toLocaleString()}</p>
