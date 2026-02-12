@@ -1,0 +1,98 @@
+Replit AI Agent Prompt: Fix "getOptimizedImageUrl is not defined" Error
+Error Context and Objective
+You need to resolve a critical runtime error on the checkout page (https://www.pakcart.store/checkout) where the application crashes with the message "getOptimizedImageUrl is not defined". This error likely occurred during the migration from Express backend to serverless architecture, where image optimization utilities may have been removed or not properly migrated to the client-side Cloudinary integration.
+
+Phase 1: Error Source Investigation
+Step 1: Locate the Error Origin Search the entire codebase for all references to getOptimizedImageUrl (including variations like getOptimizedImageURL, optimizedImageUrl). Focus particularly on:
+
+The checkout page component (src/pages/Checkout.tsx or similar)
+Cart-related components (CartItem, OrderSummary, product listings)
+Any image rendering components used in the checkout flow
+Identify the exact file and line where this undefined function is being called.
+
+Step 2: Determine Root Cause Category Based on your investigation, classify the issue into one of these scenarios:
+
+Scenario A: Function exists elsewhere but missing import in the checkout component
+Scenario B: Function was renamed or moved during migration but references weren't updated
+Scenario C: Function was completely removed during backend elimination and needs recreation
+Scenario D: Function is obsolete and should be replaced with existing alternatives
+Phase 2: Strategic Resolution Implementation
+Step 3: Handle Missing Import (Scenario A) If the function exists in src/lib/cloudinary.ts, src/lib/utils.ts, or similar utility files:
+
+Add the correct named import to the checkout component
+Verify the function is properly exported from its source module
+Check for any TypeScript import/export issues
+Step 4: Fix Renamed/Moved Function (Scenario B) If a similar function exists under a different name:
+
+Update all references to use the correct function name
+Ensure consistent naming across the entire codebase
+Update any related TypeScript types or interfaces
+Step 5: Implement Missing Function (Scenario C) If the function doesn't exist, create it in src/lib/cloudinary.ts:
+
+Create a properly typed function that accepts image URL and optional transformation parameters
+Implement Cloudinary URL optimization with parameters like f_auto, q_auto, and responsive sizing
+Include fallback handling for non-Cloudinary URLs
+Ensure the function works in client-side environment without server dependencies
+Step 6: Replace with Existing Alternative (Scenario D) If the function is no longer needed:
+
+Replace all usages with existing image handling utilities
+Ensure replacement maintains the same visual quality and performance
+Update any related components that might use similar obsolete functions
+Phase 3: Implementation Details and Integration
+Step 7: Create Robust Cloudinary Helper (if needed) When implementing the missing function, ensure it:
+
+Accepts parameters: (imageUrl: string, transformations?: CloudinaryTransformations) => string
+Validates input URLs and handles null/undefined cases gracefully
+Applies standard optimizations: automatic format selection, quality adjustment, width/height constraints
+Returns optimized Cloudinary URLs for Cloudinary images, original URLs for others
+Includes proper TypeScript typing and JSDoc documentation
+Step 8: Update Component Integration In the checkout component and related files:
+
+Add proper imports for the utility function
+Ensure all image rendering code uses the optimization helper consistently
+Verify that product images, thumbnails, and any other media display correctly
+Handle loading states and error cases for image optimization
+Phase 4: Quality Assurance and Prevention
+Step 9: Comprehensive Codebase Scan Perform a global search for similar issues:
+
+Look for other undefined image-related functions
+Check for broken imports in other page components
+Verify that all Cloudinary integrations work consistently across the application
+Ensure environment variables (VITE_CLOUDINARY_CLOUD_NAME, etc.) are properly configured
+Step 10: TypeScript and Build Verification Ensure the fix is robust:
+
+Resolve any TypeScript compilation errors
+Verify that Vite build process handles the utility module correctly
+Test that the function works in both development and production environments
+Confirm no circular dependencies or module resolution issues exist
+Step 11: Functional Testing Test the complete checkout flow:
+
+Navigate to the checkout page and verify it loads without errors
+Confirm all product images render with proper optimization
+Check browser console for any remaining errors or warnings
+Test image loading performance and fallback behavior
+Verify the error boundary no longer triggers
+Phase 5: Documentation and Maintenance
+Step 12: Create Usage Guidelines Document the image optimization approach:
+
+Add clear comments explaining how to use the utility function
+Create guidelines for when to apply image optimization in new components
+Document the Cloudinary transformation parameters and their effects
+Establish patterns for consistent image handling across the application
+Step 13: Final Verification Summary Provide a comprehensive report including:
+
+Root cause of the original error
+Which resolution scenario was applied
+Files modified or created during the fix
+Any additional improvements made to image handling
+Recommendations for preventing similar issues in future development
+Success Criteria
+The fix is complete when:
+
+The checkout page loads without the "getOptimizedImageUrl is not defined" error
+All product images display correctly with appropriate optimization
+No console errors related to image handling appear
+The solution is consistent with the serverless architecture using Vercel, Firebase/Firestore, and Cloudinary
+TypeScript compilation succeeds without errors
+The implementation follows the existing code patterns and maintains type safety
+Execute these steps systematically, providing brief progress updates after completing each major phase to ensure the fix addresses both the immediate error and prevents similar issues in the future.
