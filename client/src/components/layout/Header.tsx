@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { SearchOverlay } from "./SearchOverlay";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
+import { useCategories } from "@/hooks/use-categories";
 
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -39,14 +40,7 @@ const Header = () => {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { user, isAuthenticated, logout } = useAuthStore();
   
-  const { data: parentCategories } = useQuery<ParentCategory[]>({ 
-    queryKey: ["parent-categories"],
-    queryFn: () => categoryFirestoreService.getAllParentCategories()
-  });
-  const { data: categoriesData } = useQuery<Category[]>({ 
-    queryKey: ["categories"],
-    queryFn: () => categoryFirestoreService.getAllCategories()
-  });
+  const { categories: categoriesData, parentCategories, isLoading: categoriesLoading } = useCategories();
 
   useEffect(() => {
     const handleScroll = () => {

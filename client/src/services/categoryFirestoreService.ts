@@ -9,7 +9,8 @@ import {
   query, 
   where, 
   orderBy,
-  limit
+  limit,
+  onSnapshot
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { 
@@ -35,6 +36,36 @@ export class CategoryFirestoreService {
       console.error("Error getting category:", error);
       throw new Error(`Failed to fetch category: ${error.message}`);
     }
+  }
+
+  subscribeCategories(callback: (categories: Category[]) => void) {
+    const q = query(collection(db, CATEGORIES_COLLECTION), orderBy("name", "asc"));
+    return onSnapshot(q, (querySnapshot) => {
+      const categories = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          parentCategoryId: data.parentId || data.parentCategoryId 
+        } as unknown as Category;
+      });
+      callback(categories);
+    }, (error) => {
+      console.error("Error subscribing to categories:", error);
+    });
+  }
+
+  subscribeParentCategories(callback: (categories: ParentCategory[]) => void) {
+    const q = query(collection(db, PARENT_CATEGORIES_COLLECTION), orderBy("name", "asc"));
+    return onSnapshot(q, (querySnapshot) => {
+      const categories = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      } as unknown as ParentCategory));
+      callback(categories);
+    }, (error) => {
+      console.error("Error subscribing to parent categories:", error);
+    });
   }
 
   async getAllCategories(): Promise<Category[]> {
