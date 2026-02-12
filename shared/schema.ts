@@ -23,75 +23,101 @@ export const baseDocumentSchema = z.object({
   updatedAt: firestoreTimestampSchema,
 });
 
-export interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  longDescription?: string;
-  price: number;
-  originalPrice?: number | null;
-  images: string[];
-  categoryId: string;
-  inStock: boolean;
-  active?: boolean;
-  rating?: string | number;
-  reviewCount?: number;
-  features?: string[];
-  specifications?: Record<string, any>;
-  stock?: number;
-}
+/**
+ * Core Entity Schemas (Part 6.5 & 6.6)
+ */
 
-export interface Category {
-  id: string | number;
-  slug: string;
-  name: string;
-  description?: string;
-  image?: string;
-  parentCategoryId?: string | number | null;
-}
+export const productSchema = baseDocumentSchema.extend({
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string(),
+  longDescription: z.string().optional(),
+  price: z.number().positive(),
+  originalPrice: z.number().nullable().optional(),
+  images: z.array(z.string()),
+  categoryId: documentIdSchema, // Reference to category doc ID (Part 6.6)
+  inStock: z.boolean(),
+  active: z.boolean().default(true),
+  rating: z.union([z.string(), z.number()]).optional(),
+  reviewCount: z.number().default(0),
+  features: z.array(z.string()).optional(),
+  specifications: z.record(z.any()).optional(),
+  stock: z.number().int().nonnegative().optional(),
+});
 
-export interface ParentCategory {
-  id: string | number;
-  slug: string;
-  name: string;
-  description?: string;
-  image?: string;
-}
+export const categorySchema = baseDocumentSchema.extend({
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  parentCategoryId: documentIdSchema.nullable().optional(), // Reference to parent category doc ID (Part 6.6)
+});
 
-export interface CartItem {
-  id: string;
-  productId: string;
-  quantity: number;
-  product: Product;
-}
+export const parentCategorySchema = baseDocumentSchema.extend({
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  image: z.string().optional(),
+});
 
-export interface User {
-  uid: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
-  phoneNumber?: string;
-  address?: string;
-  city?: string;
-  createdAt: string;
-}
+export const userSchema = z.object({
+  uid: z.string(), // Firebase Auth UID
+  email: z.string().email(),
+  displayName: z.string(),
+  photoURL: z.string().url().optional(),
+  phoneNumber: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  createdAt: firestoreTimestampSchema,
+});
 
-export interface Order {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  createdAt: string;
-  shippingAddress: {
-    street: string;
-    area: string;
-    city: string;
-  };
-}
+// Part 6.6: Embedded Relationship Patterns
+export const cartItemSchema = z.object({
+  id: z.string(),
+  productId: documentIdSchema, // Reference to product
+  quantity: z.number().int().positive(),
+  // Denormalized product data for consistent read patterns in orders
+  product: productSchema.pick({
+    name: true,
+    price: true,
+    images: true,
+    slug: true
+  }),
+});
 
-// Auth Schemas
+export const orderSchema = baseDocumentSchema.extend({
+  userId: z.string(), // Reference to user uid
+  items: z.array(cartItemSchema),
+  total: z.number().positive(),
+  status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+  shippingAddress: z.object({
+    street: z.string(),
+    area: z.string(),
+    city: z.string(),
+  }),
+});
+
+/**
+ * Type Exports
+ */
+
+export type Product = z.infer<typeof productSchema>;
+export type Category = z.infer<typeof categorySchema>;
+export type ParentCategory = z.infer<typeof parentCategorySchema>;
+export type User = z.infer<typeof userSchema>;
+export type CartItem = z.infer<typeof cartItemSchema>;
+export type Order = z.infer<typeof orderSchema>;
+
+export type InsertProduct = z.infer<typeof productSchema.omit({ id: true, createdAt: true, updatedAt: true })>;
+export type InsertCategory = z.infer<typeof categorySchema.omit({ id: true, createdAt: true, updatedAt: true })>;
+export type InsertParentCategory = z.infer<typeof parentCategorySchema.omit({ id: true, createdAt: true, updatedAt: true })>;
+export type InsertUser = z.infer<typeof userSchema.omit({ uid: true, createdAt: true })>;
+export type InsertOrder = z.infer<typeof orderSchema.omit({ id: true, createdAt: true, updatedAt: true })>;
+
+/**
+ * UI & Form Validation Schemas
+ */
+
 export const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -133,9 +159,3 @@ export const profileSchema = z.object({
 export type LoginValues = z.infer<typeof loginSchema>;
 export type SignupValues = z.infer<typeof signupSchema>;
 export type ProfileValues = z.infer<typeof profileSchema>;
-
-export type InsertProduct = Omit<Product, "id">;
-export type InsertCategory = Omit<Category, "id">;
-export type InsertParentCategory = Omit<ParentCategory, "id">;
-export type InsertUser = Omit<User, "uid">;
-export type InsertOrder = Omit<Order, "id">;
