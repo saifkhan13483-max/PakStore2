@@ -75,28 +75,26 @@ export default function Checkout() {
 
       const orderData = {
         userId: user?.uid || "guest",
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        area: data.area,
-        notes: data.notes || "",
-        paymentMethod: "COD",
         items: items.map(item => ({
+          id: item.id || Math.random().toString(36).substring(7),
           productId: item.productId,
           quantity: item.quantity,
-          name: (item as any).name || "Unknown Product",
-          price: (item as any).price || 0,
-          image: (item as any).images?.[0] || ""
+          product: {
+            name: (item as any).name || "Unknown Product",
+            price: (item as any).price || 0,
+            images: (item as any).images || [],
+            slug: (item as any).slug || ""
+          }
         })),
-        totals: {
-          subtotal,
-          shipping,
-          total
-        },
+        total: total,
         status: "pending",
-        createdAt: new Date().toISOString()
+        shippingAddress: {
+          street: data.address,
+          area: data.area,
+          city: data.city,
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       console.log("DEBUG Order Payload:", orderData);
