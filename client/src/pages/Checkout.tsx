@@ -78,20 +78,20 @@ export default function Checkout() {
         items: items.map(item => ({
           id: item.id || Math.random().toString(36).substring(7),
           productId: item.productId,
-          quantity: item.quantity,
+          quantity: Number(item.quantity),
           product: {
             name: (item as any).name || "Unknown Product",
-            price: (item as any).price || 0,
+            price: Number((item as any).price || 0),
             images: (item as any).images || [],
             slug: (item as any).slug || ""
           }
         })),
-        total: total,
+        total: Number(total),
         status: "pending",
         shippingAddress: {
-          street: data.address,
-          area: data.area,
-          city: data.city,
+          street: String(data.address),
+          area: String(data.area),
+          city: String(data.city),
         },
         createdAt: new Date(),
         updatedAt: new Date()

@@ -88,7 +88,7 @@ export const cartItemSchema = z.object({
 export const orderSchema = baseDocumentSchema.extend({
   userId: z.string(), // Reference to user uid
   items: z.array(cartItemSchema),
-  total: z.number().positive(),
+  total: z.coerce.number().positive(),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
   shippingAddress: z.object({
     street: z.string(),
