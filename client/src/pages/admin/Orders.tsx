@@ -136,6 +136,8 @@ export default function AdminOrders() {
                                     const date = order.createdAt as any;
                                     if (date?.toDate) return format(date.toDate(), "PPP p");
                                     if (date instanceof Date) return format(date, "PPP p");
+                                    if (typeof date === "string") return format(new Date(date), "PPP p");
+                                    if (date?.seconds) return format(new Date(date.seconds * 1000), "PPP p");
                                     return "N/A";
                                   })()}</p>
                                 </div>

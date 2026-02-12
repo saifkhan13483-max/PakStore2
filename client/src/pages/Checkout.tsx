@@ -88,6 +88,7 @@ export default function Checkout() {
         })),
         total: total,
         status: "pending",
+        createdAt: new Date(),
         customerInfo: {
           fullName: String(data.fullName),
           email: String(data.email),
