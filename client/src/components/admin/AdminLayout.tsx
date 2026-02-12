@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "../app-sidebar";
+import { AdminSidebar } from "../admin-sidebar";
 import { ThemeToggle } from "../theme-toggle";
 
 interface AdminLayoutProps {
@@ -16,7 +16,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <SidebarProvider style={style as React.CSSProperties}>
       <div className="flex h-screen w-full bg-background">
-        <AppSidebar />
+        <AdminSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between p-4 border-b bg-card h-16">
             <div className="flex items-center gap-4">
