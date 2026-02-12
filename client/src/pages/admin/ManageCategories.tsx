@@ -33,6 +33,7 @@ export default function ManageCategories() {
     mutationFn: (data: any) => categoryFirestoreService.createParentCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Parent category created" });
     },
   });
@@ -42,6 +43,7 @@ export default function ManageCategories() {
       categoryFirestoreService.updateParentCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       setEditingParent(null);
       toast({ title: "Success", description: "Parent category updated" });
     },
@@ -51,6 +53,7 @@ export default function ManageCategories() {
     mutationFn: (id: string) => categoryFirestoreService.deleteParentCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Parent category deleted" });
     },
     onError: (error: Error) => {
@@ -62,6 +65,7 @@ export default function ManageCategories() {
     mutationFn: (data: any) => categoryFirestoreService.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       toast({ title: "Success", description: "Category created" });
     },
   });
@@ -71,6 +75,7 @@ export default function ManageCategories() {
       categoryFirestoreService.updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       setEditingCategory(null);
       toast({ title: "Success", description: "Category updated" });
     },
@@ -80,6 +85,7 @@ export default function ManageCategories() {
     mutationFn: (id: string) => categoryFirestoreService.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"] });
       toast({ title: "Success", description: "Category deleted" });
     },
     onError: (error: Error) => {
