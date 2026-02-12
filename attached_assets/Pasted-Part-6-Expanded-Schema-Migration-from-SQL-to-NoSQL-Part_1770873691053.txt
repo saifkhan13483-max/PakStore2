@@ -1,0 +1,34 @@
+Part 6 Expanded: Schema Migration from SQL to NoSQL (Parts 6.1-6.7)
+Based on the Replit AI Agent's limitation message, Part 6 needs to be broken down into smaller, more focused tasks. The agent struggles with complex multi-file operations that involve analysis, deletion, creation, and validation all at once. Here's Part 6 subdivided into manageable components:
+
+Part 6.1: Current Schema Analysis and Documentation
+Analyze the existing shared/schema.ts file without making any modifications. Create a detailed inventory of all current Drizzle ORM table definitions, including table names, column types, primary keys, foreign key relationships, and any constraints or indexes. List all existing Zod validation schemas and their current validation rules. Document the relationships between tables (one-to-many, many-to-many, etc.) and identify which tables represent core entities versus junction tables. Output this analysis as comments within the file or as a separate documentation file that will guide the migration process.
+
+Part 6.2: Firestore Collection Architecture Planning
+Based on the analysis from Part 6.1, design the new Firestore collection structure without modifying any code yet. Decide which SQL tables will become top-level Firestore collections, which will become subcollections, and which data should be denormalized or embedded within documents. Consider Firestore's query limitations and optimize the structure for the application's read patterns. Document decisions about relationship handling - whether to use document references (string IDs), subcollections, or embedded objects. Create a clear mapping document showing: SQL_TABLE_NAME -> firestore.collection('collection_name') or -> subcollection under parent.
+
+Part 6.3: Clean Slate Preparation
+Remove all Drizzle ORM dependencies and SQL-specific code from shared/schema.ts. Delete imports from drizzle-orm, drizzle-orm/pg-core, and any PostgreSQL-specific packages. Remove all pgTable definitions, column definitions using Drizzle syntax (like serial, varchar, text, boolean), and any SQL-specific constraints or indexes. Keep only the basic Zod import and any utility functions that aren't SQL-specific. This creates a clean foundation for building Firestore-compatible schemas without type conflicts from the old SQL definitions.
+
+Part 6.4: Base Firestore Schema Creation
+Create foundational Zod schemas for Firestore document structures. Define a base document schema that includes standard Firestore fields: id as a string (not numeric), createdAt and updatedAt as timestamp fields compatible with Firestore's Timestamp type. Create utility schemas for common Firestore data types and constraints, including validation for Firestore's document size limits (1MB), field name restrictions (no leading/trailing periods, no double periods), and maximum nesting depth (20 levels). Export TypeScript interfaces for these base types that can be extended by specific entity schemas.
+
+Part 6.5: Core Entity Schema Recreation
+Recreate the primary entity schemas (like User, Project, or whatever your main business objects are) using pure Zod validation, designed for Firestore's document model. Convert all ID fields from numeric types to strings. Transform foreign key relationships into string reference fields or embedded objects based on the architecture plan from Part 6.2. Ensure all schemas validate Firestore-compatible data types (string, number, boolean, array, object, timestamp, geopoint). Add validation for any Firestore-specific constraints relevant to your data. Export the corresponding TypeScript interfaces using z.infer<> for type safety.
+
+Part 6.6: Relationship and Reference Schema Implementation
+Implement the relationship patterns defined in Part 6.2 using Firestore-appropriate structures. For document references, create string ID fields with appropriate validation. For embedded objects, define nested Zod schemas that respect Firestore's nesting limitations. For subcollections, create separate schemas that will be used in subcollection operations. Handle any many-to-many relationships using junction collections or arrays of references as appropriate. Ensure all relationship schemas maintain referential integrity through validation rules and clear TypeScript typing.
+
+Part 6.7: Migration Validation and Type Export
+Verify that all new Firestore schemas compile correctly and provide the same type safety as the original SQL schemas. Ensure all exports from shared/schema.ts are properly typed and accessible to both frontend and any remaining backend code. Create or update any union types or composite interfaces that the application relies on. Test that TypeScript compilation succeeds throughout the project with the new schema definitions. Document any breaking changes in field names, types, or structure that will require updates in consuming code. Create a final mapping reference that developers can use to understand how to query the new Firestore structure to achieve the same results as previous SQL queries.
+
+Implementation Guidelines for Replit AI Agent
+Sequential Execution: Complete these parts in exact order (6.1 → 6.2 → 6.3 → 6.4 → 6.5 → 6.6 → 6.7), as each builds on the previous step.
+
+Validation Between Steps: After each part, ensure TypeScript compilation still works before proceeding to the next step.
+
+Scope Limitation: Each part focuses on a single type of operation - analysis, planning, cleanup, creation, or validation - to stay within the agent's capability limits.
+
+Documentation Focus: Parts 6.1, 6.2, and 6.7 emphasize documentation to ensure the migration is well-documented and reversible if needed.
+
+Type Safety Preservation: Throughout all parts, maintain the same level of type safety that existed in the original Drizzle implementation, just adapted for Firestore's document model.
