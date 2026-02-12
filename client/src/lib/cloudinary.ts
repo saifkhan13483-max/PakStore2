@@ -39,11 +39,8 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
   ];
 
   if (width) transformations.push(`w_${width}`);
-  if (height) transformations.push(`h_${height}`);
+  if (height) transformations.push(`height_${height}`);
   if (width || height) transformations.push(`c_${crop}`);
-
-  // For Pakistani networks, we can add a flag to optimize for slower connections if needed
-  // but q_auto:good is generally the best balance.
 
   return `${parts[0]}/upload/${transformations.join(',')}/${parts[1]}`;
 }
@@ -57,4 +54,38 @@ export function getResponsiveSrcSet(url: string, widths: number[] = [320, 640, 7
   return widths
     .map(w => `${getOptimizedImageUrl(url, { width: w })} ${w}w`)
     .join(', ');
+}
+
+/**
+ * Performs a direct unsigned upload to Cloudinary.
+ * Used for client-side uploads without a backend.
+ */
+export async function uploadImage(file: File): Promise<string> {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+  if (!cloudName || !uploadPreset) {
+    throw new Error("Cloudinary configuration missing");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+  formData.append("folder", "pakcart/products");
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to upload image");
+  }
+
+  const data = await response.json();
+  return data.secure_url;
 }

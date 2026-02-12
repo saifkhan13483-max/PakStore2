@@ -28,8 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-// @ts-ignore - MediaUpload is a JSX component
-import { MediaUpload } from "@/components/MediaUpload";
+import { ImageUploader } from "@/components/product/ImageUploader";
 import { useEffect } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
@@ -244,44 +243,11 @@ export default function AdminProductForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <div className="space-y-4">
-                            <MediaUpload 
-                              multiple={true}
-                              folder="products"
-                                onUploadComplete={(results: any) => {
-                                  const newUrls = Array.isArray(results) 
-                                    ? results.map((r: any) => r.secure_url)
-                                    : [results.secure_url];
-                                  field.onChange([...(Array.isArray(field.value) ? field.value : []), ...newUrls]);
-                                }}
-                            />
-                            {field.value && field.value.length > 0 && (
-                              <div className="grid grid-cols-3 gap-4 mt-4">
-                                {field.value.map((url: string, index: number) => (
-                                  <div key={index} className="relative group">
-                                    <img 
-                                      src={url} 
-                                      alt={`Product ${index}`} 
-                                      className="w-full h-24 object-cover rounded-md border"
-                                    />
-                                    <Button
-                                      type="button"
-                                      variant="destructive"
-                                      size="icon"
-                                      className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                      onClick={() => {
-                                        const newVal = [...field.value];
-                                        newVal.splice(index, 1);
-                                        field.onChange(newVal);
-                                      }}
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                          <ImageUploader 
+                            value={field.value || []}
+                            onChange={(urls) => field.onChange(urls)}
+                            maxImages={8}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
