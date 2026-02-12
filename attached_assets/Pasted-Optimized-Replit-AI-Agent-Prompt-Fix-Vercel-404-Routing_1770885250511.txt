@@ -1,0 +1,34 @@
+Optimized Replit AI Agent Prompt: Fix Vercel 404 Routing Errors
+Please scan this complete project and configure it for seamless Vercel hosting, specifically fixing the 404 errors that occur when users refresh pages on client-side routes. This is a Vite + React + Wouter application with 43 pages that needs proper SPA (Single Page Application) configuration for Vercel deployment.
+
+Part 1: Complete Project Analysis and Problem Identification
+Scan the entire project structure including all configuration files, routing setup, and page components. Identify that this is a Vite (v5.4.19) + React (v18.3.1) + Wouter client-side routing application. Understand that the core issue is Vercel attempting to serve physical files for routes like /tools/loan-calculator when users refresh pages, but these routes are handled by Wouter on the client side. The solution requires configuring Vercel to always serve index.html for non-API routes and let Wouter handle routing client-side. Document all existing routes and confirm the current build output structure.
+
+Part 2: Vercel Configuration File Creation
+Create a comprehensive vercel.json file in the project root that solves the SPA routing problem. Configure rewrite rules that direct all non-API traffic to /index.html using the pattern "source": "/(.*)" and "destination": "/index.html". Ensure API routes (if any exist under /api/*) are preserved and not rewritten. Add performance optimization with caching headers for static assets in /assets/* directory, setting Cache-Control: public, max-age=31536000, immutable for long-term caching of versioned assets. Include essential security headers for all routes: X-Content-Type-Options: nosniff, X-Frame-Options: DENY, and X-XSS-Protection: 1; mode=block.
+
+Part 3: Vite Configuration Verification and Optimization
+Examine and verify the vite.config.ts or vite.config.js file to ensure proper Vercel compatibility. Confirm the base property is set to '/' for root-level deployment. Verify build.outDir is set to 'dist' to match Vercel's expected output directory. Remove any development-only proxy configurations that would interfere with production deployment. Ensure path aliases and imports are correctly configured for production builds. Verify the build configuration produces optimized output with proper code splitting and asset handling for the 43 pages.
+
+Part 4: Build Process and Package Configuration Validation
+Review package.json to ensure the build script is properly configured with vite build (or tsc && vite build for TypeScript projects). Verify all production dependencies are correctly listed and no dev-only dependencies are required for the build process. Confirm the build command produces the expected output in the dist directory with properly structured assets. Ensure environment variables use the VITE_ prefix for client-side access and document any required Vercel environment variable configuration.
+
+Part 5: Wouter Routing Integration Verification
+Analyze the Wouter routing implementation to ensure it's properly configured for production SPA deployment. Verify all route definitions use correct path patterns that work with HTML5 History API. Confirm navigation uses Wouter's Link components or navigation hooks rather than standard anchor tags that would cause full page reloads. Ensure the router handles both exact matches and nested routes correctly for all 43 pages. Implement a catch-all route in Wouter for handling undefined routes with a proper 404 page within the application.
+
+Part 6: Deployment Settings and Environment Configuration
+Document the required Vercel deployment settings: Framework Preset should be "Vite", Build Command should be npm run build, Output Directory should be dist, and Root Directory should be appropriate for the project structure. Ensure all necessary environment variables are identified and documented for Vercel dashboard configuration. Verify that the application handles missing environment variables gracefully with clear error messages. Configure proper error boundaries and logging for production deployment monitoring.
+
+Part 7: Comprehensive Testing and Validation Strategy
+Create and execute a thorough testing plan to validate the deployment fix. Test direct URL access to all major route patterns including root routes, nested routes like /tools/loan-calculator, and parameterized routes. Verify that page refresh functionality works correctly on all 43 pages without producing 404 errors. Confirm that static assets (CSS, JS, images, fonts) load properly with correct caching headers. Test browser navigation (back/forward buttons) and ensure all client-side routing continues to function correctly. Validate that security headers are present in browser developer tools and that the application performs optimally in production.
+
+Expected Outcome
+After implementing these configurations, the project should deploy successfully to Vercel with all 43 pages accessible via direct URL and refresh functionality. Users should be able to bookmark and share any route without encountering 404 errors. Static assets should load efficiently with proper caching, and the application should maintain optimal performance and security. The configuration should be future-proof, automatically handling new routes added through Wouter without requiring additional Vercel configuration changes.
+
+Key Technical Requirements:
+
+Complete vercel.json with SPA rewrites, asset caching, and security headers
+Verified vite.config.js/ts optimized for production deployment
+Validated build process producing correct output structure
+Confirmed Wouter routing compatibility with Vercel hosting
+Comprehensive testing covering all route patterns and functionality
