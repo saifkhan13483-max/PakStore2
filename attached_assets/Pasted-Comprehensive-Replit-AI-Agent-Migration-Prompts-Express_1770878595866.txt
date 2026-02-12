@@ -1,0 +1,64 @@
+Comprehensive Replit AI Agent Migration Prompts: Express to Serverless Architecture
+Migration Overview and Context
+You are helping migrate a full-stack React application from a traditional Node.js/Express backend architecture to a completely serverless architecture optimized for Vercel deployment. The current stack uses React, Vite, TanStack Query, Zustand, Wouter, Tailwind CSS, Shadcn UI on the frontend, with Node.js/Express, Drizzle ORM, and PostgreSQL on the backend. The goal is to eliminate the backend server entirely and migrate to Firebase/Firestore for data management, direct Cloudinary integration for media, and Vercel for deployment, while maintaining all existing functionality and type safety.
+
+Phase 1: Infrastructure Cleanup and Setup (Parts 1-5)
+Part 1: Complete Backend Removal
+Remove the entire Express backend infrastructure from the project. Delete the server/ directory completely, including all Express route handlers, middleware, and the main server file. Remove all backend-related dependencies from package.json including express, ws, drizzle-orm, pg, and any PostgreSQL drivers. Update any build scripts that reference backend compilation or startup. Ensure the project structure now focuses entirely on the client-side React application with no server components remaining.
+
+Part 2: Environment Variable Restructuring for Vercel
+Restructure all environment variables to support Vercel and client-side Firebase integration. Create a new .env.example file that includes all necessary environment variables with the VITE_ prefix for client-accessible variables. Include placeholders for Firebase configuration (API Key, Auth Domain, Project ID, Storage Bucket, Messaging Sender ID, App ID), Cloudinary settings (Cloud Name, Upload Preset), and any Vercel-specific configurations. Remove all database connection strings and backend-specific environment variables. Update any existing environment variable references throughout the codebase to use the new naming convention.
+
+Part 3: Firebase SDK Integration and Initialization
+Install the Firebase SDK and create a comprehensive Firebase configuration file at src/lib/firebase.ts. Initialize Firebase using environment variables and export configured instances for Authentication, Firestore database, and any other required Firebase services. Ensure the configuration supports both development and production environments with proper error handling for missing environment variables. Create TypeScript interfaces for Firebase configuration to maintain type safety. Set up proper Firebase app initialization that can be imported throughout the application.
+
+Part 4: Vite Configuration Optimization
+Update vite.config.ts to remove any proxy configurations that were pointing to the local Express server. Optimize the Vite configuration for Vercel deployment by ensuring proper build output directory configuration, static asset handling, and environment variable processing. Configure Vite to handle the SPA routing requirements that Wouter will need. Remove any backend-specific build processes and ensure the configuration focuses solely on optimizing the React application build.
+
+Part 5: Package.json Script Updates
+Update all npm scripts in package.json to reflect the new serverless architecture. Remove any start scripts that were launching the Express server. Ensure the dev script only runs the Vite development server. Update the build script to compile TypeScript and build the React application for production deployment. Remove any backend-specific linting, testing, or build scripts. Add any new scripts needed for Firebase emulator development if applicable.
+
+Phase 2: Data Architecture Migration (Parts 6-10)
+Part 6: Schema Migration from SQL to NoSQL
+Transform the existing Drizzle ORM schemas in shared/schema.ts to work with Firestore's document-based NoSQL model. Convert relational table structures to Firestore collection and document schemas while maintaining Zod validation. Redesign foreign key relationships using document references or denormalization strategies appropriate for NoSQL. Update all TypeScript interfaces to reflect Firestore document structures, ensuring ID fields are strings and nested objects follow Firestore's data model constraints. Document the mapping between old PostgreSQL tables and new Firestore collections.
+
+Part 7: Firestore Service Layer Implementation
+Create a new service layer file at src/lib/firestore.ts that replaces the existing storage abstraction. Implement generic CRUD operations including getDocument, getCollection, addDocument, updateDocument, deleteDocument, and queryCollection functions. Integrate Zod schema validation into all operations to maintain type safety when reading from and writing to Firestore. Include proper error handling, batch operations support, and transaction capabilities where needed. Ensure the service layer provides the same interface patterns as the previous storage abstraction to minimize changes in consuming components.
+
+Part 8: TanStack Query Integration with Firestore
+Refactor all existing TanStack Query hooks to use the new Firestore service layer instead of HTTP API calls. Update query functions to directly call Firestore operations, maintaining the same query keys and caching strategies. Implement proper error handling and loading states that account for Firestore's asynchronous nature. Update mutation functions to use Firestore operations and ensure proper query invalidation after successful mutations. Maintain optimistic updates where appropriate and integrate with Firestore's offline capabilities.
+
+Part 9: Real-time Data Implementation
+Replace the existing WebSocket implementation with Firestore's native real-time listeners using onSnapshot. Create custom hooks like useRealtimeDocument and useRealtimeCollection that establish Firestore listeners and integrate with TanStack Query's caching mechanism. Implement proper subscription management to prevent memory leaks by ensuring listeners are detached when components unmount. Update any features that previously used WebSockets for real-time updates to use these new Firestore-based real-time hooks.
+
+Part 10: Authentication System Migration
+Implement Firebase Authentication to replace any existing authentication system. Create a comprehensive authentication context and custom hooks at src/hooks/use-auth.ts that handle user state management, sign-in, sign-out, and registration flows. Integrate Firebase Auth with the application's routing system to protect authenticated routes. Update any existing authentication-related components to use Firebase Auth methods. Ensure user authentication state is properly synchronized with Firestore security rules and any user-specific data access patterns.
+
+Phase 3: Client-Side Integration (Parts 11-15)
+Part 11: Cloudinary Direct Upload Implementation
+Implement direct-to-Cloudinary upload functionality from the client side, eliminating the need for backend file handling. Create upload utilities at src/lib/cloudinary.ts that handle unsigned uploads using Cloudinary's browser SDK. Implement file upload components with progress tracking, error handling, and integration with form state management. Update any existing file upload functionality to use direct Cloudinary uploads and store the resulting URLs in Firestore documents. Ensure proper security measures are in place to prevent upload abuse while maintaining client-side functionality.
+
+Part 12: Route Protection and Navigation
+Update the Wouter routing system to integrate with Firebase Authentication for route protection. Implement authentication guards that redirect unauthenticated users to login pages when accessing protected routes. Ensure the routing system properly handles authentication state changes and maintains desired navigation behavior. Update any route-based data loading to work with the new Firestore integration and authentication system. Maintain the existing navigation patterns while adapting to the serverless architecture.
+
+Part 13: State Management Optimization
+Optimize Zustand state management to work efficiently with Firestore real-time updates and TanStack Query caching. Clearly define what state should remain in Zustand (UI state, temporary data, client preferences) versus what should be managed by TanStack Query (server state from Firestore). Eliminate any state duplication between the different state management systems. Create clear patterns and documentation for when to use each state management approach in the new architecture.
+
+Part 14: Form and Validation Updates
+Update all forms throughout the application to work with the new Firestore backend and Firebase Authentication. Ensure form validation continues to use the updated Zod schemas and integrates properly with Firestore operations. Update any forms that previously submitted to Express endpoints to now perform direct Firestore operations or use the new service layer. Maintain proper error handling and user feedback for form submissions in the serverless environment.
+
+Part 15: Component Integration Testing
+Review and test all existing React components to ensure they work correctly with the new Firebase and Firestore integration. Update any components that made direct API calls to use the new TanStack Query hooks with Firestore. Ensure loading states, error handling, and data display continue to function properly. Test real-time updates in components that should reflect live data changes. Verify that all Shadcn UI components continue to work seamlessly with the new data layer.
+
+Phase 4: Vercel Deployment Optimization (Parts 16-20)
+Part 16: Vercel Configuration Setup
+Create a comprehensive vercel.json configuration file that optimizes the application for Vercel deployment. Configure proper routing rules to handle SPA navigation with Wouter, ensuring all routes redirect to index.html for client-side routing. Set up appropriate caching headers for static assets and configure any necessary environment variable mappings. Ensure the build output directory matches Vercel's expectations and configure any custom build commands if needed.
+
+Part 17: Performance Optimization for Serverless
+Optimize the application for serverless deployment characteristics including cold start performance and bundle size optimization. Implement code splitting using Vite's lazy loading capabilities to reduce initial bundle size. Optimize Firestore queries to minimize read operations and costs through proper indexing, query limits, and pagination strategies. Configure Cloudinary for optimal image delivery with appropriate transformations and responsive loading. Implement service worker caching for static assets where beneficial.
+
+Part 18: Environment Variable Management
+Set up proper environment variable management for Vercel deployment. Create documentation for all required environment variables and their configuration in Vercel's dashboard. Ensure sensitive credentials are properly secured and never exposed to the client side. Configure different environment variables for preview and production deployments. Test that all environment variables are properly loaded in both development and production environments.
+
+Part 19: Build Process Optimization
+Optimize the build process for Vercel deployment by ensuring efficient compilation and minimal build times. Configure TypeScript compilation settings for production builds and ensure proper tree shaking of unused code. Set up build caching strategies where appropriate and ensure the build process is deterministic and reliable. Test the build process locally to ensure it matches Vercel's build environment.

@@ -97,6 +97,16 @@ export const orderSchema = baseDocumentSchema.extend({
   }),
 });
 
+export const commentSchema = baseDocumentSchema.extend({
+  productId: documentIdSchema,
+  userId: z.string(),
+  userName: z.string(),
+  userPhoto: z.string().optional(),
+  content: z.string().min(1),
+  rating: z.number().min(1).max(5),
+  images: z.array(z.string()).optional(),
+});
+
 /**
  * Type Exports (Part 6.7)
  */
@@ -107,6 +117,7 @@ export type ParentCategory = z.infer<typeof parentCategorySchema>;
 export type User = z.infer<typeof userSchema>;
 export type CartItem = z.infer<typeof cartItemSchema>;
 export type Order = z.infer<typeof orderSchema>;
+export type Comment = z.infer<typeof commentSchema>;
 
 export type InsertProduct = z.infer<typeof productSchema>;
 export const insertProductSchema = productSchema.omit({ id: true, createdAt: true, updatedAt: true });
@@ -122,6 +133,9 @@ export const insertUserSchema = userSchema.omit({ uid: true, createdAt: true });
 
 export type InsertOrder = z.infer<typeof orderSchema>;
 export const insertOrderSchema = orderSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertComment = z.infer<typeof commentSchema>;
+export const insertCommentSchema = commentSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
 export const profileSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),

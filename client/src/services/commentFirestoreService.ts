@@ -33,7 +33,8 @@ export const commentFirestoreService = {
         return {
           id: doc.id,
           ...data,
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
         } as Comment;
       });
       return comments;
@@ -52,7 +53,8 @@ export const commentFirestoreService = {
           return {
             id: doc.id,
             ...data,
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
           } as Comment;
         });
         return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -67,7 +69,8 @@ export const commentFirestoreService = {
     console.log("DEBUG Creating Comment:", comment);
     const data = {
       ...comment,
-      createdAt: Timestamp.now()
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
     };
     try {
       const docRef = await addDoc(collection(db, "comments"), data);
@@ -99,7 +102,8 @@ export const commentFirestoreService = {
       return {
         id: docRef.id,
         ...data,
-        createdAt: data.createdAt.toDate().toISOString()
+        createdAt: data.createdAt.toDate(),
+        updatedAt: data.updatedAt.toDate()
       } as Comment;
     } catch (error) {
       console.error("DEBUG Error creating comment in Firestore:", error);
