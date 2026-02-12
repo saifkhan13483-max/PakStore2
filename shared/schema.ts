@@ -1,7 +1,30 @@
 import { z } from "zod";
 
+/**
+ * Firestore Utility Schemas
+ */
+
+// Firestore Timestamp schema
+export const firestoreTimestampSchema = z.object({
+  seconds: z.number(),
+  nanoseconds: z.number(),
+}).or(z.date()).or(z.string());
+
+// Firestore Document ID schema
+export const documentIdSchema = z.string().min(1).max(128).refine(
+  (id) => !id.includes('.') && !id.startsWith('__'),
+  { message: "Invalid Firestore document ID" }
+);
+
+// Base Firestore Document schema
+export const baseDocumentSchema = z.object({
+  id: documentIdSchema,
+  createdAt: firestoreTimestampSchema,
+  updatedAt: firestoreTimestampSchema,
+});
+
 export interface Product {
-  id: string | number;
+  id: string;
   slug: string;
   name: string;
   description: string;
@@ -9,7 +32,7 @@ export interface Product {
   price: number;
   originalPrice?: number | null;
   images: string[];
-  categoryId: string | number;
+  categoryId: string;
   inStock: boolean;
   active?: boolean;
   rating?: string | number;
