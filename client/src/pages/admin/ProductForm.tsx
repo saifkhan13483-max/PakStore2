@@ -61,7 +61,7 @@ export default function AdminProductForm() {
       price: 0,
       originalPrice: 0,
       images: [],
-      parentCategoryId: "",
+      categoryId: "",
       stock: 0,
       active: true,
       inStock: true,
@@ -83,7 +83,7 @@ export default function AdminProductForm() {
       form.reset({
         ...product,
         images: product.images || [],
-        parentCategoryId: product.parentCategoryId ? String(product.parentCategoryId) : "",
+        categoryId: product.categoryId ? String(product.categoryId) : "",
         rating: typeof product.rating === 'string' ? parseFloat(product.rating) : (product.rating || 0),
         reviewCount: product.reviewCount || 0,
         features: product.features || [],
@@ -386,7 +386,7 @@ export default function AdminProductForm() {
                   />
                   <FormField
                     control={form.control}
-                    name="parentCategoryId"
+                    name="categoryId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Category</FormLabel>
