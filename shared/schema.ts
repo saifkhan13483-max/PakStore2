@@ -123,8 +123,18 @@ export const insertUserSchema = userSchema.omit({ uid: true, createdAt: true });
 export type InsertOrder = z.infer<typeof orderSchema>;
 export const insertOrderSchema = orderSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
+export const profileSchema = z.object({
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
+  phoneNumber: z
+    .string()
+    .regex(/^((\+92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/, "Invalid Pakistani phone number format"),
+  city: z.string().min(1, "City is required"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  emergencyContact: z.string().optional(),
+});
+
 export const checkoutInfoSchema = profileSchema;
-export type CheckoutInfo = ProfileValues;
+export type CheckoutInfo = z.infer<typeof profileSchema>;
 
 /**
  * UI & Form Validation Schemas
@@ -156,16 +166,6 @@ export const signupSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
-});
-
-export const profileSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  phoneNumber: z
-    .string()
-    .regex(/^((\+92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$/, "Invalid Pakistani phone number format"),
-  city: z.string().min(1, "City is required"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  emergencyContact: z.string().optional(),
 });
 
 export type LoginValues = z.infer<typeof loginSchema>;

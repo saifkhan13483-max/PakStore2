@@ -246,7 +246,7 @@ export default function AdminCategories() {
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.slug}</TableCell>
                   <TableCell>
-                    {parentCategories?.find(pc => String(pc.id) === String(category.parentId))?.name || "None"}
+                    {parentCategories?.find(pc => String(pc.id) === String(category.parentCategoryId))?.name || "None"}
                   </TableCell>
                   <TableCell>
                     <Button 

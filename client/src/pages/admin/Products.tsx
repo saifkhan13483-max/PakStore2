@@ -106,6 +106,7 @@ export default function AdminProducts() {
         name: `${rest.name} (Copy)`,
         slug: `${rest.slug}-copy-${Date.now()}`,
       };
+      // @ts-ignore - InsertProduct vs Product typing
       return await productFirestoreService.createProduct(duplicatedProduct);
     },
     onSuccess: () => {

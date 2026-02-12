@@ -144,7 +144,7 @@ export const productFirestoreService = {
         rating: productData.rating ?? 0,
         reviewCount: productData.reviewCount ?? 0
       });
-      return { id: docRef.id, ...productData } as Product;
+      return { ...productData, id: docRef.id } as Product;
     } catch (error: any) {
       console.error("Error creating product:", error);
       throw new Error(`Failed to create product: ${error.message}`);
