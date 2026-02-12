@@ -33,6 +33,10 @@ export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {
   } = options;
 
   // Split URL into parts: base, upload, and path
+  if (url.startsWith('attached_assets/')) {
+    return `/${url}`;
+  }
+
   const parts = url.split('/upload/');
   if (parts.length !== 2) return url;
 

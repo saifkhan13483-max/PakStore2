@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Category, ParentCategory, Product } from "@shared/schema";
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import logoImg from "@/assets/logo.png";
 import {
   Sheet,
@@ -81,7 +82,7 @@ const Header = () => {
         <div className="flex h-12 items-center justify-between gap-4">
           <Link href="/" className="flex items-center group">
             <img 
-              src={logoImg} 
+              src={getOptimizedImageUrl(logoImg)} 
               alt="PakCart" 
               className="h-10 w-auto transition-transform group-hover:scale-105" 
             />
@@ -243,7 +244,7 @@ const Header = () => {
                 <div className="flex flex-col h-full bg-background">
                   <SheetHeader className="p-6 border-b text-left">
                     <SheetTitle className="font-display text-2xl font-bold text-primary">
-                      <img src={logoImg} alt="PakCart" className="h-8 w-auto" />
+                      <img src={getOptimizedImageUrl(logoImg)} alt="PakCart" className="h-8 w-auto" />
                     </SheetTitle>
                   </SheetHeader>
                   

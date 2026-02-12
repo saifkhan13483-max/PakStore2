@@ -21,7 +21,7 @@ export function OrderSummary() {
               <div className="h-16 w-16 rounded-md bg-muted overflow-hidden flex-shrink-0">
                 {item.images?.[0] ? (
                   <img
-                    src={item.images[0]}
+                    src={getOptimizedImageUrl(item.images[0])}
                     alt={item.name}
                     className="h-full w-full object-cover"
                   />

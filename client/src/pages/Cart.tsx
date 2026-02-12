@@ -1,3 +1,4 @@
+import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -123,7 +124,7 @@ export default function Cart() {
                     <div className="flex gap-4 sm:gap-6">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
                         <img
-                          src={(item as any).images?.[0] || "https://placehold.co/200x200?text=No+Image"}
+                          src={getOptimizedImageUrl((item as any).images?.[0] || "https://placehold.co/200x200?text=No+Image")}
                           alt={(item as any).name}
                           className="w-full h-full object-cover"
                         />

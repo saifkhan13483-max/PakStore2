@@ -353,7 +353,7 @@ export default function AdminProducts() {
                     <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center overflow-hidden border">
                       {product.images && product.images.length > 0 ? (
                         <img 
-                          src={product.images[0]} 
+                          src={getOptimizedImageUrl(product.images[0])} 
                           alt={product.name} 
                           className="h-full w-full object-cover"
                         />
