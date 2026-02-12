@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/validate-build.js",
     "preview": "vite preview",
     "check": "tsc"
   },
