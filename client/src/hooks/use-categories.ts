@@ -7,15 +7,21 @@ export function useCategories() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Real-time synchronization for sub-categories
     const unsubscribe = categoryFirestoreService.subscribeCategories((categories) => {
       queryClient.setQueryData(["categories"], categories);
+      // Ensure the cache is considered fresh after real-time update
+      queryClient.invalidateQueries({ queryKey: ["categories"], refetchType: "none" });
     });
     return () => unsubscribe();
   }, [queryClient]);
 
   useEffect(() => {
+    // Real-time synchronization for parent categories
     const unsubscribe = categoryFirestoreService.subscribeParentCategories((parentCategories) => {
       queryClient.setQueryData(["parent-categories"], parentCategories);
+      // Ensure the cache is considered fresh after real-time update
+      queryClient.invalidateQueries({ queryKey: ["parent-categories"], refetchType: "none" });
     });
     return () => unsubscribe();
   }, [queryClient]);
