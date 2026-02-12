@@ -17,6 +17,10 @@ interface AuthState {
   error: AuthError | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  /**
+   * Zustand is used for UI state (loading, error) and client-side derived auth state.
+   * Firebase Auth is the source of truth for the user object itself.
+   */
   setUser: (user: AuthUser | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: AuthError | null) => void;

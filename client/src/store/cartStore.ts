@@ -128,6 +128,8 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'noorbazaar-cart',
+      // Store only UI-relevant cart data, keep in sync with Firestore for persistence
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );
