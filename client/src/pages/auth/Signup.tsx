@@ -21,8 +21,7 @@ import { auth, db, googleProvider } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, writeBatch, collection, getDocs } from "firebase/firestore";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
-import { useCartStore } from "@/store/cartStore";
-import { signupSchema, type SignupValues } from "@/lib/validations/auth";
+import { useAuthStore } from "@/store/authStore";
 
 const passwordRequirements = [
   { id: "length", label: "Minimum 8 characters", regex: /.{8,}/ },
@@ -41,8 +40,8 @@ export default function Signup() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
-  const cartStore = useCartStore();
-
+  const { register, loginWithGoogle } = useAuthStore();
+  
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (resendCooldown > 0) {

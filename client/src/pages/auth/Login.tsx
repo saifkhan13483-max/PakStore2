@@ -17,9 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
-import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
 import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import * as z from "zod";
@@ -32,7 +30,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
-  const { login, loginWithGoogle } = useAuth();
+  const { login, signInWithGoogle: loginWithGoogle, resetPassword } = useAuthStore();
   const cartStore = useCartStore();
 
   const form = useForm<LoginValues>({

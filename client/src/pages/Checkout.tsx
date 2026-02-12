@@ -58,7 +58,7 @@ export default function Checkout() {
       
       // 1. Prepare order data
       const subtotal = items.reduce((sum, item) => sum + (((item as any).price || 0) * item.quantity), 0);
-      const shipping = subtotal > 5000 ? 0 : 250; // Corrected: FREE shipping on orders over 5,000
+      const shipping = subtotal > 5000 ? 0 : 250; 
       const total = subtotal + shipping;
 
       const orderData = {
@@ -84,55 +84,18 @@ export default function Checkout() {
           total
         },
         status: "pending",
+        createdAt: new Date().toISOString()
       };
       
       console.log("DEBUG Order Payload:", orderData);
       
-      // 2. Send order to backend API instead of direct Firestore call
-      let response;
-      try {
-        response = await fetch("/api/orders", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderData),
-        });
-      } catch (fetchError: any) {
-        console.error("DEBUG Network/Fetch error:", fetchError);
-        throw new Error("Could not connect to the server. Please check your internet connection and try again.");
-      }
-
-      let responseData;
-      const responseText = await response.text();
-      
-      try {
-        responseData = responseText ? JSON.parse(responseText) : null;
-      } catch (e) {
-        console.error("DEBUG JSON parse error:", responseText);
-        throw new Error("The server returned an invalid response. Please try again later.");
-      }
-      
-      if (!responseData) {
-        throw new Error("No response received from the server. Please try again.");
-      }
-      
-      console.log("DEBUG Order Response:", { ok: response.ok, status: response.status, data: responseData });
-
-      if (!response.ok) {
-        // Handle explicit validation errors from backend
-        if (responseData.message === "Validation failed" && responseData.details) {
-          console.error("DEBUG Validation details:", responseData.details);
-          const firstError = responseData.details[0];
-          const path = firstError.path ? firstError.path.join('.') : 'Field';
-          throw new Error(`Validation Error: ${path} - ${firstError.message}`);
-        }
-        throw new Error(responseData.message || `Order failed (Server status: ${response.status})`);
-      }
+      // 2. Direct Firestore call instead of backend API
+      const { firestoreService } = await import("@/lib/firestore");
+      const result = await firestoreService.addDocument("orders", orderData);
 
       toast({
         title: "Order Placed Successfully!",
-        description: `Thank you for shopping with us. Your order ID is #${responseData.orderId || responseData.id}`,
+        description: `Thank you for shopping with us. Your order ID is #${result.id}`,
       });
 
       clearCart();
