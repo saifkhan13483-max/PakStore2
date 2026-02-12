@@ -20,9 +20,16 @@ A modern e-commerce application built with React, Vite, and Firebase (Firestore 
 ## Architecture
 - **Frontend**: React + Vite + Tailwind CSS + Shadcn UI.
 - **Database**: Firebase Firestore.
-- **Authentication**: Firebase Auth.
+- **Authentication**: Firebase Auth (Source of Truth for User State).
 - **File Storage**: Cloudinary.
 - **Deployment**: Static hosting.
+
+## State Management Patterns
+- **Server State (TanStack Query)**: Used for all Firestore data fetching, caching, and invalidation (Products, Categories, Orders).
+- **Global UI State (Zustand)**:
+  - `authStore`: Manages temporary UI auth state (loading, errors) and client-side derived state (isAdmin). Synchronized via `onAuthStateChanged`.
+  - `cartStore`: Manages local cart items with persistence to Firestore for authenticated users.
+- **Local State (React useState/useContext)**: Used for component-specific UI logic and small context providers.
 
 ## User Preferences
 - Clean, modern UI using Shadcn components.
