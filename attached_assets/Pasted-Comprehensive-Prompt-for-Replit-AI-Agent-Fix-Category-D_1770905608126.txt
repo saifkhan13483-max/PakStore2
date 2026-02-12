@@ -1,0 +1,54 @@
+Comprehensive Prompt for Replit AI Agent: Fix Category Display in Header Navigation
+Problem Context and Immediate Priority
+The application has an admin panel where categories are successfully added and stored, but these categories are not appearing in the site's header navigation "Categories" dropdown. This is likely a data binding issue between the Firestore backend and the header component that needs immediate resolution.
+
+Phase 1: Quick Diagnosis and Most Likely Fixes (Priority: High)
+Part 1: Locate and Inspect Header Component
+Identify the header/navigation component that contains the "Categories" dropdown menu. This is typically located in src/components/layout/Header.tsx, src/components/ui/Navigation.tsx, or similar. Examine how this component currently retrieves category data. Check if it's using hardcoded category arrays, outdated API endpoints, or missing data fetching hooks entirely. This is the most common cause of the issue.
+
+Part 2: Verify Data Fetching Implementation
+Check if the header component uses a TanStack Query hook to fetch categories from Firestore. Look for hooks like useQuery({ queryKey: ['categories'] }) or similar. If no data fetching exists, this explains why admin-created categories don't appear. If a hook exists, verify it's calling the correct Firestore collection and service layer functions that match what the admin panel uses for saving categories.
+
+Part 3: Validate Firestore Collection and Data Structure
+Confirm that categories added through the admin panel are actually being saved to Firestore correctly. Check the collection name, document structure, and field names. Verify that the header component's query matches exactly what the admin panel writes. Common mismatches include different collection names, field name variations (e.g., name vs title), or missing required fields that the header expects.
+
+Part 4: Fix Cache Invalidation
+Ensure that when categories are added/edited/deleted in the admin panel, the TanStack Query cache is properly invalidated using queryClient.invalidateQueries(['categories']). Without proper cache invalidation, the header will continue showing stale data even if new categories exist in Firestore. Add this invalidation to all admin panel category mutation hooks.
+
+Phase 2: Comprehensive Implementation (Priority: Medium)
+Part 5: Create or Update Category Fetching Hook
+Create a dedicated custom hook src/hooks/use-categories.ts that fetches categories for header display. This hook should use TanStack Query with Firestore real-time listeners (onSnapshot) to ensure categories update immediately when changed in the admin panel. Structure the hook to return parent categories with their sub-categories in a format optimized for dropdown navigation.
+
+Part 6: Implement Real-Time Category Updates
+Integrate Firestore's onSnapshot functionality into the category hook to establish real-time data synchronization. When categories are added, edited, or deleted in the admin panel, the header should update automatically without requiring page refresh. Ensure proper listener cleanup to prevent memory leaks when components unmount.
+
+Part 7: Update Header Component Integration
+Modify the header component to use the new category fetching hook. Replace any static category data with dynamic data from the hook. Implement proper loading states while categories are being fetched and error handling for fetch failures. Ensure the component gracefully handles empty category lists and network issues.
+
+Part 8: Structure Dropdown Menu Properly
+Update the dropdown menu structure to properly render parent categories with sub-categories in a hierarchical format. Ensure parent categories appear as main menu items with sub-categories nested appropriately. Include the "All Products" option and maintain the existing Shadcn UI styling patterns shown in the screenshots.
+
+Phase 3: Advanced Features and Optimization (Priority: Low)
+Part 9: Implement Category Navigation Logic
+Add proper navigation functionality using the Wouter routing system. When users click parent categories or sub-categories, they should navigate to appropriate product listing pages with proper filtering. Ensure the "All Products" option shows all products across categories.
+
+Part 10: Add Product Count Display
+Implement functionality to display product counts next to categories and sub-categories as shown in the admin interface. This may require additional Firestore queries or maintaining count fields that update when products are added/removed from categories.
+
+Part 11: Optimize Performance and Costs
+Optimize Firestore queries to minimize read operations and improve performance. Implement proper query indexing and consider caching strategies that balance real-time updates with cost efficiency. Ensure the header remains responsive and doesn't impact page load times.
+
+Phase 4: Validation and Testing (Priority: High)
+Part 12: Test Complete Data Flow
+Thoroughly test the entire category flow from admin panel creation to header display. Add a new parent category through the admin panel and verify it immediately appears in the header dropdown. Test adding, editing, and deleting categories to ensure all operations reflect properly in the header navigation.
+
+Part 13: Verify Cross-Component Consistency
+Ensure that category data structure and fetching patterns are consistent across the admin panel and header components. Both should use the same Firestore service layer, schemas, and data transformation logic to prevent future synchronization issues.
+
+Part 14: Implement Error Prevention
+Add TypeScript interfaces and Zod validation to ensure category data consistency. Create shared types between admin and header components to prevent field name mismatches. Document the category data flow to help future developers understand the system architecture.
+
+Implementation Notes for Replit AI Agent
+Start with Phase 1 immediately - these are the most likely causes and quickest fixes. Most category display issues stem from missing data fetching hooks or cache invalidation problems. Only proceed to subsequent phases if Phase 1 doesn't resolve the issue. Each phase builds on the previous one, so complete them sequentially. Focus on maintaining type safety and following the existing application patterns throughout the implementation.
+
+Expected Outcome: Categories added through the admin panel should appear immediately in the header navigation dropdown, with real-time updates and proper hierarchical display of parent and sub-categories.
