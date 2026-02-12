@@ -5,6 +5,7 @@ import {
   onAuthStateChanged, 
   signInWithPopup, 
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   signOut,
   User as FirebaseUser
@@ -27,6 +28,7 @@ interface AuthState {
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
 }
 
@@ -94,6 +96,18 @@ export const useAuthStore = create<AuthState>()(
         try {
           await sendPasswordResetEmail(auth, email);
           set({ isLoading: false });
+        } catch (error: any) {
+          set({ 
+            error: { code: error.code, message: error.message }, 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+      register: async (email, password) => {
+        set({ isLoading: true, error: null });
+        try {
+          return await createUserWithEmailAndPassword(auth, email, password);
         } catch (error: any) {
           set({ 
             error: { code: error.code, message: error.message }, 

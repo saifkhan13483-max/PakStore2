@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
+import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import * as z from "zod";

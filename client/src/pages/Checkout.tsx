@@ -102,12 +102,12 @@ export default function Checkout() {
       console.log("DEBUG Order Payload:", orderData);
       
       // 2. Direct Firestore call instead of backend API
-      const { firestoreService } = await import("@/lib/firestore");
-      const result = await firestoreService.addDocument("orders", orderData);
+      const { addDocument } = await import("@/lib/firestore");
+      const result = await addDocument("orders", orderData);
 
       toast({
         title: "Order Placed Successfully!",
-        description: `Thank you for shopping with us. Your order ID is #${result.id}`,
+        description: `Thank you for shopping with us. Your order ID is #${result}`,
       });
 
       clearCart();
