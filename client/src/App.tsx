@@ -147,29 +147,24 @@ function Router() {
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 
+import { AuthProvider } from "@/hooks/use-auth";
+
 function App() {
-  const user = useAuthStore((state) => state.user);
-  const syncWithFirebase = useCartStore((state) => state.syncWithFirebase);
-
-  useEffect(() => {
-    if (user) {
-      syncWithFirebase(user.uid);
-    }
-  }, [user, syncWithFirebase]);
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <TooltipProvider>
-          <Helmet>
-            <title>PakCart | Authentic Pakistani Artisanal Products</title>
-            <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
-          </Helmet>
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <TooltipProvider>
+            <Helmet>
+              <title>PakCart | Authentic Pakistani Artisanal Products</title>
+              <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
+            </Helmet>
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 
