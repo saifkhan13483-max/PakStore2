@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "@/hooks/use-auth";
 import { SocialAuthButton } from "@/components/auth/SocialAuthButton";
 import { useCartStore } from "@/store/cartStore";
 import { doc, updateDoc, serverTimestamp, collection, getDocs, writeBatch } from "firebase/firestore";
@@ -32,7 +32,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
-  const { signInWithEmail, signInWithGoogle, resetPassword } = useAuthStore();
+  const { login, loginWithGoogle } = useAuth();
   const cartStore = useCartStore();
 
   const form = useForm<LoginValues>({
@@ -109,16 +109,8 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      await signInWithGoogle();
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser) {
-        await syncCartAfterLogin(currentUser.uid);
-        toast({
-          title: "Welcome back!",
-          description: "Signed in successfully with Google.",
-        });
-        handleRedirect();
-      }
+      await loginWithGoogle();
+      handleRedirect();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -159,23 +151,12 @@ export default function Login() {
   async function onSubmit(data: LoginValues) {
     setIsLoading(true);
     try {
-      await signInWithEmail(data.email, data.password);
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser) {
-        // Update last login in Firestore
-        const userDocRef = doc(db, "users", currentUser.uid);
-        await updateDoc(userDocRef, {
-          lastLoginAt: serverTimestamp()
-        }).catch(err => console.error("Update lastLoginAt failed:", err));
-
-        await syncCartAfterLogin(currentUser.uid);
-        
-        toast({
-          title: "Welcome back!",
-          description: "You have signed in successfully.",
-        });
-        handleRedirect();
-      }
+      await login(data.email, data.password);
+      toast({
+        title: "Welcome back!",
+        description: "You have signed in successfully.",
+      });
+      handleRedirect();
     } catch (error: any) {
       console.error("Login error:", error);
       let message = "Invalid email or password. Please try again.";

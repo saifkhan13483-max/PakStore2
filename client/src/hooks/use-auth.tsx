@@ -13,9 +13,9 @@ import { useAuthStore } from "@/store/authStore";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: typeof signInWithEmailAndPassword;
-  register: typeof createUserWithEmailAndPassword;
-  logout: typeof signOut;
+  login: (email: string, pass: string) => Promise<any>;
+  register: (email: string, pass: string) => Promise<any>;
+  logout: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
 }
 
@@ -25,26 +25,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const setUserStore = useAuthStore((state) => state.setUser);
-  const clearUserStore = useAuthStore((state) => state.clearUser);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      if (user) {
-        setUserStore({
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-        });
-      } else {
-        clearUserStore();
-      }
+      // Let the existing store's onAuthStateChanged handler in authStore.ts handle the mapping
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [setUserStore, clearUserStore]);
+  }, [setUserStore]);
 
   const login = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
   const register = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);

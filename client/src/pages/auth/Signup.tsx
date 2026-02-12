@@ -127,89 +127,11 @@ export default function Signup() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      // Check if user exists in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      if (!userDoc.exists()) {
-        // Create new user document with consistent fields
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          phoneNumber: "",
-          createdAt: serverTimestamp(),
-          lastLoginAt: serverTimestamp(),
-          provider: "google",
-          emailVerified: user.emailVerified,
-          preferences: {},
-          shippingAddresses: [],
-        });
-      } else {
-        // Update last login and potentially sync profile info
-        await updateDoc(userDocRef, {
-          lastLoginAt: serverTimestamp(),
-          displayName: user.displayName || userDoc.data().displayName,
-          photoURL: user.photoURL || userDoc.data().photoURL,
-        });
-      }
-
-      // Sync Cart from localStorage to Firestore
-      const guestCartJson = localStorage.getItem("cart-storage");
-      if (guestCartJson) {
-        try {
-          const guestCartData = JSON.parse(guestCartJson);
-          const guestItems = guestCartData.state?.items || [];
-          
-          if (guestItems.length > 0) {
-            const cartCollectionRef = collection(db, "users", user.uid, "cart");
-            const existingCartSnap = await getDocs(cartCollectionRef);
-            const existingItemsMap = new Map();
-            existingCartSnap.docs.forEach(doc => {
-              existingItemsMap.set(doc.data().productId, { id: doc.id, ...doc.data() });
-            });
-
-            const batch = writeBatch(db);
-            
-            guestItems.forEach((item: any) => {
-              const existingItem = existingItemsMap.get(item.productId || item.id);
-              if (existingItem) {
-                const newQuantity = Math.max(existingItem.quantity, item.quantity);
-                batch.update(doc(db, "users", user.uid, "cart", existingItem.id), {
-                  quantity: newQuantity,
-                  updatedAt: serverTimestamp()
-                });
-              } else {
-                const newDocRef = doc(collection(db, "users", user.uid, "cart"));
-                batch.set(newDocRef, {
-                  productId: item.productId || item.id,
-                  quantity: item.quantity,
-                  addedAt: serverTimestamp(),
-                });
-              }
-            });
-
-            await batch.commit();
-            localStorage.removeItem("cart-storage");
-            toast({
-              title: "Cart saved!",
-              description: `We've saved ${guestItems.length} items to your account! Checkout with cash on delivery across Pakistan.`,
-            });
-          }
-        } catch (e) {
-          console.error("Cart sync error:", e);
-        }
-      }
-
+      await loginWithGoogle();
       toast({
-        title: `Welcome to PakCart, ${user.displayName}!`,
+        title: `Welcome to PakCart!`,
         description: "Account created successfully. Enjoy free delivery on orders over Rs. 2,000 and nationwide COD.",
       });
-
       handleRedirect();
     } catch (error: any) {
       console.error("Google sign-in error:", error);
@@ -236,7 +158,7 @@ export default function Signup() {
   async function onSubmit(data: SignupValues) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await register(data.email, data.password);
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: data.fullName });
