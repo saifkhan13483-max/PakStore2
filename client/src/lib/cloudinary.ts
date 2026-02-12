@@ -20,7 +20,8 @@ interface CloudinaryOptions {
  * - c_fill: Crop and fill to specified dimensions
  */
 export function getOptimizedImageUrl(url: string, options: CloudinaryOptions = {}) {
-  if (!url || !url.includes('cloudinary.com')) return url;
+  if (!url) return url;
+  if (!url.includes('cloudinary.com')) return url;
 
   const {
     width,
