@@ -75,11 +75,11 @@ export default function AdminOrders() {
                     <TableCell className="font-mono text-xs text-emerald-800">#{order.id.slice(0, 8)}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-emerald-900">{order.shippingAddress.street}</span>
+                        <span className="font-medium text-emerald-900">{order.shippingAddress?.street || "No Address"}</span>
                         <span className="text-xs text-muted-foreground">{order.userId}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-emerald-800">{order.shippingAddress.city}</TableCell>
+                    <TableCell className="text-emerald-800">{order.shippingAddress?.city || "N/A"}</TableCell>
                     <TableCell className="text-right font-bold text-emerald-900">
                       Rs. {order.total.toLocaleString()}
                     </TableCell>
@@ -106,9 +106,9 @@ export default function AdminOrders() {
                                   <Package className="w-4 h-4" /> Shipping Info
                                 </h3>
                                 <div className="text-sm space-y-1">
-                                  <p className="font-medium">{order.shippingAddress.street}</p>
-                                  <p className="flex items-center gap-1 mt-2 font-medium"><MapPin className="w-3 h-3" /> {order.shippingAddress.street}</p>
-                                  <p className="ml-4">{order.shippingAddress.area}, {order.shippingAddress.city}</p>
+                                  <p className="font-medium">{order.shippingAddress?.street || "N/A"}</p>
+                                  <p className="flex items-center gap-1 mt-2 font-medium"><MapPin className="w-3 h-3" /> {order.shippingAddress?.street || "N/A"}</p>
+                                  <p className="ml-4">{order.shippingAddress?.area || "N/A"}, {order.shippingAddress?.city || "N/A"}</p>
                                 </div>
                               </div>
                               <div>
