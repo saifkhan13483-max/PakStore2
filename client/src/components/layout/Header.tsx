@@ -29,6 +29,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => {
@@ -41,10 +45,6 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   
   const { categories: categoriesData, parentCategories, isLoading: categoriesLoading } = useCategories();
-
-  useEffect(() => {
-    console.log('Header dynamic data:', { categoriesData, parentCategories, categoriesLoading });
-  }, [categoriesData, parentCategories, categoriesLoading]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,45 +110,58 @@ const Header = () => {
                   Categories <ChevronDown className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 p-2 max-h-[80vh] overflow-y-auto">
+              <DropdownMenuContent align="start" className="w-64 p-2">
                 {parentCategories?.map((parent) => {
                   const subCategories = categoriesData?.filter(c => c.parentCategoryId === parent.id) || [];
-                  return (
-                    <div key={parent.id} className="mb-4 last:mb-0">
-                      <DropdownMenuLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5 flex justify-between items-center">
-                        {parent.name}
-                        <Link 
-                          href={`/products?parentCategoryId=${parent.id}`}
-                          className="text-[10px] lowercase font-normal hover:underline cursor-pointer"
-                        >
-                          View All
-                        </Link>
-                      </DropdownMenuLabel>
-                      <div className="grid grid-cols-1 gap-1">
-                        {subCategories.length > 0 ? (
-                          subCategories.map((category) => (
-                            <DropdownMenuItem key={category.id} asChild>
+                  
+                  if (subCategories.length > 0) {
+                    return (
+                      <DropdownMenuSub key={parent.id}>
+                        <DropdownMenuSubTrigger className="cursor-pointer">
+                          <span className="font-medium">{parent.name}</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent className="w-48">
+                            <DropdownMenuItem asChild>
                               <Link 
-                                href={`/products?categoryId=${category.id}`} 
-                                className="cursor-pointer w-full rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                                href={`/products?parentCategoryId=${parent.id}`}
+                                className="cursor-pointer w-full font-semibold text-primary"
                               >
-                                {category.name}
+                                All in {parent.name}
                               </Link>
                             </DropdownMenuItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-1 text-xs text-muted-foreground italic">
-                            No sub-categories
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                            <DropdownMenuSeparator />
+                            {subCategories.map((category) => (
+                              <DropdownMenuItem key={category.id} asChild>
+                                <Link 
+                                  href={`/products?categoryId=${category.id}`} 
+                                  className="cursor-pointer w-full"
+                                >
+                                  {category.name}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                    );
+                  }
+
+                  return (
+                    <DropdownMenuItem key={parent.id} asChild>
+                      <Link 
+                        href={`/products?parentCategoryId=${parent.id}`}
+                        className="cursor-pointer w-full font-medium"
+                      >
+                        {parent.name}
+                      </Link>
+                    </DropdownMenuItem>
                   );
                 })}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/products" className="cursor-pointer w-full font-medium px-2 py-1.5">
-                    All Products
+                  <Link href="/products" className="cursor-pointer w-full font-medium">
+                    Shop All Products
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -1,0 +1,57 @@
+Comprehensive Replit AI Agent Prompt: Fix Header Category Synchronization Issue
+Problem Analysis and Priority
+Your categories are successfully displaying in the shop page filters but not in the header dropdown navigation. This indicates the shop page has working Firestore integration while the header component is using static/hardcoded data. The solution is to replicate the working shop page pattern in the header component.
+
+Phase 1: Immediate Diagnosis and Core Fix (Execute First - High Priority)
+Part 1: Locate and Compare Data Sources
+Find the shop page component that renders the working category filters (likely src/pages/Shop.tsx or src/components/shop/Filters.tsx). Identify the exact hook, query, or service function it uses to fetch categories from Firestore. Note the specific implementation: query key, collection name, and data structure. Then locate the header component (src/components/layout/Header.tsx or similar) and compare its category implementation. You'll find the header uses hardcoded arrays like ['ELECTRONICS & GADGETS', 'FASHION & ACCESSORIES', 'HOME & KITCHEN'].
+
+Part 2: Remove Static Data and Implement Dynamic Fetching
+In the header component, completely remove all hardcoded category arrays and static strings. Import and use the exact same data fetching pattern from the working shop page component. If the shop page uses useCategories() or useQuery({ queryKey: ['categories'] }), implement the identical pattern in the header. Ensure you're using the same Firestore collection, query key, and data transformation logic.
+
+Part 3: Update Header Dropdown Rendering
+Replace the static dropdown menu items with dynamic mapping over the fetched category data. Maintain the existing visual styling (uppercase text, spacing, divider) but populate the content from Firestore. Include proper loading states and error handling - if categories fail to load, show just "All Products" to maintain navigation functionality.
+
+Part 4: Verify Query Key Consistency
+Ensure the header component uses the identical TanStack Query key as the shop page (e.g., ['categories']). Check that the admin panel's category mutations call queryClient.invalidateQueries(['categories']) with the same key. This ensures when categories are added/edited/deleted in the admin panel, both the header and shop page update simultaneously.
+
+Phase 2: Shared Hook Implementation and Data Structure
+Part 5: Create or Identify Shared Category Hook
+Extract the category fetching logic into a shared hook src/hooks/use-categories.ts that both header and shop components can use. This hook should fetch parent categories and their sub-category relationships from Firestore using the same service layer and schemas. Export different selector functions if needed: one for parent categories (header navigation) and one for sub-categories (shop filters).
+
+Part 6: Handle Parent vs Sub-Category Hierarchy
+Your admin panel shows "Parent Categories" (Electronics & Gadgets, Fashion & Accessories, Home & Kitchen) and "Sub-Categories" (Power Banks, Watches). Determine whether the header should display parent categories with sub-category dropdowns, or just parent categories. Update the data fetching and rendering logic accordingly. The shop page currently shows sub-categories in filters, so ensure the hierarchy relationship is properly maintained.
+
+Part 7: Implement Real-Time Synchronization
+If the shop page uses Firestore's onSnapshot for real-time updates, implement the same pattern in the shared category hook. This ensures both header and shop page receive immediate updates when categories are modified in the admin panel, without requiring page refresh.
+
+Phase 3: Navigation and Advanced Features
+Part 8: Configure Category Navigation Links
+Ensure clicking categories in the header dropdown navigates correctly using your Wouter routing system. Parent categories should link to filtered product views (e.g., /shop?category=electronics-gadgets) that show all products in that parent category and its sub-categories. Maintain the "All Products" link that shows unfiltered results.
+
+Part 9: Implement Nested Dropdown (Optional)
+If you want to display sub-categories in the header, use Shadcn UI's DropdownMenuSub, DropdownMenuSubTrigger, and DropdownMenuSubContent components to create nested menus. Parent categories would show sub-categories on hover while remaining clickable themselves.
+
+Phase 4: Testing and Validation
+Part 10: Test End-to-End Category Flow
+Perform this critical test sequence:
+
+Add a new parent category in the admin panel (e.g., "Sports & Outdoors")
+Verify it immediately appears in the header dropdown without page refresh
+Click the category in the header and confirm it navigates to the correct filtered shop page
+Verify the same category data appears consistently in both header and shop page filters
+Edit the category name in admin panel and confirm it updates in both locations simultaneously
+Part 11: Validate Cache Invalidation
+Test that category mutations (add, edit, delete) in the admin panel properly invalidate the TanStack Query cache. Both header and shop page should refetch and update immediately after admin changes. If updates don't appear instantly, check that the query keys match exactly between components and admin mutations.
+
+Part 12: Handle Edge Cases
+Test the application behavior when no categories exist, when Firestore queries fail, and during loading states. Ensure the header gracefully degrades (showing just "All Products") rather than breaking. Verify that the existing navigation structure remains functional even during data loading or error states.
+
+Implementation Priority and Success Criteria
+Execute Parts 1-4 immediately - these will resolve the core synchronization issue by replicating the working shop page pattern in the header.
+
+Expected immediate result: The header dropdown should display dynamic categories from Firestore that match what appears in the shop page filters, with real-time updates when categories are modified in the admin panel.
+
+Critical validation: After implementation, adding a category like "Books & Media" in the admin panel should make it appear simultaneously in both the header dropdown and shop page filters without any manual refresh or intervention.
+
+Success criteria: Complete synchronization between admin panel category management, header navigation dropdown, and shop page category filters, with consistent data structure and real-time updates across all three interfaces.
