@@ -69,14 +69,14 @@ export default function Home() {
               <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
                 Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/products">
-                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 h-12 sm:min-h-14 text-base sm:text-lg font-bold w-full sm:w-auto">
+              <div className="flex flex-row gap-3 sm:gap-4">
+                <Link href="/products" className="flex-1">
+                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-4 sm:px-8 h-12 sm:min-h-14 text-sm sm:text-lg font-bold w-full">
                     Shop Now
                   </Button>
                 </Link>
-                <Link href="/about">
-                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 h-12 sm:min-h-14 text-base sm:text-lg w-full sm:w-auto">
+                <Link href="/about" className="flex-1">
+                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-4 sm:px-8 h-12 sm:min-h-14 text-sm sm:text-lg w-full">
                     Our Story
                   </Button>
                 </Link>
