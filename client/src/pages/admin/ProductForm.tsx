@@ -25,8 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { useEffect } from "react";
@@ -144,56 +144,63 @@ export default function AdminProductForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/products">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h2 className="text-2xl font-bold tracking-tight">
-          {isEditing ? "Edit Product" : "New Product"}
-        </h2>
+    <div className="space-y-8 p-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/products">
+            <Button variant="outline" size="icon" className="h-9 w-9 hover-elevate shadow-sm">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">
+              {isEditing ? "Edit Product" : "New Product"}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {isEditing ? "Modify your product details and availability" : "Add a new item to your store inventory"}
+            </p>
+          </div>
+        </div>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-8">
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
                 <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
+                  <CardTitle className="text-xl">Basic Information</CardTitle>
+                  <CardDescription>Primary details that customers will see first</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Kashmiri Pashmina Shawl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slug</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. kashmiri-pashmina-shawl" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Unique identifier for the product URL.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Kashmiri Pashmina Shawl" className="bg-background/50" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Slug</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. kashmiri-pashmina-shawl" className="bg-background/50 font-mono text-xs" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="description"
@@ -203,7 +210,7 @@ export default function AdminProductForm() {
                         <FormControl>
                           <Textarea 
                             placeholder="Brief overview of the product..." 
-                            className="min-h-[100px]"
+                            className="min-h-[80px] bg-background/50"
                             {...field} 
                           />
                         </FormControl>
@@ -220,7 +227,7 @@ export default function AdminProductForm() {
                         <FormControl>
                           <Textarea 
                             placeholder="Detailed product information..." 
-                            className="min-h-[200px]"
+                            className="min-h-[180px] bg-background/50"
                             {...field} 
                             value={field.value || ""}
                           />
@@ -232,11 +239,12 @@ export default function AdminProductForm() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
                 <CardHeader>
-                  <CardTitle>Product Media</CardTitle>
+                  <CardTitle className="text-xl">Product Media</CardTitle>
+                  <CardDescription>Upload high-quality images to showcase your product</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent>
                   <FormField
                     control={form.control}
                     name="images"
@@ -256,134 +264,130 @@ export default function AdminProductForm() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle>Features & Specifications</CardTitle>
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl">Features</CardTitle>
+                    <CardDescription>Add key selling points for your product</CardDescription>
+                  </div>
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="sm"
                     onClick={() => appendFeature("")}
+                    className="hover-elevate"
                   >
                     <Plus className="mr-2 h-4 w-4" /> Add Feature
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <FormLabel>Key Features</FormLabel>
+                  <div className="grid gap-3">
                     {featureFields.map((field, index) => (
-                      <div key={field.id} className="flex gap-2">
+                      <div key={field.id} className="flex gap-2 group">
                         <Input 
                           {...form.register(`features.${index}` as any)} 
                           placeholder="e.g. Hand-woven using traditional methods"
+                          className="bg-background/50"
                         />
                         <Button 
                           type="button" 
                           variant="ghost" 
                           size="icon"
                           onClick={() => removeFeature(index)}
+                          className="text-muted-foreground hover:text-destructive hover-elevate"
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
                     {featureFields.length === 0 && (
-                      <p className="text-sm text-muted-foreground italic">No features added yet.</p>
+                      <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg border-muted/20">
+                        <Plus className="h-8 w-8 text-muted/20 mb-2" />
+                        <p className="text-sm text-muted-foreground italic">No features added yet.</p>
+                      </div>
                     )}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="space-y-6">
-              <Card>
+            <div className="space-y-8">
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
                 <CardHeader>
-                  <CardTitle>Pricing & Inventory</CardTitle>
+                  <CardTitle className="text-xl text-primary flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Pricing & Inventory
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (₨)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={e => field.onChange(parseInt(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="originalPrice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Original Price (₨) - Optional</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            value={field.value || ""}
-                            onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="inStock"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">In Stock</FormLabel>
-                          <FormDescription>
-                            Toggle availability of this product.
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value ?? true}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4">
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sale Price (₨)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              className="bg-background/50 font-bold text-lg"
+                              {...field} 
+                              onChange={e => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="originalPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Original Price (₨) <span className="text-muted-foreground text-xs font-normal">(Optional)</span></FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              className="bg-background/50 text-muted-foreground"
+                              {...field} 
+                              value={field.value || ""}
+                              onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="pt-2">
+                    <FormField
+                      control={form.control}
+                      name="inStock"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-xl bg-background/50 p-4 border border-border/50">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Availability</FormLabel>
+                            <p className="text-xs text-muted-foreground">Is this item ready for sale?</p>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value ?? true}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
                 <CardHeader>
-                  <CardTitle>Organization</CardTitle>
+                  <CardTitle className="text-xl">Organization</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="rating"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Rating (0-5)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            min="0"
-                            max="5"
-                            {...field} 
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <CardContent className="space-y-6">
                   <FormField
                     control={form.control}
                     name="categoryId"
@@ -395,7 +399,7 @@ export default function AdminProductForm() {
                           value={field.value?.toString()}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-background/50">
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                           </FormControl>
@@ -411,26 +415,47 @@ export default function AdminProductForm() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="rating"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Initial Rating (0-5)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            className="bg-background/50"
+                            {...field} 
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-3 sticky bottom-4 z-50">
                 <Button 
                   type="submit" 
-                  className="flex-1" 
+                  className="w-full h-12 text-lg font-semibold shadow-lg hover-elevate active-elevate-2" 
                   disabled={mutation.isPending}
                   data-testid="button-save-product"
                 >
                   {mutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   ) : (
-                    <Save className="mr-2 h-4 w-4" />
+                    <Save className="mr-2 h-5 w-5" />
                   )}
-                  {isEditing ? "Update Product" : "Create Product"}
+                  {isEditing ? "Update Product" : "Publish Product"}
                 </Button>
                 <Link href="/admin/products">
-                  <Button variant="outline" type="button">
-                    Cancel
+                  <Button variant="ghost" type="button" className="w-full h-11 hover-elevate">
+                    Discard Changes
                   </Button>
                 </Link>
               </div>
