@@ -72,17 +72,17 @@ export const productFirestoreService = {
       }
 
       // Add default ordering if not specified to ensure consistent pagination
-      // If we have an "in" query or multiple "==" queries, Firestore might need an index
-      // For simplicity in this fix, we'll try to keep it basic.
-      if (filters.sortBy === "price-asc") {
-        constraints.push(orderBy("price", "asc"));
-      } else if (filters.sortBy === "price-desc") {
-        constraints.push(orderBy("price", "desc"));
-      } else if (filters.category || filters.parentCategoryId) {
-        // When filtering by category, we should still allow ordering
-        constraints.push(orderBy("createdAt", "desc"));
-      } else {
-        constraints.push(orderBy("createdAt", "desc"));
+      // To avoid composite index issues when filtering, we only add orderBy if NO filters are present
+      // or if we're sure an index exists. For now, let's omit orderBy when category filtering
+      // to allow the query to run without requiring a manual index creation for the user.
+      if (!filters.category && !filters.parentCategoryId && !filters.search) {
+        if (filters.sortBy === "price-asc") {
+          constraints.push(orderBy("price", "asc"));
+        } else if (filters.sortBy === "price-desc") {
+          constraints.push(orderBy("price", "desc"));
+        } else {
+          constraints.push(orderBy("createdAt", "desc"));
+        }
       }
 
       if (filters.startAfterDoc) {

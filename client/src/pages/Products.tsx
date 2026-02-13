@@ -84,6 +84,21 @@ export default function Products() {
     if (!productsData) return [];
     let result = [...productsData];
 
+    // Handle sorting client-side when filtering to avoid Firestore index requirements
+    if (filterState.categories.length > 0 || new URLSearchParams(search).get("parentCategoryId")) {
+      if (sortBy === "price-low") {
+        result.sort((a, b) => a.price - b.price);
+      } else if (sortBy === "price-high") {
+        result.sort((a, b) => b.price - a.price);
+      } else if (sortBy === "newest") {
+        result.sort((a, b) => {
+          const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+          const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+          return dateB - dateA;
+        });
+      }
+    }
+
     // Client-side additional filters
     if (filterState.categories.length > 0) {
       result = result.filter(p => {
