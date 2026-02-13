@@ -180,6 +180,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 
 import { AuthProvider } from "@/hooks/use-auth";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 function App() {
   return (
