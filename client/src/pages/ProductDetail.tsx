@@ -66,10 +66,10 @@ export default function ProductDetail() {
         if (existingIdx !== -1) {
           setActiveImage(existingIdx);
         } else {
-          // If not in gallery (shouldn't happen with current admin flow, but safe fallback)
-          // we could either add it or just use it as a temporary override.
-          // For now, let's assume if it's not in the main gallery, we want to show it.
-          // In a real app, variant images are often part of the gallery anyway.
+          // If the image isn't in the main gallery, we should still show it as the active image
+          // For now, since `images` is a useMemo based on `product.images`, 
+          // we'll assume the variant image is part of the gallery or we'd need to add it to the gallery state.
+          // However, simple fix is to ensure the variant selection triggers setActiveImage if found.
         }
       }
       
