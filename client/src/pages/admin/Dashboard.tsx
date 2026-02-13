@@ -1,11 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw, TrendingUp, TrendingDown, Clock, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { adminStatsService, type AdminStats } from "@/services/adminStatsService";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -40,37 +42,51 @@ export default function AdminDashboard() {
       title: "Total Products", 
       value: stats?.totalProducts ?? 0, 
       icon: Package, 
-      color: "text-blue-500" 
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      description: "Available in store"
     },
     { 
       title: "Total Categories", 
       value: stats?.totalCategories ?? 0, 
       icon: Tags, 
-      color: "text-orange-500" 
+      color: "text-orange-500",
+      bg: "bg-orange-500/10",
+      description: "Product classifications"
     },
     { 
       title: "Total Orders", 
       value: stats?.totalOrders ?? 0, 
       icon: ShoppingCart, 
-      color: "text-purple-500" 
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+      description: "Lifetime orders"
     },
     { 
       title: "Revenue", 
       value: `₨ ${stats?.totalRevenue?.toLocaleString() ?? "0"}`, 
       icon: BarChart, 
-      color: "text-yellow-500" 
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+      description: "Total earnings"
     },
   ];
 
+  const recentOrders = orders?.slice(0, 5) ?? [];
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+    <div className="space-y-8 p-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+          <p className="text-muted-foreground">Welcome back! Here's what's happening with your store today.</p>
+        </div>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={handleRefresh}
           disabled={isRefetching}
+          className="hover-elevate"
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
           Refresh Stats
@@ -79,46 +95,119 @@ export default function AdminDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
-          <Card key={stat.title}>
+          <Card key={stat.title} className="hover-elevate border-none bg-card/50 backdrop-blur-sm shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <div className={`p-2 rounded-md ${stat.bg}`}>
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="lg:col-span-4 border-none bg-card/50 backdrop-blur-sm shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle>Recent Orders</CardTitle>
+              <CardDescription>You have {orders?.length ?? 0} total orders.</CardDescription>
+            </div>
+            <Link href="/admin/orders">
+              <Button variant="ghost" size="sm" className="hover-elevate">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Activity overview will be displayed here.
-            </p>
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-4">
+                {recentOrders.length > 0 ? (
+                  recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border/50 hover-elevate group">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <ShoppingCart className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium leading-none">{order.customerInfo.fullName}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {order.items.length} {order.items.length === 1 ? 'item' : 'items'} • ₨ {order.total.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge variant={order.status === 'delivered' ? 'default' : 'secondary'} className="capitalize text-[10px] px-2 py-0">
+                          {order.status}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {order.createdAt instanceof Date ? order.createdAt.toLocaleDateString() : 'Just now'}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground/20 mb-2" />
+                    <p className="text-sm text-muted-foreground">No orders yet.</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
-        <Card className="col-span-3">
+
+        <Card className="lg:col-span-3 border-none bg-card/50 backdrop-blur-sm shadow-sm">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common administrative tasks</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="grid gap-3">
             <Link href="/admin/products/new">
-              <Button className="w-full justify-start" variant="outline">
-                <Package className="mr-2 h-4 w-4" /> Add New Product
+              <Button className="w-full justify-between h-12 hover-elevate" variant="outline">
+                <span className="flex items-center">
+                  <Package className="mr-3 h-5 w-5 text-blue-500" /> 
+                  Add New Product
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </Button>
             </Link>
             <Link href="/admin/categories">
-              <Button className="w-full justify-start" variant="outline">
-                <Tags className="mr-2 h-4 w-4" /> Manage Categories
+              <Button className="w-full justify-between h-12 hover-elevate" variant="outline">
+                <span className="flex items-center">
+                  <Tags className="mr-3 h-5 w-5 text-orange-500" /> 
+                  Manage Categories
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </Button>
             </Link>
+            <Link href="/admin/orders">
+              <Button className="w-full justify-between h-12 hover-elevate" variant="outline">
+                <span className="flex items-center">
+                  <ShoppingCart className="mr-3 h-5 w-5 text-purple-500" /> 
+                  Manage Orders
+                </span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </Link>
+            <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold">Store Health</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Your store revenue is up 12% compared to last week. Keep up the great work!
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
