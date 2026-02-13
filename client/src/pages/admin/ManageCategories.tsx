@@ -268,8 +268,24 @@ function ParentCategoryDialog({ category, onSubmit, isPending }: { category?: Pa
   const [open, setOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(insertParentCategorySchema),
-    defaultValues: category || { name: "", slug: "", description: "" },
+    defaultValues: {
+      name: category?.name || "",
+      slug: category?.slug || "",
+      description: category?.description || "",
+      image: category?.image || "",
+    },
   });
+
+  useEffect(() => {
+    if (category) {
+      form.reset({
+        name: category.name,
+        slug: category.slug,
+        description: category.description || "",
+        image: category.image || "",
+      });
+    }
+  }, [category, form.reset]);
 
   const handleSubmit = (data: any) => {
     onSubmit(data);
@@ -350,8 +366,26 @@ function CategoryDialog({ category, parentCategories, onSubmit, isPending }: { c
   const [open, setOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(insertCategorySchema),
-    defaultValues: category || { name: "", slug: "", description: "", parentCategoryId: undefined },
+    defaultValues: {
+      name: category?.name || "",
+      slug: category?.slug || "",
+      description: category?.description || "",
+      parentCategoryId: category?.parentCategoryId || "",
+      image: category?.image || "",
+    },
   });
+
+  useEffect(() => {
+    if (category) {
+      form.reset({
+        name: category.name,
+        slug: category.slug,
+        description: category.description || "",
+        parentCategoryId: category.parentCategoryId,
+        image: category.image || "",
+      });
+    }
+  }, [category, form.reset]);
 
   const handleSubmit = (data: any) => {
     onSubmit(data);
