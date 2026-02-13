@@ -224,10 +224,10 @@ export default function Products() {
 
           {/* Product Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="space-y-4">
-                  <Skeleton className="aspect-[4/5] w-full rounded-3xl" />
+                  <Skeleton className="aspect-[4/5] w-full rounded-2xl md:rounded-3xl" />
                   <div className="space-y-2 px-1">
                     <Skeleton className="h-5 w-4/5" />
                     <Skeleton className="h-4 w-1/4" />
@@ -257,7 +257,7 @@ export default function Products() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {displayedProducts.map((product) => (
                   <ProductCardComponent key={product.id} product={product} />
                 ))}

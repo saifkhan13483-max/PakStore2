@@ -96,27 +96,27 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="flex items-start justify-between gap-2 mb-2">
+      <div className="p-3 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2 mb-1 md:mb-2">
           <Link href={`/products/${product.slug}`} className="block flex-1">
-            <h3 className="font-display text-lg font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-2">
+            <h3 className="font-display text-sm md:text-lg font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-2">
               {product.name}
             </h3>
           </Link>
-          <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-950/30 px-2 py-1 rounded-lg">
-            <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-            <span className="text-xs font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+          <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-950/30 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg w-fit">
+            <Star className="w-2.5 h-2.5 md:w-3 md:h-3 fill-yellow-500 text-yellow-500" />
+            <span className="text-[10px] md:text-xs font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
           </div>
         </div>
         
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-muted/50">
+        <div className="flex items-center justify-between mt-2 md:mt-4 pt-2 md:pt-4 border-t border-muted/50">
           <div className="flex flex-col">
             {product.originalPrice && (
-              <span className="text-xs text-muted-foreground line-through decoration-destructive/50">
+              <span className="text-[10px] md:text-xs text-muted-foreground line-through decoration-destructive/50">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
-            <span className="text-xl font-black text-primary tracking-tight">
+            <span className="text-sm md:text-xl font-black text-primary tracking-tight">
               {formatPrice(product.price)}
             </span>
           </div>
@@ -124,9 +124,9 @@ export function ProductCard({ product }: ProductCardProps) {
             onClick={handleAddToCart}
             size="sm" 
             variant="ghost" 
-            className="rounded-full h-10 w-10 p-0 hover:bg-primary hover:text-primary-foreground transition-all"
+            className="rounded-full h-8 w-8 md:h-10 md:w-10 p-0 hover:bg-primary hover:text-primary-foreground transition-all"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </div>
       </div>
