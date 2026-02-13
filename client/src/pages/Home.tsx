@@ -39,7 +39,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[45vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden">
           {/* Background with overlay */}
           <div className="absolute inset-0 z-0">
              {/* Abstract luxury texture background */}
@@ -53,20 +53,20 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/40" />
           </div>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-8 lg:py-20">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="max-w-2xl text-white"
             >
-              <span className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-sm font-medium mb-6">
+              <span className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-wider">
                 Premium Quality Products
               </span>
-              <h1 className="font-display text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
                 <span className="text-[#2a7e2c]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#2a7e2c]">in Pakistan</span>
               </h1>
-              <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-lg">
+              <p className="text-sm sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg">
                 Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
               </p>
               <div className="flex flex-row gap-3 sm:gap-4">
@@ -86,9 +86,9 @@ export default function Home() {
         </section>
 
         {/* Trust Indicators */}
-        <section className="py-12 border-b bg-card">
+        <section className="py-8 sm:py-12 border-b bg-card">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
                   <Truck className="h-5 w-5" />
