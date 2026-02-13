@@ -154,21 +154,21 @@ export default function AdminProductForm() {
   return (
     <div className="space-y-8 p-1">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/admin/products">
-            <Button variant="outline" size="icon" className="h-9 w-9 hover-elevate shadow-sm">
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              {isEditing ? "Edit Product" : "New Product"}
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              {isEditing ? "Modify your product details and availability" : "Add a new item to your store inventory"}
-            </p>
-          </div>
-        </div>
+            <div className="flex items-center gap-4">
+              <Link href="/admin/products">
+                <Button variant="outline" size="icon" className="h-9 w-9 hover-elevate shadow-sm border-emerald-200 text-emerald-700">
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight text-emerald-950">
+                  {isEditing ? "Edit Product" : "New Product"}
+                </h2>
+                <p className="text-emerald-600/70 text-sm font-medium">
+                  {isEditing ? "Modify your product details and availability" : "Add a new item to your store inventory"}
+                </p>
+              </div>
+            </div>
       </div>
 
       <Form {...form}>
@@ -187,12 +187,12 @@ export default function AdminProductForm() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="flex items-center gap-1">
+                          <FormLabel className="flex items-center gap-1 font-semibold text-emerald-900">
                             Product Name
                             <span className="text-destructive">*</span>
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Kashmiri Pashmina Shawl" className="bg-background/50 focus-visible:ring-emerald-500" {...field} />
+                            <Input placeholder="e.g. Kashmiri Pashmina Shawl" className="bg-background/50 focus-visible:ring-emerald-500 border-emerald-100" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -203,11 +203,11 @@ export default function AdminProductForm() {
                       name="slug"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Slug</FormLabel>
+                          <FormLabel className="font-semibold text-emerald-900">Slug</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. kashmiri-pashmina-shawl" className="bg-background/50 font-mono text-xs focus-visible:ring-emerald-500" {...field} />
+                            <Input placeholder="e.g. kashmiri-pashmina-shawl" className="bg-background/50 font-mono text-xs focus-visible:ring-emerald-500 border-emerald-100" {...field} />
                           </FormControl>
-                          <FormDescription className="text-[10px]">URL-friendly identifier</FormDescription>
+                          <FormDescription className="text-[10px] text-emerald-600/70">URL-friendly identifier</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -548,13 +548,13 @@ export default function AdminProductForm() {
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category</FormLabel>
+                        <FormLabel className="font-semibold text-emerald-900">Category</FormLabel>
                         <Select 
                           onValueChange={(val) => field.onChange(val)} 
                           value={field.value?.toString()}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-background/50">
+                            <SelectTrigger className="bg-background/50 border-emerald-100 focus:ring-emerald-500">
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                           </FormControl>
@@ -570,34 +570,13 @@ export default function AdminProductForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="rating"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Initial Rating (0-5)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.1"
-                            min="0"
-                            max="5"
-                            className="bg-background/50"
-                            {...field} 
-                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
               </Card>
 
               <div className="flex flex-col gap-3 sticky bottom-4 z-50">
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-lg font-semibold shadow-lg hover-elevate active-elevate-2" 
+                  className="w-full h-12 text-lg font-bold shadow-lg shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700 text-white transition-all active:scale-[0.98]" 
                   disabled={mutation.isPending}
                   data-testid="button-save-product"
                 >
@@ -606,11 +585,11 @@ export default function AdminProductForm() {
                   ) : (
                     <Save className="mr-2 h-5 w-5" />
                   )}
-                  {isEditing ? "Update Product" : "Publish Product"}
+                  {isEditing ? "Save Changes" : "Publish Product"}
                 </Button>
                 <Link href="/admin/products">
-                  <Button variant="ghost" type="button" className="w-full h-11 hover-elevate">
-                    Discard Changes
+                  <Button variant="ghost" type="button" className="w-full h-11 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-semibold transition-colors">
+                    Cancel & Discard
                   </Button>
                 </Link>
               </div>
