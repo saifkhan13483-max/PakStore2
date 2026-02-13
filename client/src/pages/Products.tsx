@@ -146,29 +146,29 @@ export default function Products() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Mobile Filter Trigger */}
-        <div className="lg:hidden mb-4 flex gap-2">
+        <div className="lg:hidden mb-6 flex gap-3">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="flex-1 gap-2">
+              <Button variant="outline" className="flex-1 gap-2 h-11 rounded-xl shadow-sm hover:bg-accent transition-colors">
                 <Filter className="h-4 w-4" />
                 Filters
               </Button>
             </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
+            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              <SheetHeader className="border-b pb-4">
+                <SheetTitle className="text-xl font-bold">Refine Collection</SheetTitle>
               </SheetHeader>
-              <div className="py-4">
+              <div className="py-6 overflow-y-auto max-h-[calc(100vh-100px)]">
                 <Filters onFilterChange={handleFilterChange} />
               </div>
             </SheetContent>
           </Sheet>
           <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
-            <SelectTrigger className="w-[180px]">
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
+            <SelectTrigger className="w-[180px] h-11 rounded-xl shadow-sm">
+              <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl">
               <SelectItem value="featured">Featured</SelectItem>
               <SelectItem value="price-low">Price: Low to High</SelectItem>
               <SelectItem value="price-high">Price: High to Low</SelectItem>
@@ -178,71 +178,86 @@ export default function Products() {
         </div>
 
         {/* Sidebar Filters (Desktop) */}
-        <aside className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-24">
+        <aside className="hidden lg:block w-72 flex-shrink-0">
+          <div className="sticky top-28 bg-card rounded-2xl p-6 border shadow-sm">
             <Filters onFilterChange={handleFilterChange} />
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">
-                {queryParam ? `Search Results for "${queryParam}"` : "Shop All Products"}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+            <div className="space-y-1">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                {queryParam ? `Search Results for "${queryParam}"` : "Our Collections"}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground font-medium">
                 {isLoading ? (
                   <Skeleton className="h-4 w-32" />
                 ) : (
-                  `Showing ${displayedProducts.length} of ${filteredAndSortedProducts.length} products`
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    Showing {displayedProducts.length} of {filteredAndSortedProducts.length} unique items
+                  </span>
                 )}
               </p>
             </div>
             
             <div className="hidden lg:block">
-              <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
-                <SelectTrigger className="w-[200px]">
-                  <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="newest">Newest Arrivals</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-muted-foreground">Sort:</span>
+                <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
+                  <SelectTrigger className="w-[220px] h-10 rounded-xl bg-card border shadow-sm hover:bg-accent transition-colors">
+                    <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Featured" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="featured">Most Popular</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="newest">Latest Releases</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
           {/* Product Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="space-y-4">
-                  <Skeleton className="h-[300px] w-full rounded-2xl" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="aspect-[4/5] w-full rounded-3xl" />
+                  <div className="space-y-2 px-1">
+                    <Skeleton className="h-5 w-4/5" />
+                    <Skeleton className="h-4 w-1/4" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : filteredAndSortedProducts.length === 0 ? (
-            <div className="text-center py-20 bg-muted/30 rounded-2xl border-2 border-dashed">
-              <div className="max-w-md mx-auto">
-                <Filter className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No products match your filters</h3>
-                <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters or search criteria to find what you're looking for.
+            <div className="text-center py-24 bg-muted/20 rounded-3xl border-2 border-dashed border-muted-foreground/20">
+              <div className="max-w-sm mx-auto px-6">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Filter className="h-10 w-10 text-muted-foreground/40" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">No results found</h3>
+                <p className="text-muted-foreground mb-8 text-balance">
+                  We couldn't find any products matching your current selection. Try broadening your filters.
                 </p>
-                <Button variant="default" onClick={() => handleFilterChange({ categories: [], priceRange: null, inStockOnly: false })}>
-                  Clear All Filters
+                <Button 
+                  variant="default" 
+                  size="lg"
+                  className="rounded-full px-8"
+                  onClick={() => handleFilterChange({ categories: [], priceRange: null, inStockOnly: false })}
+                >
+                  Reset All Filters
                 </Button>
               </div>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayedProducts.map((product) => (
                   <ProductCardComponent key={product.id} product={product} />
                 ))}
@@ -250,14 +265,14 @@ export default function Products() {
 
               {/* Load More */}
               {visibleCount < filteredAndSortedProducts.length && (
-                <div className="mt-12 text-center">
+                <div className="mt-16 text-center border-t pt-12">
                   <Button 
                     onClick={handleLoadMore} 
                     size="lg"
                     variant="outline"
-                    className="min-w-[200px]"
+                    className="min-w-[240px] h-12 rounded-full border-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 shadow-sm"
                   >
-                    Load More Products
+                    Explore More Items
                   </Button>
                 </div>
               )}
