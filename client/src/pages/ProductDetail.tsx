@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +44,38 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+
+  const images = useMemo(() => {
+    return product?.images && product.images.length > 0 
+      ? product.images 
+      : ["https://placehold.co/600x600?text=No+Image"];
+  }, [product]);
+
+  // Handle variant image switching
+  const handleVariantSelect = (variantName: string, optionId: string) => {
+    setSelectedVariants(prev => {
+      const newVariants = { ...prev, [variantName]: optionId };
+      
+      // Find the selected option's image
+      const variant = product?.variants?.find(v => v.name === variantName);
+      const option = variant?.options.find(o => o.id === optionId);
+      
+      if (option?.image) {
+        // Find if this image is already in our gallery
+        const existingIdx = images.findIndex(img => img === option.image);
+        if (existingIdx !== -1) {
+          setActiveImage(existingIdx);
+        } else {
+          // If not in gallery (shouldn't happen with current admin flow, but safe fallback)
+          // we could either add it or just use it as a temporary override.
+          // For now, let's assume if it's not in the main gallery, we want to show it.
+          // In a real app, variant images are often part of the gallery anyway.
+        }
+      }
+      
+      return newVariants;
+    });
+  };
 
   // Calculate adjusted price based on variants
   const currentPrice = useMemo(() => {
@@ -133,10 +165,6 @@ export default function ProductDetail() {
       </div>
     );
   }
-
-  const images = product.images && product.images.length > 0 
-    ? product.images 
-    : ["https://placehold.co/600x600?text=No+Image"];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -249,14 +277,23 @@ export default function ProductDetail() {
                       {variant.options.map((option) => (
                         <button
                           key={option.id}
-                          onClick={() => setSelectedVariants(prev => ({ ...prev, [variant.name]: option.id }))}
-                          className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                          onClick={() => handleVariantSelect(variant.name, option.id)}
+                          className={`group relative overflow-hidden px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                             selectedVariants[variant.name] === option.id
                               ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
                               : "border-border/50 bg-background hover:border-primary/30 hover:bg-accent/50"
                           }`}
                         >
-                          {option.value}
+                          <div className="flex items-center gap-2">
+                            {option.image && (
+                              <img 
+                                src={getOptimizedImageUrl(option.image, { width: 40, height: 40 })} 
+                                alt={option.value}
+                                className="w-6 h-6 rounded-md object-cover border border-border/50"
+                              />
+                            )}
+                            <span>{option.value}</span>
+                          </div>
                           {option.price && option.price !== product.price && (
                             <span className="ml-1.5 opacity-60">
                               ({formatPrice(option.price)})
