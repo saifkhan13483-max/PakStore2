@@ -175,9 +175,9 @@ export default function AdminProductForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-8">
-              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Basic Information</CardTitle>
+              <Card className="border-emerald-100 bg-emerald-50/10 backdrop-blur-sm shadow-sm">
+                <CardHeader className="bg-emerald-50/30 border-b border-emerald-100">
+                  <CardTitle className="text-xl text-emerald-900">Basic Information</CardTitle>
                   <CardDescription>Primary details that customers will see first</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -187,9 +187,12 @@ export default function AdminProductForm() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Product Name</FormLabel>
+                          <FormLabel className="flex items-center gap-1">
+                            Product Name
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Kashmiri Pashmina Shawl" className="bg-background/50" {...field} />
+                            <Input placeholder="e.g. Kashmiri Pashmina Shawl" className="bg-background/50 focus-visible:ring-emerald-500" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -202,8 +205,9 @@ export default function AdminProductForm() {
                         <FormItem>
                           <FormLabel>Slug</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. kashmiri-pashmina-shawl" className="bg-background/50 font-mono text-xs" {...field} />
+                            <Input placeholder="e.g. kashmiri-pashmina-shawl" className="bg-background/50 font-mono text-xs focus-visible:ring-emerald-500" {...field} />
                           </FormControl>
+                          <FormDescription className="text-[10px]">URL-friendly identifier</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -247,9 +251,9 @@ export default function AdminProductForm() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Product Media</CardTitle>
+              <Card className="border-emerald-100 bg-emerald-50/10 backdrop-blur-sm shadow-sm">
+                <CardHeader className="bg-emerald-50/30 border-b border-emerald-100">
+                  <CardTitle className="text-xl text-emerald-900">Product Media</CardTitle>
                   <CardDescription>Upload high-quality images to showcase your product</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -272,10 +276,10 @@ export default function AdminProductForm() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm overflow-visible">
-                <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <Card className="border-emerald-100 bg-emerald-50/10 backdrop-blur-sm shadow-sm overflow-visible">
+                <CardHeader className="bg-emerald-50/30 border-b border-emerald-100 flex flex-row items-center justify-between gap-2">
                   <div className="space-y-1">
-                    <CardTitle className="text-xl flex items-center gap-2">
+                    <CardTitle className="text-xl flex items-center gap-2 text-emerald-900">
                       <Layers className="h-5 w-5" />
                       Product Variants
                     </CardTitle>
@@ -286,7 +290,7 @@ export default function AdminProductForm() {
                     variant="outline" 
                     size="sm"
                     onClick={() => appendVariant({ id: Math.random().toString(36).substr(2, 9), name: "", options: [] })}
-                    className="hover-elevate"
+                    className="hover-elevate bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50"
                   >
                     <Plus className="mr-2 h-4 w-4" /> Add Variant Type
                   </Button>
@@ -463,9 +467,9 @@ export default function AdminProductForm() {
             </div>
 
             <div className="space-y-8">
-              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-primary flex items-center gap-2">
+              <Card className="border-emerald-100 bg-emerald-50/10 backdrop-blur-sm shadow-sm">
+                <CardHeader className="bg-emerald-50/30 border-b border-emerald-100">
+                  <CardTitle className="text-xl text-emerald-900 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5" />
                     Pricing & Inventory
                   </CardTitle>
