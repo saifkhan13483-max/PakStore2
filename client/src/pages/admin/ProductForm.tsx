@@ -325,9 +325,9 @@ export default function AdminProductForm() {
                           <h4 className="text-sm font-medium">Options</h4>
                           <Button
                             type="button"
-                            variant="link"
+                            variant="ghost"
                             size="sm"
-                            className="h-auto p-0"
+                            className="h-auto p-0 text-primary hover:bg-transparent"
                             onClick={() => {
                               const options = form.getValues(`variants.${vIndex}.options` as any) || [];
                               form.setValue(`variants.${vIndex}.options` as any, [
