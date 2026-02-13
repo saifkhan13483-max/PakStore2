@@ -27,6 +27,18 @@ export const baseDocumentSchema = z.object({
  * Core Entity Schemas (Part 6.5 & 6.6)
  */
 
+export const productVariantSchema = z.object({
+  id: z.string(),
+  name: z.string(), // e.g. "Color", "Size"
+  options: z.array(z.object({
+    id: z.string(),
+    value: z.string(), // e.g. "Gold", "Silver", "Black"
+    price: z.number().optional(), // override base price
+    stock: z.number().optional(),
+    image: z.string().optional(),
+  })),
+});
+
 export const productSchema = baseDocumentSchema.extend({
   slug: z.string().min(1),
   name: z.string().min(1),
@@ -36,6 +48,7 @@ export const productSchema = baseDocumentSchema.extend({
   originalPrice: z.number().nullable().optional(),
   images: z.array(z.string()),
   categoryId: documentIdSchema, // Reference to category doc ID (Part 6.6)
+  variants: z.array(productVariantSchema).optional(),
   inStock: z.boolean(),
   active: z.boolean().default(true),
   rating: z.union([z.string(), z.number()]).optional(),

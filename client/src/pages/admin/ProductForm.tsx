@@ -26,10 +26,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp } from "lucide-react";
+import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
-import { useEffect } from "react";
+import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 
@@ -69,6 +69,7 @@ export default function AdminProductForm() {
       reviewCount: 0,
       features: [],
       specifications: {},
+      variants: [],
     },
   });
 
@@ -76,6 +77,12 @@ export default function AdminProductForm() {
   const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
     control: form.control,
     name: "features" as any,
+  });
+
+  // Handle variants array
+  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
+    control: form.control,
+    name: "variants" as any,
   });
 
   useEffect(() => {
@@ -88,6 +95,7 @@ export default function AdminProductForm() {
         reviewCount: product.reviewCount || 0,
         features: product.features || [],
         specifications: product.specifications || {},
+        variants: product.variants || [],
       });
     }
   }, [product, form]);
@@ -264,7 +272,134 @@ export default function AdminProductForm() {
                 </CardContent>
               </Card>
 
-              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm">
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm overflow-visible">
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Layers className="h-5 w-5" />
+                      Product Variants
+                    </CardTitle>
+                    <CardDescription>Add options like Color, Size, or Material</CardDescription>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => appendVariant({ id: Math.random().toString(36).substr(2, 9), name: "", options: [] })}
+                    className="hover-elevate"
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Add Variant Type
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {variantFields.map((variant, vIndex) => (
+                    <div key={variant.id} className="p-4 rounded-xl border border-border/50 bg-background/30 space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <FormField
+                            control={form.control}
+                            name={`variants.${vIndex}.name` as any}
+                            render={({ field }) => (
+                              <FormItem className="space-y-1">
+                                <FormLabel className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Variant Type Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="e.g. Color" className="bg-background/50 h-8" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => removeVariant(vIndex)}
+                          className="mt-6 text-muted-foreground hover:text-destructive hover-elevate"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">Options</h4>
+                          <Button
+                            type="button"
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0"
+                            onClick={() => {
+                              const options = form.getValues(`variants.${vIndex}.options` as any) || [];
+                              form.setValue(`variants.${vIndex}.options` as any, [
+                                ...options,
+                                { id: Math.random().toString(36).substr(2, 9), value: "" }
+                              ]);
+                            }}
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Add Option
+                          </Button>
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          {(form.watch(`variants.${vIndex}.options` as any) || []).map((option: any, oIndex: number) => (
+                            <div key={option.id} className="flex items-center gap-2">
+                              <FormField
+                                control={form.control}
+                                name={`variants.${vIndex}.options.${oIndex}.value` as any}
+                                render={({ field }) => (
+                                  <FormItem className="flex-1">
+                                    <FormControl>
+                                      <Input placeholder="e.g. Gold" className="bg-background/50 h-9" {...field} />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`variants.${vIndex}.options.${oIndex}.price` as any}
+                                render={({ field }) => (
+                                  <FormItem className="w-24">
+                                    <FormControl>
+                                      <Input 
+                                        type="number" 
+                                        placeholder="Price" 
+                                        className="bg-background/50 h-9" 
+                                        {...field} 
+                                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                                onClick={() => {
+                                  const options = form.getValues(`variants.${vIndex}.options` as any);
+                                  form.setValue(`variants.${vIndex}.options` as any, options.filter((_: any, i: number) => i !== oIndex));
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {variantFields.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-10 border-2 border-dashed rounded-xl border-muted/20">
+                      <Layers className="h-10 w-10 text-muted/20 mb-3" />
+                      <p className="text-sm text-muted-foreground">No variants added. Perfect for simple products.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-none bg-card/50 backdrop-blur-sm shadow-sm overflow-visible">
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <div className="space-y-1">
                     <CardTitle className="text-xl">Features</CardTitle>
