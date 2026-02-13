@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Edit2, Loader2, FolderTree, Tag, AlertCircle } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -282,7 +282,7 @@ function ParentCategoryDialog({ category, onSubmit, isPending }: { category?: Pa
         name: category.name,
         slug: category.slug,
         description: category.description || "",
-        image: category.image || "",
+        image: category.image || undefined,
       });
     }
   }, [category, form.reset]);
@@ -349,6 +349,19 @@ function ParentCategoryDialog({ category, onSubmit, isPending }: { category?: Pa
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ""} placeholder="https://..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter className="pt-4">
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -382,7 +395,7 @@ function CategoryDialog({ category, parentCategories, onSubmit, isPending }: { c
         slug: category.slug,
         description: category.description || "",
         parentCategoryId: category.parentCategoryId,
-        image: category.image || "",
+        image: (category.image as string | undefined) || undefined,
       });
     }
   }, [category, form.reset]);
@@ -469,6 +482,19 @@ function CategoryDialog({ category, parentCategories, onSubmit, isPending }: { c
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea {...field} placeholder="Describe this sub-category..." className="resize-none" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} value={field.value || ""} placeholder="https://..." />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
