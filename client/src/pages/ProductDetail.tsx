@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, ChevronLeft, Star } from "lucide-react";
-import { useState } from "react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check } from "lucide-react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,10 +43,44 @@ export default function ProductDetail() {
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+
+  // Calculate adjusted price based on variants
+  const currentPrice = useMemo(() => {
+    if (!product) return 0;
+    let price = product.price;
+    
+    if (product.variants) {
+      product.variants.forEach(variant => {
+        const selectedOptionId = selectedVariants[variant.name];
+        if (selectedOptionId) {
+          const option = variant.options.find(o => o.id === selectedOptionId);
+          if (option?.price) {
+            price = option.price;
+          }
+        }
+      });
+    }
+    return price;
+  }, [product, selectedVariants]);
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity);
+      // Check if all variants are selected
+      if (product.variants && product.variants.length > 0) {
+        const unselected = product.variants.filter(v => !selectedVariants[v.name]);
+        if (unselected.length > 0) {
+          toast({
+            title: "Please select options",
+            description: `Please select ${unselected.map(u => u.name).join(', ')}`,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+
+      const productWithAdjustedPrice = { ...product, price: currentPrice };
+      addToCart(productWithAdjustedPrice, quantity);
       toast({
         title: "Added to cart",
         description: `${quantity} x ${product.name} added to your cart.`,
@@ -84,10 +118,6 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-40 w-full" />
-        </div>
       </div>
     );
   }
@@ -124,9 +154,7 @@ export default function ProductDetail() {
         </Link>
       </Button>
 
-      {/* Top Section: Images and Primary Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 mb-12 lg:mb-20">
-        {/* Gallery Section */}
         <div className="flex flex-col md:flex-row gap-4 lg:sticky lg:top-24 h-fit">
           {images.length > 1 && (
             <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[400px] lg:max-h-[500px] order-2 md:order-1">
@@ -164,8 +192,7 @@ export default function ProductDetail() {
           </Card>
         </div>
 
-        {/* Info Section */}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col">
           <div className="space-y-6">
             <div className="space-y-2">
               {category && (
@@ -192,7 +219,7 @@ export default function ProductDetail() {
             
             <div className="flex items-baseline gap-3">
               <span className="text-3xl md:text-4xl font-bold text-primary">
-                {formatPrice(product.price)}
+                {formatPrice(currentPrice)}
               </span>
               {product.originalPrice && (
                 <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
@@ -205,13 +232,51 @@ export default function ProductDetail() {
               {product.description}
             </div>
 
+            {/* Product Variants Selection */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="space-y-6 pt-4">
+                {product.variants.map((variant) => (
+                  <div key={variant.name} className="space-y-3">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                      {variant.name}
+                      {selectedVariants[variant.name] && (
+                        <span className="text-primary normal-case font-normal text-xs bg-primary/10 px-2 py-0.5 rounded-full">
+                          {variant.options.find(o => o.id === selectedVariants[variant.name])?.value}
+                        </span>
+                      )}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {variant.options.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setSelectedVariants(prev => ({ ...prev, [variant.name]: option.id }))}
+                          className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                            selectedVariants[variant.name] === option.id
+                              ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                              : "border-border/50 bg-background hover:border-primary/30 hover:bg-accent/50"
+                          }`}
+                        >
+                          {option.value}
+                          {option.price && option.price !== product.price && (
+                            <span className="ml-1.5 opacity-60">
+                              ({formatPrice(option.price)})
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {product.features && product.features.length > 0 && (
-              <div className="py-2">
-                <h3 className="font-semibold text-foreground mb-4">Key Features</h3>
+              <div className="py-4 border-t border-border/50 mt-6">
+                <h3 className="font-bold text-foreground mb-4 uppercase text-xs tracking-widest">Key Features</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                   {product.features.map((feature, i) => (
-                    <div key={i} className="flex items-start text-sm text-muted-foreground">
-                      <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 mr-3 flex-shrink-0" />
+                    <div key={i} className="flex items-start text-sm text-muted-foreground bg-accent/30 p-2 rounded-lg border border-border/10">
+                      <Check className="mt-0.5 w-4 h-4 text-primary mr-3 flex-shrink-0" />
                       {feature}
                     </div>
                   ))}
@@ -254,7 +319,6 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Middle Section: Tabs for Description and Reviews */}
       <section className="mb-16">
         <Tabs defaultValue="description" className="w-full">
           <TabsList className="w-full flex flex-row justify-start border-b rounded-none h-auto p-0 bg-transparent overflow-x-auto scrollbar-hide">
@@ -262,7 +326,7 @@ export default function ProductDetail() {
               value="description" 
               className="flex-shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-3 sm:px-6 py-3 font-semibold text-xs sm:text-base transition-none whitespace-nowrap"
             >
-              Product long description:
+              Product details
             </TabsTrigger>
             <TabsTrigger 
               value="reviews" 
@@ -272,8 +336,24 @@ export default function ProductDetail() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="pt-6 sm:pt-8 focus-visible:ring-0">
-            <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed">
-              <p>{product.longDescription || "No detailed description available for this product."}</p>
+            <div className="max-w-4xl">
+              <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed">
+                <p className="whitespace-pre-wrap">{product.longDescription || "No detailed description available for this product."}</p>
+              </div>
+              
+              {product.specifications && Object.keys(product.specifications).length > 0 && (
+                <div className="mt-12">
+                  <h3 className="text-xl font-bold mb-6">Specifications</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <div key={key} className="flex border-b border-border/50 pb-2">
+                        <span className="font-semibold text-foreground w-1/3">{key}</span>
+                        <span className="text-muted-foreground">{String(value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="pt-6 sm:pt-8 focus-visible:ring-0">
@@ -284,7 +364,6 @@ export default function ProductDetail() {
 
       <Separator className="my-12" />
 
-      {/* Bottom Section: Related Products */}
       {relatedProducts.length > 0 && (
         <section className="mb-12">
           <div className="flex items-center justify-between mb-8">
