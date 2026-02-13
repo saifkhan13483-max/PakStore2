@@ -163,42 +163,6 @@ export function ImageUploader({
           </label>
         )}
       </div>
-
-      {!isUploading && value.length === 0 && (
-        <div 
-          className={cn(
-            "p-6 sm:p-8 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center transition-all",
-            dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/10 bg-muted/30"
-          )}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 text-primary">
-            <Upload className="w-6 h-6 sm:w-8 sm:h-8" />
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">Upload Product Images</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-[200px] sm:max-w-[240px] mb-4 sm:mb-6">
-            Drag and drop your images here or click the button below
-          </p>
-          <Button 
-            type="button"
-            variant="outline" 
-            className="rounded-full px-6 sm:px-8 border-primary/20 hover:border-primary/50"
-            disabled={disabled}
-            onClick={() => {
-              const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-              input?.click();
-            }}
-          >
-            Select Files
-          </Button>
-          <p className="mt-4 sm:mt-6 text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            JPEG, PNG, WEBP (Max 5MB)
-          </p>
-        </div>
-      )}
     </div>
   );
 }
