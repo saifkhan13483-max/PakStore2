@@ -52,8 +52,10 @@ export const productFirestoreService = {
     try {
       const constraints: QueryConstraint[] = [];
       
+      // Handle category filtering
       if (filters.category && filters.category !== "all") {
-        constraints.push(where("categoryId", "==", filters.category));
+        // Ensure category is a string for comparison
+        constraints.push(where("categoryId", "==", String(filters.category)));
       } else if (filters.parentCategoryId) {
         // Fetch sub-categories for this parent
         const catsQuery = query(collection(db, "categories"), where("parentCategoryId", "==", filters.parentCategoryId));

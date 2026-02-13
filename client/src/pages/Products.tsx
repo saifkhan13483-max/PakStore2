@@ -86,7 +86,10 @@ export default function Products() {
     // Client-side additional filters if not handled by Firestore service
     // Filter by category (double check client side)
     if (filterState.categories.length > 0) {
-      result = result.filter(p => filterState.categories.includes(String(p.categoryId)));
+      result = result.filter(p => {
+        const productCatId = String(p.categoryId);
+        return filterState.categories.some(catId => String(catId) === productCatId);
+      });
     }
 
     // Filter by price range
