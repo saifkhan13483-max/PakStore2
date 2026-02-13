@@ -191,14 +191,14 @@ export default function Products() {
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                 {queryParam ? `Search Results for "${queryParam}"` : "Our Collections"}
               </h1>
-              <p className="text-muted-foreground font-medium">
+                <p className="text-muted-foreground font-medium flex items-center gap-2">
                 {isLoading ? (
                   <Skeleton className="h-4 w-32" />
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <>
                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                     Showing {displayedProducts.length} of {filteredAndSortedProducts.length} unique items
-                  </span>
+                  </>
                 )}
               </p>
             </div>

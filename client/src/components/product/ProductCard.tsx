@@ -1,6 +1,6 @@
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
-import { ShoppingCart, Eye, Star, ImageOff } from "lucide-react";
+import { ShoppingCart, Eye, Star, ImageOff, Plus } from "lucide-react";
 import { type Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
