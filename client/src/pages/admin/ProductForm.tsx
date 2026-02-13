@@ -371,6 +371,22 @@ export default function AdminProductForm() {
                                   </FormItem>
                                 )}
                               />
+                              <FormField
+                                control={form.control}
+                                name={`variants.${vIndex}.options.${oIndex}.image` as any}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <ImageUploader
+                                        value={field.value ? [field.value] : []}
+                                        onChange={(urls) => field.onChange(urls[0])}
+                                        maxImages={1}
+                                        compact
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
                               <Button
                                 type="button"
                                 variant="ghost"

@@ -11,13 +11,15 @@ interface ImageUploaderProps {
   onChange: (urls: string[]) => void;
   maxImages?: number;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export function ImageUploader({ 
   value = [], 
   onChange, 
   maxImages = 5,
-  disabled = false 
+  disabled = false,
+  compact = false
 }: ImageUploaderProps) {
   const { upload, isUploading, progress } = useCloudinary();
   const [dragActive, setDragActive] = useState(false);
@@ -25,9 +27,13 @@ export function ImageUploader({
   const onUpload = useCallback(async (file: File) => {
     const result = await upload(file);
     if (result) {
-      onChange([...value, result.secure_url]);
+      if (maxImages === 1) {
+        onChange([result.secure_url]);
+      } else {
+        onChange([...value, result.secure_url]);
+      }
     }
-  }, [upload, value, onChange]);
+  }, [upload, value, onChange, maxImages]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -58,6 +64,34 @@ export function ImageUploader({
   const removeImage = (url: string) => {
     onChange(value.filter((item) => item !== url));
   };
+
+  if (compact && maxImages === 1) {
+    return (
+      <div className="flex items-center gap-3">
+        {value[0] ? (
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-border">
+            <img src={value[0]} alt="Variant preview" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => removeImage(value[0])}
+              disabled={disabled || isUploading}
+              className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <label className={cn(
+            "w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dashed transition-all cursor-pointer",
+            isUploading ? "opacity-50 cursor-not-allowed" : "border-muted-foreground/20 hover:border-primary/50 hover:bg-muted"
+          )}>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={disabled || isUploading} />
+            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+          </label>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 w-full">
