@@ -138,9 +138,9 @@ export default function AdminDashboard() {
                           <ShoppingCart className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium leading-none">{order.customerInfo.fullName}</p>
+                          <p className="text-sm font-medium leading-none">{order.customerInfo?.fullName || 'Unknown Customer'}</p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {order.items.length} {order.items.length === 1 ? 'item' : 'items'} • ₨ {order.total.toLocaleString()}
+                            {order.items?.length || 0} {(order.items?.length || 0) === 1 ? 'item' : 'items'} • ₨ {(order.total || 0).toLocaleString()}
                           </p>
                         </div>
                       </div>
