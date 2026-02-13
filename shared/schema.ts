@@ -89,6 +89,7 @@ export const cartItemSchema = z.object({
   id: z.string(),
   productId: documentIdSchema, // Reference to product
   quantity: z.number().int().positive(),
+  selectedVariant: z.record(z.string()).optional(), // e.g. { Color: "Gold", Size: "M" }
   // Denormalized product data for consistent read patterns in orders
   product: productSchema.pick({
     name: true,

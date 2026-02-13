@@ -152,7 +152,16 @@ export default function AdminOrders() {
                                   <div key={idx} className="flex justify-between items-start border-b border-emerald-50 pb-2">
                                     <div className="flex-1">
                                       <p className="text-sm font-medium text-emerald-900">{item.product?.name || "Unknown Product"}</p>
-                                      <p className="text-xs text-muted-foreground">Qty: {item.quantity} × Rs. {item.product?.price?.toLocaleString() ?? "0"}</p>
+                                      {item.selectedVariant && Object.entries(item.selectedVariant).length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                          {Object.entries(item.selectedVariant).map(([key, value]) => (
+                                            <Badge key={key} variant="secondary" className="text-[10px] h-4 px-1 bg-emerald-50 text-emerald-700 border-emerald-100">
+                                              {key}: {value}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      )}
+                                      <p className="text-xs text-muted-foreground mt-1">Qty: {item.quantity} × Rs. {item.product?.price?.toLocaleString() ?? "0"}</p>
                                     </div>
                                     <p className="text-sm font-bold">Rs. {(item.quantity * (item.product?.price ?? 0)).toLocaleString()}</p>
                                   </div>

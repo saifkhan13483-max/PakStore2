@@ -34,6 +34,15 @@ export function OrderSummary() {
               </div>
               <div className="flex-1 space-y-1">
                 <p className="font-medium line-clamp-1">{item.name}</p>
+                {item.selectedVariant && Object.entries(item.selectedVariant).length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(item.selectedVariant).map(([key, value]) => (
+                      <span key={key} className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                        {key}: {value}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="flex justify-between text-muted-foreground">
                   <span>Qty: {item.quantity}</span>
                   <span>Rs. {(item.price * item.quantity).toLocaleString()}</span>
