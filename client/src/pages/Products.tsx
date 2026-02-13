@@ -65,7 +65,7 @@ export default function Products() {
     }
   }, [search]);
 
-  const { data: productsData, isLoading } = useQuery({
+  const { data: productsData, isLoading, error } = useQuery({
     queryKey: ["products", { categories: filterState.categories, sortBy, queryParam, parentCategoryId: new URLSearchParams(search).get("parentCategoryId") }],
     queryFn: () => {
       const params = new URLSearchParams(search);
@@ -76,15 +76,15 @@ export default function Products() {
         sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "newest" : undefined,
         limit: 100 
       });
-    }
+    },
+    retry: false
   });
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!productsData) return [];
     let result = [...productsData];
 
-    // Client-side additional filters if not handled by Firestore service
-    // Filter by category (double check client side)
+    // Client-side additional filters
     if (filterState.categories.length > 0) {
       result = result.filter(p => {
         const productCatId = String(p.categoryId);
@@ -237,6 +237,15 @@ export default function Products() {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-24 bg-destructive/5 rounded-3xl border-2 border-dashed border-destructive/20">
+              <div className="max-w-sm mx-auto px-6">
+                <h3 className="text-2xl font-bold mb-3">Index Required</h3>
+                <p className="text-muted-foreground mb-8">
+                  The current filter requires a Firestore index. Please check the browser console for the link to create it.
+                </p>
+              </div>
             </div>
           ) : filteredAndSortedProducts.length === 0 ? (
             <div className="text-center py-24 bg-muted/20 rounded-3xl border-2 border-dashed border-muted-foreground/20">

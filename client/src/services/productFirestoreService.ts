@@ -65,15 +65,22 @@ export const productFirestoreService = {
         if (catIds.length > 0) {
           constraints.push(where("categoryId", "in", catIds.slice(0, 10)));
         } else {
-          return [];
+          // If a parent category is selected but has no subcategories, 
+          // we should also check if the parent category itself is used as a categoryId for products
+          constraints.push(where("categoryId", "==", filters.parentCategoryId));
         }
       }
 
       // Add default ordering if not specified to ensure consistent pagination
+      // If we have an "in" query or multiple "==" queries, Firestore might need an index
+      // For simplicity in this fix, we'll try to keep it basic.
       if (filters.sortBy === "price-asc") {
         constraints.push(orderBy("price", "asc"));
       } else if (filters.sortBy === "price-desc") {
         constraints.push(orderBy("price", "desc"));
+      } else if (filters.category || filters.parentCategoryId) {
+        // When filtering by category, we should still allow ordering
+        constraints.push(orderBy("createdAt", "desc"));
       } else {
         constraints.push(orderBy("createdAt", "desc"));
       }
