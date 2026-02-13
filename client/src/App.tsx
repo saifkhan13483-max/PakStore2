@@ -6,31 +6,52 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
+
+// Robust Lazy Loading with retry logic
+const lazyWithRetry = (componentImport: () => Promise<any>) => {
+  return lazy(async () => {
+    const pageHasBeenForceRefreshed = JSON.parse(
+      window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.localStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasBeenForceRefreshed) {
+        window.localStorage.setItem('page-has-been-force-refreshed', 'true');
+        return window.location.reload();
+      }
+      throw error;
+    }
+  });
+};
+
+// Page Imports with Code Splitting and Retry Logic
+const Home = lazyWithRetry(() => import("@/pages/Home"));
+const Products = lazyWithRetry(() => import("@/pages/Products"));
+const Signup = lazyWithRetry(() => import("@/pages/auth/Signup"));
+const Login = lazyWithRetry(() => import("@/pages/auth/Login"));
+const ProductDetail = lazyWithRetry(() => import("@/pages/ProductDetail"));
+const Cart = lazyWithRetry(() => import("@/pages/Cart"));
+const Checkout = lazyWithRetry(() => import("@/pages/Checkout"));
+const ThankYou = lazyWithRetry(() => import("@/pages/ThankYou"));
+const About = lazyWithRetry(() => import("@/pages/About"));
+const Contact = lazyWithRetry(() => import("@/pages/Contact"));
+const Privacy = lazyWithRetry(() => import("@/pages/Privacy"));
+const Terms = lazyWithRetry(() => import("@/pages/Terms"));
+const Profile = lazyWithRetry(() => import("@/pages/auth/Profile"));
+const AdminDashboard = lazyWithRetry(() => import("@/pages/admin/Dashboard"));
+const AdminProducts = lazyWithRetry(() => import("@/pages/admin/Products"));
+const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm"));
+const AdminCategories = lazyWithRetry(() => import("@/pages/admin/ManageCategories"));
+const AdminOrders = lazyWithRetry(() => import("@/pages/admin/Orders"));
+
+import { trackEvent } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { trackEvent } from "@/lib/firebase";
-
-// Page Imports with Code Splitting
-const Home = lazy(() => import("@/pages/Home"));
-const Products = lazy(() => import("@/pages/Products"));
-const Signup = lazy(() => import("@/pages/auth/Signup"));
-const Login = lazy(() => import("@/pages/auth/Login"));
-const ProductDetail = lazy(() => import("@/pages/ProductDetail"));
-const Cart = lazy(() => import("@/pages/Cart"));
-const Checkout = lazy(() => import("@/pages/Checkout"));
-const ThankYou = lazy(() => import("@/pages/ThankYou"));
-const About = lazy(() => import("@/pages/About"));
-const Contact = lazy(() => import("@/pages/Contact"));
-const Privacy = lazy(() => import("@/pages/Privacy"));
-const Terms = lazy(() => import("@/pages/Terms"));
-const Profile = lazy(() => import("@/pages/auth/Profile"));
-const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
-const AdminProducts = lazy(() => import("@/pages/admin/Products"));
-const AdminProductForm = lazy(() => import("@/pages/admin/ProductForm"));
-const AdminCategories = lazy(() => import("@/pages/admin/ManageCategories"));
-const AdminOrders = lazy(() => import("@/pages/admin/Orders"));
-
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 import { AdminLayout } from "@/components/admin/AdminLayout";
