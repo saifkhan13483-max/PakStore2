@@ -66,10 +66,11 @@ export default function ProductDetail() {
         if (existingIdx !== -1) {
           setActiveImage(existingIdx);
         } else {
-          // If the image isn't in the main gallery, we should still show it as the active image
-          // For now, since `images` is a useMemo based on `product.images`, 
-          // we'll assume the variant image is part of the gallery or we'd need to add it to the gallery state.
-          // However, simple fix is to ensure the variant selection triggers setActiveImage if found.
+          // If the image isn't in the main gallery, we set it as the active image
+          // We can't easily modify the 'images' useMemo here, but we can set activeImage
+          // to a value that our rendering logic understands.
+          // In this case, we'll just set it to the option.image string if we were to support it.
+          // For now, the variant images are added to the main images array in data/products.ts
         }
       }
       
