@@ -7,23 +7,31 @@ export function useCategories() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (!categoryFirestoreService || typeof categoryFirestoreService.subscribeCategories !== 'function') {
+      console.error("categoryFirestoreService.subscribeCategories is not a function", categoryFirestoreService);
+      return;
+    }
     // Real-time synchronization for sub-categories
     const unsubscribe = categoryFirestoreService.subscribeCategories((categories) => {
       queryClient.setQueryData(["categories"], categories);
       // Ensure the cache is considered fresh after real-time update
       queryClient.invalidateQueries({ queryKey: ["categories"], refetchType: "none" });
     });
-    return () => unsubscribe();
+    return () => unsubscribe?.();
   }, [queryClient]);
 
   useEffect(() => {
+    if (!categoryFirestoreService || typeof categoryFirestoreService.subscribeParentCategories !== 'function') {
+      console.error("categoryFirestoreService.subscribeParentCategories is not a function", categoryFirestoreService);
+      return;
+    }
     // Real-time synchronization for parent categories
     const unsubscribe = categoryFirestoreService.subscribeParentCategories((parentCategories) => {
       queryClient.setQueryData(["parent-categories"], parentCategories);
       // Ensure the cache is considered fresh after real-time update
       queryClient.invalidateQueries({ queryKey: ["parent-categories"], refetchType: "none" });
     });
-    return () => unsubscribe();
+    return () => unsubscribe?.();
   }, [queryClient]);
 
   const categoriesQuery = useQuery<Category[]>({
