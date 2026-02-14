@@ -192,17 +192,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             )}
           </div>
         </div>
-
-        <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground/60 font-medium px-1">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <kbd className="flex items-center justify-center min-w-4 h-4 px-1 border rounded bg-muted/50 text-[9px]">Enter</kbd> to select
-            </span>
-            <span className="flex items-center gap-1.5">
-              <kbd className="flex items-center justify-center min-w-4 h-4 px-1 border rounded bg-muted/50 text-[9px]">↑↓</kbd> to navigate
-            </span>
-          </div>
-        </div>
       </div>
       <div 
         className="absolute inset-0 z-[100]" 
