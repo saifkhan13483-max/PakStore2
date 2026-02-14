@@ -5,7 +5,8 @@ import {
   getDocs,
   limit,
   writeBatch,
-  doc
+  doc,
+  deleteDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -83,6 +84,19 @@ export class AdminStatsService {
     } catch (error: any) {
       console.error("Error resetting orders:", error);
       throw new Error(`Failed to reset orders: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete a single order by ID
+   */
+  async deleteOrder(orderId: string): Promise<void> {
+    try {
+      const orderRef = doc(db, ORDERS_COLLECTION, orderId);
+      await deleteDoc(orderRef);
+    } catch (error: any) {
+      console.error("Error deleting order:", error);
+      throw new Error(`Failed to delete order: ${error.message}`);
     }
   }
 }
