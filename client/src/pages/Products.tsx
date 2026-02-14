@@ -209,7 +209,7 @@ export default function Products() {
         <main className="flex-1">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">
                 {queryParam ? `Search Results for "${queryParam}"` : "Our Collections"}
               </h1>
                 <p className="text-muted-foreground font-medium flex items-center gap-2">
