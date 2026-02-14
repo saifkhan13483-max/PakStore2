@@ -210,12 +210,12 @@ export function Navbar() {
               variant="outline"
               size="sm"
               onClick={() => setIsSearchOpen(true)}
-              className="hidden lg:flex items-center gap-3 w-72 justify-start text-muted-foreground h-10 px-4 rounded-xl bg-muted/30 hover:bg-muted/50 border-border/50 transition-all hover:ring-2 hover:ring-primary/10 group"
+              className="hidden lg:flex items-center gap-2 w-64 justify-start text-muted-foreground h-10 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 border-border/50 transition-all group"
             >
               <Search className="h-4 w-4 group-hover:text-primary transition-colors" />
-              <span className="text-xs font-medium">Search for anything...</span>
-              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-md border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60 shadow-sm">
-                <span className="text-xs">⌘</span>K
+              <span className="text-sm font-medium">Search...</span>
+              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground/60">
+                ⌘K
               </kbd>
             </Button>
             
