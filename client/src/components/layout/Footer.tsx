@@ -7,10 +7,10 @@ const Footer = () => {
   return (
     <footer className="bg-background border-t">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row gap-8 mb-12">
           
           {/* Company Information */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 lg:max-w-[30%] lg:mr-12">
             <Link href="/" className="inline-block">
               <img src={getOptimizedImageUrl(logoImg)} alt="PakCart" className="h-12 w-auto" />
             </Link>
@@ -30,43 +30,46 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="font-display font-semibold text-lg">Quick Links</h4>
-            <nav className="flex flex-col gap-3">
-              <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shop All Products</Link>
-              <Link href="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Categories</Link>
-              <Link href="/new-arrivals" className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link>
-            </nav>
-          </div>
+          {/* Links and Contact Section */}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h4 className="font-display font-semibold text-lg">Quick Links</h4>
+              <nav className="flex flex-col gap-3">
+                <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shop All Products</Link>
+                <Link href="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Categories</Link>
+                <Link href="/new-arrivals" className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link>
+              </nav>
+            </div>
 
-          {/* Customer Service */}
-          <div className="space-y-4">
-            <h4 className="font-display font-semibold text-lg">Help & Info</h4>
-            <nav className="flex flex-col gap-3">
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link>
-            </nav>
-          </div>
+            {/* Customer Service */}
+            <div className="space-y-4">
+              <h4 className="font-display font-semibold text-lg">Help & Info</h4>
+              <nav className="flex flex-col gap-3">
+                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
+                <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+                <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link>
+              </nav>
+            </div>
 
-          {/* Contact Details */}
-          <div className="space-y-4">
-            <h4 className="font-display font-semibold text-lg">Contact Us</h4>
-                <ul className="space-y-4 text-sm">
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <Phone className="h-5 w-5 text-secondary shrink-0" />
-                    <span>+92 300 1234567</span>
-                  </li>
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <Mail className="h-5 w-5 text-secondary shrink-0" />
-                    <span>hello@pakcart.store</span>
-                  </li>
-                  <li className="flex items-center gap-3 text-muted-foreground">
-                    <Globe className="h-5 w-5 text-secondary shrink-0" />
-                    <span>www.pakcart.store</span>
-                  </li>
-                </ul>
+            {/* Contact Details */}
+            <div className="space-y-4">
+              <h4 className="font-display font-semibold text-lg">Contact Us</h4>
+              <ul className="space-y-4 text-sm">
+                <li className="flex items-center gap-3 text-muted-foreground">
+                  <Phone className="h-5 w-5 text-secondary shrink-0" />
+                  <span>+92 300 1234567</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground">
+                  <Mail className="h-5 w-5 text-secondary shrink-0" />
+                  <span>hello@pakcart.store</span>
+                </li>
+                <li className="flex items-center gap-3 text-muted-foreground">
+                  <Globe className="h-5 w-5 text-secondary shrink-0" />
+                  <span>www.pakcart.store</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
