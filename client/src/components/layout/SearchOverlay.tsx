@@ -158,7 +158,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   index === selectedIndex ? "bg-primary/5 border-primary/10" : "hover:bg-muted/50"
                 )}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                   <Search className={cn(
                     "h-4 w-4 shrink-0 transition-colors",
                     index === selectedIndex ? "text-primary" : "text-muted-foreground"
