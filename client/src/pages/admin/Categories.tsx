@@ -57,7 +57,13 @@ export default function AdminCategories() {
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: (data: any) => categoryFirestoreService.createCategory(data),
+    mutationFn: (data: any) => {
+      const { parentId, ...rest } = data;
+      return categoryFirestoreService.createCategory({
+        ...rest,
+        parentCategoryId: parentId === "none" ? null : parentId
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       categoryForm.reset();

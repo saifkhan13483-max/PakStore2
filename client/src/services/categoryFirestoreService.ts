@@ -100,33 +100,29 @@ export class CategoryFirestoreService {
   async createCategory(categoryData: any): Promise<Category> {
     try {
       const validatedData = insertCategorySchema.parse(categoryData);
-      const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), validatedData);
-      return { ...validatedData, id: docRef.id } as unknown as Category;
+      const dataToSave = {
+        ...validatedData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const docRef = await addDoc(collection(db, CATEGORIES_COLLECTION), dataToSave);
+      return { ...dataToSave, id: docRef.id } as unknown as Category;
     } catch (error: any) {
       console.error("Error creating category:", error);
       throw new Error(`Failed to create category: ${error.message}`);
     }
   }
 
-  async deleteCategory(categoryId: string): Promise<void> {
-    try {
-      const productsQuery = query(collection(db, PRODUCTS_COLLECTION), where("categoryId", "==", categoryId), limit(1));
-      const productsSnapshot = await getDocs(productsQuery);
-      if (!productsSnapshot.empty) {
-        throw new Error("Cannot delete category because it contains products.");
-      }
-      await deleteDoc(doc(db, CATEGORIES_COLLECTION, categoryId));
-    } catch (error: any) {
-      console.error("Error deleting category:", error);
-      throw new Error(error.message || "Failed to delete category");
-    }
-  }
-
   async createParentCategory(categoryData: any): Promise<ParentCategory> {
     try {
       const validatedData = insertParentCategorySchema.parse(categoryData);
-      const docRef = await addDoc(collection(db, PARENT_CATEGORIES_COLLECTION), validatedData);
-      return { ...validatedData, id: docRef.id } as unknown as ParentCategory;
+      const dataToSave = {
+        ...validatedData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const docRef = await addDoc(collection(db, PARENT_CATEGORIES_COLLECTION), dataToSave);
+      return { ...dataToSave, id: docRef.id } as unknown as ParentCategory;
     } catch (error: any) {
       console.error("Error creating parent category:", error);
       throw new Error(`Failed to create parent category: ${error.message}`);
@@ -134,11 +130,19 @@ export class CategoryFirestoreService {
   }
 
   async updateParentCategory(id: string, data: any): Promise<void> {
-    await updateDoc(doc(db, PARENT_CATEGORIES_COLLECTION, id), data);
+    const updateData = {
+      ...data,
+      updatedAt: new Date()
+    };
+    await updateDoc(doc(db, PARENT_CATEGORIES_COLLECTION, id), updateData);
   }
 
   async updateCategory(id: string, data: any): Promise<void> {
-    await updateDoc(doc(db, CATEGORIES_COLLECTION, id), data);
+    const updateData = {
+      ...data,
+      updatedAt: new Date()
+    };
+    await updateDoc(doc(db, CATEGORIES_COLLECTION, id), updateData);
   }
 
   async deleteParentCategory(id: string): Promise<void> {

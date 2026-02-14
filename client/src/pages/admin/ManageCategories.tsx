@@ -59,7 +59,13 @@ export default function ManageCategories() {
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: (data: any) => categoryFirestoreService.createCategory(data),
+    mutationFn: (data: any) => {
+      const { parentCategoryId, ...rest } = data;
+      return categoryFirestoreService.createCategory({
+        ...rest,
+        parentCategoryId: parentCategoryId === "" ? null : parentCategoryId
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Category created" });
@@ -67,8 +73,13 @@ export default function ManageCategories() {
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => 
-      categoryFirestoreService.updateCategory(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) => {
+      const { parentCategoryId, ...rest } = data;
+      return categoryFirestoreService.updateCategory(id, {
+        ...rest,
+        parentCategoryId: parentCategoryId === "" ? null : parentCategoryId
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Success", description: "Category updated" });
