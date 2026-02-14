@@ -1,16 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw, TrendingUp, TrendingDown, Clock, ArrowRight } from "lucide-react";
+import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw, TrendingUp, TrendingDown, Clock, ArrowRight, RotateCcw } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { adminStatsService, type AdminStats } from "@/services/adminStatsService";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   // Use real-time orders for dashboard stats if possible, or stick to query with shorter refetch
   const { data: orders } = useRealtimeCollection<Order>(
@@ -25,17 +27,33 @@ export default function AdminDashboard() {
     refetchInterval: 10000, // Faster refresh for dashboard
   });
 
+  const resetOrdersMutation = useMutation({
+    mutationFn: () => adminStatsService.resetOrders(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      toast({
+        title: "Success",
+        description: "Orders and revenue have been reset.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset orders.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to reset all orders and revenue? This action cannot be undone.")) {
+      resetOrdersMutation.mutate();
+    }
+  };
 
   const statCards = [
     { 
@@ -60,7 +78,8 @@ export default function AdminDashboard() {
       icon: ShoppingCart, 
       color: "text-purple-500",
       bg: "bg-purple-500/10",
-      description: "Lifetime orders"
+      description: "Lifetime orders",
+      canReset: true
     },
     { 
       title: "Revenue", 
@@ -68,7 +87,8 @@ export default function AdminDashboard() {
       icon: BarChart, 
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
-      description: "Total earnings"
+      description: "Total earnings",
+      canReset: true
     },
   ];
 
@@ -95,13 +115,30 @@ export default function AdminDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
-          <Card key={stat.title} className="hover-elevate border-none bg-card/50 backdrop-blur-sm shadow-sm">
+          <Card key={stat.title} className="hover-elevate border-none bg-card/50 backdrop-blur-sm shadow-sm relative group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <div className={`p-2 rounded-md ${stat.bg}`}>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <div className="flex items-center gap-2">
+                {stat.canReset && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReset();
+                    }}
+                    disabled={resetOrdersMutation.isPending}
+                    data-testid={`button-reset-${stat.title.toLowerCase().replace(' ', '-')}`}
+                  >
+                    <RotateCcw className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                )}
+                <div className={`p-2 rounded-md ${stat.bg}`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
               </div>
             </CardHeader>
             <CardContent>

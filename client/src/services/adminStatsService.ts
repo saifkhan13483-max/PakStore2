@@ -3,7 +3,9 @@ import {
   getCountFromServer,
   query,
   getDocs,
-  limit
+  limit,
+  writeBatch,
+  doc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -61,6 +63,26 @@ export class AdminStatsService {
     } catch (error: any) {
       console.error("Error getting admin stats:", error);
       throw new Error(`Failed to fetch admin stats: ${error.message}`);
+    }
+  }
+
+  /**
+   * Reset all orders (deletes all order documents)
+   */
+  async resetOrders(): Promise<void> {
+    try {
+      const q = query(collection(db, ORDERS_COLLECTION));
+      const querySnapshot = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      querySnapshot.forEach((document) => {
+        batch.delete(doc(db, ORDERS_COLLECTION, document.id));
+      });
+      
+      await batch.commit();
+    } catch (error: any) {
+      console.error("Error resetting orders:", error);
+      throw new Error(`Failed to reset orders: ${error.message}`);
     }
   }
 }
