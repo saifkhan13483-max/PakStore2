@@ -166,7 +166,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     <Search className="h-4 w-4 shrink-0" />
                   </div>
                   <span className={cn(
-                    "text-[15px] font-medium transition-colors truncate",
+                    "text-[15px] font-medium transition-colors truncate max-w-[200px]",
                     index === selectedIndex ? "text-primary" : "text-foreground"
                   )}>
                     {item.title}
