@@ -132,39 +132,45 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none ${
+                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none h-9 px-3 rounded-md hover:bg-accent/50 ${
                     location.startsWith("/products") ? "text-primary font-semibold" : "text-muted-foreground"
                   }`}
                 >
                   Categories <ChevronDown className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 p-2">
-                {parentCategories?.map((parent) => (
-                  <div key={parent.id} className="mb-4 last:mb-0">
-                    <DropdownMenuLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
-                      {parent.name}
-                    </DropdownMenuLabel>
-                    <div className="grid grid-cols-1 gap-1">
-                      {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                        <DropdownMenuItem key={category.id} asChild>
-                          <Link 
-                            href={`/products?categoryId=${category.id}`} 
-                            className="cursor-pointer w-full rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-                          >
-                            {category.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
+              <DropdownMenuContent align="start" className="w-72 p-3 shadow-xl border-border/50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="grid gap-4">
+                  {parentCategories?.map((parent) => (
+                    <div key={parent.id} className="space-y-2">
+                      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-primary/70 px-2 py-0">
+                        {parent.name}
+                      </DropdownMenuLabel>
+                      <div className="grid grid-cols-1 gap-0.5">
+                        {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
+                          <DropdownMenuItem key={category.id} asChild className="p-0 focus:bg-transparent">
+                            <Link 
+                              href={`/products?categoryId=${category.id}`} 
+                              className="group flex items-center justify-between w-full rounded-md px-2 py-2 text-sm transition-all hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
+                            >
+                              <span className="font-medium">{category.name}</span>
+                              <ChevronDown className="h-3.3 w-3.5 -rotate-90 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                            </Link>
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/products" className="cursor-pointer w-full font-medium px-2 py-1.5">
-                    All Products
-                  </Link>
-                </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="opacity-50" />
+                  <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
+                    <Link 
+                      href="/products" 
+                      className="flex items-center justify-center w-full font-bold text-xs uppercase tracking-tighter px-2 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+                    >
+                      Shop All Products
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 
