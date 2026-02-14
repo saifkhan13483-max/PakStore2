@@ -21,17 +21,22 @@ export default function AdminOrders() {
     "orders",
     orderSchema,
     ["/api/orders"],
-    [orderBy("createdAt", "desc")]
+    // Remove orderBy to avoid composite index requirement for now
+    // [orderBy("createdAt", "desc")]
   );
 
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [isUpdating, setIsUpdating] = useState(false);
+  // Client-side sorting as a temporary fix for missing Firestore index
+  const sortedOrders = useMemo(() => {
+    if (!orders) return [];
+    return [...orders].sort((a, b) => {
+      const dateA = (a.createdAt as any)?.seconds || 0;
+      const dateB = (b.createdAt as any)?.seconds || 0;
+      return dateB - dateA;
+    });
+  }, [orders]);
 
   const filteredOrders = useMemo(() => {
-    if (!orders) return [];
-    return orders.filter(order => {
+    return sortedOrders.filter(order => {
       const matchesSearch = 
         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customerInfo?.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,7 +46,7 @@ export default function AdminOrders() {
       
       return matchesSearch && matchesStatus;
     });
-  }, [orders, searchTerm, statusFilter]);
+  }, [sortedOrders, searchTerm, statusFilter]);
 
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     try {
