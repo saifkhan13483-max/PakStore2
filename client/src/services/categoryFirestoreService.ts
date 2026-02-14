@@ -113,6 +113,20 @@ export class CategoryFirestoreService {
     }
   }
 
+  async deleteCategory(categoryId: string): Promise<void> {
+    try {
+      const productsQuery = query(collection(db, PRODUCTS_COLLECTION), where("categoryId", "==", categoryId), limit(1));
+      const productsSnapshot = await getDocs(productsQuery);
+      if (!productsSnapshot.empty) {
+        throw new Error("Cannot delete category because it contains products.");
+      }
+      await deleteDoc(doc(db, CATEGORIES_COLLECTION, categoryId));
+    } catch (error: any) {
+      console.error("Error deleting category:", error);
+      throw new Error(error.message || "Failed to delete category");
+    }
+  }
+
   async createParentCategory(categoryData: any): Promise<ParentCategory> {
     try {
       const validatedData = insertParentCategorySchema.parse(categoryData);

@@ -405,7 +405,7 @@ function CategoryDialog({ category, parentCategories, onSubmit, isPending }: { c
         name: category.name,
         slug: category.slug,
         description: category.description || "",
-        parentCategoryId: category.parentCategoryId,
+        parentCategoryId: (category.parentCategoryId as string | undefined) || undefined,
         image: (category.image as string | undefined) || undefined,
       });
     }
