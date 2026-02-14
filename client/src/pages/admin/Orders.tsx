@@ -25,6 +25,11 @@ export default function AdminOrders() {
     // [orderBy("createdAt", "desc")]
   );
 
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // Client-side sorting as a temporary fix for missing Firestore index
   const sortedOrders = useMemo(() => {
     if (!orders) return [];
