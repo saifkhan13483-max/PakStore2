@@ -18,9 +18,20 @@ export default function MyOrders() {
     ["my-orders", user?.uid],
     [
       where("userId", "==", user?.uid || ""),
-      orderBy("createdAt", "desc")
+      // Remove orderBy to avoid composite index requirement
+      // orderBy("createdAt", "desc")
     ]
   );
+
+  // Client-side sorting as a temporary fix for missing Firestore index
+  const sortedOrders = useMemo(() => {
+    if (!orders) return [];
+    return [...orders].sort((a, b) => {
+      const dateA = (a.createdAt as any)?.seconds || (a.createdAt as any)?.getTime() / 1000 || 0;
+      const dateB = (b.createdAt as any)?.seconds || (b.createdAt as any)?.getTime() / 1000 || 0;
+      return dateB - dateA;
+    });
+  }, [orders]);
 
   if (isLoading) {
     return (
@@ -45,7 +56,7 @@ export default function MyOrders() {
         <p className="text-muted-foreground">Track and manage your recent purchases</p>
       </div>
 
-      {!orders || orders.length === 0 ? (
+      {!sortedOrders || sortedOrders.length === 0 ? (
         <Card className="border-dashed flex flex-col items-center justify-center py-16 text-center">
           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
             <ShoppingBag className="h-8 w-8 text-muted-foreground" />
@@ -58,7 +69,7 @@ export default function MyOrders() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {orders.map((order) => (
+          {sortedOrders.map((order) => (
             <Card key={order.id} className="overflow-hidden hover-elevate transition-all border-none bg-card/50 backdrop-blur-sm shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/30 py-4">
                 <div className="flex flex-col gap-1">
