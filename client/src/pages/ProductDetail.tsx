@@ -229,7 +229,7 @@ export default function ProductDetail() {
                   {category.name}
                 </p>
               )}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight">
                 {product.name}
               </h1>
             </div>
