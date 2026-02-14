@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, X, ChevronDown } from "lucide-react";
+import { ShoppingCart, Menu, Search, User, X, ChevronDown, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
