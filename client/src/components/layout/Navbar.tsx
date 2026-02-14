@@ -91,7 +91,7 @@ export function Navbar() {
                           {parent.name}
                         </p>
                         <div className="flex flex-col gap-2 pl-4">
-                          {categoriesData?.filter(c => c.parentCategoryId === parent.id).map((category) => (
+                          {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
                             <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
                               {category.name}
                             </Link>
@@ -146,7 +146,7 @@ export function Navbar() {
                       {parent.name}
                     </DropdownMenuLabel>
                     <div className="grid grid-cols-1 gap-1">
-                      {categoriesData?.filter(c => c.parentCategoryId === parent.id).map((category) => (
+                      {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
                         <DropdownMenuItem key={category.id} asChild>
                           <Link 
                             href={`/products?categoryId=${category.id}`} 

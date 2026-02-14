@@ -112,7 +112,7 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 p-2">
                 {parentCategories?.map((parent) => {
-                  const subCategories = categoriesData?.filter(c => c.parentCategoryId === parent.id) || [];
+                  const subCategories = categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)) || [];
                   
                   if (subCategories.length > 0) {
                     return (
