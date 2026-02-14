@@ -194,7 +194,7 @@ export default function ManageCategories() {
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-lg">{cat.name}</CardTitle>
                         <Badge variant="outline" className="text-[10px] h-4">
-                          {parentCategories?.find(p => p.id === cat.parentCategoryId)?.name || "Unassigned"}
+                          {parentCategories?.find(p => String(p.id) === String(cat.parentCategoryId))?.name || "Unassigned"}
                         </Badge>
                       </div>
                       <CardDescription className="font-mono text-xs">/{cat.slug}</CardDescription>
@@ -457,7 +457,7 @@ function CategoryDialog({ category, parentCategories, onSubmit, isPending }: { c
                   <FormLabel>Parent Category</FormLabel>
                   <Select 
                     onValueChange={(val) => field.onChange(val)} 
-                    defaultValue={field.value?.toString()}
+                    value={field.value?.toString() || ""}
                   >
                     <FormControl>
                       <SelectTrigger>
