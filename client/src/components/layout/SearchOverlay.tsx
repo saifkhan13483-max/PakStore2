@@ -77,46 +77,46 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="fixed inset-x-0 top-0 z-[101] bg-background p-4 shadow-lg md:top-[15%] md:mx-auto md:max-w-2xl md:rounded-2xl border animate-in slide-in-from-top-4 duration-300">
-        <div className="flex items-center gap-2 mb-6">
-              <form onSubmit={handleSearch} className="relative flex-1 group">
+    <div className="fixed inset-0 z-[100] bg-background/60 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="fixed inset-x-0 top-0 z-[101] bg-background p-6 shadow-2xl md:top-[10%] md:mx-auto md:max-w-2xl md:rounded-3xl border border-border/50 animate-in slide-in-from-top-8 duration-500 ease-out">
+        <div className="flex items-center gap-4 mb-8">
+          <form onSubmit={handleSearch} className="relative flex-1 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products..."
-              className="h-14 text-lg border border-primary/20 focus-visible:ring-0 focus-visible:border-primary transition-all rounded-xl pl-4 pr-10"
+              placeholder="Search for products, categories..."
+              className="h-14 text-lg border-none bg-muted/30 focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all rounded-2xl pl-12 pr-12 shadow-inner"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
               {query ? (
                 <button 
                   type="button"
                   onClick={() => setQuery("")}
-                  className="p-1 hover:bg-accent rounded-full text-muted-foreground transition-colors"
+                  className="p-1.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </button>
               ) : (
-                <div className="flex items-center gap-1 px-1.5 py-0.5 border rounded bg-muted/50 text-[10px] text-muted-foreground font-mono">
-                  <Command className="h-3 w-3" />
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 border rounded-lg bg-background/50 text-[10px] text-muted-foreground font-medium tracking-tight">
+                  <span className="text-xs">⌘</span>
                   <span>K</span>
                 </div>
               )}
             </div>
           </form>
-          <Button variant="ghost" onClick={onClose} className="md:hidden text-muted-foreground font-medium text-lg h-14">
+          <Button variant="ghost" onClick={onClose} className="text-muted-foreground hover:text-foreground font-medium px-4 h-14 rounded-2xl">
             Cancel
           </Button>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-            Best Seller Products
+        <div className="space-y-8">
+          <div className="flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] text-muted-foreground/50 uppercase px-1">
+            Suggested Search
           </div>
           
-          <div className="space-y-1">
+          <div className="grid gap-2">
             {POPULAR_TOOLS.map((tool, index) => (
               <button
                 key={tool.id}
@@ -126,47 +126,51 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
-                  "w-full flex items-center gap-4 p-3 rounded-xl transition-all text-left group",
-                  index === selectedIndex ? "bg-primary/10 ring-1 ring-primary/20" : "hover:bg-accent/50"
+                  "w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left group border border-transparent",
+                  index === selectedIndex ? "bg-primary/5 border-primary/10 shadow-sm" : "hover:bg-muted/50"
                 )}
               >
                 <div className={cn(
-                  "h-12 w-12 flex items-center justify-center rounded-xl transition-colors shrink-0",
-                  index === selectedIndex ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                  "h-12 w-12 flex items-center justify-center rounded-xl transition-all duration-300 shrink-0",
+                  index === selectedIndex ? "bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/20" : "bg-muted text-muted-foreground group-hover:scale-105"
                 )}>
                   <Search className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
                     <span className={cn(
-                      "font-semibold transition-colors truncate",
+                      "text-base font-semibold transition-colors truncate",
                       index === selectedIndex ? "text-primary" : "text-foreground group-hover:text-primary"
                     )}>
                       {tool.title}
                     </span>
-                    <Badge variant="secondary" className="text-[9px] font-bold tracking-wider h-4 px-1.5 bg-muted group-hover:bg-primary/10 uppercase">
+                    <Badge variant="outline" className="text-[9px] font-bold tracking-widest px-2 py-0.5 border-primary/10 bg-primary/5 text-primary uppercase">
                       {tool.category}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-1 leading-tight">
+                  <p className="text-sm text-muted-foreground/80 line-clamp-1 leading-relaxed">
                     {tool.description}
                   </p>
                 </div>
+                <ArrowRight className={cn(
+                  "h-4 w-4 text-primary transition-all duration-300",
+                  index === selectedIndex ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                )} />
               </button>
             ))}
           </div>
         </div>
 
-        <div className="mt-8 pt-4 border-t flex items-center justify-between text-[11px] text-muted-foreground font-medium px-1">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <span className="flex items-center justify-center w-4 h-4 border rounded bg-muted/50 text-[10px]">✓</span> to select
+        <div className="mt-10 pt-6 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground/60 font-medium px-1">
+          <div className="flex items-center gap-6">
+            <span className="flex items-center gap-2">
+              <kbd className="flex items-center justify-center min-w-5 h-5 px-1.5 border rounded bg-muted/50 text-[10px] font-sans">Enter</kbd> to select
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="flex items-center justify-center h-4 px-1 border rounded bg-muted/50 text-[10px]">↑↓</span> to navigate
+            <span className="flex items-center gap-2">
+              <kbd className="flex items-center justify-center min-w-5 h-5 px-1.5 border rounded bg-muted/50 text-[10px] font-sans">↑↓</kbd> to navigate
             </span>
           </div>
-          <span>5 results</span>
+          <span className="bg-muted/50 px-2 py-0.5 rounded-full">{POPULAR_TOOLS.length} results</span>
         </div>
       </div>
       <div 
