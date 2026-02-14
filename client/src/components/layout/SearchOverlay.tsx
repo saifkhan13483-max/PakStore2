@@ -5,24 +5,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const POPULAR_SEARCHES = [
-  { id: "pashmina", title: "Kashmiri Pashmina", category: "BEST SELLER" },
-  { id: "khussa", title: "Multani Khussa", category: "BEST SELLER" },
-  { id: "powerbank", title: "Power Bank", category: "ELECTRONICS" },
-  { id: "honey", title: "Pure Honey", category: "ORGANIC" },
-  { id: "lamp", title: "Salt Lamp", category: "HOME DECOR" },
-];
-
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [, setLocation] = useLocation();
+  
+  const { data: products } = useProducts();
+  const { categories } = useCategories();
+
+  // Combine products and categories for search results
+  const results = query.trim() 
+    ? [
+        ...(products?.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4).map(p => ({
+          id: p.id,
+          title: p.name,
+          category: "PRODUCT",
+          type: "product"
+        })) || []),
+        ...(categories?.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 2).map(c => ({
+          id: c.id,
+          title: c.name,
+          category: "CATEGORY",
+          type: "category"
+        })) || [])
+      ]
+    : [
+        ...(products?.slice(0, 3).map(p => ({
+          id: p.id,
+          title: p.name,
+          category: "POPULAR",
+          type: "product"
+        })) || []),
+        ...(categories?.slice(0, 2).map(c => ({
+          id: c.id,
+          title: c.name,
+          category: "TRENDING",
+          type: "category"
+        })) || [])
+      ];
 
   useEffect(() => {
     if (isOpen) {
@@ -42,18 +70,19 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % POPULAR_SEARCHES.length);
+        setSelectedIndex((prev) => (prev + 1) % results.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + POPULAR_SEARCHES.length) % POPULAR_SEARCHES.length);
+        setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
       } else if (e.key === "Enter") {
-        if (query.trim() && selectedIndex === -1) {
-          return;
-        }
         e.preventDefault();
-        const selected = POPULAR_SEARCHES[selectedIndex];
+        const selected = results[selectedIndex];
         if (selected) {
-          setLocation(`/products?search=${encodeURIComponent(selected.title)}`);
+          if (selected.type === "product") {
+            setLocation(`/products?search=${encodeURIComponent(selected.title)}`);
+          } else {
+            setLocation(`/products?categoryId=${selected.id}`);
+          }
           onClose();
         }
       } else if (e.key === "Escape") {
@@ -63,7 +92,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, query, setLocation, onClose]);
+  }, [isOpen, selectedIndex, results, setLocation, onClose]);
 
   if (!isOpen) return null;
 
@@ -84,7 +113,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             <Input
               autoFocus
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedIndex(0);
+              }}
               placeholder="Search products..."
               className="h-11 text-base border-none bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary/20 transition-all rounded-xl pl-10 pr-10 shadow-none"
             />
@@ -105,15 +137,19 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
         <div className="space-y-4">
           <div className="text-[10px] font-bold tracking-wider text-muted-foreground/60 uppercase px-1">
-            Quick Searches
+            {query.trim() ? "Search Results" : "Quick Suggestions"}
           </div>
           
           <div className="grid gap-1">
-            {POPULAR_SEARCHES.map((item, index) => (
+            {results.map((item, index) => (
               <button
-                key={item.id}
+                key={`${item.type}-${item.id}`}
                 onClick={() => {
-                  setLocation(`/products?search=${encodeURIComponent(item.title)}`);
+                  if (item.type === "product") {
+                    setLocation(`/products?search=${encodeURIComponent(item.title)}`);
+                  } else {
+                    setLocation(`/products?categoryId=${item.id}`);
+                  }
                   onClose();
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
@@ -128,17 +164,22 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     index === selectedIndex ? "text-primary" : "text-muted-foreground"
                   )} />
                   <span className={cn(
-                    "text-sm font-medium transition-colors",
+                    "text-sm font-medium transition-colors line-clamp-1",
                     index === selectedIndex ? "text-primary" : "text-foreground"
                   )}>
                     {item.title}
                   </span>
                 </div>
-                <Badge variant="outline" className="text-[9px] font-bold px-1.5 h-4 border-primary/10 bg-primary/5 text-primary uppercase">
+                <Badge variant="outline" className="text-[9px] font-bold px-1.5 h-4 border-primary/10 bg-primary/5 text-primary uppercase shrink-0">
                   {item.category}
                 </Badge>
               </button>
             ))}
+            {query.trim() && results.length === 0 && (
+              <div className="p-8 text-center text-sm text-muted-foreground">
+                No results found for "{query}"
+              </div>
+            )}
           </div>
         </div>
 
