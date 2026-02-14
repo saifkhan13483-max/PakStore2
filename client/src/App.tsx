@@ -10,18 +10,29 @@ import { Suspense, lazy, useEffect, useState } from "react";
 
 // Robust Lazy Loading with retry logic
 const lazyWithRetry = (componentImport: () => Promise<any>) => {
-  return lazy(() => componentImport().catch((error) => {
-    const pageHasBeenForceRefreshed = JSON.parse(
-      window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
-    );
+  return lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error: any) {
+      // Check for common network/module loading errors
+      const isDynamicImportError = 
+        error?.message?.includes('Failed to fetch dynamically imported module') ||
+        error?.message?.includes('error loading dynamically imported module');
 
-    if (!pageHasBeenForceRefreshed) {
-      window.localStorage.setItem('page-has-been-force-refreshed', 'true');
-      window.location.reload();
-      return { default: () => null }; // Return a dummy component while reloading
+      if (isDynamicImportError) {
+        const pageHasBeenForceRefreshed = JSON.parse(
+          window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
+        );
+
+        if (!pageHasBeenForceRefreshed) {
+          window.localStorage.setItem('page-has-been-force-refreshed', 'true');
+          window.location.reload();
+          return { default: () => null };
+        }
+      }
+      throw error;
     }
-    throw error;
-  }));
+  });
 };
 
 // Page Imports with Code Splitting and Retry Logic
