@@ -2,19 +2,14 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${process.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${process.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  appId: process.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCy6W_iVKhOuawX5kLtq_arxsVfnxbfg94",
+  authDomain: "pakstore-45ec7.firebaseapp.com",
+  projectId: "pakstore-45ec7",
+  storageBucket: "pakstore-45ec7.firebasestorage.app",
+  appId: "1:427945652323:web:14ba66302d404561d7c856",
 };
 
 async function promoteAdmin(email) {
-  if (!process.env.VITE_FIREBASE_API_KEY) {
-    console.error('Error: VITE_FIREBASE_API_KEY is not set.');
-    return;
-  }
-
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   
@@ -24,8 +19,7 @@ async function promoteAdmin(email) {
   const querySnapshot = await getDocs(q);
   
   if (querySnapshot.empty) {
-    console.log(`No user found with email: ${email}`);
-    console.log('If this user hasn\'t signed up yet, they will need to sign up first.');
+    console.log(`PROMOTE_RESULT: No user found with email: ${email}`);
     return;
   }
   
@@ -35,9 +29,11 @@ async function promoteAdmin(email) {
       isAdmin: true,
       updatedAt: new Date()
     });
-    console.log(`Successfully promoted ${email} to admin.`);
+    console.log(`PROMOTE_RESULT: Successfully promoted ${email} to admin.`);
   }
 }
 
 const targetEmail = 'ch.ayan.arain.786@gmail.com';
-promoteAdmin(targetEmail).catch(console.error);
+promoteAdmin(targetEmail).catch(err => {
+  console.log(`PROMOTE_RESULT: ERROR: ${err.message}`);
+});
