@@ -132,44 +132,61 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus:outline-none h-9 px-3 rounded-md hover:bg-accent/50 ${
-                    location.startsWith("/products") ? "text-primary font-semibold" : "text-muted-foreground"
+                  className={`flex items-center gap-2 text-sm font-medium transition-all hover:text-primary focus:outline-none h-10 px-4 rounded-full border border-transparent hover:border-border/50 hover:bg-accent/30 ${
+                    location.startsWith("/products") ? "text-primary bg-primary/5 border-primary/20" : "text-muted-foreground"
                   }`}
                 >
-                  Categories <ChevronDown className="h-4 w-4" />
+                  <Menu className="h-4 w-4" />
+                  Categories
+                  <ChevronDown className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-72 p-3 shadow-xl border-border/50 animate-in fade-in zoom-in-95 duration-200">
-                <div className="grid gap-4">
-                  {parentCategories?.map((parent) => (
-                    <div key={parent.id} className="space-y-2">
-                      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-primary/70 px-2 py-0">
-                        {parent.name}
-                      </DropdownMenuLabel>
-                      <div className="grid grid-cols-1 gap-0.5">
-                        {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                          <DropdownMenuItem key={category.id} asChild className="p-0 focus:bg-transparent">
-                            <Link 
-                              href={`/products?categoryId=${category.id}`} 
-                              className="group flex items-center justify-between w-full rounded-md px-2 py-2 text-sm transition-all hover:bg-primary/5 hover:text-primary active:scale-[0.98]"
-                            >
-                              <span className="font-medium">{category.name}</span>
-                              <ChevronDown className="h-3.3 w-3.5 -rotate-90 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
-                            </Link>
-                          </DropdownMenuItem>
-                        ))}
-                      </div>
+              <DropdownMenuContent 
+                align="start" 
+                className="w-[480px] p-0 shadow-2xl border-border/40 overflow-hidden rounded-xl animate-in fade-in slide-in-from-top-2 duration-300"
+              >
+                <div className="flex">
+                  <div className="flex-1 p-6 bg-background">
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                      {parentCategories?.map((parent) => (
+                        <div key={parent.id} className="space-y-3">
+                          <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary/80 px-0 py-0 mb-1 border-b border-primary/10 pb-1">
+                            {parent.name}
+                          </DropdownMenuLabel>
+                          <div className="flex flex-col gap-1">
+                            {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
+                              <DropdownMenuItem key={category.id} asChild className="p-0 focus:bg-transparent">
+                                <Link 
+                                  href={`/products?categoryId=${category.id}`} 
+                                  className="group flex items-center justify-between w-full rounded-md px-2 py-1.5 text-[13px] text-muted-foreground transition-all hover:bg-primary/5 hover:text-primary active:translate-x-0.5"
+                                >
+                                  <span className="font-medium">{category.name}</span>
+                                  <ChevronDown className="h-3 w-3 -rotate-90 opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  <DropdownMenuSeparator className="opacity-50" />
-                  <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
-                    <Link 
-                      href="/products" 
-                      className="flex items-center justify-center w-full font-bold text-xs uppercase tracking-tighter px-2 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
-                    >
-                      Shop All Products
-                    </Link>
-                  </DropdownMenuItem>
+                  </div>
+                  <div className="w-40 bg-muted/30 border-l border-border/40 p-6 flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Featured</p>
+                      <Link href="/products" className="block group">
+                        <p className="text-sm font-semibold group-hover:text-primary transition-colors">New Arrivals</p>
+                        <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">Check out our latest electronic gadgets.</p>
+                      </Link>
+                    </div>
+                    <DropdownMenuItem asChild className="p-0 focus:bg-transparent mt-8">
+                      <Link 
+                        href="/products" 
+                        className="flex items-center justify-center w-full font-bold text-[10px] uppercase tracking-widest px-3 py-3 bg-primary text-primary-foreground rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-[0.97]"
+                      >
+                        All Products
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
