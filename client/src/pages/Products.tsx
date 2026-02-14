@@ -56,12 +56,15 @@ export default function Products() {
     const parentCat = params.get("parentCategoryId");
     
     if (cat) {
-      setFilterState(prev => ({ ...prev, categories: [cat] }));
+      setFilterState(prev => {
+        if (prev.categories.includes(cat) && prev.categories.length === 1) return prev;
+        return { ...prev, categories: [cat] };
+      });
     } else if (parentCat) {
-      // If a parent category is selected, we might want to filter by all its sub-categories
-      // For now, let's just clear sub-category filters if a parent is explicitly viewed
-      // or handle it by fetching all products for that parent in the query
-      setFilterState(prev => ({ ...prev, categories: [] }));
+      setFilterState(prev => {
+        if (prev.categories.length === 0) return prev;
+        return { ...prev, categories: [] };
+      });
     }
   }, [search]);
 

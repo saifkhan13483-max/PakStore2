@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearch } from "wouter";
 import {
   Accordion,
   AccordionContent,
@@ -32,9 +33,22 @@ export interface FilterState {
 }
 
 export function Filters({ onFilterChange }: FiltersProps) {
+  const search = useSearch();
+  const urlCategoryId = useMemo(() => {
+    const params = new URLSearchParams(search);
+    return params.get("category") || params.get("categoryId");
+  }, [search]);
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
+
+  // Synchronize state with URL parameter
+  useEffect(() => {
+    if (urlCategoryId) {
+      setSelectedCategories([urlCategoryId]);
+    }
+  }, [urlCategoryId]);
 
   // Use the shared hook for categories to ensure synchronization
   const { categories: allCategories } = useCategories();
