@@ -105,11 +105,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="fixed inset-x-0 top-0 z-[101] bg-background p-4 shadow-xl md:top-[15%] md:mx-auto md:max-w-xl md:rounded-2xl border animate-in slide-in-from-top-4 duration-300 ease-out">
-        <div className="flex items-center gap-2 mb-4">
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="fixed inset-x-0 top-0 z-[101] bg-background p-4 shadow-xl md:top-[10%] md:mx-auto md:max-w-2xl md:rounded-2xl border animate-in slide-in-from-top-4 duration-300 ease-out h-full md:h-auto overflow-y-auto">
+        <div className="flex items-center gap-2 mb-6 sticky top-0 bg-background pb-2">
           <form onSubmit={handleSearch} className="relative flex-1 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               autoFocus
               value={query}
@@ -118,29 +118,29 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 setSelectedIndex(0);
               }}
               placeholder="Search products..."
-              className="h-11 text-base border-none bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary/20 transition-all rounded-xl pl-10 pr-10 shadow-none"
+              className="h-12 text-lg border-none bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all rounded-xl pl-12 pr-12 shadow-none"
             />
             {query && (
               <button 
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full text-muted-foreground transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </form>
-          <Button variant="ghost" onClick={onClose} size="sm" className="text-muted-foreground hover:text-foreground rounded-xl px-3 h-11">
+          <Button variant="ghost" onClick={onClose} size="sm" className="text-muted-foreground hover:text-foreground rounded-xl px-4 h-12">
             Cancel
           </Button>
         </div>
 
-        <div className="space-y-4">
-          <div className="text-[10px] font-bold tracking-wider text-muted-foreground/60 uppercase px-1">
+        <div className="space-y-6 pb-4">
+          <div className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground/50 uppercase px-2">
             {query.trim() ? "Search Results" : "Quick Suggestions"}
           </div>
           
-          <div className="grid gap-1">
+          <div className="grid gap-1.5">
             {results.map((item, index) => (
               <button
                 key={`${item.type}-${item.id}`}
@@ -154,23 +154,33 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
-                  "w-full flex items-center justify-between p-3 rounded-xl transition-all text-left group border border-transparent",
-                  index === selectedIndex ? "bg-primary/5 border-primary/10" : "hover:bg-muted/50"
+                  "w-full flex items-center justify-between p-3.5 rounded-xl transition-all text-left group border border-transparent hover-elevate",
+                  index === selectedIndex ? "bg-primary/10 border-primary/20 shadow-sm" : "hover:bg-muted/30"
                 )}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
-                  <Search className={cn(
-                    "h-4 w-4 shrink-0 transition-colors",
-                    index === selectedIndex ? "text-primary" : "text-muted-foreground"
-                  )} />
+                <div className="flex items-center gap-4 flex-1 min-w-0 pr-6">
+                  <div className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    index === selectedIndex ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                  )}>
+                    <Search className="h-4 w-4 shrink-0" />
+                  </div>
                   <span className={cn(
-                    "text-sm font-medium transition-colors truncate",
+                    "text-[15px] font-medium transition-colors truncate",
                     index === selectedIndex ? "text-primary" : "text-foreground"
                   )}>
                     {item.title}
                   </span>
                 </div>
-                <Badge variant="outline" className="text-[9px] font-bold px-1.5 h-4 border-primary/10 bg-primary/5 text-primary uppercase shrink-0">
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "text-[10px] font-bold px-2 h-5 uppercase shrink-0 transition-colors",
+                    index === selectedIndex 
+                      ? "border-primary/20 bg-primary/10 text-primary" 
+                      : "border-border/50 bg-muted/30 text-muted-foreground"
+                  )}
+                >
                   {item.category}
                 </Badge>
               </button>
