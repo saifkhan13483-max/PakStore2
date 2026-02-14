@@ -230,6 +230,9 @@ const Header = () => {
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="cursor-pointer w-full">Profile Settings</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/orders" className="cursor-pointer w-full">My Orders</Link>
+                  </DropdownMenuItem>
                   {user?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin" className="cursor-pointer w-full font-medium text-primary">
@@ -364,6 +367,12 @@ const Header = () => {
                             <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
                               <User className="h-5 w-5" />
                               My Profile
+                            </Button>
+                          </Link>
+                          <Link href="/orders">
+                            <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
+                              <ShoppingBag className="h-5 w-5" />
+                              My Orders
                             </Button>
                           </Link>
                           <Button 

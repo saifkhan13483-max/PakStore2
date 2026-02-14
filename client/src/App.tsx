@@ -38,6 +38,7 @@ const Contact = lazyWithRetry(() => import("@/pages/Contact"));
 const Privacy = lazyWithRetry(() => import("@/pages/Privacy"));
 const Terms = lazyWithRetry(() => import("@/pages/Terms"));
 const Profile = lazyWithRetry(() => import("@/pages/auth/Profile"));
+const MyOrders = lazyWithRetry(() => import("@/pages/MyOrders"));
 const AdminDashboard = lazyWithRetry(() => import("@/pages/admin/Dashboard"));
 const AdminProducts = lazyWithRetry(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm"));
@@ -90,6 +91,11 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute>
           <Profile />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/orders">
+        <ProtectedRoute>
+          <MyOrders />
         </ProtectedRoute>
       </Route>
       <Route path="/thank-you" component={ThankYou} />
