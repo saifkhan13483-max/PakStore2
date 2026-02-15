@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
 // Using the provided environment variables for initialization
 const projectId = process.env.FIREBASE_PROJECT_ID;
