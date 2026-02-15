@@ -1,0 +1,96 @@
+I have a React + Firebase + Firestore project called PakCart that I built with Replit.
+Tech stack: React 18, Vite, Firebase Auth, Firestore, TanStack Query, Zustand.
+
+I want to implement a proper admin system and make sure there are two admins:
+
+My email (owner): saifkhan16382@gmail.com
+My friend’s email: ch.ayan.arain786@gmail.com
+Right now:
+
+Firebase Auth is set up and both of us appear in the Firebase Auth “Users” list.
+In Firestore, there is a users collection where the document ID is the Firebase UID.
+A user document currently has at least photoURL and updatedAt, but there is no role or isAdmin field yet.
+I want the app’s admin dashboard / admin-only pages to be available only to users who are admins.
+Your tasks:
+
+Find where admin access is currently controlled
+
+Search the codebase for:
+isAdmin
+role === "admin"
+admin in auth or routing code
+or any hardcoded email checks (like user.email === "something").
+Identify the component(s) / file(s) that:
+Protect admin routes (like AdminRoute, ProtectedRoute, or router config)
+Render the admin dashboard or admin pages
+Manage auth state (Zustand authStore, React context, or similar)
+Implement role-based admin using Firestore
+
+In the users collection in Firestore, I want a field to mark admins.
+Use this schema:
+role: "admin" for admins
+Optionally role: "user" for regular users
+Update the code so that:
+On login, the app loads the user’s Firestore profile (from users/{uid}).
+It stores the profile (including role) in the existing auth state (Zustand or context).
+isAdmin is derived from profile.role === "admin".
+Admin access logic
+
+Replace any hardcoded admin email checks with a role-based check.
+
+Centralize the logic like this (you can adjust to fit existing patterns):
+
+Copy// Example shape — adapt to current auth store / context
+type UserProfile = {
+  uid: string;
+  email: string;
+  role?: "admin" | "user";
+  photoURL?: string;
+  // other fields if needed
+};
+
+const isAdmin = profile?.role === "admin";
+Use this isAdmin to:
+
+Protect admin-only routes.
+Hide or show admin UI (menus, buttons, etc).
+Ensure both specific emails become admins
+
+Make sure the code does not hardcode these emails for checks.
+But I want a small utility script or function that, when run once, will:
+Look up the user document for:
+saifkhan16382@gmail.com
+ch.ayan.arain786@gmail.com
+Set role: "admin" on both.
+If you can’t run it automatically, at least:
+Print out clear instructions in comments for how I should:
+Find the two UIDs
+Create or update users/{uid} documents in Firestore
+Add role: "admin" there.
+Update route protection
+
+Find the router configuration (wouter or whatever is used).
+Make an AdminRoute or equivalent that:
+Redirects to / (or /login) if !isAdmin.
+Allows access if isAdmin.
+Make sure all admin pages go through this guard.
+Explain in comments what I need to manually do in Firebase
+
+In code comments or a short README section, add step‑by‑step notes:
+How to add a new admin later:
+User signs up / logs in.
+Go to Firestore → users collection → find or create users/{uid}.
+Set role to "admin".
+That’s it—no code change needed.
+Don’t break existing functionality
+
+Keep current login/signup flows working.
+If something is already using authStore or TanStack Query, integrate role loading into that instead of replacing it.
+Make minimal but clean and consistent changes.
+After you make the changes:
+
+Show me:
+The key modified files (paths and code snippets).
+Exactly where in the Firebase Console I must click to set role: "admin" for my friend.
+Also, point out where in the code I can quickly add console logs if I need to debug isAdmin.
+If anything in the codebase is unclear, inspect it and choose the cleanest, simplest approach that fits the existing patterns.

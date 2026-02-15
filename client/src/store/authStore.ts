@@ -10,7 +10,8 @@ import {
   signOut,
   User as FirebaseUser
 } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, googleProvider, db } from '../lib/firebase';
 
 interface AuthState {
   user: AuthUser | null;
@@ -18,10 +19,6 @@ interface AuthState {
   error: AuthError | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  /**
-   * Zustand is used for UI state (loading, error) and client-side derived auth state.
-   * Firebase Auth is the source of truth for the user object itself.
-   */
   setUser: (user: AuthUser | null) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: AuthError | null) => void;
@@ -34,9 +31,7 @@ interface AuthState {
 
 import defaultAvatar from '@/assets/images/default-avatar.png';
 
-const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'saifkhan16382@gmail.com', 'ch.ayan.arain786@gmail.com'];
-
-const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
+const mapFirebaseUserToAuthUser = (user: FirebaseUser, role: 'admin' | 'user' = 'user'): AuthUser => ({
   uid: user.uid,
   email: user.email,
   displayName: user.displayName,
@@ -46,7 +41,7 @@ const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   createdAt: user.metadata.creationTime || new Date().toISOString(),
   lastLoginAt: user.metadata.lastSignInTime || new Date().toISOString(),
   providerId: user.providerData[0]?.providerId || 'password',
-  role: ADMIN_EMAILS.includes(user.email || '') ? 'admin' : 'user',
+  role: role,
 });
 
 export const useAuthStore = create<AuthState>()(
@@ -123,6 +118,7 @@ export const useAuthStore = create<AuthState>()(
           set({ 
             user: null, 
             isAuthenticated: false, 
+            isAdmin: false,
             error: null,
             isLoading: false 
           });
@@ -139,16 +135,42 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ 
         user: state.user, 
-        isAuthenticated: state.isAuthenticated 
+        isAuthenticated: state.isAuthenticated,
+        isAdmin: state.isAdmin
       }),
     }
   )
 );
 
 if (auth) {
-  onAuthStateChanged(auth, (firebaseUser) => {
+  onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
-      useAuthStore.getState().setUser(mapFirebaseUserToAuthUser(firebaseUser));
+      try {
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        let role: 'admin' | 'user' = 'user';
+        
+        if (userDoc.exists()) {
+          role = userDoc.data().role === 'admin' ? 'admin' : 'user';
+        } else {
+          // Create initial user document if it doesn't exist
+          await setDoc(userDocRef, {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            role: 'user',
+            photoURL: firebaseUser.photoURL || null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+        
+        useAuthStore.getState().setUser(mapFirebaseUserToAuthUser(firebaseUser, role));
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        // Fallback to basic user mapping if firestore fails
+        useAuthStore.getState().setUser(mapFirebaseUserToAuthUser(firebaseUser));
+      }
     } else {
       useAuthStore.getState().setUser(null);
     }
