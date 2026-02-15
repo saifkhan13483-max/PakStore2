@@ -34,7 +34,7 @@ interface AuthState {
 
 import defaultAvatar from '@/assets/images/default-avatar.png';
 
-const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'saifkhan16382@gmail.com'];
+const ADMIN_EMAILS = ['admin@pakcart.com', 'owner@pakcart.com', 'saifkhan16382@gmail.com', 'ch.ayan.arain786@gmail.com'];
 
 const mapFirebaseUserToAuthUser = (user: FirebaseUser): AuthUser => ({
   uid: user.uid,
