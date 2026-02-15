@@ -71,15 +71,6 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <nav className="flex flex-col gap-4 mt-8">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-muted-foreground mb-4"
-                    onClick={() => setIsSearchOpen(true)}
-                  >
-                    <Search className="mr-2 h-4 w-4" />
-                    Search tools...
-                  </Button>
-                  
                   <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
                     Home
                   </Link>

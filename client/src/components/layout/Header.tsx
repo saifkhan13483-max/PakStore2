@@ -275,23 +275,6 @@ const Header = () => {
                   </SheetHeader>
                   
                   <div className="flex flex-col flex-1 py-6">
-                    <div className="px-6 mb-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Search products..." 
-                          className="pl-10 h-10 rounded-full"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && searchQuery.trim()) {
-                              setLocation(`/products?search=${encodeURIComponent(searchQuery)}`);
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-
                     <nav className="flex flex-col px-6">
                       <Link
                         href="/"
