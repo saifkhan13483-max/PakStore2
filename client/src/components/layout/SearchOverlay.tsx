@@ -118,7 +118,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 setSelectedIndex(0);
               }}
               placeholder="Search products..."
-              className="h-12 text-lg border-none bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all rounded-xl pl-12 pr-12 shadow-none"
+              className="h-10 text-sm border-none bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all rounded-xl pl-12 pr-12 shadow-none"
             />
             {query && (
               <button 
@@ -126,21 +126,21 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 onClick={() => setQuery("")}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </button>
             )}
           </form>
-          <Button variant="ghost" onClick={onClose} size="sm" className="text-muted-foreground hover:text-foreground rounded-xl px-4 h-12">
+          <Button variant="ghost" onClick={onClose} size="sm" className="text-muted-foreground hover:text-foreground rounded-xl px-4 h-10 text-xs">
             Cancel
           </Button>
         </div>
 
-        <div className="space-y-6 pb-4">
-          <div className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground/50 uppercase px-2">
+        <div className="space-y-4 pb-4">
+          <div className="text-[10px] font-bold tracking-[0.1em] text-muted-foreground/50 uppercase px-2">
             {query.trim() ? "Search Results" : "Quick Suggestions"}
           </div>
           
-          <div className="grid gap-1.5">
+          <div className="grid gap-1">
             {results.map((item, index) => (
               <button
                 key={`${item.type}-${item.id}`}
@@ -154,19 +154,19 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
-                  "w-full flex items-center justify-between p-3.5 rounded-xl transition-all text-left group border border-transparent hover-elevate",
+                  "w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left group border border-transparent hover-elevate",
                   index === selectedIndex ? "bg-primary/10 border-primary/20 shadow-sm" : "hover:bg-muted/30"
                 )}
               >
-                <div className="flex items-center gap-4 flex-1 min-w-0 pr-6">
+                <div className="flex items-center gap-3 flex-1 min-w-0 pr-6">
                   <div className={cn(
-                    "p-2 rounded-lg transition-colors",
+                    "p-1.5 rounded-lg transition-colors",
                     index === selectedIndex ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                   )}>
-                    <Search className="h-4 w-4 shrink-0" />
+                    <Search className="h-3.5 w-3.5 shrink-0" />
                   </div>
                   <span className={cn(
-                    "text-[15px] font-medium transition-colors truncate max-w-[200px]",
+                    "text-sm font-medium transition-colors truncate max-w-[200px]",
                     index === selectedIndex ? "text-primary" : "text-foreground"
                   )}>
                     {item.title}
@@ -175,7 +175,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 <Badge 
                   variant="outline" 
                   className={cn(
-                    "text-[10px] font-bold px-2 h-5 uppercase shrink-0 transition-colors",
+                    "text-[9px] font-bold px-1.5 h-4 uppercase shrink-0 transition-colors",
                     index === selectedIndex 
                       ? "border-primary/20 bg-primary/10 text-primary" 
                       : "border-border/50 bg-muted/30 text-muted-foreground"
