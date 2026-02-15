@@ -284,34 +284,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* Newsletter / CTA */}
-        <section className="py-16 sm:py-24 bg-primary text-white overflow-hidden relative">
-          {/* Decorative pattern */}
-          <div className="absolute top-0 right-0 opacity-10 pointer-events-none transform translate-x-1/4 -translate-y-1/4 hidden sm:block">
-            <svg width="600" height="600" viewBox="0 0 100 100">
-               <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="currentColor" />
-            </svg>
-          </div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center max-w-3xl">
-            <Star className="h-10 w-10 sm:h-12 sm:w-12 text-secondary mx-auto mb-6" />
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Join the PakCart Family</h2>
-            <p className="text-primary-foreground/80 text-base sm:text-lg mb-8 sm:mb-10">
-              Subscribe to receive updates on new arrivals, exclusive artisan stories, and special offers.
-            </p>
-            <form className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
-              <input 
-                type="email" 
-                placeholder="Enter your email address" 
-                className="flex-1 px-5 py-3 sm:px-6 sm:py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-secondary focus:bg-white/20 transition-all text-sm sm:text-base"
-              />
-              <Button type="submit" className="rounded-full px-8 py-5 sm:py-6 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold text-base sm:text-lg">
-                Subscribe
-              </Button>
-            </form>
-          </div>
-        </section>
       </main>
     </div>
   );
