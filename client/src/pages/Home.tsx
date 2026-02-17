@@ -95,7 +95,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 className="font-bold text-[10px] sm:text-sm">Free Delivery</h4>
-                  <p className="text-[8px] sm:text-xs text-muted-foreground whitespace-nowrap">Orders over Rs. 2000</p>
+                  <p className="text-[8px] sm:text-xs text-muted-foreground whitespace-nowrap">Orders over Rs. 5000</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 sm:gap-4">
