@@ -93,27 +93,35 @@ export async function uploadImage(file: File): Promise<string> {
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   if (!cloudName || !uploadPreset) {
-    throw new Error("Cloudinary configuration missing");
+    console.error("Cloudinary config missing:", { cloudName, uploadPreset });
+    throw new Error("Cloudinary configuration missing. Please check environment variables.");
   }
 
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", uploadPreset);
+  // Ensure the folder exists or remove if it causes issues with unsigned uploads
   formData.append("folder", "pakcart/products");
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Cloudinary upload error response:", errorData);
+      throw new Error(errorData.error?.message || errorData.message || `Upload failed with status ${response.status}`);
     }
-  );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to upload image");
+    const data = await response.json();
+    return data.secure_url;
+  } catch (err: any) {
+    console.error("Cloudinary upload exception:", err);
+    throw err;
   }
-
-  const data = await response.json();
-  return data.secure_url;
 }

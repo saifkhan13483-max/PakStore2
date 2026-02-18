@@ -91,13 +91,28 @@ export function useCloudinary(): UseCloudinaryReturn {
       // Handle Success/Error
       xhr.addEventListener("load", () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          const response = JSON.parse(xhr.responseText);
-          setIsUploading(false);
-          setProgress(null);
-          resolve(response);
+          try {
+            const response = JSON.parse(xhr.responseText);
+            setIsUploading(false);
+            setProgress(null);
+            resolve(response);
+          } catch (e) {
+            console.error("Error parsing Cloudinary response:", e);
+            const errMsg = "Invalid response from upload server.";
+            setError(errMsg);
+            setIsUploading(false);
+            resolve(null);
+          }
         } else {
-          const errMsg = "Upload failed. Please check your connection.";
+          let errMsg = "Upload failed. Please check your connection.";
+          try {
+            const errorData = JSON.parse(xhr.responseText);
+            errMsg = errorData.error?.message || errorData.message || errMsg;
+          } catch (e) {}
+          
+          console.error("Cloudinary upload error:", errMsg);
           setError(errMsg);
+          toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
           setIsUploading(false);
           resolve(null);
         }
