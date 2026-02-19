@@ -169,7 +169,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <CategoryCard 
-                  name="Home & Kitchen" 
+                  name="Home & Decor" 
                   slug="home-kitchen" 
                   count={5} 
                   image={homeKitchenImage}
