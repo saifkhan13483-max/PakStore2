@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "wouter";
-import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
+import { ArrowRight, Star, Truck, ShieldCheck, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import SEO from "@/components/SEO";
@@ -8,7 +8,7 @@ import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import heroImage from "@/assets/hero-image.jpg";
 import electronicsImage from "@assets/800b13d6-d66a-4bd3-a094-d8b8ccb22df6_(1)_1770740841232.png";
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
@@ -16,8 +16,59 @@ import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_17
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 
+const HERO_SLIDES = [
+  {
+    id: 1,
+    title: "Shop the Best Deals in Pakistan",
+    subtitle: "Premium Quality Products",
+    description: "Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.",
+    image: heroImage,
+    primaryBtn: { text: "Shop Now", link: "/products" },
+    secondaryBtn: { text: "Our Story", link: "/about" },
+    accentColor: "#2a7e2c"
+  },
+  {
+    id: 2,
+    title: "Latest Electronics & Gadgets",
+    subtitle: "Innovation at Your Fingertips",
+    description: "Explore the newest smartphones, laptops, and smart home devices with official warranty and nationwide delivery.",
+    image: electronicsImage,
+    primaryBtn: { text: "Explore Gadgets", link: "/products?category=electronics-gadgets" },
+    secondaryBtn: { text: "Learn More", link: "/about" },
+    accentColor: "#3b82f6"
+  },
+  {
+    id: 3,
+    title: "Elevate Your Home Decor",
+    subtitle: "Artisanal Home Solutions",
+    description: "Transform your living space with our hand-picked collection of modern furniture and artistic decorative pieces.",
+    image: homeKitchenImage,
+    primaryBtn: { text: "Shop Decor", link: "/products?category=home-kitchen" },
+    secondaryBtn: { text: "View Catalog", link: "/products" },
+    accentColor: "#f59e0b"
+  },
+  {
+    id: 4,
+    title: "Step Into Style & Luxury",
+    subtitle: "Fashion & Accessories",
+    description: "Discover the latest trends in luxury fashion and accessories designed to make you stand out from the crowd.",
+    image: fashionImage,
+    primaryBtn: { text: "Shop Fashion", link: "/products?category=fashion-accessories" },
+    secondaryBtn: { text: "Trending Now", link: "/products" },
+    accentColor: "#ec4899"
+  }
+];
+
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const featuredProducts = useMemo(() => {
     return allProducts?.slice(0, 4) || [];
@@ -30,6 +81,9 @@ export default function Home() {
   const isFeaturedLoading = isAllProductsLoading;
   const isNewArrivalsLoading = isAllProductsLoading;
 
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+
   return (
     <div className="min-h-screen flex flex-col font-body">
       <SEO 
@@ -38,50 +92,112 @@ export default function Home() {
       />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative min-h-[45vh] sm:min-h-[60vh] flex items-center justify-center overflow-hidden">
-          {/* Background with overlay */}
-          <div className="absolute inset-0 z-0">
-             {/* Abstract luxury texture background */}
-            <img 
-              src={getOptimizedImageUrl(heroImage, { width: 1200, quality: 'auto:eco' })} 
-              alt="PakCart Hero" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
-            {/* Added a subtle overlay to make the text pop even more against the background */}
-            <div className="absolute inset-0 bg-black/40" />
-          </div>
+        {/* Hero Section with Custom Slider */}
+        <section className="relative min-h-[45vh] sm:min-h-[60vh] md:min-h-[75vh] flex items-center justify-center overflow-hidden bg-black">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 z-0"
+            >
+              <img 
+                src={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image, { width: 1920, quality: 'auto:best' })} 
+                alt={HERO_SLIDES[currentSlide].title} 
+                className="w-full h-full object-cover scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
+              <div className="absolute inset-0 bg-black/40" />
+            </motion.div>
+          </AnimatePresence>
 
           <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-8 lg:py-20">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="max-w-2xl text-white"
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={currentSlide}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="max-w-2xl text-white"
+              >
+                <motion.span 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-wider"
+                >
+                  {HERO_SLIDES[currentSlide].subtitle}
+                </motion.span>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="font-display text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight"
+                >
+                  {currentSlide === 0 ? (
+                    <>
+                      <span className="text-[#2a7e2c]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#2a7e2c]">in Pakistan</span>
+                    </>
+                  ) : HERO_SLIDES[currentSlide].title}
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-sm sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg"
+                >
+                  {HERO_SLIDES[currentSlide].description}
+                </motion.p>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-row gap-3 sm:gap-4"
+                >
+                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="flex-1 sm:flex-none">
+                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-6 sm:px-10 h-12 sm:min-h-14 text-sm sm:text-lg font-bold w-full">
+                      {HERO_SLIDES[currentSlide].primaryBtn.text}
+                    </Button>
+                  </Link>
+                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="flex-1 sm:flex-none">
+                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-6 sm:px-10 h-12 sm:min-h-14 text-sm sm:text-lg w-full">
+                      {HERO_SLIDES[currentSlide].secondaryBtn.text}
+                    </Button>
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Slider Controls */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
+            <button 
+              onClick={prevSlide}
+              className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+              aria-label="Previous slide"
             >
-              <span className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-wider">
-                Premium Quality Products
-              </span>
-              <h1 className="font-display text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
-                <span className="text-[#2a7e2c]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#2a7e2c]">in Pakistan</span>
-              </h1>
-              <p className="text-sm sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg">
-                Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.
-              </p>
-              <div className="flex flex-row gap-3 sm:gap-4">
-                <Link href="/products" className="flex-1">
-                  <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-4 sm:px-8 h-12 sm:min-h-14 text-sm sm:text-lg font-bold w-full">
-                    Shop Now
-                  </Button>
-                </Link>
-                <Link href="/about" className="flex-1">
-                  <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-4 sm:px-8 h-12 sm:min-h-14 text-sm sm:text-lg w-full">
-                    Our Story
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+            <div className="flex gap-2">
+              {HERO_SLIDES.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-secondary' : 'w-2 bg-white/40'}`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+            <button 
+              onClick={nextSlide}
+              className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
           </div>
         </section>
 
