@@ -139,10 +139,19 @@ export default function Home() {
                 >
                   {currentSlide === 0 ? (
                     <>
-                      <span className="text-white">Shop the</span> <span className="text-white italic">Best Deals</span> <span className="text-white">in Pakistan</span>
+                      <span className="text-white">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-white">in Pakistan</span>
                     </>
                   ) : (
-                    <span className="text-white drop-shadow-2xl">{HERO_SLIDES[currentSlide].title}</span>
+                    <>
+                      {(() => {
+                        const words = HERO_SLIDES[currentSlide].title.split(' ');
+                        return words.map((word, i) => (
+                          <span key={i} className={i % 2 === 1 ? "text-secondary" : "text-white"}>
+                            {word}{" "}
+                          </span>
+                        ));
+                      })()}
+                    </>
                   )}
                 </motion.h1>
                 <motion.p 
