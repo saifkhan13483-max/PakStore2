@@ -4,9 +4,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "npx vite",
-    "build": "npx vite build && node scripts/validate-build.js",
-    "preview": "npx vite preview",
+    "dev": "vite",
+    "build": "vite build && node scripts/validate-build.js",
+    "preview": "vite preview",
     "check": "tsc"
   },
   "dependencies": {
