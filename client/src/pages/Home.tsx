@@ -135,14 +135,14 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight"
+                  className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight text-white"
                 >
                   {currentSlide === 0 ? (
                     <>
-                      <span className="text-[#4ade80]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#4ade80]">in Pakistan</span>
+                      <span className="text-white">Shop the</span> <span className="text-white italic">Best Deals</span> <span className="text-white">in Pakistan</span>
                     </>
                   ) : (
-                    <span className="drop-shadow-2xl">{HERO_SLIDES[currentSlide].title}</span>
+                    <span className="text-white drop-shadow-2xl">{HERO_SLIDES[currentSlide].title}</span>
                   )}
                 </motion.h1>
                 <motion.p 
