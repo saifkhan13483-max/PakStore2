@@ -175,31 +175,31 @@ export default function Home() {
           </div>
 
           {/* Slider Controls */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
-            <div className="flex gap-2.5">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
+            <div className="flex gap-2">
               {HERO_SLIDES.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-500 shadow-sm ${idx === currentSlide ? 'w-10 bg-secondary' : 'w-2.5 bg-white/30 hover:bg-white/50'}`}
+                  className={`h-1 rounded-full transition-all duration-500 shadow-sm ${idx === currentSlide ? 'w-8 bg-secondary' : 'w-1.5 bg-white/30 hover:bg-white/50'}`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <button 
                 onClick={prevSlide}
-                className="p-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
+                className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:-translate-x-0.5" />
+                <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               </button>
               <button 
                 onClick={nextSlide}
-                className="p-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
+                className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
                 aria-label="Next slide"
               >
-                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:translate-x-0.5" />
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>
