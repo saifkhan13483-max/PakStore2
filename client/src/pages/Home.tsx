@@ -93,7 +93,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
-        <section className="relative min-h-[45vh] sm:min-h-[60vh] md:min-h-[75vh] flex items-center justify-center overflow-hidden bg-black">
+        <section className="relative min-h-[60vh] sm:min-h-[70vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden bg-black">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -108,26 +108,26 @@ export default function Home() {
                 alt={HERO_SLIDES[currentSlide].title} 
                 className="w-full h-full object-cover scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
-              <div className="absolute inset-0 bg-black/40" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent sm:from-black/90 sm:via-black/60" />
+              <div className="absolute inset-0 bg-black/40 sm:bg-black/20" />
             </motion.div>
           </AnimatePresence>
 
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-8 lg:py-20">
+          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={currentSlide}
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="max-w-2xl text-white"
+                className="max-w-2xl text-white text-center sm:text-left mx-auto sm:mx-0"
               >
                 <motion.span 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-wider"
+                  className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-xs md:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-widest shadow-lg"
                 >
                   {HERO_SLIDES[currentSlide].subtitle}
                 </motion.span>
@@ -135,19 +135,21 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="font-display text-3xl sm:text-5xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight"
+                  className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight"
                 >
                   {currentSlide === 0 ? (
                     <>
-                      <span className="text-[#2a7e2c]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#2a7e2c]">in Pakistan</span>
+                      <span className="text-[#4ade80]">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-[#4ade80]">in Pakistan</span>
                     </>
-                  ) : HERO_SLIDES[currentSlide].title}
+                  ) : (
+                    <span className="drop-shadow-2xl">{HERO_SLIDES[currentSlide].title}</span>
+                  )}
                 </motion.h1>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-sm sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg"
+                  className="text-sm sm:text-lg md:text-xl text-gray-200 mb-8 sm:mb-10 leading-relaxed max-w-lg mx-auto sm:mx-0 drop-shadow-md"
                 >
                   {HERO_SLIDES[currentSlide].description}
                 </motion.p>
@@ -155,15 +157,15 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-row gap-3 sm:gap-4"
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center sm:items-start"
                 >
-                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="flex-1 sm:flex-none">
-                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-6 sm:px-10 h-12 sm:min-h-14 text-sm sm:text-lg font-bold w-full">
+                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="w-full sm:w-auto">
+                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 sm:px-10 h-12 sm:h-14 text-sm sm:text-base md:text-lg font-bold w-full shadow-xl transition-transform hover:scale-105 active:scale-95">
                       {HERO_SLIDES[currentSlide].primaryBtn.text}
                     </Button>
                   </Link>
-                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="flex-1 sm:flex-none">
-                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-6 sm:px-10 h-12 sm:min-h-14 text-sm sm:text-lg w-full">
+                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="w-full sm:w-auto">
+                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 sm:px-10 h-12 sm:h-14 text-sm sm:text-base md:text-lg w-full transition-transform hover:scale-105 active:scale-95">
                       {HERO_SLIDES[currentSlide].secondaryBtn.text}
                     </Button>
                   </Link>
@@ -173,31 +175,33 @@ export default function Home() {
           </div>
 
           {/* Slider Controls */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
-            <button 
-              onClick={prevSlide}
-              className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
-            <div className="flex gap-2">
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
+            <div className="flex gap-2.5">
               {HERO_SLIDES.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-secondary' : 'w-2 bg-white/40'}`}
+                  className={`h-1.5 rounded-full transition-all duration-500 shadow-sm ${idx === currentSlide ? 'w-10 bg-secondary' : 'w-2.5 bg-white/30 hover:bg-white/50'}`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
             </div>
-            <button 
-              onClick={nextSlide}
-              className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={prevSlide}
+                className="p-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:-translate-x-0.5" />
+              </button>
+              <button 
+                onClick={nextSlide}
+                className="p-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
           </div>
         </section>
 
