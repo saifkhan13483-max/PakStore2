@@ -157,15 +157,15 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center sm:items-start"
+                  className="flex flex-row gap-3 sm:gap-4 items-center sm:items-start"
                 >
-                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="w-full sm:w-auto">
-                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-8 sm:px-10 h-12 sm:h-14 text-sm sm:text-base md:text-lg font-bold w-full shadow-xl transition-transform hover:scale-105 active:scale-95">
+                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="flex-1 sm:flex-none">
+                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-6 sm:px-10 h-12 sm:h-14 text-sm sm:text-base font-bold w-full shadow-xl transition-transform hover:scale-105 active:scale-95 whitespace-nowrap">
                       {HERO_SLIDES[currentSlide].primaryBtn.text}
                     </Button>
                   </Link>
-                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="w-full sm:w-auto">
-                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-8 sm:px-10 h-12 sm:h-14 text-sm sm:text-base md:text-lg w-full transition-transform hover:scale-105 active:scale-95">
+                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="flex-1 sm:flex-none">
+                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-6 sm:px-10 h-12 sm:h-14 text-sm sm:text-base w-full transition-transform hover:scale-105 active:scale-95 whitespace-nowrap">
                       {HERO_SLIDES[currentSlide].secondaryBtn.text}
                     </Button>
                   </Link>
