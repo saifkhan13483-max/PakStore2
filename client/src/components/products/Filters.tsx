@@ -72,12 +72,24 @@ export function Filters({ onFilterChange }: FiltersProps) {
     });
   }, [selectedCategories, selectedPriceRange, inStockOnly]);
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
+  const handleCategoryChange = (categoryId: string) => {
+    const category = allCategories?.find(c => c.id === categoryId);
+    const subCategoryIds = allCategories?.filter(c => c.parentCategoryId === categoryId).map(c => c.id) || [];
+    
+    setSelectedCategories((prev) => {
+      const isSelected = prev.includes(categoryId);
+      let newSelection: string[];
+
+      if (isSelected) {
+        // Deselect parent and all its subcategories
+        newSelection = prev.filter((c) => c !== categoryId && !subCategoryIds.includes(c));
+      } else {
+        // Select parent and all its subcategories
+        const toAdd = [categoryId, ...subCategoryIds];
+        newSelection = [...new Set([...prev, ...toAdd])];
+      }
+      return newSelection;
+    });
   };
 
   const handleClearAll = () => {
