@@ -69,35 +69,52 @@ export function Navbar() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col gap-4 mt-8">
-                  <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
-                    Home
-                  </Link>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
+                <div className="flex flex-col h-full">
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <nav className="flex flex-col gap-4 mt-4">
+                      <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
+                        Home
+                      </Link>
 
-                  <div className="flex flex-col gap-4">
-                    {parentCategories?.map((parent) => (
-                      <div key={parent.id} className="flex flex-col gap-2">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          {parent.name}
-                        </p>
-                        <div className="flex flex-col gap-2 pl-4">
-                          {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                            <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
-                              {category.name}
-                            </Link>
-                          ))}
-                        </div>
+                      <div className="flex flex-col gap-4">
+                        {parentCategories?.map((parent) => (
+                          <div key={parent.id} className="flex flex-col gap-2">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              {parent.name}
+                            </p>
+                            <div className="flex flex-col gap-2 pl-4">
+                              {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
+                                <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
+                                  {category.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
 
-                  {navLinks.slice(2).map((link) => (
-                    <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
-                      {link.name}
+                      {navLinks.slice(2).map((link) => (
+                        <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
+                          {link.name}
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                  <div className="p-6 border-t bg-muted/20 shrink-0">
+                    <Link href="/cart">
+                      <Button className="w-full justify-start gap-3 h-12" variant="outline">
+                        <ShoppingCart className="h-5 w-5" />
+                        View Cart
+                        {itemCount > 0 && (
+                          <Badge className="ml-auto rounded-full">
+                            {itemCount}
+                          </Badge>
+                        )}
+                      </Button>
                     </Link>
-                  ))}
-                </nav>
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>

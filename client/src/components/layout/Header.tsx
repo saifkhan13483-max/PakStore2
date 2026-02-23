@@ -274,7 +274,7 @@ const Header = () => {
                     </SheetTitle>
                   </SheetHeader>
                   
-                  <div className="flex flex-col flex-1 py-6">
+                  <div className="flex flex-col flex-1 overflow-y-auto py-6">
                     <nav className="flex flex-col px-6">
                       <Link
                         href="/"
@@ -282,6 +282,7 @@ const Header = () => {
                           "flex items-center py-4 text-lg font-medium transition-colors border-b",
                           location === "/" ? "text-primary" : "text-foreground hover:text-primary"
                         )}
+                        onClick={() => {}}
                       >
                         Home
                       </Link>
@@ -297,7 +298,7 @@ const Header = () => {
                                 {parent.name}
                               </p>
                               <div className="flex flex-col gap-1 pl-4">
-                                {categoriesData?.filter(c => c.parentCategoryId === parent.id).map((category) => (
+                                {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
                                   <Link
                                     key={category.id}
                                     href={`/products?categoryId=${category.id}`}
@@ -329,7 +330,7 @@ const Header = () => {
                       ))}
                     </nav>
                     
-                    <div className="mt-auto p-6 flex flex-col gap-3">
+                    <div className="mt-auto p-6 flex flex-col gap-3 shrink-0">
                       <Link href="/cart">
                         <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
                           <ShoppingCart className="h-5 w-5" />
