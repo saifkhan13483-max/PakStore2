@@ -391,7 +391,7 @@ export default function AdminProductForm() {
                                         placeholder="Price" 
                                         className="bg-background/50 h-9" 
                                         {...field} 
-                                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
                                       />
                                     </FormControl>
                                   </FormItem>

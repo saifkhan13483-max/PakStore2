@@ -157,8 +157,14 @@ export const productFirestoreService = {
   async createProduct(productData: InsertProduct) {
     try {
       insertProductSchema.parse(productData);
+      
+      // Remove undefined values to prevent Firestore errors
+      const cleanData = Object.fromEntries(
+        Object.entries(productData).filter(([_, v]) => v !== undefined)
+      );
+
       const docRef = await addDoc(productsRef, {
-        ...productData,
+        ...cleanData,
         createdAt: new Date(),
         inStock: (productData.stock ?? 0) > 0,
         rating: productData.rating ?? 0,
@@ -185,7 +191,13 @@ export const productFirestoreService = {
 
   async updateProduct(productId: string, updates: Partial<InsertProduct>) {
     const docRef = doc(db, COLLECTION_NAME, productId);
-    await updateDoc(docRef, { ...updates, updatedAt: new Date() });
+    
+    // Remove undefined values to prevent Firestore errors
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, v]) => v !== undefined)
+    );
+
+    await updateDoc(docRef, { ...cleanUpdates, updatedAt: new Date() });
     return { id: productId, ...updates };
   },
 
