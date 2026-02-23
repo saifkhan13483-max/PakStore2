@@ -51,31 +51,37 @@ export default function ProductDetail() {
       : ["https://placehold.co/600x600?text=No+Image"];
   }, [product]);
 
-  // Handle variant image switching
-  const handleVariantSelect = (variantName: string, optionId: string) => {
-    setSelectedVariants(prev => {
-      const newVariants = { ...prev, [variantName]: optionId };
-      
-      // Find the selected option's image
-      const variant = product?.variants?.find(v => v.name === variantName);
-      const option = variant?.options.find(o => o.id === optionId);
-      
-      if (option?.image) {
-        // Find if this image is already in our gallery
-        const existingIdx = images.findIndex(img => img === option.image);
-        if (existingIdx !== -1) {
-          setActiveImage(existingIdx);
-        } else {
-          // If the image isn't in the main gallery, we set it as the active image
-          // We can't easily modify the 'images' useMemo here, but we can set activeImage
-          // to a value that our rendering logic understands.
-          // In this case, we'll just set it to the option.image string if we were to support it.
-          // For now, the variant images are added to the main images array in data/products.ts
+  const activeImageUrl = useMemo(() => {
+    // 1. Check if a variant with an image is selected
+    if (product?.variants) {
+      for (const variant of product.variants) {
+        const selectedOptionId = selectedVariants[variant.name];
+        if (selectedOptionId) {
+          const option = variant.options.find(o => o.id === selectedOptionId);
+          if (option?.image) {
+            return option.image;
+          }
         }
       }
-      
-      return newVariants;
-    });
+    }
+    
+    // 2. Fallback to the main gallery active image
+    return images[activeImage];
+  }, [product, selectedVariants, images, activeImage]);
+
+  // Handle variant image switching
+  const handleVariantSelect = (variantName: string, optionId: string) => {
+    setSelectedVariants(prev => ({ ...prev, [variantName]: optionId }));
+    
+    // Also try to sync the activeImage index if the variant image exists in the gallery
+    const variant = product?.variants?.find(v => v.name === variantName);
+    const option = variant?.options.find(o => o.id === optionId);
+    if (option?.image) {
+      const existingIdx = images.findIndex(img => img === option.image);
+      if (existingIdx !== -1) {
+        setActiveImage(existingIdx);
+      }
+    }
   };
 
   // Calculate adjusted price based on variants
@@ -212,7 +218,7 @@ export default function ProductDetail() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  src={getOptimizedImageUrl(images[activeImage], { width: 800, height: 800 })}
+                  src={getOptimizedImageUrl(activeImageUrl, { width: 800, height: 800 })}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />

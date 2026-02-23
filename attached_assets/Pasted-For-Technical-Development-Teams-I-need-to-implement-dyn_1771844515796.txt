@@ -1,0 +1,35 @@
+For Technical Development Teams:
+
+"I need to implement dynamic variant-image linking functionality. When a user clicks on a product variant (such as color, size, or style), the corresponding variant-specific image should automatically display in the left-side image gallery. The variants and main product images must be programmatically connected so that variant selection triggers immediate image updates."
+
+For E-commerce Platform Support:
+
+"I'm experiencing an issue with my product page functionality. When customers click on different product variants, I want the main product image on the left side to automatically change to show the image associated with that specific variant. Currently, the variants and images don't seem to be properly connected. How can I ensure that selecting each variant displays its corresponding image?"
+
+For Project Management or Task Assignment:
+
+"Feature Request: Variant-Image Synchronization
+
+When users select a product variant, the left-side product image should update to match that selection
+Variants and product images need to be dynamically linked
+Image switching should occur immediately upon variant selection"
+For General Communication (Simplified):
+
+"When I click on a product variant, I want the matching variant image to appear on the left side of the page. The variants and product images should be connected so they update together automatically."
+
+Key Improvements Made:
+
+The original prompt had several issues that these versions address:
+
+Grammar corrections: Changed "i went" to "I want," "site" to "side," and "conneted" to "connected"
+Clarity enhancement: Replaced vague phrases like "image open in the left site" with specific descriptions like "display in the left-side image gallery"
+Technical precision: Added terms like "dynamic linking," "variant-specific," and "programmatically connected" where appropriate
+Action-oriented language: Used clear, direct statements about desired functionality rather than unclear expressions
+Choosing the Right Version:
+
+Select the version that best matches your situation:
+
+Use the technical version when communicating with developers or writing specifications
+Choose the support version when contacting customer service or platform help desks
+Pick the project management version for internal task tracking or feature requests
+Go with the simplified version for general communication or when brevity is important
