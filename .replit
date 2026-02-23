@@ -18,7 +18,7 @@ externalPort = 3001
 PORT = "5000"
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 run = ["node", "./dist/index.cjs"]
 build = ["npm", "run", "build"]
 publicDir = "dist"
@@ -44,7 +44,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx vite --port 5000 --host"
+args = "npm run dev"
 waitForPort = 5000
 
 [agent]
