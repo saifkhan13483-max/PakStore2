@@ -162,19 +162,35 @@ export function CommentSection({ productId }: CommentSectionProps) {
     setEditImages(comment.images || []);
   };
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const renderImages = (commentImages: string[]) => {
     return commentImages.map((img: string, i: number) => (
       <img
         key={i}
         src={getOptimizedImageUrl(img, { width: 200, height: 200 })}
         alt={`Review image ${i + 1}`}
-        className="w-20 h-20 object-cover rounded-md border"
+        className="w-20 h-20 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={() => setSelectedImage(img)}
       />
     ));
   };
 
   return (
     <div className="space-y-8">
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none">
+          {selectedImage && (
+            <img
+              src={getOptimizedImageUrl(selectedImage, { width: 1200 })}
+              alt="Full size review image"
+              className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold">Customer Reviews</h2>
         <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border">
