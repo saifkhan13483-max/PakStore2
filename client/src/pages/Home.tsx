@@ -345,7 +345,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
               {isNewArrivalsLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="space-y-4">
@@ -388,7 +388,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
               {isFeaturedLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="space-y-4">
