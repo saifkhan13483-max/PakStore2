@@ -47,6 +47,7 @@ export const productSchema = baseDocumentSchema.extend({
   price: z.number().positive(),
   originalPrice: z.number().nullable().optional(),
   images: z.array(z.string()),
+  videoUrl: z.string().optional().nullable(),
   categoryId: documentIdSchema, // Reference to category doc ID (Part 6.6)
   variants: z.array(productVariantSchema).optional(),
   inStock: z.boolean(),

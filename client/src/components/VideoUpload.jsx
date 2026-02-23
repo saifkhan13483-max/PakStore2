@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { uploadFile } from "@/services/cloudinaryService";
 import { saveMediaMetadata } from "@/services/mediaMetadataService";
 import { useToast } from "@/hooks/use-toast";
@@ -7,13 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Video, Upload, CheckCircle, Video as VideoIcon } from "lucide-react";
 
-export function VideoUpload({ onUploadComplete, userId, folder = "videos" }) {
+export function VideoUpload({ onUploadComplete, userId, folder = "videos", value }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(value ? { secure_url: value } : null);
   const { toast } = useToast();
   const fileInputRef = useRef(null);
+
+  // Update result if value changes externally
+  useEffect(() => {
+    if (value && (!result || result.secure_url !== value)) {
+      setResult({ secure_url: value });
+    } else if (!value) {
+      setResult(null);
+    }
+  }, [value]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];

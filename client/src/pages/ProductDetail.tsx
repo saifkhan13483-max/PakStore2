@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
@@ -43,6 +44,7 @@ export default function ProductDetail() {
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 
   const images = useMemo(() => {
@@ -72,6 +74,7 @@ export default function ProductDetail() {
   // Handle variant image switching
   const handleVariantSelect = (variantName: string, optionId: string) => {
     setSelectedVariants(prev => ({ ...prev, [variantName]: optionId }));
+    setShowVideo(false);
     
     // Also try to sync the activeImage index if the variant image exists in the gallery
     const variant = product?.variants?.find(v => v.name === variantName);
@@ -196,9 +199,12 @@ export default function ProductDetail() {
               {images.map((img, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setActiveImage(idx)}
+                  onClick={() => {
+                    setActiveImage(idx);
+                    setShowVideo(false);
+                  }}
                   className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                    activeImage === idx 
+                    !showVideo && activeImage === idx 
                       ? "border-primary ring-2 ring-primary/10" 
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
                   }`}
@@ -206,22 +212,51 @@ export default function ProductDetail() {
                   <img src={getOptimizedImageUrl(img, { width: 100, height: 100 })} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
+              {product.videoUrl && (
+                <button
+                  onClick={() => setShowVideo(true)}
+                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center bg-black ${
+                    showVideo 
+                      ? "border-primary ring-2 ring-primary/10" 
+                      : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
+                  }`}
+                >
+                  <Play className="w-8 h-8 text-white" />
+                </button>
+              )}
             </div>
           )}
           
           <Card className="flex-1 overflow-hidden border border-border/50 shadow-sm rounded-2xl order-1 md:order-2">
-            <CardContent className="p-0 aspect-square relative">
+            <CardContent className="p-0 aspect-square relative bg-black">
               <AnimatePresence mode="wait">
-                <motion.img
-                  key={activeImage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  src={getOptimizedImageUrl(activeImageUrl, { width: 800, height: 800 })}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+                {showVideo && product.videoUrl ? (
+                  <motion.div
+                    key="video"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="w-full h-full"
+                  >
+                    <video 
+                      src={product.videoUrl} 
+                      controls 
+                      autoPlay
+                      className="w-full h-full object-contain"
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.img
+                    key={activeImage}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    src={getOptimizedImageUrl(activeImageUrl, { width: 800, height: 800 })}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </AnimatePresence>
             </CardContent>
           </Card>

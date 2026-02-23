@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
+import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
@@ -61,6 +62,7 @@ export default function AdminProductForm() {
       price: 0,
       originalPrice: 0,
       images: [],
+      videoUrl: "",
       categoryId: "",
       stock: 0,
       active: true,
@@ -90,6 +92,7 @@ export default function AdminProductForm() {
       form.reset({
         ...product,
         images: product.images || [],
+        videoUrl: product.videoUrl || "",
         categoryId: product.categoryId ? String(product.categoryId) : "",
         rating: typeof product.rating === 'string' ? parseFloat(product.rating) : (product.rating || 0),
         reviewCount: product.reviewCount || 0,
@@ -254,21 +257,40 @@ export default function AdminProductForm() {
               <Card className="border-emerald-100 bg-emerald-50/10 backdrop-blur-sm shadow-sm">
                 <CardHeader className="bg-emerald-50/30 border-b border-emerald-100">
                   <CardTitle className="text-xl text-emerald-900">Product Media</CardTitle>
-                  <CardDescription>Upload high-quality images to showcase your product</CardDescription>
+                  <CardDescription>Upload images and a product video</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
                   <FormField
                     control={form.control}
                     name="images"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Product Images (Max 15)</FormLabel>
                         <FormControl>
                           <ImageUploader 
                             value={field.value || []}
                             onChange={(urls) => field.onChange(urls)}
-                            maxImages={8}
+                            maxImages={15}
                           />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="videoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product Video</FormLabel>
+                        <FormControl>
+                          <VideoUpload 
+                            onUploadComplete={(data) => field.onChange(data.secure_url)}
+                            value={field.value}
+                          />
+                        </FormControl>
+                        <FormDescription>Upload a product demonstration video</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
