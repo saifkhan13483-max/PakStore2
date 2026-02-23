@@ -21,6 +21,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Navbar() {
@@ -77,22 +83,31 @@ export function Navbar() {
                         Home
                       </Link>
 
-                      <div className="flex flex-col gap-4">
-                        {parentCategories?.map((parent) => (
-                          <div key={parent.id} className="flex flex-col gap-2">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              {parent.name}
-                            </p>
-                            <div className="flex flex-col gap-2 pl-4">
-                              {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                                <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
-                                  {category.name}
-                                </Link>
+                      <Accordion type="single" collapsible className="w-full">
+                        <AccordionItem value="categories" className="border-none">
+                          <AccordionTrigger className="py-2 text-lg font-medium hover:no-underline">
+                            Categories
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <div className="flex flex-col gap-4 pt-2">
+                              {parentCategories?.map((parent) => (
+                                <div key={parent.id} className="flex flex-col gap-2">
+                                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                    {parent.name}
+                                  </p>
+                                  <div className="flex flex-col gap-2 pl-4">
+                                    {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
+                                      <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
+                                        {category.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
                               ))}
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
 
                       {navLinks.slice(2).map((link) => (
                         <Link key={link.href} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">

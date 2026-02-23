@@ -21,6 +21,13 @@ import { SearchOverlay } from "./SearchOverlay";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { useCategories } from "@/hooks/use-categories";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 import { useAuthStore } from "@/store/authStore";
 import {
   DropdownMenu,
@@ -288,32 +295,38 @@ const Header = () => {
                       </Link>
 
                       <div className="flex flex-col border-b">
-                        <p className="pt-4 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                          Categories
-                        </p>
-                        <div className="flex flex-col gap-4 pb-4 pl-4">
-                          {parentCategories?.map((parent) => (
-                            <div key={parent.id} className="flex flex-col gap-2">
-                              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                                {parent.name}
-                              </p>
-                              <div className="flex flex-col gap-1 pl-4">
-                                {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                                  <Link
-                                    key={category.id}
-                                    href={`/products?categoryId=${category.id}`}
-                                    className={cn(
-                                      "py-1 text-base font-medium transition-colors",
-                                      location.includes(`categoryId=${category.id}`) ? "text-primary" : "text-foreground hover:text-primary"
-                                    )}
-                                  >
-                                    {category.name}
-                                  </Link>
+                        <Accordion type="single" collapsible className="w-full border-none">
+                          <AccordionItem value="categories" className="border-none">
+                            <AccordionTrigger className="py-4 text-lg font-medium hover:no-underline">
+                              Categories
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4">
+                              <div className="flex flex-col gap-4 pl-4">
+                                {parentCategories?.map((parent) => (
+                                  <div key={parent.id} className="flex flex-col gap-2">
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                      {parent.name}
+                                    </p>
+                                    <div className="flex flex-col gap-1 pl-4">
+                                      {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
+                                        <Link
+                                          key={category.id}
+                                          href={`/products?categoryId=${category.id}`}
+                                          className={cn(
+                                            "py-1 text-base font-medium transition-colors",
+                                            location.includes(`categoryId=${category.id}`) ? "text-primary" : "text-foreground hover:text-primary"
+                                          )}
+                                        >
+                                          {category.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </div>
                                 ))}
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
                       </div>
 
                       {navLinks.slice(2).map((link) => (
