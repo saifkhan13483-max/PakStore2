@@ -71,11 +71,11 @@ export default function Home() {
   }, []);
 
   const featuredProducts = useMemo(() => {
-    return allProducts?.slice(0, 4) || [];
+    return allProducts?.slice(0, 5) || [];
   }, [allProducts]);
 
   const newArrivals = useMemo(() => {
-    return allProducts?.slice(0, 4) || [];
+    return allProducts?.slice(0, 5) || [];
   }, [allProducts]);
 
   const isFeaturedLoading = isAllProductsLoading;
@@ -345,9 +345,9 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
               {isNewArrivalsLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="h-[300px] w-full rounded-2xl" />
                     <Skeleton className="h-4 w-2/3" />
@@ -388,9 +388,9 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8">
               {isFeaturedLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="h-[300px] w-full rounded-2xl" />
                     <Skeleton className="h-4 w-2/3" />

@@ -36,7 +36,7 @@ type SortOption = "featured" | "price-low" | "price-high" | "newest";
 export default function Products() {
   const [location] = useLocation();
   const search = useSearch();
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(10);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
@@ -138,12 +138,12 @@ export default function Products() {
   }, [filteredAndSortedProducts, visibleCount]);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => Math.min(prev + 8, filteredAndSortedProducts.length));
+    setVisibleCount((prev) => Math.min(prev + 10, filteredAndSortedProducts.length));
   };
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilterState(newFilters);
-    setVisibleCount(8); // Reset visibility when filters change
+    setVisibleCount(10); // Reset visibility when filters change
   };
 
   return (
@@ -245,8 +245,8 @@ export default function Products() {
 
           {/* Product Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-              {Array.from({ length: 6 }).map((_, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-8">
+              {Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="space-y-4">
                   <Skeleton className="aspect-[4/5] w-full rounded-2xl md:rounded-3xl" />
                   <div className="space-y-2 px-1">
@@ -287,7 +287,7 @@ export default function Products() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-8">
                 {displayedProducts.map((product) => (
                   <ProductCardComponent key={product.id} product={product} />
                 ))}
