@@ -405,7 +405,7 @@ export default function AdminProductForm() {
                                     <FormControl>
                                       <ImageUploader
                                         value={field.value ? [field.value] : []}
-                                        onChange={(urls) => field.onChange(urls[0])}
+                                        onChange={(urls) => field.onChange(urls[0] || "")}
                                         maxImages={1}
                                         compact
                                       />
