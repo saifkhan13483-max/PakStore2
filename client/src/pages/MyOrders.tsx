@@ -109,7 +109,16 @@ export default function MyOrders() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{item.product?.name || "Product"}</p>
-                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                            {item.selectedVariant && Object.entries(item.selectedVariant).length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {Object.entries(item.selectedVariant).map(([key, value]) => (
+                                  <Badge key={key} variant="outline" className="text-[10px] h-4 py-0 bg-primary/5 text-primary border-primary/20">
+                                    {key}: {value}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">Qty: {item.quantity}</p>
                           </div>
                         </div>
                       ))}
