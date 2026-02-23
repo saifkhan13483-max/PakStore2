@@ -280,11 +280,11 @@ export default function AdminOrders() {
                                         <div className="flex-1 flex justify-between">
                                           <div>
                                             <p className="font-semibold text-emerald-900">{item.product?.name || "Unknown Product"}</p>
-                                            {item.selectedVariant && Object.entries(item.selectedVariant).length > 0 && (
+                                            {item.selectedVariant && Object.keys(item.selectedVariant).length > 0 && (
                                               <div className="flex flex-wrap gap-1 mt-1">
                                                 {Object.entries(item.selectedVariant).map(([key, value]) => (
                                                   <Badge key={key} variant="outline" className="text-[10px] h-4 py-0 bg-emerald-50/50 text-emerald-600">
-                                                    {key}: {value}
+                                                    {key}: {String(value)}
                                                   </Badge>
                                                 ))}
                                               </div>
