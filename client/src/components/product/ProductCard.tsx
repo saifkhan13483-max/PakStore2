@@ -99,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="p-2 md:p-3">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-0.5 md:gap-1 mb-0.5 md:mb-1">
           <Link href={`/products/${product.slug}`} className="block flex-1">
-            <h3 className="font-display text-[11px] md:text-[13px] font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-1">
+            <h3 className="font-display text-[11px] md:text-[13px] font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-2">
               {product.name}
             </h3>
           </Link>
