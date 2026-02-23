@@ -64,59 +64,59 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
         
         {/* Modern Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
-          <div className="flex items-center justify-center gap-3 transform translate-y-12 group-hover:translate-y-0 transition-all duration-500 ease-out">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-2 md:p-3">
+          <div className="flex items-center justify-center gap-2 transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out">
             <Link href={`/products/${product.slug}`}>
-              <Button variant="secondary" size="icon" className="rounded-full h-10 w-10 hover:bg-white hover:text-black transition-all shadow-xl hover:scale-110">
-                <Eye className="h-4 w-4" />
+              <Button variant="secondary" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-white hover:text-black transition-all shadow-xl hover:scale-110">
+                <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </Button>
             </Link>
             <Button 
               onClick={handleAddToCart}
               variant="default" 
               size="icon" 
-              className="rounded-full h-10 w-10 bg-primary text-primary-foreground hover:scale-110 transition-all shadow-xl border-2 border-primary-foreground/20"
+              className="rounded-full h-8 w-8 md:h-9 md:w-9 bg-primary text-primary-foreground hover:scale-110 transition-all shadow-xl border-2 border-primary-foreground/20"
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
           </div>
         </div>
 
         {/* Badges */}
         {!product.inStock && (
-          <div className="absolute top-3 left-3 bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
+          <div className="absolute top-2 left-2 bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg">
             Sold Out
           </div>
         )}
         {product.originalPrice && product.originalPrice > product.price && (
-          <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">
+          <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg">
             {Math.round((1 - product.price / product.originalPrice) * 100)}% Off
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-3 md:p-4">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-1 md:gap-2 mb-1 md:mb-1.5">
+      <div className="p-2 md:p-3">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-0.5 md:gap-1 mb-0.5 md:mb-1">
           <Link href={`/products/${product.slug}`} className="block flex-1">
-            <h3 className="font-display text-[13px] md:text-[15px] font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-2">
+            <h3 className="font-display text-[11px] md:text-[13px] font-bold text-foreground leading-tight hover:text-primary transition-colors line-clamp-1">
               {product.name}
             </h3>
           </Link>
-          <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-950/30 px-1.5 md:px-1.5 py-0.5 md:py-0.5 rounded-lg w-fit">
-            <Star className="w-2 h-2 md:w-2.5 md:h-2.5 fill-yellow-500 text-yellow-500" />
-            <span className="text-[9px] md:text-[10px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+          <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
+            <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
+            <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
           </div>
         </div>
         
-        <div className="flex items-center justify-between mt-1.5 md:mt-3 pt-1.5 md:pt-3 border-t border-muted/50">
+        <div className="flex items-center justify-between mt-1 md:mt-2 pt-1 md:pt-2 border-t border-muted/50">
           <div className="flex flex-col">
             {product.originalPrice && (
-              <span className="text-[9px] md:text-[10px] text-muted-foreground line-through decoration-destructive/50">
+              <span className="text-[8px] md:text-[9px] text-muted-foreground line-through decoration-destructive/50">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
-            <span className="text-xs md:text-lg font-black text-primary tracking-tight">
+            <span className="text-[11px] md:text-[14px] font-black text-primary tracking-tight">
               {formatPrice(product.price)}
             </span>
           </div>
@@ -124,9 +124,9 @@ export function ProductCard({ product }: ProductCardProps) {
             onClick={handleAddToCart}
             size="sm" 
             variant="ghost" 
-            className="rounded-full h-7 w-7 md:h-9 md:w-9 p-0 hover:bg-primary hover:text-primary-foreground transition-all"
+            className="rounded-full h-6 w-6 md:h-7 md:w-7 p-0 hover:bg-primary hover:text-primary-foreground transition-all"
           >
-            <Plus className="h-3.5 w-3.5 md:h-4.5 md:w-4.5" />
+            <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
           </Button>
         </div>
       </div>
