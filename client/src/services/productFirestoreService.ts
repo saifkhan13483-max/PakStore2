@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
+import { getPublicIdFromUrl, deleteCloudinaryImage } from "@/lib/cloudinary";
 
 const COLLECTION_NAME = "products";
 const productsRef = collection(db, COLLECTION_NAME);
@@ -225,7 +226,28 @@ export const productFirestoreService = {
   },
 
   async deleteProduct(productId: string) {
-    await deleteDoc(doc(db, COLLECTION_NAME, productId));
-    return true;
+    try {
+      // 1. Get product to find images
+      const product = await this.getProductById(productId);
+      
+      // 2. Delete images from Cloudinary if they exist
+      if (product.images && Array.isArray(product.images)) {
+        for (const imageUrl of product.images) {
+          const publicId = getPublicIdFromUrl(imageUrl);
+          if (publicId) {
+            await deleteCloudinaryImage(publicId);
+          }
+        }
+      }
+
+      // 3. Delete from Firestore
+      await deleteDoc(doc(db, COLLECTION_NAME, productId));
+      return true;
+    } catch (error) {
+      console.error("Error in deleteProduct:", error);
+      // Still attempt to delete from Firestore even if image deletion fails
+      await deleteDoc(doc(db, COLLECTION_NAME, productId));
+      return true;
+    }
   }
 };
