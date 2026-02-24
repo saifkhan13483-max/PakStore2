@@ -75,7 +75,9 @@ export default function MyOrders() {
               <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/30 py-4">
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order ID</span>
-                  <span className="font-mono text-sm">#{order.id.slice(0, 8).toUpperCase()}</span>
+                  <Link href={`/orders/${order.id}`} className="font-mono text-sm hover:text-primary transition-colors cursor-pointer">
+                    #{order.id.slice(0, 8).toUpperCase()}
+                  </Link>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</span>
@@ -134,14 +136,21 @@ export default function MyOrders() {
                         <p className="text-xs text-muted-foreground">Total Amount</p>
                         <p className="text-lg font-bold">Rs. {order.total?.toLocaleString()}</p>
                       </div>
-                      <Badge className={`capitalize px-3 ${
-                        order.status === 'delivered' ? 'bg-emerald-500 hover:bg-emerald-600' :
-                        order.status === 'shipped' ? 'bg-blue-500 hover:bg-blue-600' :
-                        order.status === 'pending' ? 'bg-amber-500 hover:bg-amber-600' :
-                        'bg-slate-500 hover:bg-slate-600'
-                      }`}>
-                        {order.status}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge className={`capitalize px-3 ${
+                          order.status === 'delivered' ? 'bg-emerald-500 hover:bg-emerald-600' :
+                          order.status === 'shipped' ? 'bg-blue-500 hover:bg-blue-600' :
+                          order.status === 'pending' ? 'bg-amber-500 hover:bg-amber-600' :
+                          'bg-slate-500 hover:bg-slate-600'
+                        }`}>
+                          {order.status}
+                        </Badge>
+                        <Link href={`/orders/${order.id}`}>
+                          <Button variant="link" size="sm" className="h-auto p-0 text-xs flex items-center gap-1">
+                            View Full Details <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>

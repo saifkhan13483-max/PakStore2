@@ -135,8 +135,17 @@ export default function ProductDetail() {
         }
       }
 
-      const productWithAdjustedPrice = { ...product, price: currentPrice };
-      addToCart(productWithAdjustedPrice, quantity);
+      const productWithAdjustedPrice = { 
+        ...product, 
+        price: currentPrice,
+        selectedVariant: Object.entries(selectedVariants).reduce((acc, [key, optionId]) => {
+          const variant = product.variants?.find(v => v.name === key);
+          const option = variant?.options.find(o => o.id === optionId);
+          if (option) acc[key] = option.value;
+          return acc;
+        }, {} as Record<string, string>)
+      };
+      addToCart(productWithAdjustedPrice as any, quantity);
       toast({
         title: "Added to cart",
         description: `${quantity} x ${product.name} added to your cart.`,

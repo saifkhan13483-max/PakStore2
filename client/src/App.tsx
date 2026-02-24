@@ -56,6 +56,7 @@ const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm")
 const AdminCategories = lazyWithRetry(() => import("@/pages/admin/ManageCategories"));
 const AdminOrders = lazyWithRetry(() => import("@/pages/admin/Orders"));
 const AdminSitemap = lazyWithRetry(() => import("@/pages/admin/Sitemap"));
+const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 
 import { trackEvent } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
@@ -108,6 +109,11 @@ function Router() {
       <Route path="/orders">
         <ProtectedRoute>
           <MyOrders />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/orders/:id">
+        <ProtectedRoute>
+          <OrderDetail />
         </ProtectedRoute>
       </Route>
       <Route path="/thank-you" component={ThankYou} />

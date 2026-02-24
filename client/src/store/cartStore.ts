@@ -54,8 +54,9 @@ export const useCartStore = create<CartState>()(
               name: product.name,
               price: product.price,
               images: product.images,
-              category: product.category,
+              category: (product as any).category,
               slug: product.slug,
+              selectedVariant: (product as any).selectedVariant || {}
             } as any,
           ];
         }
