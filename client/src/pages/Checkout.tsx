@@ -79,6 +79,7 @@ export default function Checkout() {
           id: String(item.id || Math.random().toString(36).substring(7)),
           productId: String(item.productId),
           quantity: Math.max(1, Math.floor(Number(item.quantity))),
+          selectedVariant: item.selectedVariant || {},
           product: {
             name: String((item as any).name || "Unknown Product"),
             price: Number((item as any).price || 0),
