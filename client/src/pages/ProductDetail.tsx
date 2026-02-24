@@ -82,7 +82,7 @@ export default function ProductDetail() {
     }
     
     // 2. Fallback to the main gallery active image
-    return images[activeImage];
+    return images[activeImage] || images[0];
   }, [product, selectedVariants, images, activeImage]);
 
   // Handle variant image switching
