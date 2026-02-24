@@ -48,9 +48,23 @@ export default function ProductDetail() {
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 
   const images = useMemo(() => {
-    return product?.images && product.images.length > 0 
+    const baseImages = product?.images && product.images.length > 0 
       ? product.images 
       : ["https://placehold.co/600x600?text=No+Image"];
+
+    // Add variant images to the gallery if they are not already there
+    const variantImages: string[] = [];
+    if (product?.variants) {
+      product.variants.forEach(variant => {
+        variant.options.forEach(option => {
+          if (option.image && !baseImages.includes(option.image) && !variantImages.includes(option.image)) {
+            variantImages.push(option.image);
+          }
+        });
+      });
+    }
+
+    return [...baseImages, ...variantImages];
   }, [product]);
 
   const activeImageUrl = useMemo(() => {
