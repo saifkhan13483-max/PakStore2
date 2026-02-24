@@ -222,6 +222,10 @@ export const productFirestoreService = {
     const cleanUpdates = cleanObject(updates);
 
     await updateDoc(docRef, { ...cleanUpdates, updatedAt: new Date() });
+    
+    // Trigger sitemap update notification if needed (e.g. ping search engines)
+    // sitemapService.pingSearchEngines();
+    
     return { id: productId, ...updates };
   },
 
