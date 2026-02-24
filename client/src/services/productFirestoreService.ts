@@ -158,14 +158,26 @@ export const productFirestoreService = {
     try {
       insertProductSchema.parse(productData);
       
-      // Remove undefined values to prevent Firestore errors
-      const cleanData = Object.fromEntries(
-        Object.entries(productData).filter(([_, v]) => v !== undefined)
-      );
+      // Deeply remove undefined values to prevent Firestore errors
+      const cleanObject = (obj: any): any => {
+        if (Array.isArray(obj)) {
+          return obj.map(v => cleanObject(v));
+        } else if (obj !== null && typeof obj === 'object' && !(obj instanceof Date)) {
+          return Object.fromEntries(
+            Object.entries(obj)
+              .filter(([_, v]) => v !== undefined)
+              .map(([k, v]) => [k, cleanObject(v)])
+          );
+        }
+        return obj;
+      };
+
+      const cleanData = cleanObject(productData);
 
       const docRef = await addDoc(productsRef, {
         ...cleanData,
         createdAt: new Date(),
+        updatedAt: new Date(),
         inStock: (productData.stock ?? 0) > 0,
         rating: productData.rating ?? 0,
         reviewCount: productData.reviewCount ?? 0
@@ -192,10 +204,21 @@ export const productFirestoreService = {
   async updateProduct(productId: string, updates: Partial<InsertProduct>) {
     const docRef = doc(db, COLLECTION_NAME, productId);
     
-    // Remove undefined values to prevent Firestore errors
-    const cleanUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, v]) => v !== undefined)
-    );
+    // Deeply remove undefined values to prevent Firestore errors
+    const cleanObject = (obj: any): any => {
+      if (Array.isArray(obj)) {
+        return obj.map(v => cleanObject(v));
+      } else if (obj !== null && typeof obj === 'object' && !(obj instanceof Date)) {
+        return Object.fromEntries(
+          Object.entries(obj)
+            .filter(([_, v]) => v !== undefined)
+            .map(([k, v]) => [k, cleanObject(v)])
+        );
+      }
+      return obj;
+    };
+
+    const cleanUpdates = cleanObject(updates);
 
     await updateDoc(docRef, { ...cleanUpdates, updatedAt: new Date() });
     return { id: productId, ...updates };
