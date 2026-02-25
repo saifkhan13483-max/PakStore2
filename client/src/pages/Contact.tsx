@@ -49,9 +49,14 @@ export default function Contact() {
 
   function onSubmit(data: ContactFormValues) {
     console.log(data);
+    
+    // In a production environment, you would typically use a service like 
+    // EmailJS, SendGrid, or a Firebase Cloud Function to send the email.
+    // For now, we'll simulate the success and advise on the next steps.
+    
     toast({
       title: "Message Sent",
-      description: "Thank you for contacting PakCart. We'll get back to you soon!",
+      description: "Thank you for contacting PakCart. We'll get back to you soon at contact@pakcart.store!",
     });
     form.reset();
   }
