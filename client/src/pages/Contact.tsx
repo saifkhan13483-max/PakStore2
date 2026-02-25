@@ -84,8 +84,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-medium">Email Support</p>
-                  <a href="mailto:support@pakcart.store" className="text-muted-foreground hover:text-emerald-700 transition-colors">
-                    support@pakcart.store
+                  <a href="mailto:contact@pakcart.store" className="text-muted-foreground hover:text-emerald-700 transition-colors">
+                    contact@pakcart.store
                   </a>
                 </div>
               </div>
