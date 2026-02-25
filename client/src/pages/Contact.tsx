@@ -50,13 +50,16 @@ export default function Contact() {
   function onSubmit(data: ContactFormValues) {
     console.log(data);
     
-    // In a production environment, you would typically use a service like 
-    // EmailJS, SendGrid, or a Firebase Cloud Function to send the email.
-    // For now, we'll simulate the success and advise on the next steps.
+    // Construct WhatsApp message URL
+    const whatsappMessage = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\nSubject: ${data.subject}\nMessage: ${data.message}`);
+    const whatsappUrl = `https://wa.me/923188055850?text=${whatsappMessage}`;
+    
+    // Redirect to WhatsApp
+    window.open(whatsappUrl, '_blank');
     
     toast({
-      title: "Message Sent",
-      description: "Thank you for contacting PakCart. We'll get back to you soon at contact@pakcart.store!",
+      title: "Opening WhatsApp",
+      description: "Redirecting you to send your message via WhatsApp.",
     });
     form.reset();
   }
@@ -77,8 +80,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="font-medium">Call Us</p>
-                  <a href="tel:+923001234567" className="text-muted-foreground hover:text-emerald-700 transition-colors">
-                    +92 300 1234567
+                  <a href="tel:+923188055850" className="text-muted-foreground hover:text-emerald-700 transition-colors">
+                    +92 318 8055850
                   </a>
                 </div>
               </div>
@@ -109,13 +112,13 @@ export default function Contact() {
 
             <div className="mt-10 flex gap-4">
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                <a href="https://wa.me/923001234567" target="_blank" rel="noreferrer">
+                <a href="https://wa.me/923188055850" target="_blank" rel="noreferrer">
                   <SiWhatsapp className="mr-2 h-5 w-5" />
                   WhatsApp Us
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href="tel:+923001234567">
+                <a href="tel:+923188055850">
                   <Phone className="mr-2 h-5 w-5" />
                   Call Now
                 </a>
