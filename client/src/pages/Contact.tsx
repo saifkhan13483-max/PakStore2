@@ -58,6 +58,14 @@ export default function Contact() {
                 Email us at <span className="font-medium text-primary">artisans@pakcart.com</span> with your portfolio.
               </p>
             </div>
+
+            <div className="bg-primary/5 p-8 rounded-xl border border-primary/10 mt-6">
+              <h3 className="text-lg font-bold mb-2">Build Your Own Store</h3>
+              <p className="text-muted-foreground text-sm">
+                Interested in launching your own professional e-commerce platform like this one? 
+                Get in touch with us at <a href="mailto:saifkhan@pakcart.store" className="font-medium text-primary hover:underline">saifkhan@pakcart.store</a> to start your digital journey today.
+              </p>
+            </div>
           </div>
 
           {/* Contact Form */}
