@@ -94,7 +94,7 @@ export default function AdminDashboard() {
       title: "Estimated Profit", 
       value: `₨ ${orders?.reduce((acc, order) => {
         return acc + (order.items || []).reduce((itemAcc, item) => {
-          const itemProfit = (item as any).profit || 0;
+          const itemProfit = item.product?.profit || 0;
           return itemAcc + (item.quantity * itemProfit);
         }, 0);
       }, 0).toLocaleString() ?? "0"}`, 
