@@ -83,6 +83,7 @@ export default function Checkout() {
           product: {
             name: String((item as any).name || "Unknown Product"),
             price: Number((item as any).price || 0),
+            profit: Number((item as any).profit || 0),
             images: Array.isArray((item as any).images) ? (item as any).images : [],
             slug: String((item as any).slug || "")
           }
