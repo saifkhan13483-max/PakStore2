@@ -104,7 +104,7 @@ export default function ProductDetail() {
   // Calculate adjusted price based on variants
   const currentPrice = useMemo(() => {
     if (!product) return 0;
-    let price = product.price;
+    let basePrice = product.price + (product.profit || 0);
     
     if (product.variants) {
       product.variants.forEach(variant => {
@@ -112,12 +112,13 @@ export default function ProductDetail() {
         if (selectedOptionId) {
           const option = variant.options.find(o => o.id === selectedOptionId);
           if (option?.price) {
-            price = option.price;
+            // If variant has price, we assume it's the new base price (cost)
+            basePrice = option.price + (product.profit || 0);
           }
         }
       });
     }
-    return price;
+    return basePrice;
   }, [product, selectedVariants]);
 
   const handleAddToCart = () => {

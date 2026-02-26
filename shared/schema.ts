@@ -45,6 +45,7 @@ export const productSchema = baseDocumentSchema.extend({
   description: z.string(),
   longDescription: z.string().optional(),
   price: z.number().positive(),
+  profit: z.number().nonnegative().optional().default(0),
   originalPrice: z.number().nullable().optional(),
   images: z.array(z.string()),
   videoUrl: z.string().optional().nullable(),
@@ -95,6 +96,7 @@ export const cartItemSchema = z.object({
   product: productSchema.pick({
     name: true,
     price: true,
+    profit: true,
     images: true,
     slug: true
   }),

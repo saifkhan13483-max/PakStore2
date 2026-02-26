@@ -53,6 +53,7 @@ export const useCartStore = create<CartState>()(
               sessionId: null,
               name: product.name,
               price: product.price,
+              profit: product.profit || 0,
               images: product.images,
               category: (product as any).category,
               slug: product.slug,

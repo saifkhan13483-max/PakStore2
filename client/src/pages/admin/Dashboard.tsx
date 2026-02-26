@@ -90,6 +90,19 @@ export default function AdminDashboard() {
       description: "Total earnings",
       canReset: true
     },
+    { 
+      title: "Estimated Profit", 
+      value: `₨ ${orders?.reduce((acc, order) => {
+        return acc + (order.items || []).reduce((itemAcc, item) => {
+          const itemProfit = (item as any).profit || 0;
+          return itemAcc + (item.quantity * itemProfit);
+        }, 0);
+      }, 0).toLocaleString() ?? "0"}`, 
+      icon: TrendingUp, 
+      color: "text-emerald-600",
+      bg: "bg-emerald-600/10",
+      description: "Dropshipping margin",
+    },
   ];
 
   const recentOrders = orders?.slice(0, 5) ?? [];

@@ -60,6 +60,7 @@ export default function AdminProductForm() {
       description: "",
       longDescription: "",
       price: 0,
+      profit: 0,
       originalPrice: 0,
       images: [],
       videoUrl: "",
@@ -91,6 +92,7 @@ export default function AdminProductForm() {
     if (product) {
       form.reset({
         ...product,
+        profit: product.profit || 0,
         images: product.images || [],
         videoUrl: product.videoUrl || "",
         categoryId: product.categoryId ? String(product.categoryId) : "",
@@ -503,7 +505,7 @@ export default function AdminProductForm() {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Sale Price (₨)</FormLabel>
+                          <FormLabel>Cost Price (₨)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -516,6 +518,29 @@ export default function AdminProductForm() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="profit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Profit (₨) <span className="text-muted-foreground text-xs font-normal">(Optional)</span></FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              className="bg-background/50 font-bold text-lg text-emerald-600"
+                              {...field} 
+                              onChange={e => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormDescription className="text-[10px]">Your profit margin for dropshipping</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                      <p className="text-xs font-semibold text-emerald-900 uppercase tracking-wider mb-1">Display Price (Cost + Profit)</p>
+                      <p className="text-2xl font-bold text-emerald-700">₨ {(form.watch("price") || 0) + (form.watch("profit") || 0)}</p>
+                    </div>
                     <FormField
                       control={form.control}
                       name="originalPrice"
