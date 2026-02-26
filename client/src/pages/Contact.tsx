@@ -34,8 +34,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">Email</p>
-                    <p className="text-muted-foreground">support@pakcart.com</p>
-                    <p className="text-muted-foreground">info@pakcart.com</p>
+                    <p className="text-muted-foreground">contact@pakcart.store</p>
                   </div>
                 </div>
 
@@ -45,21 +44,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">Phone</p>
-                    <p className="text-muted-foreground">+92 300 1234567</p>
+                    <p className="text-muted-foreground">+92 318 8055850</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri, 9am - 6pm PKT</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full text-primary">
-                    <MapPin className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">Our Location</p>
-                    <p className="text-muted-foreground">
-                      Artisan District, Lahore<br />
-                      Punjab, Pakistan
-                    </p>
                   </div>
                 </div>
               </div>
