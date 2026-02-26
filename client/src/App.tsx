@@ -37,6 +37,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) => {
 
 // Page Imports with Code Splitting and Retry Logic
 const Home = lazyWithRetry(() => import("@/pages/Home"));
+const Categories = lazyWithRetry(() => import("@/pages/Categories"));
 const Products = lazyWithRetry(() => import("@/pages/Products"));
 const Signup = lazyWithRetry(() => import("@/pages/auth/Signup"));
 const Login = lazyWithRetry(() => import("@/pages/auth/Login"));
@@ -91,6 +92,7 @@ function Router() {
   const routes = (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/categories" component={Categories} />
       <Route path="/auth/signup" component={Signup} />
       <Route path="/auth/login" component={Login} />
       <Route path="/products" component={Products} />

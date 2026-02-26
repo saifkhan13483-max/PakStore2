@@ -58,6 +58,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: "Home", href: "/" },
+    { name: "Categories", href: "/categories" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
@@ -81,6 +82,10 @@ export function Navbar() {
                     <nav className="flex flex-col gap-4 mt-4">
                       <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
                         Home
+                      </Link>
+
+                      <Link href="/categories" className="text-lg font-medium hover:text-primary transition-colors">
+                        Categories
                       </Link>
 
                       <Accordion type="single" collapsible className="w-full">
