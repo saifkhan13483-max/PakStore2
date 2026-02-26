@@ -1,5 +1,5 @@
 import { ContactForm } from "@/components/ContactForm";
-import { SEO } from "@/components/SEO";
+import SEO from "@/components/SEO";
 
 export default function Contact() {
   return (
