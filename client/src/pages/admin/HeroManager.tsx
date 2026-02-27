@@ -32,7 +32,16 @@ export default function HeroManager() {
       queryClient.invalidateQueries({ queryKey: ["hero-slides"] });
       toast({ title: "Success", description: "Slide created successfully" });
       setIsDialogOpen(false);
+      form.reset();
     },
+    onError: (error: any) => {
+      console.error("Create slide error:", error);
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to create slide. Check your permissions.", 
+        variant: "destructive" 
+      });
+    }
   });
 
   const updateMutation = useMutation({
@@ -42,7 +51,16 @@ export default function HeroManager() {
       toast({ title: "Success", description: "Slide updated successfully" });
       setIsDialogOpen(false);
       setEditingSlide(null);
+      form.reset();
     },
+    onError: (error: any) => {
+      console.error("Update slide error:", error);
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to update slide. Check your permissions.", 
+        variant: "destructive" 
+      });
+    }
   });
 
   const deleteMutation = useMutation({
@@ -203,7 +221,14 @@ export default function HeroManager() {
                       <FormItem>
                         <FormLabel>Display Order</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={e => {
+                              const val = e.target.value === "" ? 0 : parseInt(e.target.value);
+                              field.onChange(isNaN(val) ? 0 : val);
+                            }} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
