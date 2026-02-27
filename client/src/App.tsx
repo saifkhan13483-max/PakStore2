@@ -39,6 +39,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) => {
 const Home = lazyWithRetry(() => import("@/pages/Home"));
 const Categories = lazyWithRetry(() => import("@/pages/Categories"));
 const Products = lazyWithRetry(() => import("@/pages/Products"));
+const NewArrivals = lazyWithRetry(() => import("@/pages/NewArrivals"));
 const Signup = lazyWithRetry(() => import("@/pages/auth/Signup"));
 const Login = lazyWithRetry(() => import("@/pages/auth/Login"));
 const ProductDetail = lazyWithRetry(() => import("@/pages/ProductDetail"));
@@ -93,6 +94,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/categories" component={Categories} />
+      <Route path="/new-arrivals" component={NewArrivals} />
       <Route path="/auth/signup" component={Signup} />
       <Route path="/auth/login" component={Login} />
       <Route path="/products" component={Products} />

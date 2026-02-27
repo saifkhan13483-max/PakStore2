@@ -201,9 +201,9 @@ export function Navbar() {
                   <div className="w-40 bg-muted/30 border-l border-border/40 p-6 flex flex-col justify-between">
                     <div className="space-y-4">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Featured</p>
-                      <Link href="/products" className="block group">
+                      <Link href="/new-arrivals" className="block group">
                         <p className="text-sm font-semibold group-hover:text-primary transition-colors">New Arrivals</p>
-                        <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">Check out our latest electronic gadgets.</p>
+                        <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">Check out our latest curated treasures.</p>
                       </Link>
                     </div>
                     <DropdownMenuItem asChild className="p-0 focus:bg-transparent mt-8">
