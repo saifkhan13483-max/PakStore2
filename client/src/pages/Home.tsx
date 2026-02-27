@@ -15,60 +15,56 @@ import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
-
-const HERO_SLIDES = [
-  {
-    id: 1,
-    title: "Shop the Best Deals in Pakistan",
-    subtitle: "Premium Quality Products",
-    description: "Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.",
-    image: heroImage,
-    primaryBtn: { text: "Shop Now", link: "/products" },
-    secondaryBtn: { text: "Our Story", link: "/about" },
-    accentColor: "#2a7e2c"
-  },
-  {
-    id: 2,
-    title: "Latest Electronics & Gadgets",
-    subtitle: "Innovation at Your Fingertips",
-    description: "Explore the newest smartphones, laptops, and smart home devices with official warranty and nationwide delivery.",
-    image: electronicsImage,
-    primaryBtn: { text: "Explore Gadgets", link: "/products?category=electronics-gadgets" },
-    secondaryBtn: { text: "Learn More", link: "/about" },
-    accentColor: "#3b82f6"
-  },
-  {
-    id: 3,
-    title: "Elevate Your Home Decor",
-    subtitle: "Artisanal Home Solutions",
-    description: "Transform your living space with our hand-picked collection of modern furniture and artistic decorative pieces.",
-    image: homeKitchenImage,
-    primaryBtn: { text: "Shop Decor", link: "/products?category=home-kitchen" },
-    secondaryBtn: { text: "View Catalog", link: "/products" },
-    accentColor: "#f59e0b"
-  },
-  {
-    id: 4,
-    title: "Step Into Style & Luxury",
-    subtitle: "Fashion & Accessories",
-    description: "Discover the latest trends in luxury fashion and accessories designed to make you stand out from the crowd.",
-    image: fashionImage,
-    primaryBtn: { text: "Shop Fashion", link: "/products?category=fashion-accessories" },
-    secondaryBtn: { text: "Trending Now", link: "/products" },
-    accentColor: "#ec4899"
-  }
-];
+import { heroFirestoreService } from "@/services/heroFirestoreService";
+import { type HeroSlide } from "@shared/hero-schema";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const { data: dynamicSlides, isLoading: isHeroLoading } = useQuery<HeroSlide[]>({
+    queryKey: ["hero-slides-active"],
+    queryFn: () => heroFirestoreService.getActiveSlides(),
+  });
+
+  const HERO_SLIDES = useMemo(() => {
+    if (dynamicSlides && dynamicSlides.length > 0) {
+      return dynamicSlides.map(slide => ({
+        id: slide.id,
+        title: slide.title,
+        subtitle: slide.subtitle,
+        description: "", // HeroSlide schema doesn't have description, using empty for now or can add it
+        image: slide.image,
+        primaryBtn: { text: slide.buttonText, link: slide.buttonLink },
+        secondaryBtn: { text: "Our Story", link: "/about" },
+        accentColor: "#2a7e2c"
+      }));
+    }
+    
+    // Fallback to static slides if none in DB
+    return [
+      {
+        id: 1,
+        title: "Shop the Best Deals in Pakistan",
+        subtitle: "Premium Quality Products",
+        description: "Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.",
+        image: heroImage,
+        primaryBtn: { text: "Shop Now", link: "/products" },
+        secondaryBtn: { text: "Our Story", link: "/about" },
+        accentColor: "#2a7e2c"
+      },
+      // ... keep others as fallback if needed, but usually we want dynamic
+    ];
+  }, [dynamicSlides]);
+
   useEffect(() => {
+    if (HERO_SLIDES.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [HERO_SLIDES.length]);
 
   const featuredProducts = useMemo(() => {
     return allProducts?.slice(0, 5) || [];
@@ -160,7 +156,7 @@ export default function Home() {
                   transition={{ delay: 0.4 }}
                   className="text-sm sm:text-lg md:text-xl text-gray-200 mb-8 sm:mb-10 leading-relaxed max-w-lg mx-auto sm:mx-0 drop-shadow-md"
                 >
-                  {HERO_SLIDES[currentSlide].description}
+                  {HERO_SLIDES[currentSlide]?.description || ""}
                 </motion.p>
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
