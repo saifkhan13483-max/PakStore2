@@ -37,7 +37,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) => {
 
 // Page Imports with Code Splitting and Retry Logic
 const Home = lazyWithRetry(() => import("@/pages/Home"));
-const Categories = lazyWithRetry(() => import("@/pages/Categories"));
+const Categories = lazyWithRetry(() => import("./pages/Categories"));
 const Products = lazyWithRetry(() => import("@/pages/Products"));
 const NewArrivals = lazyWithRetry(() => import("@/pages/NewArrivals"));
 const Signup = lazyWithRetry(() => import("@/pages/auth/Signup"));
