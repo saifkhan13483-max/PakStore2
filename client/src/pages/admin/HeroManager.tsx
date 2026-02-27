@@ -155,9 +155,13 @@ export default function HeroManager() {
                           )}
                           <MediaUpload
                             onUploadComplete={(result: any) => {
-                              const url = Array.isArray(result) ? result[0]?.url : result?.url;
+                              // Handle both single result and array result from MediaUpload
+                              // handle both secure_url (from useCloudinary) and url (generic)
+                              const uploadedFile = Array.isArray(result) ? result[0] : result;
+                              const url = uploadedFile?.secure_url || uploadedFile?.url;
                               if (url) {
                                 field.onChange(url);
+                                toast({ title: "Success", description: "Image uploaded and applied." });
                               }
                             }}
                             onUploadError={(err: string) => toast({ title: "Upload Failed", description: err, variant: "destructive" })}

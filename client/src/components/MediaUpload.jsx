@@ -80,12 +80,16 @@ export function MediaUpload({
           selectedFiles.map(file => upload(file))
         );
         const successfulUploads = results.filter(Boolean);
-        setUploadedData(successfulUploads.length > 0 ? successfulUploads : null);
-        onUploadComplete?.(successfulUploads);
+        if (successfulUploads.length > 0) {
+          setUploadedData(successfulUploads);
+          onUploadComplete?.(successfulUploads);
+        }
       } else {
         const result = await upload(selectedFiles[0]);
-        setUploadedData(result);
-        onUploadComplete?.(result);
+        if (result) {
+          setUploadedData(result);
+          onUploadComplete?.(result);
+        }
       }
     } catch (err) {
       console.error("Upload failed:", err);
