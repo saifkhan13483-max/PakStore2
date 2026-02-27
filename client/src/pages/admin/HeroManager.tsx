@@ -133,8 +133,13 @@ export default function HeroManager() {
                             <img src={field.value} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
                           )}
                           <MediaUpload
-                            onUploadSuccess={(url) => field.onChange(url)}
-                            onUploadError={(err) => toast({ title: "Upload Failed", description: err, variant: "destructive" })}
+                            onUploadComplete={(result: any) => {
+                              const url = Array.isArray(result) ? result[0]?.url : result?.url;
+                              if (url) {
+                                field.onChange(url);
+                              }
+                            }}
+                            onUploadError={(err: string) => toast({ title: "Upload Failed", description: err, variant: "destructive" })}
                           />
                         </div>
                       </FormControl>
