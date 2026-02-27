@@ -338,7 +338,7 @@ export default function Home() {
                 <h2 className="font-display text-4xl font-bold text-foreground mb-2">New Arrivals</h2>
                 <div className="h-1.5 w-16 bg-secondary rounded-full" />
               </motion.div>
-              <Link href="/products?sort=newest">
+              <Link href="/new-arrivals">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-full transition-all duration-300">
                   Shop New Collection
                 </Button>

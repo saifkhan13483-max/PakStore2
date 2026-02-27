@@ -37,7 +37,6 @@ const Footer = () => {
               <h4 className="font-display font-semibold text-lg">Quick Links</h4>
               <nav className="flex flex-col gap-3">
                 <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shop All Products</Link>
-                <Link href="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Categories</Link>
                 <Link href="/new-arrivals" className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link>
               </nav>
             </div>
