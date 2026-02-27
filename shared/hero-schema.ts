@@ -2,7 +2,7 @@ import { z } from "zod";
 import { baseDocumentSchema, firestoreTimestampSchema } from "./schema";
 
 export const heroSlideSchema = baseDocumentSchema.extend({
-  image: z.string().url(),
+  image: z.string().min(1),
   title: z.string().min(1),
   subtitle: z.string().min(1),
   buttonText: z.string().min(1),
