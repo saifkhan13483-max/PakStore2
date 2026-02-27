@@ -30,6 +30,7 @@ export default function HeroManager() {
     mutationFn: (data: any) => heroFirestoreService.createSlide(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["hero-slides-active"] });
       toast({ title: "Success", description: "Slide created successfully" });
       setIsDialogOpen(false);
       form.reset();
@@ -48,6 +49,7 @@ export default function HeroManager() {
     mutationFn: ({ id, data }: { id: string; data: any }) => heroFirestoreService.updateSlide(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["hero-slides-active"] });
       toast({ title: "Success", description: "Slide updated successfully" });
       setIsDialogOpen(false);
       setEditingSlide(null);
@@ -67,6 +69,7 @@ export default function HeroManager() {
     mutationFn: (id: string) => heroFirestoreService.deleteSlide(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hero-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["hero-slides-active"] });
       toast({ title: "Success", description: "Slide deleted successfully" });
     },
   });

@@ -34,7 +34,7 @@ export default function Home() {
         id: slide.id,
         title: slide.title,
         subtitle: slide.subtitle,
-        description: "", // HeroSlide schema doesn't have description, using empty for now or can add it
+        description: slide.subtitle, // Use subtitle as description for dynamic slides
         image: slide.image,
         primaryBtn: { text: slide.buttonText, link: slide.buttonLink },
         secondaryBtn: { text: "Our Story", link: "/about" },
