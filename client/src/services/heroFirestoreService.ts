@@ -36,16 +36,19 @@ export const heroFirestoreService = {
 
   async getActiveSlides(): Promise<HeroSlide[]> {
     try {
+      // Simplified query to avoid index requirement for combined where and orderBy
       const q = query(
         collection(db, HERO_SLIDES_COLLECTION),
-        where("active", "==", true),
-        orderBy("order", "asc")
+        where("active", "==", true)
       );
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
+      const slides = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as HeroSlide[];
+      
+      // Sort in memory to avoid "failed-precondition" (missing index) error
+      return slides.sort((a, b) => (a.order || 0) - (b.order || 0));
     } catch (error: any) {
       console.error("Error getting active hero slides:", error);
       return [];
