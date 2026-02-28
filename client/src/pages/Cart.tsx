@@ -33,7 +33,7 @@ export default function Cart() {
   const { toast } = useToast();
   const totalPrice = getTotalPrice();
   const shippingThreshold = 5000;
-  const shippingCost = totalPrice >= shippingThreshold ? 0 : 500;
+  const shippingCost = totalPrice >= shippingThreshold ? 0 : 250;
   
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [showClearCartAlert, setShowClearCartAlert] = useState(false);
