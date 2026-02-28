@@ -10,12 +10,16 @@ export interface SitemapItem {
 
 export const sitemapService = {
   async generateSitemap() {
-    const domain = window.location.origin;
+    const domain = "https://pakcart.store";
     const items: SitemapItem[] = [
       { loc: `${domain}/`, changefreq: "daily", priority: 1.0 },
+      { loc: `${domain}/products`, changefreq: "daily", priority: 0.9 },
+      { loc: `${domain}/categories`, changefreq: "weekly", priority: 0.8 },
+      { loc: `${domain}/new-arrivals`, changefreq: "weekly", priority: 0.8 },
       { loc: `${domain}/about`, changefreq: "monthly", priority: 0.5 },
       { loc: `${domain}/contact`, changefreq: "monthly", priority: 0.5 },
-      { loc: `${domain}/products`, changefreq: "daily", priority: 0.9 },
+      { loc: `${domain}/privacy`, changefreq: "yearly", priority: 0.3 },
+      { loc: `${domain}/terms`, changefreq: "yearly", priority: 0.3 },
     ];
 
     try {
@@ -42,7 +46,7 @@ export const sitemapService = {
           loc: `${domain}/products/${data.slug}`,
           lastmod,
           changefreq: "weekly",
-          priority: 0.9,
+          priority: 0.7,
         });
       });
 
