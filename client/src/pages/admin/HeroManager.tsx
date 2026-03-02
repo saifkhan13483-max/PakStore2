@@ -11,7 +11,7 @@ import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MediaUpload } from "@/components/MediaUpload";
@@ -91,7 +91,12 @@ export default function HeroManager() {
     if (editingSlide) {
       updateMutation.mutate({ id: editingSlide.id, data });
     } else {
-      createMutation.mutate(data);
+      // Find the maximum order and add 1 for the new slide
+      const maxOrder = slides && slides.length > 0 
+        ? Math.max(...slides.map(s => s.order || 0)) 
+        : 0;
+      const newData = { ...data, order: maxOrder + 1 };
+      createMutation.mutate(newData);
     }
   };
 
@@ -231,12 +236,16 @@ export default function HeroManager() {
                           <Input 
                             type="number" 
                             {...field} 
+                            placeholder="Leave empty for last"
                             onChange={e => {
-                              const val = e.target.value === "" ? 0 : parseInt(e.target.value);
-                              field.onChange(isNaN(val) ? 0 : val);
+                              const val = e.target.value === "" ? undefined : parseInt(e.target.value);
+                              field.onChange(val);
                             }} 
                           />
                         </FormControl>
+                        <FormDescription>
+                          Slides are shown in ascending order (0, 1, 2...). New slides are added to the end by default.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

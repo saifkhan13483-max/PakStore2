@@ -21,7 +21,8 @@ export const heroFirestoreService = {
     try {
       const q = query(
         collection(db, HERO_SLIDES_COLLECTION),
-        orderBy("order", "asc")
+        orderBy("order", "asc"),
+        orderBy("createdAt", "desc")
       );
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({
@@ -48,7 +49,15 @@ export const heroFirestoreService = {
       })) as HeroSlide[];
       
       // Sort in memory to avoid "failed-precondition" (missing index) error
-      return slides.sort((a, b) => (a.order || 0) - (b.order || 0));
+      // Sort primarily by order, secondarily by createdAt desc
+      return slides.sort((a, b) => {
+        if ((a.order || 0) !== (b.order || 0)) {
+          return (a.order || 0) - (b.order || 0);
+        }
+        const timeA = (a as any).createdAt?.toMillis?.() || 0;
+        const timeB = (b as any).createdAt?.toMillis?.() || 0;
+        return timeB - timeA;
+      });
     } catch (error: any) {
       console.error("Error getting active hero slides:", error);
       return [];
