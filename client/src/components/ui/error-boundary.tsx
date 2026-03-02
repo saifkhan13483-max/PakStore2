@@ -29,7 +29,9 @@ export class ErrorBoundary extends Component<Props, State> {
     // Auto-reload if a chunk/module fails to load
     const isDynamicImportError = 
       error?.message?.includes('Failed to fetch dynamically imported module') ||
-      error?.message?.includes('error loading dynamically imported module');
+      error?.message?.includes('error loading dynamically imported module') ||
+      error?.name === 'ChunkLoadError' ||
+      (error instanceof TypeError && error.message.includes('import'));
       
     if (isDynamicImportError) {
       const lastReload = window.sessionStorage.getItem('last-chunk-reload');

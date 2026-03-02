@@ -11,19 +11,24 @@ import { Suspense, lazy, useEffect, useState } from "react";
 // Robust Lazy Loading with retry logic
 const lazyWithRetry = (componentImport: () => Promise<any>) => {
   return lazy(async () => {
+    const pageHasBeenForceRefreshed = JSON.parse(
+      window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
     try {
-      return await componentImport();
+      const component = await componentImport();
+      if (pageHasBeenForceRefreshed) {
+        window.localStorage.setItem('page-has-been-force-refreshed', 'false');
+      }
+      return component;
     } catch (error: any) {
       // Check for common network/module loading errors
       const isDynamicImportError = 
         error?.message?.includes('Failed to fetch dynamically imported module') ||
-        error?.message?.includes('error loading dynamically imported module');
+        error?.message?.includes('error loading dynamically imported module') ||
+        error?.name === 'ChunkLoadError';
 
       if (isDynamicImportError) {
-        const pageHasBeenForceRefreshed = JSON.parse(
-          window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
-        );
-
         if (!pageHasBeenForceRefreshed) {
           window.localStorage.setItem('page-has-been-force-refreshed', 'true');
           window.location.reload();
