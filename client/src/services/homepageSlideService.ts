@@ -18,19 +18,32 @@ const COLLECTION_NAME = "homepage_slides";
 
 export const homepageSlideService = {
   async getAllSlides(): Promise<HomepageSlide[]> {
-    const q = query(collection(db, COLLECTION_NAME), orderBy("display_order", "asc"));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
+    try {
+      const q = query(collection(db, COLLECTION_NAME));
+      const snapshot = await getDocs(q);
+      const slides = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
+      return slides.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    } catch (error) {
+      console.error("Error fetching all slides:", error);
+      return [];
+    }
   },
 
   async getActiveSlides(): Promise<HomepageSlide[]> {
-    const q = query(
-      collection(db, COLLECTION_NAME), 
-      where("is_active", "==", true),
-      orderBy("display_order", "asc")
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
+    try {
+      const q = query(
+        collection(db, COLLECTION_NAME), 
+        where("is_active", "==", true)
+      );
+      const snapshot = await getDocs(q);
+      const slides = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
+      
+      // Sort in memory to avoid index requirement
+      return slides.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    } catch (error) {
+      console.error("Error fetching active slides:", error);
+      return [];
+    }
   },
 
   async createSlide(data: InsertHomepageSlide): Promise<string> {
