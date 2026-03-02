@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { homepageSlideService } from "@/services/homepageSlideService";
 import { type HomepageSlide } from "@shared/homepage-slide-schema";
+import { format } from "date-fns";
 import { 
   Table, 
   TableBody, 
@@ -95,7 +96,7 @@ export default function HomepageSlider() {
                   name="image_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Slide Image</FormLabel>
+                      <FormLabel>Slide Image (Recommended: 1920x700, Max: 2MB)</FormLabel>
                       <FormControl>
                         <ImageUploader
                           value={field.value ? [field.value] : []}
@@ -153,15 +154,17 @@ export default function HomepageSlider() {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[120px] py-4">Thumbnail</TableHead>
+              <TableHead>File Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Display Order</TableHead>
+              <TableHead>Date Added</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {slides?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                   No slides found. Click "Add New Slide" to get started.
                 </TableCell>
               </TableRow>
@@ -175,6 +178,9 @@ export default function HomepageSlider() {
                         <ImageIcon className="text-white h-4 w-4" />
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell className="max-w-[200px] truncate font-mono text-xs">
+                    {slide.image_url.split('/').pop()?.split('?')[0]}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -201,6 +207,9 @@ export default function HomepageSlider() {
                       }}
                       data-testid={`input-order-${slide.id}`}
                     />
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {slide.createdAt ? format(new Date(slide.createdAt), "MMM d, yyyy") : "N/A"}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button 

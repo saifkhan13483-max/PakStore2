@@ -41,7 +41,7 @@ export default function Home() {
     if (HERO_SLIDES.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5000);
+    }, 4500); // Transitions automatically every 4-5 seconds
     return () => clearInterval(timer);
   }, [HERO_SLIDES.length, isPaused]);
 
@@ -99,15 +99,15 @@ export default function Home() {
             <Skeleton className="w-full h-full" />
           ) : HERO_SLIDES.length > 0 ? (
             <>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentSlide}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="absolute inset-0"
-                >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
                   <picture>
                     {HERO_SLIDES[currentSlide].image_webp_url && (
                       <source srcSet={HERO_SLIDES[currentSlide].image_webp_url} type="image/webp" />

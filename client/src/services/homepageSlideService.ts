@@ -26,11 +26,11 @@ export const homepageSlideService = {
   async getActiveSlides(): Promise<HomepageSlide[]> {
     const q = query(
       collection(db, COLLECTION_NAME), 
-      where("is_active", "==", true)
+      where("is_active", "==", true),
+      orderBy("display_order", "asc")
     );
     const snapshot = await getDocs(q);
-    const slides = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
-    return slides.sort((a, b) => a.display_order - b.display_order);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HomepageSlide));
   },
 
   async createSlide(data: InsertHomepageSlide): Promise<string> {

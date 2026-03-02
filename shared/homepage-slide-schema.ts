@@ -5,7 +5,7 @@ export const homepageSlideSchema = baseDocumentSchema.extend({
   image_url: z.string().min(1),
   image_webp_url: z.string().nullable().optional(),
   is_active: z.boolean().default(true),
-  display_order: z.number().int().default(0),
+  display_order: z.number().int().min(0).default(0),
 });
 
 export type HomepageSlide = z.infer<typeof homepageSlideSchema>;

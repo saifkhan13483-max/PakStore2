@@ -1,15 +1,15 @@
 import { cloudinaryConfig } from "../config/cloudinary";
 
 export const validateFile = (file) => {
-  const maxSize = 10 * 1024 * 1024; // 10MB default
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "video/mp4", "application/pdf"];
+  const maxSize = 2 * 1024 * 1024; // 2MB limit per requirements
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: "File type not supported" };
+    return { valid: false, error: "Only JPG, PNG, and WebP formats are accepted" };
   }
 
   if (file.size > maxSize) {
-    return { valid: false, error: "File size exceeds 10MB limit" };
+    return { valid: false, error: "File size exceeds 2MB limit" };
   }
 
   return { valid: true };
