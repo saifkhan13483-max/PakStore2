@@ -34,19 +34,12 @@ export const homepageSlideService = {
   },
 
   async createSlide(data: InsertHomepageSlide): Promise<string> {
-    try {
-      console.log("Creating slide in Firestore:", data);
-      const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-        ...data,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      console.log("Slide created with ID:", docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error("Error creating slide:", error);
-      throw error;
-    }
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
   },
 
   async updateSlide(id: string, data: Partial<HomepageSlide>): Promise<void> {

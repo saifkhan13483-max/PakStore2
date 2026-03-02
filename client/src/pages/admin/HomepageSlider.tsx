@@ -99,10 +99,8 @@ export default function HomepageSlider() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit((data) => {
-        console.log("Submitting slide data:", data);
         createMutation.mutate(data);
       }, (errors) => {
-        console.error("Form validation errors:", errors);
         const errorMessages = Object.entries(errors)
           .map(([key, value]: [string, any]) => `${key}: ${value.message}`)
           .join(", ");
