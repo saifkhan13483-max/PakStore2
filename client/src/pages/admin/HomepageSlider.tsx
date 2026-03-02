@@ -228,7 +228,16 @@ export default function HomepageSlider() {
                     />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {slide.createdAt ? format(new Date(slide.createdAt), "MMM d, yyyy") : "N/A"}
+                    {slide.createdAt ? (() => {
+                      try {
+                        const date = typeof slide.createdAt === 'object' && 'seconds' in slide.createdAt 
+                          ? new Date(slide.createdAt.seconds * 1000)
+                          : new Date(slide.createdAt);
+                        return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM d, yyyy");
+                      } catch (e) {
+                        return "Invalid Date";
+                      }
+                    })() : "N/A"}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button 

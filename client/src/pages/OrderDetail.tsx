@@ -189,11 +189,14 @@ export default function OrderDetail() {
                     <p className="font-bold text-emerald-900 text-sm">Order Placed</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {(() => {
-                        const date = order.createdAt as any;
-                        if (date?.toDate) return format(date.toDate(), "PPP p");
-                        if (date instanceof Date) return format(date, "PPP p");
-                        if (date?.seconds) return format(new Date(date.seconds * 1000), "PPP p");
-                        return "N/A";
+                        try {
+                          const date = order.createdAt as any;
+                          if (!date) return "N/A";
+                          const d = date?.seconds ? new Date(date.seconds * 1000) : new Date(date);
+                          return isNaN(d.getTime()) ? "N/A" : format(d, "PPP p");
+                        } catch (e) {
+                          return "N/A";
+                        }
                       })()}
                     </p>
                   </div>

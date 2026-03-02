@@ -260,7 +260,16 @@ export function CommentSection({ productId }: CommentSectionProps) {
                       <h4 className="font-bold">{comment.userName}</h4>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
-                          {comment.createdAt ? format(new Date(comment.createdAt), "MMM d, yyyy") : "Just now"}
+                          {comment.createdAt ? (() => {
+                            try {
+                              const date = typeof comment.createdAt === 'object' && 'seconds' in comment.createdAt 
+                                ? new Date(comment.createdAt.seconds * 1000)
+                                : new Date(comment.createdAt);
+                              return isNaN(date.getTime()) ? "" : format(date, "MMM d, yyyy");
+                            } catch (e) {
+                              return "";
+                            }
+                          })() : ""}
                         </span>
                         {user?.uid === comment.userId && (
                           <DropdownMenu>

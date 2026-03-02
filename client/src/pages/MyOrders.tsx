@@ -83,11 +83,14 @@ export default function MyOrders() {
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</span>
                   <span className="text-sm">
                     {(() => {
-                      const date = order.createdAt as any;
-                      if (date?.toDate) return format(date.toDate(), "MMM d, yyyy");
-                      if (date instanceof Date) return format(date, "MMM d, yyyy");
-                      if (date?.seconds) return format(new Date(date.seconds * 1000), "MMM d, yyyy");
-                      return "N/A";
+                      try {
+                        const date = order.createdAt as any;
+                        if (!date) return "N/A";
+                        const d = date?.seconds ? new Date(date.seconds * 1000) : new Date(date);
+                        return isNaN(d.getTime()) ? "N/A" : format(d, "MMM d, yyyy");
+                      } catch (e) {
+                        return "N/A";
+                      }
                     })()}
                   </span>
                 </div>
