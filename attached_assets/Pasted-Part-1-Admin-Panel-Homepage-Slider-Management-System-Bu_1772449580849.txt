@@ -1,0 +1,92 @@
+Part 1: Admin Panel — Homepage Slider Management System
+Build a robust, production-ready Admin Panel module for managing homepage slider content. This module must give administrators full control over slider content through a clean, intuitive interface — with no hardcoding of slide data in templates at any point.
+
+🎯 Objectives & Goals:
+
+The Admin Panel must achieve the following core goals with no compromise. Slides are entirely managed through the Admin Panel, meaning no content is hardcoded in frontend templates. Each slide stores image data only — no text, captions, buttons, or overlays are associated with any slide record. The system must prioritize performance, security, accessibility, and long-term maintainability.
+
+🛠️ Navigation & Menu Structure:
+
+Add a dedicated section in the Admin Panel sidebar or navigation menu labeled "Homepage Slider" under the Content Management group. This item must be accessible only to users with appropriate roles such as Super Admin or Content Manager. Unauthorized users must be redirected or shown a permission-denied response.
+
+🛠️ Slide Management Features:
+
+The admin interface must provide the following capabilities in a clean, intuitive UI:
+
+Add New Slide — A form or modal to upload and configure a new slide entry
+Upload Image — Accepts JPG, PNG, and WebP formats only; all other formats must be rejected with a clear, user-friendly error message
+Set Display Order — A drag-and-drop reordering interface is strongly preferred; fall back to a numeric input field if drag-and-drop is not feasible
+Enable / Disable Slide — A toggle switch per slide to control frontend visibility without deleting the database record
+Delete Slide — Includes a confirmation dialog to prevent accidental deletion of records
+Preview Slide Image — Inline thumbnail preview in the management table, with an option to open a full-size lightbox preview
+🛠️ Image Validation & Processing Rules:
+
+All uploaded images must comply with the following rules, enforced at both the client side (for UX feedback) and server side (for security and integrity):
+
+Recommended dimensions: 1920×700 pixels (landscape, desktop-optimized)
+Mobile scaling: Images must scale responsively using CSS (object-fit: cover) — no cropping distortion allowed
+Maximum file size: 2MB hard limit per upload; display a user-friendly error message if this limit is exceeded
+Image optimization: Automatically compress and optimize images server-side before saving (e.g., using Sharp, ImageMagick, or an equivalent library)
+WebP conversion: If the uploaded image is not already in WebP format, auto-convert it to WebP and store both the original (as a fallback) and the WebP version
+Unique filename generation: Rename all uploaded files using UUID or timestamp-based naming to prevent file conflicts and path traversal vulnerabilities
+🛠️ Admin UI/UX Standards:
+
+Display all slides in a sortable data table with the following columns: Thumbnail, File Name, Status (Active/Inactive), Display Order, Date Added, and Actions
+Show total active and inactive slide counts at the top of the management page as summary badges or stat cards
+Provide success/error flash messages for all CRUD operations (create, update, delete, reorder)
+Implement input validation with clear inline error feedback on all form fields
+💾 Database Structure:
+
+Create the following table to store all slider records. All fields are required unless stated otherwise.
+
+Table name: homepage_slides
+
+Column	Type	Description
+id	INT, Primary Key, Auto Increment	Unique identifier
+image_url	VARCHAR(500)	Relative or absolute path to the stored image
+image_webp_url	VARCHAR(500), Nullable	Path to the WebP-converted version of the image
+is_active	BOOLEAN, Default: TRUE	Controls whether the slide is shown on the frontend
+display_order	INT, Default: 0	Controls the rendering sequence of slides
+created_at	TIMESTAMP	Record creation timestamp
+updated_at	TIMESTAMP	Last modification timestamp
+Indexing: Add a composite index on (is_active, display_order) to optimize frontend query performance when fetching only active, ordered slides.
+
+Part 2: Frontend — Homepage Slider Display & Behavior
+Build a robust, production-ready Frontend Slider component that fetches and renders homepage slides from the database dynamically. The slider must deliver a seamless, high-performance visual experience to end users across all devices and screen sizes — with absolutely no text, UI overlays, or branding elements on top of any slide image.
+
+🎯 Objectives & Goals:
+
+The frontend slider must achieve the following core goals with no compromise. All slide content is fetched dynamically from the backend — no hardcoded images or content exist in any template. Each slide renders images only, meaning there must be absolutely no text overlays, headings, descriptions, buttons, captions, or any UI elements rendered on top of the slide image. The slider must be fully responsive and pixel-perfect across all screen sizes including mobile, tablet, large desktop, and 4K displays. The system must prioritize render performance, accessibility, and smooth animation quality.
+
+🌐 Core Slider Behavior:
+
+Auto-advance: Slides must transition automatically every 4–5 seconds. The interval must be configurable via a variable or config value — not hardcoded inline
+Transition style: Implement a smooth fade or slide transition — whichever renders more cleanly at full viewport width. Avoid any jarring, choppy, or abrupt animations
+Infinite loop: After the last slide, the slider must seamlessly return to the first slide with no visual break, flash, or delay
+Pause on hover: On desktop and pointer-capable devices, auto-advance must pause when the user hovers over the slider area and resume immediately on mouse leave
+Touch/Swipe support: On mobile and tablet devices, support natural left/right swipe gestures to manually navigate between slides
+Keyboard accessibility: Support left and right arrow key navigation when the slider element is focused, in compliance with basic WCAG accessibility standards
+🌐 Strict Content Rules (Non-Negotiable):
+
+The following elements must never appear on any slide under any circumstance:
+
+❌ Text overlays of any kind
+❌ Call-to-action buttons or links
+❌ Captions, titles, or descriptions
+❌ Logo or branding overlays
+The only acceptable content is:
+
+✔️ The full-width slide image, rendered edge-to-edge with absolutely no padding, margin, or surrounding whitespace
+🌐 Responsive & Performance Requirements:
+
+The slider must render full viewport width (100vw) with a fixed or aspect-ratio-driven height
+Images must use object-fit: cover to fill the container without distortion across all screen sizes
+Serve WebP format to supported browsers and fall back to the original format for unsupported browsers using the HTML <picture> element with a <source> tag
+Lazy-load all slides except the first one to avoid blocking the initial page render
+Preload the first slide image using a <link rel="preload"> tag or equivalent technique to eliminate layout shift and improve Largest Contentful Paint (LCP) scores
+🌐 Navigation Controls (Optional but Recommended):
+
+Dot indicators: Display subtle dot or pill indicators at the bottom of the slider to show the current slide position and allow direct navigation to any slide
+Arrow buttons: If implemented, use minimal, semi-transparent arrow controls that do not distract from the image content; arrows must be hidden on mobile viewports
+If no navigation controls are desired, omit them entirely for a fully clean, distraction-free visual experience — both approaches are valid
+💡 Developer Note: Part 1 and Part 2 are designed to work as a unified system. Part 1 handles all data input, storage, and image processing logic. Part 2 handles all data consumption and visual rendering. They communicate through a shared database table (homepage_slides) and a backend API or server-rendered data layer that Part 2 queries to retrieve only active slides ordered by display_order ascending.
