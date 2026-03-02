@@ -57,7 +57,6 @@ const AdminProducts = lazyWithRetry(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm"));
 const AdminCategories = lazyWithRetry(() => import("@/pages/admin/ManageCategories"));
 const AdminOrders = lazyWithRetry(() => import("@/pages/admin/Orders"));
-const AdminHero = lazyWithRetry(() => import("@/pages/admin/HeroManager"));
 const AdminSitemap = lazyWithRetry(() => import("@/pages/admin/Sitemap"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 
@@ -167,13 +166,6 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminOrders />
-          </AdminLayout>
-        </AdminRoute>
-      </Route>
-      <Route path="/admin/hero">
-        <AdminRoute>
-          <AdminLayout>
-            <AdminHero />
           </AdminLayout>
         </AdminRoute>
       </Route>

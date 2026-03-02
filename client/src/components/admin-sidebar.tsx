@@ -19,7 +19,6 @@ const adminItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Products", url: "/admin/products", icon: ShoppingBag },
   { title: "Categories", url: "/admin/categories", icon: Tags },
-  { title: "Hero Slides", url: "/admin/hero", icon: ImageIcon },
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
   { title: "Sitemap", url: "/admin/sitemap", icon: Globe },
   { title: "Back to Shop", url: "/", icon: Home },
