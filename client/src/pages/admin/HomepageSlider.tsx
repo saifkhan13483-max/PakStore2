@@ -39,6 +39,7 @@ export default function HomepageSlider() {
     mutationFn: (data: any) => homepageSlideService.createSlide(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides", "active"] });
       toast({ title: "Success", description: "Slide created successfully" });
       setIsAddModalOpen(false);
       form.reset();
@@ -58,6 +59,7 @@ export default function HomepageSlider() {
       homepageSlideService.updateSlide(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides", "active"] });
       toast({ title: "Updated", description: "Slide updated successfully" });
     },
   });
@@ -66,6 +68,7 @@ export default function HomepageSlider() {
     mutationFn: (id: string) => homepageSlideService.deleteSlide(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/homepage-slides", "active"] });
       toast({ title: "Deleted", description: "Slide deleted successfully" });
     },
   });

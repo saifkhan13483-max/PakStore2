@@ -26,7 +26,7 @@ export default function Home() {
   const touchStart = useRef<number | null>(null);
 
   const { data: slides, isLoading: isHeroLoading } = useQuery<HomepageSlide[]>({
-    queryKey: ["/api/homepage-slides/active"],
+    queryKey: ["/api/homepage-slides", "active"],
     queryFn: () => homepageSlideService.getActiveSlides(),
   });
 
