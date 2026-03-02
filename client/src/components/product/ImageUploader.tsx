@@ -25,13 +25,21 @@ export function ImageUploader({
   const [dragActive, setDragActive] = useState(false);
 
   const onUpload = useCallback(async (file: File) => {
-    const result = await upload(file);
-    if (result) {
-      if (maxImages === 1) {
-        onChange([result.secure_url]);
+    try {
+      console.log("Starting image upload to Cloudinary...");
+      const result = await upload(file);
+      if (result) {
+        console.log("Upload successful:", result.secure_url);
+        if (maxImages === 1) {
+          onChange([result.secure_url]);
+        } else {
+          onChange([...value, result.secure_url]);
+        }
       } else {
-        onChange([...value, result.secure_url]);
+        console.error("Upload failed: No result from Cloudinary");
       }
+    } catch (error) {
+      console.error("Error during image upload:", error);
     }
   }, [upload, value, onChange, maxImages]);
 

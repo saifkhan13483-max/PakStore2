@@ -43,6 +43,14 @@ export default function HomepageSlider() {
       setIsAddModalOpen(false);
       form.reset();
     },
+    onError: (error: any) => {
+      console.error("Mutation error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create slide",
+        variant: "destructive",
+      });
+    },
   });
 
   const updateMutation = useMutation({
@@ -90,7 +98,20 @@ export default function HomepageSlider() {
               <DialogTitle>Add New Slide</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))} className="space-y-4">
+              <form onSubmit={form.handleSubmit((data) => {
+        console.log("Submitting slide data:", data);
+        createMutation.mutate(data);
+      }, (errors) => {
+        console.error("Form validation errors:", errors);
+        const errorMessages = Object.entries(errors)
+          .map(([key, value]: [string, any]) => `${key}: ${value.message}`)
+          .join(", ");
+        toast({
+          title: "Validation Error",
+          description: errorMessages || "Please check the form for errors.",
+          variant: "destructive",
+        });
+      })} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="image_url"
