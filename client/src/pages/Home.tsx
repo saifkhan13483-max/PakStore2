@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
@@ -15,56 +15,35 @@ import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
-import { heroFirestoreService } from "@/services/heroFirestoreService";
-import { type HeroSlide } from "@shared/hero-schema";
+import { homepageSlideService } from "@/services/homepageSlideService";
+import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStart = useRef<number | null>(null);
 
-  const { data: dynamicSlides, isLoading: isHeroLoading } = useQuery<HeroSlide[]>({
-    queryKey: ["hero-slides-active"],
-    queryFn: () => heroFirestoreService.getActiveSlides(),
+  const { data: slides, isLoading: isHeroLoading } = useQuery<HomepageSlide[]>({
+    queryKey: ["/api/homepage-slides/active"],
+    queryFn: () => homepageSlideService.getActiveSlides(),
   });
 
   const HERO_SLIDES = useMemo(() => {
-    if (dynamicSlides && dynamicSlides.length > 0) {
-      return dynamicSlides.map(slide => ({
-        id: slide.id,
-        title: slide.title,
-        subtitle: slide.subtitle,
-        description: slide.subtitle, // Use subtitle as description for dynamic slides
-        image: slide.image,
-        primaryBtn: { text: slide.buttonText, link: slide.buttonLink },
-        secondaryBtn: { text: "Our Story", link: "/about" },
-        accentColor: "#2a7e2c"
-      }));
+    if (slides && slides.length > 0) {
+      return slides;
     }
-    
-    // Fallback to static slides if none in DB
-    return [
-      {
-        id: 1,
-        title: "Shop the Best Deals in Pakistan",
-        subtitle: "Premium Quality Products",
-        description: "Quality Products, Delivered to Your Door. Experience the finest selection of artisanal treasures and daily essentials.",
-        image: heroImage,
-        primaryBtn: { text: "Shop Now", link: "/products" },
-        secondaryBtn: { text: "Our Story", link: "/about" },
-        accentColor: "#2a7e2c"
-      },
-      // ... keep others as fallback if needed, but usually we want dynamic
-    ];
-  }, [dynamicSlides]);
+    return [];
+  }, [slides]);
 
   useEffect(() => {
-    if (HERO_SLIDES.length <= 1) return;
+    if (HERO_SLIDES.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(timer);
-  }, [HERO_SLIDES.length]);
+  }, [HERO_SLIDES.length, isPaused]);
 
   const featuredProducts = useMemo(() => {
     return allProducts?.slice(0, 5) || [];
@@ -80,8 +59,18 @@ export default function Home() {
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
 
+  // Keyboard accessibility
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prevSlide();
+      if (e.key === "ArrowRight") nextSlide();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [HERO_SLIDES.length]);
+
   return (
-    <div className="min-h-screen flex flex-col font-body">
+    <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
       <SEO 
         title="Home" 
         description="Shop the best products at PakCart. Quality items delivered to your door in Pakistan."
@@ -89,125 +78,87 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
-        <section className="relative min-h-[60vh] sm:min-h-[70vh] md:min-h-[85vh] flex items-center justify-center overflow-hidden bg-black">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
-              className="absolute inset-0 z-0"
-            >
-              <img 
-                src={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image, { width: 1920, quality: 'auto:best' })} 
-                alt={HERO_SLIDES[currentSlide].title} 
-                className="w-full h-full object-cover scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent sm:from-black/90 sm:via-black/60" />
-              <div className="absolute inset-0 bg-black/40 sm:bg-black/20" />
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="container relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={currentSlide}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="max-w-2xl text-white text-center sm:text-left mx-auto sm:mx-0"
-              >
-                <motion.span 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="inline-block px-4 py-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-[10px] sm:text-xs md:text-sm font-medium mb-4 sm:mb-6 uppercase tracking-widest shadow-lg"
+        <section 
+          className="relative w-full aspect-[1920/700] min-h-[400px] overflow-hidden bg-black group"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
+          onTouchEnd={(e) => {
+            if (touchStart.current === null) return;
+            const touchEnd = e.changedTouches[0].clientX;
+            const diff = touchStart.current - touchEnd;
+            if (Math.abs(diff) > 50) {
+              if (diff > 0) nextSlide();
+              else prevSlide();
+            }
+            touchStart.current = null;
+          }}
+          tabIndex={0}
+        >
+          {isHeroLoading ? (
+            <Skeleton className="w-full h-full" />
+          ) : HERO_SLIDES.length > 0 ? (
+            <>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="absolute inset-0"
                 >
-                  {HERO_SLIDES[currentSlide].subtitle}
-                </motion.span>
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-[1.1] tracking-tight text-white"
-                >
-                  {currentSlide === 0 ? (
-                    <>
-                      <span className="text-white">Shop the</span> <span className="text-secondary italic">Best Deals</span> <span className="text-white">in Pakistan</span>
-                    </>
-                  ) : (
-                    <>
-                      {(() => {
-                        const words = HERO_SLIDES[currentSlide].title.split(' ');
-                        return words.map((word, i) => (
-                          <span key={i} className={i % 2 === 1 ? "text-secondary" : "text-white"}>
-                            {word}{" "}
-                          </span>
-                        ));
-                      })()}
-                    </>
-                  )}
-                </motion.h1>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-sm sm:text-lg md:text-xl text-gray-200 mb-8 sm:mb-10 leading-relaxed max-w-lg mx-auto sm:mx-0 drop-shadow-md"
-                >
-                  {HERO_SLIDES[currentSlide]?.description || ""}
-                </motion.p>
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="flex flex-row gap-3 sm:gap-4 items-center sm:items-start"
-                >
-                  <Link href={HERO_SLIDES[currentSlide].primaryBtn.link} className="flex-1 sm:flex-none">
-                    <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full px-6 sm:px-10 h-12 sm:h-14 text-sm sm:text-base font-bold w-full shadow-xl transition-transform hover:scale-105 active:scale-95 whitespace-nowrap">
-                      {HERO_SLIDES[currentSlide].primaryBtn.text}
-                    </Button>
-                  </Link>
-                  <Link href={HERO_SLIDES[currentSlide].secondaryBtn.link} className="flex-1 sm:flex-none">
-                    <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/40 backdrop-blur-md hover:bg-white/20 rounded-full px-6 sm:px-10 h-12 sm:h-14 text-sm sm:text-base w-full transition-transform hover:scale-105 active:scale-95 whitespace-nowrap">
-                      {HERO_SLIDES[currentSlide].secondaryBtn.text}
-                    </Button>
-                  </Link>
+                  <picture>
+                    {HERO_SLIDES[currentSlide].image_webp_url && (
+                      <source srcSet={HERO_SLIDES[currentSlide].image_webp_url} type="image/webp" />
+                    )}
+                    <img 
+                      src={HERO_SLIDES[currentSlide].image_url} 
+                      alt={`Slide ${currentSlide + 1}`}
+                      className="w-full h-full object-cover"
+                      loading={currentSlide === 0 ? "eager" : "lazy"}
+                    />
+                  </picture>
                 </motion.div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+              </AnimatePresence>
 
-          {/* Slider Controls */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
-            <div className="flex gap-2">
-              {HERO_SLIDES.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-1 rounded-full transition-all duration-500 shadow-sm ${idx === currentSlide ? 'w-8 bg-secondary' : 'w-1.5 bg-white/30 hover:bg-white/50'}`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
+              {/* Slider Controls */}
+              {HERO_SLIDES.length > 1 && (
+                <>
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                    {HERO_SLIDES.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-y-0 left-4 right-4 flex items-center justify-between pointer-events-none">
+                    <button 
+                      onClick={prevSlide}
+                      className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100 hidden sm:block"
+                      aria-label="Previous slide"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button 
+                      onClick={nextSlide}
+                      className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100 hidden sm:block"
+                      aria-label="Next slide"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/50">
+              No active slides available
             </div>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={prevSlide}
-                className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-              </button>
-              <button 
-                onClick={nextSlide}
-                className="p-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/20 transition-all shadow-lg group active:scale-90"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
-            </div>
-          </div>
+          )}
         </section>
 
         {/* Trust Indicators */}
