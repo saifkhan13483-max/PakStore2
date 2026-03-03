@@ -315,6 +315,10 @@ export default function ProductDetail() {
               <span className="text-3xl md:text-4xl font-bold text-primary">
                 {formatPrice(currentPrice)}
               </span>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Display Price</span>
+                <span className="text-[10px] text-muted-foreground opacity-70">(Cost + Profit)</span>
+              </div>
               {product.originalPrice && (
                 <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
                   {formatPrice(product.originalPrice)}

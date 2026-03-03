@@ -117,7 +117,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </span>
             )}
             <span className="text-[11px] md:text-[14px] font-black text-primary tracking-tight">
-              {formatPrice(product.price)}
+              {formatPrice(product.price + (product.profit || 0))}
             </span>
           </div>
           <Button 
