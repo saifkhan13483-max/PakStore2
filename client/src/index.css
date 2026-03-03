@@ -8,60 +8,72 @@
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  /* Premium Emerald & Refined Gold Theme */
-  --background: 40 20% 99%; /* Brighter, cleaner linen */
-  --foreground: 165 40% 8%; /* Deeper, more neutral charcoal emerald */
+  /* Modern Premium E-commerce Palette */
+  --background: 36 33% 97%;
+  --foreground: 170 25% 15%;
   
-  --primary: 165 60% 18%; /* Richer, deeper Emerald for luxury feel */
-  --primary-foreground: 45 30% 98%;
+  --card: 0 0% 100%;
+  --card-foreground: 170 25% 15%;
   
-  --secondary: 42 45% 45%; /* Refined "Champagne Gold" - less saturated, more elegant */
-  --secondary-foreground: 165 40% 8%;
-  
-  --muted: 165 15% 95%; /* Softer grey-green for background surfaces */
-  --muted-foreground: 165 15% 40%;
-  
-  --accent: 42 45% 45%;
-  --accent-foreground: 45 30% 98%;
-  
-  --destructive: 0 70% 50%; /* More balanced, less "neon" red */
-  --destructive-foreground: 0 0% 98%;
-  
-  --border: 165 15% 90%;
-  --input: 165 15% 90%;
-  --ring: 165 60% 18%;
-
   --popover: 0 0% 100%;
-  --popover-foreground: 165 40% 8%;
+  --popover-foreground: 170 25% 15%;
+  
+  --primary: 168 65% 28%;
+  --primary-hover: 168 65% 24%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 42 75% 55%;
+  --secondary-hover: 42 75% 50%;
+  --secondary-foreground: 170 25% 15%;
+  
+  --muted: 165 25% 94%;
+  --muted-foreground: 170 12% 40%;
+  
+  --accent: 42 75% 55%;
+  --accent-foreground: 170 25% 15%;
+  
+  --destructive: 4 75% 55%;
+  --destructive-hover: 4 75% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 170 15% 88%;
+  --input: 170 15% 88%;
+  --ring: 168 65% 28%;
   
   --radius: 0.75rem;
 }
 
 .dark {
-  --background: 165 45% 4%; /* Near black with a hint of emerald depth */
-  --foreground: 45 15% 92%;
+  --background: 170 25% 5%;
+  --foreground: 36 33% 97%;
   
-  --primary: 165 50% 35%; /* Lighter emerald for visibility on dark */
-  --primary-foreground: 165 45% 4%;
+  --card: 170 25% 8%;
+  --card-foreground: 36 33% 97%;
   
-  --secondary: 42 40% 55%; /* Softer gold for dark mode */
-  --secondary-foreground: 165 45% 4%;
+  --popover: 170 25% 8%;
+  --popover-foreground: 36 33% 97%;
   
-  --muted: 165 30% 10%;
-  --muted-foreground: 165 20% 65%;
+  --primary: 168 65% 35%;
+  --primary-hover: 168 65% 30%;
+  --primary-foreground: 0 0% 100%;
   
-  --accent: 42 40% 55%;
-  --accent-foreground: 165 45% 4%;
+  --secondary: 42 75% 55%;
+  --secondary-hover: 42 75% 50%;
+  --secondary-foreground: 170 25% 5%;
   
-  --destructive: 0 60% 45%;
-  --destructive-foreground: 0 0% 98%;
+  --muted: 170 20% 12%;
+  --muted-foreground: 170 12% 70%;
   
-  --border: 165 30% 12%;
-  --input: 165 30% 12%;
-  --ring: 165 50% 35%;
-
-  --popover: 165 35% 8%;
-  --popover-foreground: 45 15% 92%;
+  --accent: 42 75% 55%;
+  --accent-foreground: 170 25% 5%;
+  
+  --destructive: 4 75% 55%;
+  --destructive-hover: 4 75% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 170 20% 15%;
+  --input: 170 20% 15%;
+  --ring: 168 65% 35%;
 }
 
 @layer base {
