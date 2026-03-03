@@ -315,12 +315,8 @@ export default function ProductDetail() {
               <span className="text-3xl md:text-4xl font-bold text-primary">
                 {formatPrice(currentPrice)}
               </span>
-              <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Display Price</span>
-                <span className="text-[10px] text-muted-foreground opacity-70">(Cost + Profit)</span>
-              </div>
               {product.originalPrice && (
-                <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
+                <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal ml-2">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
@@ -414,7 +410,7 @@ export default function ProductDetail() {
               </div>
               <Button 
                 size="lg"
-                className="flex-1 h-12 bg-[#1A4D2E] hover:bg-[#1A4D2E]/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
+                className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
               >
