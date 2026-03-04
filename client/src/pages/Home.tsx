@@ -25,6 +25,10 @@ export default function Home() {
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
 
+  const [showMoreNewArrivals, setShowMoreNewArrivals] = useState(false);
+  const [showMoreFeatured, setShowMoreFeatured] = useState(false);
+  const [showMoreLiked, setShowMoreLiked] = useState(false);
+
   const { data: slides, isLoading: isHeroLoading } = useQuery<HomepageSlide[]>({
     queryKey: ["/api/homepage-slides", "active"],
     queryFn: () => homepageSlideService.getActiveSlides(),
@@ -46,16 +50,18 @@ export default function Home() {
   }, [HERO_SLIDES.length, isPaused]);
 
   const featuredProducts = useMemo(() => {
-    return allProducts?.filter(p => p.labels?.includes("Best Seller")).slice(0, 5) || [];
-  }, [allProducts]);
+    const filtered = allProducts?.filter(p => p.labels?.includes("Best Seller")) || [];
+    return showMoreFeatured ? filtered : filtered.slice(0, 5);
+  }, [allProducts, showMoreFeatured]);
 
   const likedProducts = useMemo(() => {
-    return allProducts?.filter(p => p.labels?.includes("Liked")).slice(0, 5) || [];
-  }, [allProducts]);
+    const filtered = allProducts?.filter(p => p.labels?.includes("Liked")) || [];
+    return showMoreLiked ? filtered : filtered.slice(0, 5);
+  }, [allProducts, showMoreLiked]);
 
   const newArrivals = useMemo(() => {
-    return allProducts?.slice(0, 5) || [];
-  }, [allProducts]);
+    return showMoreNewArrivals ? allProducts || [] : allProducts?.slice(0, 5) || [];
+  }, [allProducts, showMoreNewArrivals]);
 
   const isFeaturedLoading = isAllProductsLoading;
   const isLikedLoading = isAllProductsLoading;
@@ -313,13 +319,26 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
                   >
                     <ProductCard product={product} />
                   </motion.div>
                 ))
               )}
             </div>
+
+            {allProducts && allProducts.length > 5 && (
+              <div className="mt-12 text-center">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => setShowMoreNewArrivals(!showMoreNewArrivals)}
+                  className="rounded-full min-w-[200px]"
+                >
+                  {showMoreNewArrivals ? "Show Less" : "Show More"}
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -355,6 +374,19 @@ export default function Home() {
                 ))
               )}
             </div>
+
+            {allProducts?.filter(p => p.labels?.includes("Best Seller")).length! > 5 && (
+              <div className="mt-12 text-center">
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => setShowMoreFeatured(!showMoreFeatured)}
+                  className="rounded-full min-w-[200px]"
+                >
+                  {showMoreFeatured ? "Show Less" : "Show More"}
+                </Button>
+              </div>
+            )}
 
             <div className="mt-12 text-center md:hidden">
               <Link href="/products">
@@ -403,13 +435,26 @@ export default function Home() {
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
                     >
                       <ProductCard product={product} />
                     </motion.div>
                   ))
                 )}
               </div>
+
+              {allProducts?.filter(p => p.labels?.includes("Liked")).length! > 5 && (
+                <div className="mt-12 text-center">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => setShowMoreLiked(!showMoreLiked)}
+                    className="rounded-full min-w-[200px] border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white"
+                  >
+                    {showMoreLiked ? "Show Less" : "Show More"}
+                  </Button>
+                </div>
+              )}
             </div>
           </section>
         )}
