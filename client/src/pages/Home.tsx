@@ -46,7 +46,7 @@ export default function Home() {
   }, [HERO_SLIDES.length, isPaused]);
 
   const featuredProducts = useMemo(() => {
-    return allProducts?.slice(0, 5) || [];
+    return allProducts?.filter(p => p.labels?.includes("Best Seller")).slice(0, 5) || [];
   }, [allProducts]);
 
   const newArrivals = useMemo(() => {
