@@ -46,6 +46,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Media collection: Auth read/write
+    match /media/{mediaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
     // Users collection: User can read/write their own profile
     match /users/{userId} {
       allow read: if isAuthenticated();
