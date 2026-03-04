@@ -6,14 +6,17 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Video, Upload, CheckCircle, Video as VideoIcon } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
-export function VideoUpload({ onUploadComplete, userId, folder = "videos", value }) {
+export function VideoUpload({ onUploadComplete, userId: propUserId, folder = "videos", value }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(value ? { secure_url: value } : null);
   const { toast } = useToast();
   const fileInputRef = useRef(null);
+  const { user } = useAuthStore();
+  const userId = propUserId || user?.uid;
 
   // Update result if value changes externally
   useEffect(() => {

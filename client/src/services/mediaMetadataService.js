@@ -21,7 +21,7 @@ export const saveMediaMetadata = async (userId, cloudinaryData, customMetadata =
   try {
     const mediaRef = collection(db, "media");
     const docData = {
-      userId,
+      userId: userId || 'anonymous',
       cloudinaryPublicId: cloudinaryData.public_id,
       cloudinaryUrl: cloudinaryData.secure_url,
       uploadedAt: serverTimestamp(),
