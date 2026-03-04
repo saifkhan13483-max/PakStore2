@@ -1,15 +1,33 @@
 import { cloudinaryConfig } from "../config/cloudinary";
 
 export const validateFile = (file) => {
-  const maxSize = 2 * 1024 * 1024; // 2MB limit per requirements
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  const isVideo = file.type.startsWith("video/");
+  const maxSize = isVideo ? 100 * 1024 * 1024 : 2 * 1024 * 1024; // 100MB for video, 2MB for images
+  const allowedTypes = [
+    "image/jpeg", 
+    "image/png", 
+    "image/webp",
+    "video/mp4",
+    "video/mpeg",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/webm"
+  ];
 
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: "Only JPG, PNG, and WebP formats are accepted" };
+    return { 
+      valid: false, 
+      error: isVideo 
+        ? "Unsupported video format. Please use MP4, MOV, or AVI." 
+        : "Only JPG, PNG, and WebP formats are accepted" 
+    };
   }
 
   if (file.size > maxSize) {
-    return { valid: false, error: "File size exceeds 2MB limit" };
+    return { 
+      valid: false, 
+      error: `File size exceeds ${isVideo ? '100MB' : '2MB'} limit` 
+    };
   }
 
   return { valid: true };
