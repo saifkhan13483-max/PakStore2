@@ -73,6 +73,7 @@ export default function AdminProductForm() {
       features: [],
       specifications: {},
       variants: [],
+      labels: [],
     },
   });
 
@@ -101,6 +102,7 @@ export default function AdminProductForm() {
         features: product.features || [],
         specifications: product.specifications || {},
         variants: product.variants || [],
+        labels: product.labels || [],
       });
     }
   }, [product, form]);
@@ -500,6 +502,44 @@ export default function AdminProductForm() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-4">
+                    <div className="grid gap-4">
+                      <FormField
+                        control={form.control}
+                        name="labels"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-emerald-900 font-semibold">Product Labels</FormLabel>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {["Best Seller", "Liked", "New", "Featured", "Sale"].map((label) => {
+                                const isSelected = (field.value || []).includes(label);
+                                return (
+                                  <Badge
+                                    key={label}
+                                    variant={isSelected ? "default" : "outline"}
+                                    className={`cursor-pointer transition-all ${
+                                      isSelected 
+                                        ? "bg-emerald-600 hover:bg-emerald-700" 
+                                        : "hover:bg-emerald-50 text-emerald-600 border-emerald-200"
+                                    }`}
+                                    onClick={() => {
+                                      const current = field.value || [];
+                                      const updated = isSelected
+                                        ? current.filter((l) => l !== label)
+                                        : [...current, label];
+                                      field.onChange(updated);
+                                    }}
+                                  >
+                                    {label}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                            <FormDescription>Select labels to highlight this product</FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={form.control}
                       name="price"

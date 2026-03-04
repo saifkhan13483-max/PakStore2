@@ -83,11 +83,26 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Badges */}
-        {!product.inStock && (
-          <div className="absolute top-2 left-2 bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg">
-            Sold Out
-          </div>
-        )}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          {!product.inStock && (
+            <div className="bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg w-fit">
+              Sold Out
+            </div>
+          )}
+          {product.labels?.map((label) => (
+            <div 
+              key={label}
+              className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg w-fit ${
+                label === 'Best Seller' ? 'bg-amber-500 text-white' :
+                label === 'Liked' ? 'bg-pink-500 text-white' :
+                label === 'New' ? 'bg-emerald-500 text-white' :
+                'bg-blue-500 text-white'
+              }`}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
         {product.originalPrice && product.originalPrice > product.price && (
           <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg">
             {Math.round((1 - product.price / product.originalPrice) * 100)}% Off

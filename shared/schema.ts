@@ -58,6 +58,7 @@ export const productSchema = baseDocumentSchema.extend({
   features: z.array(z.string()).optional(),
   specifications: z.record(z.any()).optional(),
   stock: z.number().int().nonnegative().optional(),
+  labels: z.array(z.string()).optional().default([]),
 });
 
 export const categorySchema = baseDocumentSchema.extend({
