@@ -218,8 +218,20 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 mb-12 lg:mb-20">
         <div className="flex flex-col md:flex-row gap-4 lg:sticky lg:top-24 h-fit">
-          {images.length > 1 && (
+          {images.length > 0 && (
             <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[400px] lg:max-h-[500px] order-2 md:order-1">
+              {product.videoUrl && (
+                <button
+                  onClick={() => setShowVideo(true)}
+                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center bg-black ${
+                    showVideo 
+                      ? "border-primary ring-2 ring-primary/10" 
+                      : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
+                  }`}
+                >
+                  <Play className="w-8 h-8 text-white" />
+                </button>
+              )}
               {images.map((img, idx) => (
                 <button
                   key={idx}
@@ -236,18 +248,6 @@ export default function ProductDetail() {
                   <img src={getOptimizedImageUrl(img, { width: 100, height: 100 })} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
-              {product.videoUrl && (
-                <button
-                  onClick={() => setShowVideo(true)}
-                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center bg-black ${
-                    showVideo 
-                      ? "border-primary ring-2 ring-primary/10" 
-                      : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
-                  }`}
-                >
-                  <Play className="w-8 h-8 text-white" />
-                </button>
-              )}
             </div>
           )}
           
