@@ -89,15 +89,10 @@ export function ProductCard({ product }: ProductCardProps) {
               Sold Out
             </div>
           )}
-          {product.labels?.map((label) => (
+          {product.labels?.filter(label => label === 'Best Seller').map((label) => (
             <div 
               key={label}
-              className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg w-fit ${
-                label === 'Best Seller' ? 'bg-amber-500 text-white' :
-                label === 'Liked' ? 'bg-pink-500 text-white' :
-                label === 'New' ? 'bg-emerald-500 text-white' :
-                'bg-blue-500 text-white'
-              }`}
+              className="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg w-fit bg-amber-500 text-white"
             >
               {label}
             </div>
