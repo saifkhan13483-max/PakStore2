@@ -79,7 +79,7 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
         <section 
-          className="relative w-full aspect-[1920/700] min-h-[400px] overflow-hidden bg-black group"
+          className="relative w-full aspect-[1920/700] min-h-[250px] sm:min-h-[400px] overflow-hidden bg-black group"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
