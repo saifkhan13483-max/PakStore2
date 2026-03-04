@@ -6,7 +6,7 @@ import { getOptimizedImageUrl } from "@/lib/cloudinary";
 export function OrderSummary() {
   const { items, getTotalPrice } = useCartStore();
   const subtotal = getTotalPrice();
-  const shippingThreshold = 5000;
+  const shippingThreshold = 10000;
   const shippingCharges = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 250;
   const total = subtotal + shippingCharges;
 

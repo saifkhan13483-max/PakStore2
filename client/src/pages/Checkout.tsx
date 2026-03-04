@@ -70,7 +70,7 @@ export default function Checkout() {
       
       // 1. Prepare order data
       const subtotal = items.reduce((sum, item) => sum + (Number((item as any).price || 0) * Number(item.quantity)), 0);
-      const shipping = subtotal > 5000 ? 0 : 250; 
+      const shipping = subtotal > 10000 ? 0 : 250; 
       const total = Number(subtotal + shipping);
 
       const orderData = {
