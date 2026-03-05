@@ -17,7 +17,9 @@ import categoriesListImage from "@assets/image_1772720522681.png";
 import bagsCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_30_PM_(1)_1772724070377.png";
 import slippersCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_32_PM_(1)_1772724070375.png";
 import bedsheetsCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_47_36_PM_(1)_1772727647264.png";
-import shoesCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_49_21_PM_(1)_1772727647265.png";
+import shoesCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_49_21_PM_(1)_1772718582697.png";
+import eidSpecialImage from "@assets/ChatGPT_Image_Mar_5,_2026,_09_55_38_PM_(1)_1772732730304.png";
+import watchesImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_51_13_PM_(1)_1772732730305.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
@@ -286,6 +288,10 @@ export default function Home() {
                     categoryImage = bedsheetsCategoryImage;
                   } else if (category.name.toLowerCase() === "shoes") {
                     categoryImage = shoesCategoryImage;
+                  } else if (category.name.toLowerCase().includes("eid special")) {
+                    categoryImage = eidSpecialImage;
+                  } else if (category.name.toLowerCase().includes("watches")) {
+                    categoryImage = watchesImage;
                   }
                   
                   return (
