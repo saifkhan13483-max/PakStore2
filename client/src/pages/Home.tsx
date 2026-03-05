@@ -60,7 +60,8 @@ export default function Home() {
   }, [allProducts, showMoreLiked]);
 
   const newArrivals = useMemo(() => {
-    return showMoreNewArrivals ? allProducts || [] : allProducts?.slice(0, 5) || [];
+    const filtered = allProducts?.filter(p => p.labels?.includes("New")) || [];
+    return showMoreNewArrivals ? filtered : filtered.slice(0, 5);
   }, [allProducts, showMoreNewArrivals]);
 
   const isFeaturedLoading = isAllProductsLoading;
