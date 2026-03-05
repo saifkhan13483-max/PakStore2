@@ -14,7 +14,7 @@ import electronicsImage from "@assets/bluks-bx-301-power-bank-20000mah-pakistan-
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import childrenSectionImage from "@assets/image_1772718582697.png";
-import categoriesListImage from "@assets/image_1772720324844.png";
+import categoriesListImage from "@assets/image_1772720522681.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { homepageSlideService } from "@/services/homepageSlideService";
@@ -251,7 +251,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Children's Categories */}
+        {/* Categories Section */}
         <section className="py-20 sm:py-28 bg-muted/20 overflow-hidden relative">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-16">
@@ -261,11 +261,11 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">FOR THE LITTLE ONES</span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Children's Collection</h2>
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">EXPLORE OUR</span>
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Categories</h2>
                 <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Discover a world of wonder with our curated selection of toys, clothing, and essentials for every stage of childhood.
+                  Discover our diverse range of authentic Pakistani products, handcrafted with care and tradition for your lifestyle.
                 </p>
               </motion.div>
             </div>
@@ -304,7 +304,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 <CategoryCard 
-                  name="Customiz Items" 
+                  name="Custom Items" 
                   slug="customizable-items" 
                   count={10} 
                   image={categoriesListImage}
