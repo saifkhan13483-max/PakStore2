@@ -14,7 +14,7 @@ import electronicsImage from "@assets/bluks-bx-301-power-bank-20000mah-pakistan-
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import childrenSectionImage from "@assets/image_1772718582697.png";
-import categoriesListImage from "@assets/image_1772718682882.png";
+import categoriesListImage from "@assets/image_1772720324844.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { homepageSlideService } from "@/services/homepageSlideService";
