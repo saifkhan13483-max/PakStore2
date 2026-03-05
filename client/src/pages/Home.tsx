@@ -13,6 +13,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import electronicsImage from "@assets/bluks-bx-301-power-bank-20000mah-pakistan-priceoye-va1cz-500x_1770554316337.webp";
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
+import childrenSectionImage from "@assets/image_1772718582697.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { homepageSlideService } from "@/services/homepageSlideService";
@@ -249,7 +250,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Categories */}
+        {/* Children's Categories */}
         <section className="py-20 sm:py-28 bg-muted/20 overflow-hidden relative">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-16">
@@ -259,11 +260,11 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">Curated Collections</span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Shop by Category</h2>
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">For the Little Ones</span>
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Children's Collection</h2>
                 <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Explore our meticulously selected categories featuring artisanal craftsmanship and premium global brands tailored for your lifestyle.
+                  Discover a world of wonder with our curated selection of toys, clothing, and essentials for every stage of childhood.
                 </p>
               </motion.div>
             </div>
@@ -276,10 +277,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
                 <CategoryCard 
-                  name="Electronics & Gadgets" 
-                  slug="electronics-gadgets" 
-                  count={5} 
-                  image={electronicsImage}
+                  name="Toys & Games" 
+                  slug="toys-games" 
+                  count={12} 
+                  image={childrenSectionImage}
                 />
               </motion.div>
               <motion.div
@@ -289,10 +290,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <CategoryCard 
-                  name="Home & Decor" 
-                  slug="home-kitchen" 
-                  count={5} 
-                  image={homeKitchenImage}
+                  name="Kids' Fashion" 
+                  slug="kids-fashion" 
+                  count={24} 
+                  image={childrenSectionImage}
                 />
               </motion.div>
               <motion.div
@@ -302,10 +303,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 <CategoryCard 
-                  name="Fashion & Accessories" 
-                  slug="fashion-accessories" 
-                  count={5} 
-                  image={fashionImage}
+                  name="Baby Care" 
+                  slug="baby-care" 
+                  count={18} 
+                  image={childrenSectionImage}
                 />
               </motion.div>
             </div>
