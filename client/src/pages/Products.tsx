@@ -73,7 +73,9 @@ export default function Products() {
     queryFn: () => {
       const params = new URLSearchParams(search);
       return productFirestoreService.getAllProducts({
-        category: filterState.categories.length > 0 ? filterState.categories[0] : undefined,
+        // If multiple categories are selected, don't filter at the database level by a single category
+        // to allow client-side filtering of all selected categories.
+        category: filterState.categories.length === 1 ? filterState.categories[0] : undefined,
         parentCategoryId: params.get("parentCategoryId") || undefined,
         search: queryParam,
         sortBy: sortBy === "price-low" ? "price-asc" : sortBy === "price-high" ? "price-desc" : sortBy === "newest" ? "newest" : undefined,
