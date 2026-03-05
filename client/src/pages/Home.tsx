@@ -14,6 +14,7 @@ import electronicsImage from "@assets/bluks-bx-301-power-bank-20000mah-pakistan-
 import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1)_1770740841233.png";
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import childrenSectionImage from "@assets/image_1772718582697.png";
+import categoriesListImage from "@assets/image_1772718682882.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { homepageSlideService } from "@/services/homepageSlideService";
@@ -269,12 +270,90 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <CategoryCard 
+                  name="Bags" 
+                  slug="bags" 
+                  count={15} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <CategoryCard 
+                  name="Bedsheets" 
+                  slug="bedsheets" 
+                  count={20} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <CategoryCard 
+                  name="Customizable Items" 
+                  slug="customizable-items" 
+                  count={10} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <CategoryCard 
+                  name="Eid Special" 
+                  slug="eid-special-collection" 
+                  count={25} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <CategoryCard 
+                  name="Shoes" 
+                  slug="shoes" 
+                  count={30} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <CategoryCard 
+                  name="Slippers" 
+                  slug="slippers" 
+                  count={12} 
+                  image={categoriesListImage}
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.7 }}
               >
                 <CategoryCard 
                   name="Toys & Games" 
@@ -287,7 +366,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
               >
                 <CategoryCard 
                   name="Kids' Fashion" 
@@ -300,7 +379,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
               >
                 <CategoryCard 
                   name="Baby Care" 
