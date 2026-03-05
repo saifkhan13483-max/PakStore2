@@ -16,6 +16,8 @@ import childrenSectionImage from "@assets/image_1772718582697.png";
 import categoriesListImage from "@assets/image_1772720522681.png";
 import bagsCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_30_PM_(1)_1772724070377.png";
 import slippersCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_32_PM_(1)_1772724070375.png";
+import bedsheetsCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_47_36_PM_(1)_1772727647264.png";
+import shoesCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_49_21_PM_(1)_1772727647265.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
@@ -280,6 +282,10 @@ export default function Home() {
                     categoryImage = bagsCategoryImage;
                   } else if (category.name.toLowerCase() === "slippers") {
                     categoryImage = slippersCategoryImage;
+                  } else if (category.name.toLowerCase() === "bedsheets") {
+                    categoryImage = bedsheetsCategoryImage;
+                  } else if (category.name.toLowerCase() === "shoes") {
+                    categoryImage = shoesCategoryImage;
                   }
                   
                   return (
