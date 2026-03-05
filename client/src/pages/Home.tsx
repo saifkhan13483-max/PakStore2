@@ -68,6 +68,22 @@ export default function Home() {
   const isLikedLoading = isAllProductsLoading;
   const isNewArrivalsLoading = isAllProductsLoading;
 
+  const [isSeeding, setIsSeeding] = useState(false);
+  const handleSeed = async () => {
+    setIsSeeding(true);
+    try {
+      const { seedRandomComments } = await import("@/lib/seed-comments");
+      await seedRandomComments();
+      alert("Random comments added successfully!");
+      window.location.reload();
+    } catch (error: any) {
+      console.error(error);
+      alert("Failed to seed comments: " + (error.message || "Unknown error"));
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
 
@@ -83,6 +99,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button 
+          onClick={handleSeed} 
+          disabled={isSeeding}
+          variant="secondary"
+          size="sm"
+          className="opacity-20 hover:opacity-100 bg-white/10 text-white/40 border-none shadow-none"
+        >
+          {isSeeding ? "Seeding..." : "Seed Comments"}
+        </Button>
+      </div>
       <SEO 
         title="Home" 
         description="Shop the best products at PakCart. Quality items delivered to your door in Pakistan."
