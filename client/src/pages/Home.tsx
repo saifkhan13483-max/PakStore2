@@ -270,7 +270,7 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-7xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -347,45 +347,6 @@ export default function Home() {
                   slug="slippers" 
                   count={12} 
                   image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-              >
-                <CategoryCard 
-                  name="Toys & Games" 
-                  slug="toys-games" 
-                  count={12} 
-                  image={childrenSectionImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-              >
-                <CategoryCard 
-                  name="Kids' Fashion" 
-                  slug="kids-fashion" 
-                  count={24} 
-                  image={childrenSectionImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.9 }}
-              >
-                <CategoryCard 
-                  name="Baby Care" 
-                  slug="baby-care" 
-                  count={18} 
-                  image={childrenSectionImage}
                 />
               </motion.div>
             </div>
