@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { ArrowRight, Star, Truck, ShieldCheck, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import SEO from "@/components/SEO";
 import { CategoryCard } from "@/components/products/CategoryCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import childrenSectionImage from "@assets/image_1772718582697.png";
 import categoriesListImage from "@assets/image_1772720522681.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 import { homepageSlideService } from "@/services/homepageSlideService";
 import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,7 @@ import { useAuthStore } from "@/store/authStore";
 
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
   const { isAdmin } = useAuthStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -117,11 +118,6 @@ export default function Home() {
           </Button>
         </div>
       )}
-      <SEO 
-        title="Home" 
-        description="Shop the best products at PakCart. Quality items delivered to your door in Pakistan."
-      />
-
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
         <section 
@@ -271,84 +267,28 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-              >
-                <CategoryCard 
-                  name="Bags" 
-                  slug="bags" 
-                  count={15} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <CategoryCard 
-                  name="Bedsheet" 
-                  slug="bedsheets" 
-                  count={20} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <CategoryCard 
-                  name="Custom Items" 
-                  slug="customizable-items" 
-                  count={10} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <CategoryCard 
-                  name="Eid Special" 
-                  slug="eid-special-collection" 
-                  count={25} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <CategoryCard 
-                  name="Shoes" 
-                  slug="shoes" 
-                  count={30} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                <CategoryCard 
-                  name="Slippers" 
-                  slug="slippers" 
-                  count={12} 
-                  image={categoriesListImage}
-                />
-              </motion.div>
+              {isCategoriesLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
+                ))
+              ) : (
+                categories.slice(0, 6).map((category, index) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
+                  >
+                    <CategoryCard 
+                      name={category.name} 
+                      slug={String(category.id)} 
+                      count={0} 
+                      image={category.image || categoriesListImage}
+                    />
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
           
@@ -533,6 +473,7 @@ export default function Home() {
           </section>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
