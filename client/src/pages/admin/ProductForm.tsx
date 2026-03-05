@@ -147,6 +147,29 @@ export default function AdminProductForm() {
     }
   }, [name, isEditing, form]);
 
+  // Auto-generate price for variants from base price
+  const basePrice = form.watch("price");
+  useEffect(() => {
+    if (basePrice > 0) {
+      const currentVariants = form.getValues("variants") || [];
+      let updated = false;
+      const newVariants = currentVariants.map(variant => {
+        const newOptions = variant.options.map(option => {
+          if (!option.price || option.price === 0) {
+            updated = true;
+            return { ...option, price: basePrice };
+          }
+          return option;
+        });
+        return { ...variant, options: newOptions };
+      });
+      
+      if (updated) {
+        form.setValue("variants", newVariants, { shouldValidate: true });
+      }
+    }
+  }, [basePrice, form]);
+
   const onSubmit = (data: InsertProduct) => {
     mutation.mutate(data);
   };
