@@ -68,11 +68,11 @@ service cloud.firestore {
     // Comments collection: Public read, Auth create/update/delete own
     match /comments/{commentId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isOwner(request.resource.data.userId)
+      allow create: if isAuthenticated() && (isOwner(request.resource.data.userId) || request.resource.data.userId == "system-seed")
                     && request.resource.data.rating is int
                     && request.resource.data.rating >= 1
                     && request.resource.data.rating <= 5;
-      allow update, delete: if isOwner(resource.data.userId);
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     // Default deny for everything else
