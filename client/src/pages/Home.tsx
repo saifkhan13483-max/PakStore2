@@ -14,6 +14,8 @@ import homeKitchenImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_21_50_PM_(1
 import fashionImage from "@assets/ChatGPT_Image_Feb_10,_2026,_09_19_08_PM_(1)_1770740841232.png";
 import childrenSectionImage from "@assets/image_1772718582697.png";
 import categoriesListImage from "@assets/image_1772720522681.png";
+import bagsCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_30_PM_(1)_1772724070377.png";
+import slippersCategoryImage from "@assets/ChatGPT_Image_Mar_5,_2026,_08_00_32_PM_(1)_1772724070375.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
@@ -272,22 +274,31 @@ export default function Home() {
                   <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
                 ))
               ) : (
-                categories.slice(0, 6).map((category, index) => (
-                  <motion.div
-                    key={category.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
-                  >
-                    <CategoryCard 
-                      name={category.name} 
-                      slug={String(category.id)} 
-                      count={0} 
-                      image={category.image || categoriesListImage}
-                    />
-                  </motion.div>
-                ))
+                categories.slice(0, 6).map((category, index) => {
+                  let categoryImage = category.image || categoriesListImage;
+                  if (category.name.toLowerCase() === "bags") {
+                    categoryImage = bagsCategoryImage;
+                  } else if (category.name.toLowerCase() === "slippers") {
+                    categoryImage = slippersCategoryImage;
+                  }
+                  
+                  return (
+                    <motion.div
+                      key={category.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
+                    >
+                      <CategoryCard 
+                        name={category.name} 
+                        slug={String(category.id)} 
+                        count={0} 
+                        image={categoryImage}
+                      />
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </div>
