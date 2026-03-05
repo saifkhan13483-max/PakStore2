@@ -58,3 +58,7 @@ VITE_CLOUDINARY_CLOUD_NAME = "dftvtsjcg"
 [userenv.development]
 
 [userenv.production]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
