@@ -261,7 +261,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">For the Little Ones</span>
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">FOR THE LITTLE ONES</span>
                 <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Children's Collection</h2>
                 <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
@@ -291,7 +291,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <CategoryCard 
-                  name="Bedsheets" 
+                  name="Bedsheet" 
                   slug="bedsheets" 
                   count={20} 
                   image={categoriesListImage}
@@ -304,7 +304,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 <CategoryCard 
-                  name="Customizable Items" 
+                  name="Customiz Items" 
                   slug="customizable-items" 
                   count={10} 
                   image={categoriesListImage}
