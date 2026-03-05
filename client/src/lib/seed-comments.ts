@@ -26,6 +26,11 @@ export async function seedRandomComments() {
     const productsSnapshot = await getDocs(collection(db, "products"));
     console.log(`Found ${productsSnapshot.size} products.`);
 
+    if (productsSnapshot.empty) {
+      console.log("No products found to seed comments for.");
+      return true;
+    }
+
     for (const productDoc of productsSnapshot.docs) {
       const productId = productDoc.id;
       const productName = productDoc.data().name;
@@ -38,16 +43,24 @@ export async function seedRandomComments() {
         const name = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
         const rating = Math.floor(Math.random() * 2) + 4;
 
-        await addDoc(collection(db, "comments"), {
-          productId,
-          userName: name,
-          content: comment,
-          rating,
-          userId: "system-seed",
-          userPhoto: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now()
-        });
+        try {
+          await addDoc(collection(db, "comments"), {
+            productId,
+            userName: name,
+            content: comment,
+            rating,
+            userId: "system-seed",
+            userPhoto: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+          });
+        } catch (e: any) {
+          console.error(`Failed to add comment for ${productName}:`, e);
+          if (e.code === 'permission-denied') {
+             throw new Error("Missing or insufficient permissions. Please check your Firestore Rules to allow writes to the 'comments' collection.");
+          }
+          throw e;
+        }
       }
 
       const commentsQuery = query(collection(db, "comments"), where("productId", "==", productId));
@@ -56,11 +69,19 @@ export async function seedRandomComments() {
       const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
       const averageRating = Number((totalRating / (comments.length || 1)).toFixed(1));
 
-      await updateDoc(doc(db, "products", productId), {
-        rating: averageRating,
-        reviewCount: comments.length,
-        updatedAt: Timestamp.now()
-      });
+      try {
+        await updateDoc(doc(db, "products", productId), {
+          rating: averageRating,
+          reviewCount: comments.length,
+          updatedAt: Timestamp.now()
+        });
+      } catch (e: any) {
+        console.error(`Failed to update product ${productName}:`, e);
+        if (e.code === 'permission-denied') {
+           throw new Error("Missing or insufficient permissions. Please check your Firestore Rules to allow updates to the 'products' collection.");
+        }
+        throw e;
+      }
     }
 
     console.log("Seeding complete!");
