@@ -19,8 +19,11 @@ import { homepageSlideService } from "@/services/homepageSlideService";
 import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
 
+import { useAuthStore } from "@/store/authStore";
+
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
+  const { isAdmin } = useAuthStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
@@ -99,17 +102,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button 
-          onClick={handleSeed} 
-          disabled={isSeeding}
-          variant="secondary"
-          size="sm"
-          className="opacity-20 hover:opacity-100 bg-white/10 text-white/40 border-none shadow-none"
-        >
-          {isSeeding ? "Seeding..." : "Seed Comments"}
-        </Button>
-      </div>
+      {isAdmin && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button 
+            onClick={handleSeed} 
+            disabled={isSeeding}
+            variant="secondary"
+            size="sm"
+            className="opacity-70 hover:opacity-100 bg-primary text-primary-foreground border-none shadow-lg"
+          >
+            {isSeeding ? "Seeding..." : "Seed Comments"}
+          </Button>
+        </div>
+      )}
       <SEO 
         title="Home" 
         description="Shop the best products at PakCart. Quality items delivered to your door in Pakistan."
