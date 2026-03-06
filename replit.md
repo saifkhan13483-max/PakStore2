@@ -4,6 +4,7 @@
 A modern e-commerce application built with React, Vite, and Firebase (Firestore & Authentication). The project has been migrated from a traditional Express/Postgres stack to a fully serverless architecture.
 
 ## Recent Changes
+- **2026-03-06**: Migrated project from Replit Agent to Replit environment. Installed all npm dependencies, fixed missing asset imports in Home.tsx (replaced missing ChatGPT-generated images with available fallback assets).
 - **2026-02-10**: Removed Express.js backend (`server/` folder).
 - **2026-02-10**: Migrated data persistence to Firebase Firestore.
 - **2026-02-10**: Updated build process to be frontend-only (Vite).
