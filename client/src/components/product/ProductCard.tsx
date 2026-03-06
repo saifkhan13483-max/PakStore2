@@ -1,12 +1,14 @@
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
-import { ShoppingCart, Eye, Star, ImageOff, Plus } from "lucide-react";
-import { type Product } from "@shared/schema";
+import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2 } from "lucide-react";
+import { type Product, commentSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
+import { where } from "firebase/firestore";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +18,26 @@ export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
+
+  // Real-time rating/reviews from Firestore
+  const constraints = useMemo(() => [where("productId", "==", product.id)], [product.id]);
+  const { data: comments, isLoading: isLoadingReviews } = useRealtimeCollection(
+    "comments",
+    commentSchema,
+    ["comments", product.id],
+    constraints
+  );
+
+  const { displayRating, displayReviewCount } = useMemo(() => {
+    if (!comments || comments.length === 0) {
+      return { displayRating: 0, displayReviewCount: 0 };
+    }
+    const total = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+    return {
+      displayRating: (total / comments.length).toFixed(1),
+      displayReviewCount: comments.length
+    };
+  }, [comments]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation
@@ -113,10 +135,14 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
           </Link>
-          {product.rating !== undefined && (Number(product.reviewCount) || 0) > 0 && (
+          {isLoadingReviews ? (
+            <div className="flex items-center px-1 py-0 rounded w-fit shrink-0">
+              <Loader2 className="w-2 h-2 animate-spin text-muted-foreground" />
+            </div>
+          ) : Number(displayReviewCount) > 0 && (
             <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
               <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
-              <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+              <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{displayRating}</span>
             </div>
           )}
         </div>

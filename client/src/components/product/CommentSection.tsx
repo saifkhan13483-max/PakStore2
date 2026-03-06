@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Loader2, Send, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/product/ImageUploader";
-import { Comment, InsertComment } from "@shared/schema";
+import { Comment, InsertComment, commentSchema } from "@shared/schema";
 import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
 import { useAuthStore } from "@/store/authStore";
+import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
+import { where } from "firebase/firestore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,16 +58,17 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [editImages, setEditImages] = useState<string[]>([]);
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
-  const { data: comments, isLoading, refetch } = useQuery<Comment[]>({
-    queryKey: ["comments", productId],
-    queryFn: () => {
-      console.log("DEBUG Querying comments for:", productId);
-      return commentFirestoreService.getComments(productId);
-    },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnWindowFocus: true,
-  });
+  const { data: comments, isLoading } = useRealtimeCollection(
+    "comments",
+    commentSchema,
+    ["comments", productId],
+    useMemo(() => [where("productId", "==", productId)], [productId])
+  );
+
+  const refetch = () => {
+    // Realtime collection handles updates automatically, 
+    // but we keep the name for compatibility if needed.
+  };
 
   const mutation = useMutation({
     mutationFn: (newComment: InsertComment) => {

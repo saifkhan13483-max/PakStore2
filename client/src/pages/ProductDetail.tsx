@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
@@ -18,6 +18,9 @@ import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CommentSection } from "@/components/product/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
+import { commentSchema } from "@shared/schema";
+import { where } from "firebase/firestore";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -27,6 +30,26 @@ export default function ProductDetail() {
     queryKey: ["product", slug],
     queryFn: () => productFirestoreService.getProductBySlug(slug),
   });
+
+  // Real-time rating/reviews from Firestore
+  const constraints = useMemo(() => [where("productId", "==", product?.id || "")], [product?.id]);
+  const { data: comments, isLoading: isLoadingReviews } = useRealtimeCollection(
+    "comments",
+    commentSchema,
+    ["comments", product?.id],
+    constraints
+  );
+
+  const { displayRating, displayReviewCount } = useMemo(() => {
+    if (!comments || comments.length === 0) {
+      return { displayRating: "0.0", displayReviewCount: 0 };
+    }
+    const total = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+    return {
+      displayRating: (total / comments.length).toFixed(1),
+      displayReviewCount: comments.length
+    };
+  }, [comments]);
 
   const { data: category } = useQuery({
     queryKey: ["category", product?.categoryId],
@@ -300,13 +323,17 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {(Number(product.reviewCount) || 0) > 0 && (
+              {isLoadingReviews ? (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/30 rounded-full border">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (Number(displayReviewCount) > 0 && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
                   <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                  <span className="font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+                  <span className="font-bold text-yellow-700 dark:text-yellow-500">{displayRating}</span>
                 </div>
-              )}
-              <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
+              ))}
+              <span className="text-muted-foreground text-sm">({displayReviewCount} reviews)</span>
               <Separator orientation="vertical" className="h-4 hidden sm:block" />
               <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
                 {product.inStock ? "In Stock" : "Out of Stock"}
