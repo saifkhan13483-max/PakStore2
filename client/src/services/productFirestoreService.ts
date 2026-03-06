@@ -100,11 +100,12 @@ export const productFirestoreService = {
       const querySnapshot = await getDocs(q);
       const products = querySnapshot.docs.map(doc => {
         const data = doc.data();
+        // Force number conversion and ensure we use the correct fields
         const rating = data.rating !== undefined ? Number(data.rating) : 0;
         const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
         return { 
-          id: doc.id, 
           ...data,
+          id: doc.id, 
           rating,
           reviewCount
         } as Product;
@@ -137,8 +138,8 @@ export const productFirestoreService = {
       const rating = data.rating !== undefined ? Number(data.rating) : 0;
       const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
       return { 
-        id: doc.id, 
         ...data,
+        id: doc.id, 
         rating,
         reviewCount
       } as Product;
