@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Mail, Calendar, ShieldCheck, Phone, AlertCircle, Camera } from "lucide-react";
+import { User, Mail, Calendar, ShieldCheck, Phone, AlertCircle, Camera, Image as ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, type ProfileValues } from "@/lib/validations/auth";
@@ -19,6 +19,7 @@ import { MediaUpload } from "../../components/MediaUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LayoutDashboard } from "lucide-react";
 import { Link } from "wouter";
+import { SEED_AVATARS } from "@shared/user-seeds";
 
 const PAKISTAN_CITIES = [
   "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", 
@@ -30,6 +31,7 @@ export default function Profile() {
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [isSeedPickerOpen, setIsSeedPickerOpen] = useState(false);
 
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -46,22 +48,28 @@ export default function Profile() {
 
   const onAvatarUploadComplete = async (cloudinaryData: any) => {
     if (!cloudinaryData || !cloudinaryData.secure_url) return;
+    updateProfilePhoto(cloudinaryData.secure_url);
+  };
+
+  const updateProfilePhoto = async (photoURL: string) => {
+    if (!user) return;
     
     setIsUpdating(true);
     try {
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
-        photoURL: cloudinaryData.secure_url,
+        photoURL,
         updatedAt: serverTimestamp(),
       });
       
       // Update local state in auth store
       useAuthStore.getState().setUser({
         ...user,
-        photoURL: cloudinaryData.secure_url
+        photoURL
       } as any);
       
       setIsAvatarDialogOpen(false);
+      setIsSeedPickerOpen(false);
       toast({
         title: "Profile Picture Updated",
         description: "Your profile picture has been updated successfully.",
@@ -72,15 +80,15 @@ export default function Profile() {
       // Update local state regardless of Firestore error to show immediate feedback
       useAuthStore.getState().setUser({
         ...user,
-        photoURL: cloudinaryData.secure_url
+        photoURL
       } as any);
 
-      // We still treat it as a success for the user since the image is uploaded and visible
       toast({
         title: "Profile Picture Updated",
         description: "Your profile picture has been updated successfully.",
       });
       setIsAvatarDialogOpen(false);
+      setIsSeedPickerOpen(false);
     } finally {
       setIsUpdating(false);
     }
@@ -164,13 +172,52 @@ export default function Profile() {
                     <DialogHeader>
                       <DialogTitle>Update Profile Picture</DialogTitle>
                     </DialogHeader>
-                    <MediaUpload 
-                      onUploadComplete={onAvatarUploadComplete}
-                      acceptedTypes={['image/*']}
-                      maxSize={2 * 1024 * 1024} // 2MB for profile images
-                      folder={`users/${user.uid}/profile`}
-                      multiple={false}
-                    />
+                    <div className="space-y-4 py-4">
+                      <MediaUpload 
+                        onUploadComplete={onAvatarUploadComplete}
+                        acceptedTypes={['image/*']}
+                        maxSize={2 * 1024 * 1024} // 2MB for profile images
+                        folder={`users/${user.uid}/profile`}
+                        multiple={false}
+                      />
+                      
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">Or choose from gallery</span>
+                        </div>
+                      </div>
+
+                      <Dialog open={isSeedPickerOpen} onOpenChange={setIsSeedPickerOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full gap-2">
+                            <ImageIcon className="h-4 w-4" />
+                            Choose from Seed Avatars
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-lg">
+                          <DialogHeader>
+                            <DialogTitle>Select an Avatar</DialogTitle>
+                          </DialogHeader>
+                          <div className="grid grid-cols-4 gap-4 py-4">
+                            {SEED_AVATARS.map((url, index) => (
+                              <button
+                                key={index}
+                                onClick={() => updateProfilePhoto(url)}
+                                className="relative aspect-square rounded-full overflow-hidden hover:ring-2 hover:ring-primary transition-all group"
+                              >
+                                <img src={url} alt={`Avatar ${index + 1}`} className="object-cover w-full h-full" />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">Select</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </div>

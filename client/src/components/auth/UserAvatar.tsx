@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SEED_AVATARS } from "@shared/user-seeds";
 
 interface UserAvatarProps {
   photoURL?: string | null;
@@ -10,18 +11,28 @@ interface UserAvatarProps {
 export function UserAvatar({ photoURL, displayName, email, className }: UserAvatarProps) {
   const initials = displayName
     ? displayName
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
     : email
     ? email[0].toUpperCase()
     : "U";
 
+  // Use seed avatar as fallback if no photoURL is provided
+  // We use a simple hash of the email to consistently assign the same seed avatar to the same user
+  const getSeedAvatar = () => {
+    if (!email) return SEED_AVATARS[0];
+    const hash = email.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return SEED_AVATARS[hash % SEED_AVATARS.length];
+  };
+
+  const displayPhotoURL = photoURL || getSeedAvatar();
+
   return (
     <Avatar className={className}>
       <AvatarImage 
-        src={photoURL || ""} 
+        src={displayPhotoURL} 
         alt={displayName || "User avatar"} 
         className="object-cover"
       />
