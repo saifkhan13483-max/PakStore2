@@ -18,7 +18,7 @@ const bagsCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v17
 const slippersCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789698/ChatGPT_Image_Mar_6_2026_02_15_30_PM_1_glrglb.png";
 const bedsheetsCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789692/ChatGPT_Image_Mar_6_2026_12_57_11_PM_1_e3bw54.png";
 const shoesCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789706/ChatGPT_Image_Mar_6_2026_12_57_07_PM_1_ghqfjt.png";
-import eidSpecialImage from "@/assets/hero-image.jpg";
+const eidSpecialImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772792215/ChatGPT_Image_Mar_6_2026_03_12_34_PM_1_wdck6p.png";
 const watchesImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789699/ChatGPT_Image_Mar_6_2026_12_57_08_PM_1_r0e1a4.png";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useProducts } from "@/hooks/use-products";
