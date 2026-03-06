@@ -18,14 +18,14 @@ const Footer = () => {
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.
             </p>
             <div className="flex gap-4 pt-2">
-              <a href="#" className="p-2 rounded-full bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all duration-300" aria-label="Facebook">
-                <Facebook className="h-5 w-5" />
+              <a href="#" className="p-2.5 rounded-full bg-[#FFF9E5] text-[#D4A017] hover:bg-[#D4A017] hover:text-white transition-all duration-300" aria-label="Facebook">
+                <Facebook className="h-4 w-4 fill-current" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all duration-300" aria-label="Instagram">
-                <Instagram className="h-5 w-5" />
+              <a href="#" className="p-2.5 rounded-full bg-[#FFF9E5] text-[#D4A017] hover:bg-[#D4A017] hover:text-white transition-all duration-300" aria-label="Instagram">
+                <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all duration-300" aria-label="Twitter">
-                <Twitter className="h-5 w-5" />
+              <a href="#" className="p-2.5 rounded-full bg-[#FFF9E5] text-[#D4A017] hover:bg-[#D4A017] hover:text-white transition-all duration-300" aria-label="Twitter">
+                <Twitter className="h-4 w-4 fill-current" />
               </a>
             </div>
           </div>
@@ -72,14 +72,14 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} PakCart. All rights reserved.</p>
-          <div className="flex items-center gap-1">
+        <div className="border-t pt-8 grid grid-cols-1 md:grid-cols-3 items-center gap-4 text-sm text-muted-foreground">
+          <p className="text-center md:text-left order-2 md:order-1">© {new Date().getFullYear()} PakCart. All rights reserved.</p>
+          <div className="flex items-center justify-center gap-1 order-1 md:order-2">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-red-500 fill-current" />
             <span>in Pakistan</span>
           </div>
-          <div className="flex gap-6">
+          <div className="flex justify-center md:justify-end gap-6 order-3">
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
           </div>
