@@ -1,21 +1,24 @@
-import avatar1 from "@assets/1_1772781276595.jpg";
-import avatar2 from "@assets/2_1772781276596.jpg";
-import avatar3 from "@assets/3_1772781276596.jpg";
-import avatar4 from "@assets/4_1772781276597.jpg";
-import avatar5 from "@assets/5_1772781276597.jpg";
-import avatar6 from "@assets/6_1772781276598.jpg";
-import avatar7 from "@assets/7_1772781276598.jpg";
-import avatar8 from "@assets/8_1772781276599.jpg";
-import avatar9 from "@assets/9_1772781276599.jpg";
-import avatar10 from "@assets/10_1772781276599.jpg";
-import avatar11 from "@assets/11_1772781276600.jpg";
-import avatar12 from "@assets/12_1772781276600.jpg";
-import avatar13 from "@assets/12_1772781276600.jpg"; // Using 12 as 13 in sequence if naming follows
-import avatar14 from "@assets/14_1772781276601.jpg";
-import avatar15 from "@assets/15_1772781276601.jpg";
-import avatar16 from "@assets/16_1772781276601.jpg";
-import avatar17 from "@assets/17_1772781276602.jpg";
-import avatar18 from "@assets/18_1772781276602.jpg";
+import defaultAvatar from "../client/src/assets/images/default-avatar.png";
+
+// Fallback for missing seed avatars to unblock the build
+const avatar1 = defaultAvatar;
+const avatar2 = defaultAvatar;
+const avatar3 = defaultAvatar;
+const avatar4 = defaultAvatar;
+const avatar5 = defaultAvatar;
+const avatar6 = defaultAvatar;
+const avatar7 = defaultAvatar;
+const avatar8 = defaultAvatar;
+const avatar9 = defaultAvatar;
+const avatar10 = defaultAvatar;
+const avatar11 = defaultAvatar;
+const avatar12 = defaultAvatar;
+const avatar13 = defaultAvatar;
+const avatar14 = defaultAvatar;
+const avatar15 = defaultAvatar;
+const avatar16 = defaultAvatar;
+const avatar17 = defaultAvatar;
+const avatar18 = defaultAvatar;
 
 export const SEED_AVATARS = [
   avatar1, avatar2, avatar3, avatar4, avatar5, avatar6,
