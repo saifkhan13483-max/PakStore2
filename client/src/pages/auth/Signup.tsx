@@ -25,6 +25,8 @@ import { signupSchema, type SignupValues } from "@/lib/validations/auth";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 
+import { SEED_AVATARS } from "@shared/user-seeds";
+
 const passwordRequirements = [
   { id: "length", label: "Minimum 8 characters", regex: /.{8,}/ },
   { id: "uppercase", label: "At least one uppercase letter (A-Z)", regex: /[A-Z]/ },
@@ -169,7 +171,7 @@ export default function Signup() {
         uid: user.uid,
         email: data.email,
         displayName: data.fullName,
-        photoURL: "/src/assets/images/default-avatar.png",
+        photoURL: SEED_AVATARS[Math.floor(Math.random() * SEED_AVATARS.length)].url,
         phoneNumber: "",
         createdAt: serverTimestamp(),
         lastLoginAt: serverTimestamp(),
