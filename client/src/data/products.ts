@@ -56,8 +56,8 @@ export const mockProducts: Product[] = [
     categoryId: "1",
     inStock: true,
     active: true,
-    rating: "4.8",
-    reviewCount: 124,
+    rating: "0.0",
+    reviewCount: 0,
     features: ["20000mAh Capacity", "Fast Charging Support", "One Year Warranty"],
     specifications: {
       capacity: "20000mAh",

@@ -36,11 +36,13 @@ export const productFirestoreService = {
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => {
         const data = doc.data();
+        const rating = data.rating !== undefined ? Number(data.rating) : 0;
+        const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
         return { 
           id: doc.id, 
           ...data,
-          rating: Number(data.rating || data.averageRating) || 0,
-          reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
+          rating,
+          reviewCount
         } as Product;
       });
     } catch (error: any) {
@@ -98,11 +100,13 @@ export const productFirestoreService = {
       const querySnapshot = await getDocs(q);
       const products = querySnapshot.docs.map(doc => {
         const data = doc.data();
+        const rating = data.rating !== undefined ? Number(data.rating) : 0;
+        const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
         return { 
           id: doc.id, 
           ...data,
-          rating: Number(data.rating || data.averageRating) || 0,
-          reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
+          rating,
+          reviewCount
         } as Product;
       });
 
@@ -130,11 +134,13 @@ export const productFirestoreService = {
       if (querySnapshot.empty) throw new Error("Product not found");
       const doc = querySnapshot.docs[0];
       const data = doc.data();
+      const rating = data.rating !== undefined ? Number(data.rating) : 0;
+      const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
       return { 
         id: doc.id, 
         ...data,
-        rating: Number(data.rating || data.averageRating) || 0,
-        reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
+        rating,
+        reviewCount
       } as Product;
     } catch (error: any) {
       console.error("Error getting product by slug:", error);
@@ -147,11 +153,13 @@ export const productFirestoreService = {
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) throw new Error("Product not found");
     const data = docSnap.data();
+    const rating = data.rating !== undefined ? Number(data.rating) : 0;
+    const reviewCount = data.reviewCount !== undefined ? Number(data.reviewCount) : 0;
     return { 
       id: docSnap.id, 
       ...data,
-      rating: Number(data.rating || data.averageRating) || 0,
-      reviewCount: Number(data.reviewCount || data.ratingsCount) || 0
+      rating,
+      reviewCount
     } as Product;
   },
 
