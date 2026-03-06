@@ -1,16 +1,20 @@
-export const SEED_AVATARS = [
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zainab",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Omar",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Bilal",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayesha",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Hamza",
-];
+// Sprite sheet contains 18 avatars in a 3x6 grid (3 rows, 6 columns)
+// Image: @assets/image_1772779678802.png
+// Each avatar is roughly 1/6th width and 1/3rd height
+
+export const SEED_AVATAR_SPRITE = "@assets/image_1772779678802.png";
+
+export const SEED_AVATARS = Array.from({ length: 18 }).map((_, i) => ({
+  id: `avatar-${i}`,
+  row: Math.floor(i / 6),
+  col: i % 6,
+  // We'll use these indices to calculate background position in the UI
+  index: i
+}));
 
 export const getRandomAvatar = () => {
-  return SEED_AVATARS[Math.floor(Math.random() * SEED_AVATARS.length)];
+  const index = Math.floor(Math.random() * SEED_AVATARS.length);
+  return `sprite:${index}`;
 };
 
 export const SEED_PROFILES = [
@@ -22,5 +26,5 @@ export const SEED_PROFILES = [
   { name: "Bilal Hassan", email: "bilal.hassan@example.pk" },
 ].map((p, i) => ({
   ...p,
-  photoURL: SEED_AVATARS[i % SEED_AVATARS.length]
+  photoURL: `sprite:${i % SEED_AVATARS.length}`
 }));

@@ -201,16 +201,19 @@ export default function Profile() {
                           <DialogHeader>
                             <DialogTitle>Select an Avatar</DialogTitle>
                           </DialogHeader>
-                          <div className="grid grid-cols-4 gap-4 py-4">
-                            {SEED_AVATARS.map((url, index) => (
+                          <div className="grid grid-cols-6 gap-2 py-4">
+                            {SEED_AVATARS.map((avatar, index) => (
                               <button
                                 key={index}
-                                onClick={() => updateProfilePhoto(url)}
-                                className="relative aspect-square rounded-full overflow-hidden hover:ring-2 hover:ring-primary transition-all group"
+                                onClick={() => updateProfilePhoto(`sprite:${index}`)}
+                                className="relative aspect-square rounded-full overflow-hidden hover:ring-2 hover:ring-primary transition-all group border"
                               >
-                                <img src={url} alt={`Avatar ${index + 1}`} className="object-cover w-full h-full" />
+                                <UserAvatar 
+                                  photoURL={`sprite:${index}`} 
+                                  className="w-full h-full"
+                                />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <span className="text-white text-xs font-medium">Select</span>
+                                  <span className="text-white text-[10px] font-medium">Select</span>
                                 </div>
                               </button>
                             ))}
