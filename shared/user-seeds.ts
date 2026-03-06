@@ -1,24 +1,21 @@
-import defaultAvatar from "../client/src/assets/images/default-avatar.png";
-
-// Fallback for missing seed avatars to unblock the build
-const avatar1 = defaultAvatar;
-const avatar2 = defaultAvatar;
-const avatar3 = defaultAvatar;
-const avatar4 = defaultAvatar;
-const avatar5 = defaultAvatar;
-const avatar6 = defaultAvatar;
-const avatar7 = defaultAvatar;
-const avatar8 = defaultAvatar;
-const avatar9 = defaultAvatar;
-const avatar10 = defaultAvatar;
-const avatar11 = defaultAvatar;
-const avatar12 = defaultAvatar;
-const avatar13 = defaultAvatar;
-const avatar14 = defaultAvatar;
-const avatar15 = defaultAvatar;
-const avatar16 = defaultAvatar;
-const avatar17 = defaultAvatar;
-const avatar18 = defaultAvatar;
+import avatar1 from "@assets/1_1772782291153.jpg";
+import avatar2 from "@assets/2_1772782291154.jpg";
+import avatar3 from "@assets/3_1772782291155.jpg";
+import avatar4 from "@assets/4_1772782291156.jpg";
+import avatar5 from "@assets/5_1772782291157.jpg";
+import avatar6 from "@assets/6_1772782291157.jpg";
+import avatar7 from "@assets/7_1772782291158.jpg";
+import avatar8 from "@assets/8_1772782291158.jpg";
+import avatar9 from "@assets/9_1772782291159.jpg";
+import avatar10 from "@assets/10_1772782291159.jpg";
+import avatar11 from "@assets/11_1772782291159.jpg";
+import avatar12 from "@assets/12_1772782291160.jpg";
+import avatar13 from "@assets/13_1772782291160.jpg";
+import avatar14 from "@assets/14_1772782291160.jpg";
+import avatar15 from "@assets/15_1772782291161.jpg";
+import avatar16 from "@assets/16_1772782291161.jpg";
+import avatar17 from "@assets/17_1772782291162.jpg";
+import avatar18 from "@assets/18_1772782291162.jpg";
 
 export const SEED_AVATARS = [
   avatar1, avatar2, avatar3, avatar4, avatar5, avatar6,
