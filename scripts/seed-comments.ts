@@ -56,7 +56,7 @@ async function seedRandomComments() {
           content: comment,
           rating,
           userId: "system-seed",
-          userPhoto: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+          userPhoto: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name.split(' ')[0])}`,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now()
         });

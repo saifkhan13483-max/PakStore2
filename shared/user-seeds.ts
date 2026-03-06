@@ -1,12 +1,12 @@
 export const SEED_AVATARS = [
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1552058544-1271d70658b3?w=400&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1544717297-fa154daaf02a?w=400&h=400&fit=crop",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zainab",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Omar",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Bilal",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayesha",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Hamza",
 ];
 
 export const getRandomAvatar = () => {
