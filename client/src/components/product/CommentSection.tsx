@@ -64,6 +64,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
     },
     staleTime: 0,
     gcTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const mutation = useMutation({

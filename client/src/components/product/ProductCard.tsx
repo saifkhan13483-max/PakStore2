@@ -113,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
           </Link>
-          {product.rating !== undefined && Number(product.rating) > 0 && (
+          {product.rating !== undefined && (Number(product.reviewCount) || 0) > 0 && (
             <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
               <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
               <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
