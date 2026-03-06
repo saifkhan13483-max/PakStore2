@@ -299,17 +299,25 @@ export default function ProductDetail() {
               </h1>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
-                <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                <span className="font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+            {(product.rating && Number(product.rating) > 0) || (product.reviewCount && product.reviewCount > 0) ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
+                  <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                  <span className="font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+                </div>
+                <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
+                <Separator orientation="vertical" className="h-4 hidden sm:block" />
+                <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
+                  {product.inStock ? "In Stock" : "Out of Stock"}
+                </Badge>
               </div>
-              <span className="text-muted-foreground text-sm">({product.reviewCount || 0} reviews)</span>
-              <Separator orientation="vertical" className="h-4 hidden sm:block" />
-              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
-                {product.inStock ? "In Stock" : "Out of Stock"}
-              </Badge>
-            </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
+                  {product.inStock ? "In Stock" : "Out of Stock"}
+                </Badge>
+              </div>
+            )}
             
             <div className="flex items-baseline gap-3">
               <span className="text-3xl md:text-4xl font-bold text-primary">

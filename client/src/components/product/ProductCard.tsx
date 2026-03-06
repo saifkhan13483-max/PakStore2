@@ -113,10 +113,12 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
           </Link>
-          <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
-            <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
-            <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
-          </div>
+          {product.rating && Number(product.rating) > 0 && (
+            <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
+              <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
+              <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{(Number(product.rating) || 0).toFixed(1)}</span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center justify-between mt-1 md:mt-2 pt-1 md:pt-2 border-t border-muted/50">
