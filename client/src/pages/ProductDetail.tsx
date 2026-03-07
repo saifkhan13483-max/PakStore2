@@ -1,10 +1,10 @@
-import { useRoute, Link } from "wouter";
+import { useRoute, Link, useLocation } from "wouter";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
@@ -63,6 +63,7 @@ export default function ProductDetail() {
     queryFn: () => productFirestoreService.getProductsByCategory(String(product!.categoryId!)),
   });
 
+  const [, setLocation] = useLocation();
   const addToCart = useCartStore(state => state.addToCart);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -144,7 +145,7 @@ export default function ProductDetail() {
     return basePrice;
   }, [product, selectedVariants]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (shouldRedirect = false) => {
     if (product) {
       // Check if all variants are selected
       if (product.variants && product.variants.length > 0) {
@@ -170,11 +171,20 @@ export default function ProductDetail() {
         }, {} as Record<string, string>)
       };
       addToCart(productWithAdjustedPrice as any, quantity);
-      toast({
-        title: "Added to cart",
-        description: `${quantity} x ${product.name} added to your cart.`,
-      });
+      
+      if (shouldRedirect) {
+        setLocation("/cart");
+      } else {
+        toast({
+          title: "Added to cart",
+          description: `${quantity} x ${product.name} added to your cart.`,
+        });
+      }
     }
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart(true);
   };
 
   const formatPrice = (price: number) => {
@@ -416,37 +426,51 @@ export default function ProductDetail() {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border/50">
-              <div className="flex items-center border rounded-md bg-background p-1 w-full sm:w-fit justify-between sm:justify-start">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-9 w-9 no-default-hover-elevate"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="w-4 h-4" />
-                </Button>
-                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-9 w-9 no-default-hover-elevate"
-                  onClick={() => setQuantity(quantity + 1)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border/50">
+                <div className="flex items-center border rounded-md bg-background p-1 w-full sm:w-fit justify-between sm:justify-start">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 no-default-hover-elevate"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-9 w-9 no-default-hover-elevate"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-1 gap-3">
+                  <Button 
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 h-12 rounded-md gap-3 font-bold text-lg shadow-sm transition-all active:scale-[0.98]" 
+                    onClick={() => handleAddToCart(false)}
+                    disabled={!product.inStock}
+                    data-testid="button-add-to-cart"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    {product.inStock ? "Add to Cart" : "Out of Stock"}
+                  </Button>
+                  <Button 
+                    size="lg"
+                    className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
+                    onClick={handleBuyNow}
+                    disabled={!product.inStock}
+                    data-testid="button-buy-now"
+                  >
+                    <Zap className="w-5 h-5 fill-current" />
+                    Buy Now
+                  </Button>
+                </div>
               </div>
-              <Button 
-                size="lg"
-                className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
-                onClick={handleAddToCart}
-                disabled={!product.inStock}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {product.inStock ? "Add to Cart" : "Out of Stock"}
-              </Button>
-            </div>
           </div>
         </div>
       </div>
