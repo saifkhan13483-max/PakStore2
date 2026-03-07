@@ -38,36 +38,31 @@ export function useCloudinary(): UseCloudinaryReturn {
     setError(null);
   }, []);
 
-  const upload = useCallback(async (file: File): Promise<CloudinaryUploadResult | null> => {
-    // 1. Validation
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      const errMsg = "Invalid file type. Please upload JPEG, PNG, WebP or AVIF.";
-      setError(errMsg);
-      toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
-      return null;
+  // Check if error indicates quota/rate limit
+  const isQuotaError = (responseText: string): boolean => {
+    try {
+      const data = JSON.parse(responseText);
+      const message = (data.error?.message || data.message || "").toLowerCase();
+      return (
+        message.includes("quota") ||
+        message.includes("limit") ||
+        message.includes("rate") ||
+        message.includes("bandwidth") ||
+        message.includes("storage") ||
+        message.includes("exceeded") ||
+        message.includes("plan")
+      );
+    } catch {
+      return false;
     }
+  };
 
-    if (file.size > MAX_FILE_SIZE) {
-      const errMsg = "File too large. Maximum size is 5MB.";
-      setError(errMsg);
-      toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
-      return null;
-    }
-
-    setIsUploading(true);
-    setProgress({ loaded: 0, total: file.size, percentage: 0 });
-    setError(null);
-
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-      const errMsg = "Cloudinary configuration is missing.";
-      setError(errMsg);
-      setIsUploading(false);
-      return null;
-    }
-
+  // Try uploading to a specific account
+  const uploadToAccount = (
+    file: File,
+    cloudName: string,
+    uploadPreset: string
+  ): Promise<{ success: boolean; response?: any; error?: string }> => {
     return new Promise((resolve) => {
       const xhr = new XMLHttpRequest();
       const formData = new FormData();
@@ -88,57 +83,118 @@ export function useCloudinary(): UseCloudinaryReturn {
         }
       });
 
-      // Handle Success/Error
       xhr.addEventListener("load", () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const response = JSON.parse(xhr.responseText);
-            setIsUploading(false);
-            setProgress(null);
-            resolve(response);
+            resolve({ success: true, response });
           } catch (e) {
-            console.error("Error parsing Cloudinary response:", e);
-            const errMsg = "Invalid response from upload server.";
-            setError(errMsg);
-            setIsUploading(false);
-            resolve(null);
+            resolve({ success: false, error: "Invalid response from upload server." });
           }
         } else {
-          let errMsg = "Upload failed. Please check your connection.";
+          let errMsg = "Upload failed";
           try {
             const errorData = JSON.parse(xhr.responseText);
             errMsg = errorData.error?.message || errorData.message || errMsg;
           } catch (e) {}
-          
-          console.error("Cloudinary upload error:", errMsg);
-          setError(errMsg);
-          toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
-          setIsUploading(false);
-          resolve(null);
+          resolve({ success: false, error: errMsg });
         }
       });
 
-      // Handle Network Errors (Common for slow connections)
       xhr.addEventListener("error", () => {
-        const errMsg = "Network error. Please try again.";
-        setError(errMsg);
-        setIsUploading(false);
-        resolve(null);
+        resolve({ success: false, error: "Network error" });
       });
 
-      // Handle Timeout (Essential for slow Pakistani internet)
-      xhr.timeout = 60000; // 60 seconds
+      xhr.timeout = 60000;
       xhr.addEventListener("timeout", () => {
-        const errMsg = "Upload timed out. Your connection might be too slow.";
-        setError(errMsg);
-        setIsUploading(false);
-        resolve(null);
+        resolve({ success: false, error: "Upload timed out. Your connection might be too slow." });
       });
 
       xhr.open("POST", `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
       xhr.send(formData);
     });
-  }, [toast]);
+  };
+
+  const upload = useCallback(
+    async (file: File): Promise<CloudinaryUploadResult | null> => {
+      // 1. Validation
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        const errMsg = "Invalid file type. Please upload JPEG, PNG, WebP or AVIF.";
+        setError(errMsg);
+        toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
+        return null;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        const errMsg = "File too large. Maximum size is 5MB.";
+        setError(errMsg);
+        toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
+        return null;
+      }
+
+      setIsUploading(true);
+      setProgress({ loaded: 0, total: file.size, percentage: 0 });
+      setError(null);
+
+      const cloudNameA = import.meta.env.VITE_CLOUDINARY_A_CLOUD_NAME;
+      const uploadPresetA = import.meta.env.VITE_CLOUDINARY_A_UPLOAD_PRESET;
+      const cloudNameB = import.meta.env.VITE_CLOUDINARY_B_CLOUD_NAME;
+      const uploadPresetB = import.meta.env.VITE_CLOUDINARY_B_UPLOAD_PRESET;
+
+      // Fallback to legacy env vars
+      const legacyCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const legacyUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+      const primaryCloudName = cloudNameA || legacyCloudName;
+      const primaryUploadPreset = uploadPresetA || legacyUploadPreset;
+
+      if (!primaryCloudName || !primaryUploadPreset) {
+        const errMsg = "Cloudinary configuration is missing.";
+        setError(errMsg);
+        toast({ title: "Configuration Error", description: errMsg, variant: "destructive" });
+        setIsUploading(false);
+        return null;
+      }
+
+      // Try primary account (A)
+      console.log("[useCloudinary] Attempting upload to Account A...");
+      const result1 = await uploadToAccount(file, primaryCloudName, primaryUploadPreset);
+
+      if (result1.success) {
+        setIsUploading(false);
+        setProgress(null);
+        console.log("[useCloudinary] Upload successful to Account A");
+        return result1.response;
+      }
+
+      // Check if quota error and fallback is available
+      if (cloudNameB && uploadPresetB && isQuotaError(JSON.stringify({ error: { message: result1.error } }))) {
+        console.warn("[useCloudinary] Account A quota exceeded, attempting Account B fallback...");
+        const result2 = await uploadToAccount(file, cloudNameB, uploadPresetB);
+
+        if (result2.success) {
+          setIsUploading(false);
+          setProgress(null);
+          console.log("[useCloudinary] Upload successful to Account B (fallback)");
+          return result2.response;
+        } else {
+          const errMsg = `Fallback upload also failed: ${result2.error}`;
+          setError(errMsg);
+          toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
+          setIsUploading(false);
+          return null;
+        }
+      }
+
+      // Non-quota error or no fallback available
+      const errMsg = result1.error || "Upload failed";
+      setError(errMsg);
+      toast({ title: "Upload Failed", description: errMsg, variant: "destructive" });
+      setIsUploading(false);
+      return null;
+    },
+    [toast]
+  );
 
   return { upload, isUploading, progress, error, reset };
 }
