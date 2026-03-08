@@ -81,7 +81,13 @@ Starts both Express backend and Vite frontend on port 3000
 - Use `@assets/` for imported assets
 
 ## Recent Changes (2026-03-08)
-- Implemented colored avatar system for comments
-- Seed comments now display initials with vibrant background colors
-- Created `avatar-colors.ts` utility for consistent color generation
-- Updated `CommentSection.tsx` to support both image and text-based avatars
+- **Implemented colored avatar system for comments**
+  - Seed comments now display initials with vibrant background colors
+  - Created `avatar-colors.ts` utility for consistent color generation (8 distinct colors)
+  - Updated `CommentSection.tsx` to support both image and text-based avatars
+
+- **Fixed seed comments functionality**
+  - Changed from dynamic import to static import in `Home.tsx` to prevent module loading errors
+  - Made seed function idempotent: checks if comments already exist and deletes old ones before reseeding
+  - Seed comments marked with `userId: "system-seed"` for identification and safe deletion
+  - Supports multiple re-runs without duplicate document errors

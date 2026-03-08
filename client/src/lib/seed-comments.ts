@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { collection, getDocs, addDoc, doc, updateDoc, query, where, Timestamp } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, updateDoc, query, where, Timestamp, deleteDoc } from "firebase/firestore";
 
 const RANDOM_COMMENTS = [
   "Amazing product! Highly recommended.",
@@ -34,6 +34,22 @@ export async function seedRandomComments() {
     for (const productDoc of productsSnapshot.docs) {
       const productId = productDoc.id;
       const productName = productDoc.data().name;
+      
+      // Check if this product already has seeded comments
+      const existingCommentsQuery = query(collection(db, "comments"), where("productId", "==", productId), where("userId", "==", "system-seed"));
+      const existingCommentsSnapshot = await getDocs(existingCommentsQuery);
+      
+      if (existingCommentsSnapshot.size > 0) {
+        console.log(`${productName} already has seeded comments. Deleting old ones to reseed...`);
+        // Delete existing seed comments
+        for (const commentDoc of existingCommentsSnapshot.docs) {
+          try {
+            await deleteDoc(doc(db, "comments", commentDoc.id));
+          } catch (e: any) {
+            console.error(`Failed to delete old comment: ${e.message}`);
+          }
+        }
+      }
       
       const numComments = Math.floor(Math.random() * 2) + 2;
       console.log(`Adding ${numComments} comments to ${productName}...`);
