@@ -1,50 +1,87 @@
-# Pakstore - Serverless E-commerce
+# PakCart - E-commerce Platform
 
-## Overview
-A modern e-commerce application built with React, Vite, and Firebase (Firestore & Authentication). The project has been migrated from a traditional Express/Postgres stack to a fully serverless architecture.
-
-## Recent Changes
-- **2026-03-06**: Migrated project from Replit Agent to Replit environment. Installed all npm dependencies, fixed missing asset imports in Home.tsx (replaced missing ChatGPT-generated images with available fallback assets).
-- **2026-02-10**: Removed Express.js backend (`server/` folder).
-- **2026-02-10**: Migrated data persistence to Firebase Firestore.
-- **2026-02-10**: Updated build process to be frontend-only (Vite).
-- **2026-02-10**: Cleaned up legacy dependencies (Express, Drizzle, PG).
-
-## Technical Stack
-- **Frontend Framework**: React with Vite
-- **Styling**: Tailwind CSS + Shadcn/UI components
-- **Authentication**: Firebase Authentication v9+
-- **Database**: Firestore (NoSQL)
-- **Media Storage**: Cloudinary
-- **Deployment**: Vercel
+## Project Overview
+A full-stack React + Firebase e-commerce platform for Pakistani products. Built with Vite, shadcn/ui, and Firebase backend.
 
 ## Architecture
-- **Frontend**: React + Vite + Tailwind CSS + Shadcn UI.
-- **Database**: Firebase Firestore.
-- **Authentication**: Firebase Auth (Source of Truth for User State).
-- **File Storage**: Cloudinary.
-- **Deployment**: Static hosting.
 
-## State Management Patterns
-- **Server State (TanStack Query)**: Used for all Firestore data fetching, caching, and invalidation (Products, Categories, Orders).
-- **Global UI State (Zustand)**:
-  - `authStore`: Manages temporary UI auth state (loading, errors) and client-side derived state (isAdmin). Synchronized via `onAuthStateChanged`.
-  - `cartStore`: Manages local cart items with persistence to Firestore for authenticated users.
-- **Local State (React useState/useContext)**: Used for component-specific UI logic and small context providers.
+### Frontend
+- **Framework**: React with Vite
+- **UI**: shadcn/ui components with Tailwind CSS
+- **State Management**: Zustand (for auth and cart)
+- **Data Fetching**: TanStack React Query with Firebase
+- **Routing**: Wouter
 
-## User Preferences
-- Clean, modern UI using Shadcn components.
-- Serverless architecture for scalability and low maintenance.
+### Backend
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth
+- **Image Storage**: Cloudinary CDN
 
-## Cost Optimization & Resource Management
-- **Firestore**:
-  - Implemented offline persistence to reduce unnecessary read operations.
-  - Used paginated queries (`getCollectionPaginated`) for all list views to minimize document reads.
-  - Leveraging TanStack Query's `staleTime` and `gcTime` for efficient client-side caching.
-- **Cloudinary**:
-  - Utilizing `f_auto` and `q_auto` for optimized asset delivery.
-  - Implemented responsive `srcSet` generation to serve appropriately sized images.
-  - Added `dpr_auto` support for high-density displays without over-serving pixels.
-- **Vercel**:
-  - Optimized build process and static asset caching.
-  - Using serverless infrastructure to pay only for actual usage.
+### Key Directories
+- `client/src/pages/` - Main pages (Home, Products, ProductDetail)
+- `client/src/components/` - Reusable React components
+- `client/src/services/` - Firebase service layer
+- `client/src/lib/` - Utilities (Firebase config, seed scripts)
+- `client/src/store/` - Global state (auth, cart)
+
+## Features
+
+### Comments System
+- Comments displayed in `CommentSection.tsx` component
+- Avatar display logic:
+  - If `userPhoto` is provided: displays image with fallback to first letter
+  - If `userPhoto` is empty: displays colored circular avatar with first letter
+- Seed comments use color-coded initials (no external images)
+- Colors are consistent per user based on hash of their name
+
+#### Avatar Colors Utility
+- **File**: `client/src/lib/avatar-colors.ts`
+- **Function**: `getAvatarColor(name: string)` generates RGB colors
+- **Color Palette**: 8 distinct colors (purple, red, blue, green, amber, violet, pink, emerald)
+- **Logic**: Consistent hashing based on name ensures same user always gets same color
+
+#### Seed Comments
+- **File**: `client/src/lib/seed-comments.ts`
+- Generates 2-3 random comments per product
+- Comments have `userPhoto: ""` (empty string)
+- Uses realistic names from South Asian cultures
+- Auto-updates product rating and review count
+
+### Product Management
+- Products have: name, description, price, category, images, rating, review count
+- Categories organized in sidebar navigation
+- Product detail page shows full info with comments section
+
+### Authentication
+- Firebase Auth integration
+- Admin features (seed data button on home page for logged-in admins)
+
+### Shopping Cart
+- Stored in local Zustand state
+- Add/remove items functionality
+
+## Development
+
+### Running the App
+```bash
+npm run dev
+```
+Starts both Express backend and Vite frontend on port 3000
+
+### Adding Features
+1. Define data models in `shared/schema.ts` using Zod
+2. Create Firestore service in `client/src/services/`
+3. Add components in `client/src/components/`
+4. Add pages in `client/src/pages/` and register in `App.tsx`
+
+## Important Notes
+- Do NOT modify `package.json` - use package manager for dependencies
+- Do NOT modify `vite.config.ts` or `server/vite.ts` - they're already configured
+- Use `@` aliases for imports (configured in Vite)
+- Use `@assets/` for imported assets
+
+## Recent Changes (2026-03-08)
+- Implemented colored avatar system for comments
+- Seed comments now display initials with vibrant background colors
+- Created `avatar-colors.ts` utility for consistent color generation
+- Updated `CommentSection.tsx` to support both image and text-based avatars

@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { getAvatarColor } from "@/lib/avatar-colors";
 
 interface CommentSectionProps {
   productId: string;
@@ -255,10 +256,19 @@ export function CommentSection({ productId }: CommentSectionProps) {
             <Card key={comment.id}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <Avatar>
-                    <AvatarImage src={comment.userPhoto} />
-                    <AvatarFallback>{comment.userName[0]}</AvatarFallback>
-                  </Avatar>
+                  {comment.userPhoto ? (
+                    <Avatar>
+                      <AvatarImage src={comment.userPhoto} />
+                      <AvatarFallback>{comment.userName[0]}</AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
+                      style={{ backgroundColor: getAvatarColor(comment.userName) }}
+                    >
+                      {comment.userName[0]?.toUpperCase()}
+                    </div>
+                  )}
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold">{comment.userName}</h4>
