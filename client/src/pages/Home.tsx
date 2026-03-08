@@ -28,6 +28,7 @@ import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
 
 import { useAuthStore } from "@/store/authStore";
+import { seedRandomComments } from "@/lib/seed-comments";
 
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
@@ -84,7 +85,6 @@ export default function Home() {
   const handleSeed = async () => {
     setIsSeeding(true);
     try {
-      const { seedRandomComments } = await import("@/lib/seed-comments");
       await seedRandomComments();
       alert("Random comments added successfully!");
       window.location.reload();
