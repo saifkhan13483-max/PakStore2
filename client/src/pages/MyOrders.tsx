@@ -149,7 +149,7 @@ export default function MyOrders() {
                           {order.status}
                         </Badge>
                         <Link href={`/orders/${order.id}`}>
-                          <Button variant="link" size="sm" className="h-auto p-0 text-xs flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="h-auto p-0 text-xs flex items-center gap-1">
                             View Full Details <ExternalLink className="w-3 h-3" />
                           </Button>
                         </Link>

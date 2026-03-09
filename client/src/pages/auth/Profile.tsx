@@ -15,6 +15,7 @@ import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { UserAvatar } from "../../components/auth/UserAvatar";
+// @ts-ignore - MediaUpload.jsx doesn't have TypeScript declarations
 import { MediaUpload } from "../../components/MediaUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LayoutDashboard } from "lucide-react";

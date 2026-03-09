@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
+// @ts-ignore - VideoUpload.jsx doesn't have TypeScript declarations
 import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
@@ -314,7 +315,7 @@ export default function AdminProductForm() {
                         <FormLabel>Product Video</FormLabel>
                         <FormControl>
                           <VideoUpload 
-                            onUploadComplete={(data) => field.onChange(data.secure_url)}
+                            onUploadComplete={(data: any) => field.onChange(data.secure_url)}
                             value={field.value}
                           />
                         </FormControl>

@@ -248,8 +248,8 @@ export default function ProductDetail() {
           priceCurrency: "PKR",
           rating: parseFloat(displayRating),
           reviewCount: displayReviewCount,
-          inStock: product.stock > 0,
-          availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          inStock: (product.stock ?? 0) > 0,
+          availability: (product.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
         }}
       />
       

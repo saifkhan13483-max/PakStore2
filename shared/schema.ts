@@ -100,7 +100,7 @@ export const cartItemSchema = z.object({
     profit: true,
     images: true,
     slug: true
-  }),
+  }).partial({ profit: true }),
 });
 
 export const orderSchema = baseDocumentSchema.extend({

@@ -138,6 +138,9 @@ export function CommentSection({ productId }: CommentSectionProps) {
     }
     
     mutation.mutate({
+      id: '', // Will be set by server
+      createdAt: new Date(),
+      updatedAt: new Date(),
       productId,
       userId: user.uid,
       userName: user.displayName || "Anonymous User",

@@ -69,7 +69,7 @@ export function useRealtimeDocument<T>(
  * Hook for real-time updates of a Firestore collection.
  * Integrates with TanStack Query for caching.
  */
-export function useRealtimeCollection<T>(
+export function useRealtimeCollection<T extends { id?: string }>(
   collectionName: string,
   schema: z.ZodSchema<T>,
   queryKey: any[],
@@ -95,11 +95,12 @@ export function useRealtimeCollection<T>(
           
           const validatedData = documents.map(doc => {
             try {
-              return schema.parse(doc);
+              const parsed = schema.parse(doc);
+              return { ...parsed, id: doc.id } as T;
             } catch (err) {
               console.error(`Validation error for document ${doc.id} in ${collectionName}:`, err);
               // Return a partial object or skip if validation fails to prevent the whole collection from failing
-              return doc as unknown as T;
+              return { ...doc, id: doc.id } as unknown as T;
             }
           });
           

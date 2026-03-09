@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
 
 const menuItems = [
@@ -121,8 +120,7 @@ export function AdminSidebar() {
           "flex items-center transition-all duration-300",
           isCollapsed ? "justify-center" : "justify-between"
         )}>
-          {!isCollapsed && <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Appearance</span>}
-          <ThemeToggle />
+          {!isCollapsed && <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Theme</span>}
         </div>
         
         <Button

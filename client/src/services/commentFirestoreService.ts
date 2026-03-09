@@ -15,6 +15,15 @@ import {
 } from "firebase/firestore";
 import { Comment, InsertComment } from "@shared/schema";
 
+// Helper to convert Firestore timestamps to Date
+function convertToDate(value: any): Date {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string') return new Date(value);
+  if (value?.toDate instanceof Function) return value.toDate();
+  if (value?.seconds) return new Date(value.seconds * 1000);
+  return new Date();
+}
+
 export const commentFirestoreService = {
   async getComments(productId: string): Promise<Comment[]> {
     try {
@@ -57,7 +66,7 @@ export const commentFirestoreService = {
             updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
           } as Comment;
         });
-        return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return comments.sort((a, b) => convertToDate(b.createdAt).getTime() - convertToDate(a.createdAt).getTime());
       } catch (fallbackError) {
         console.error("DEBUG client getComments fallback failed:", fallbackError);
         return [];
@@ -101,7 +110,13 @@ export const commentFirestoreService = {
 
       return {
         id: docRef.id,
-        ...data,
+        productId: comment.productId,
+        userId: comment.userId,
+        userName: comment.userName,
+        userPhoto: comment.userPhoto,
+        content: comment.content,
+        rating: comment.rating,
+        images: comment.images,
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       } as Comment;

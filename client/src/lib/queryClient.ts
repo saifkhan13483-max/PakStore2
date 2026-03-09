@@ -32,10 +32,11 @@ export interface QueryOptions {
 
 export const getQueryFn: <T>(options: QueryOptions) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior = "throw" }) =>
-  async ({ queryKey, queryFn }) => {
+  async (context: any) => {
+    const { queryKey } = context;
     // If an explicit queryFn is provided (e.g. for Firestore), use it
-    if (queryFn) {
-      return await queryFn({ queryKey, meta: {} } as any);
+    if (context.queryFn) {
+      return await context.queryFn({ queryKey, meta: {} } as any);
     }
 
     const path = queryKey.join("/");
