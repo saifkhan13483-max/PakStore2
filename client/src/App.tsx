@@ -234,8 +234,9 @@ function App() {
           <HelmetProvider>
             <TooltipProvider>
               <Helmet>
-                <title>PakCart | Authentic Pakistani Artisanal Products</title>
-                <meta name="description" content="Discover premium Pakistani artisanal products, from Kashmiri Pashminas to Multani Khussas. Quality items delivered to your doorstep." />
+                <title>Shop Online in Pakistan | Watches, Bags, Bedsheets & Footwear | PakCart</title>
+                <meta name="description" content="Buy affordable watches, handbags, slippers, bedsheets, and kids bags online in Pakistan. Free delivery on orders over Rs. 10,000. Quality fashion accessories, footwear & home essentials." />
+                <meta name="keywords" content="online shopping Pakistan, women bags, men watches, slippers, bedsheets, kids bags, fashion accessories" />
               </Helmet>
               <Router />
               <Toaster />

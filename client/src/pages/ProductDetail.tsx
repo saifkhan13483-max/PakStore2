@@ -25,6 +25,7 @@ import { where } from "firebase/firestore";
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
   const slug = params?.slug || "";
+  const [location] = useLocation();
   
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", slug],

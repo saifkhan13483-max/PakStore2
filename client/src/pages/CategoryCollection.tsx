@@ -129,11 +129,14 @@ export default function CategoryCollection() {
       </Breadcrumb>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold tracking-tight">{category.name}</h1>
           {category.description && (
-            <p className="text-muted-foreground mt-2">{category.description}</p>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl">{category.description}</p>
           )}
+          <p className="text-sm text-muted-foreground mt-4 leading-relaxed max-w-2xl">
+            Shop our curated collection of {category.name.toLowerCase()} available online in Pakistan. We offer authentic, quality products with fast delivery across Pakistan. Find the best prices and latest designs in {category.name.toLowerCase()}.
+          </p>
         </div>
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
           <SelectTrigger className="w-full sm:w-40">
