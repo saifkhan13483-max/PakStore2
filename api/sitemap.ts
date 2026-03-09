@@ -110,7 +110,7 @@ export default async function handler(req: any, res: any) {
     categories.forEach(cat => {
       xml += `
   <url>
-    <loc>${domain}/products?category=${cat.slug}</loc>
+    <loc>${domain}/collections/${cat.slug}</loc>
     <lastmod>${cat.updatedAt}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

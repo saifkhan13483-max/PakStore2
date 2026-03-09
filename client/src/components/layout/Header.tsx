@@ -131,7 +131,7 @@ const Header = () => {
                           <DropdownMenuSubContent className="w-48">
                             <DropdownMenuItem asChild>
                               <Link 
-                                href={`/products?parentCategoryId=${parent.id}`}
+                                href={`/collections?parent=${parent.slug}`}
                                 className="cursor-pointer w-full font-semibold text-primary"
                               >
                                 All in {parent.name}
@@ -141,7 +141,7 @@ const Header = () => {
                             {subCategories.map((category) => (
                               <DropdownMenuItem key={category.id} asChild>
                                 <Link 
-                                  href={`/products?categoryId=${category.id}`} 
+                                  href={`/collections/${category.slug}`} 
                                   className="cursor-pointer w-full"
                                 >
                                   {category.name}

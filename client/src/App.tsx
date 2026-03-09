@@ -57,6 +57,7 @@ const Privacy = lazyWithRetry(() => import("@/pages/Privacy"));
 const Terms = lazyWithRetry(() => import("@/pages/Terms"));
 const Profile = lazyWithRetry(() => import("@/pages/auth/Profile"));
 const MyOrders = lazyWithRetry(() => import("@/pages/MyOrders"));
+const CategoryCollection = lazyWithRetry(() => import("@/pages/CategoryCollection"));
 const AdminDashboard = lazyWithRetry(() => import("@/pages/admin/Dashboard"));
 const AdminProducts = lazyWithRetry(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm"));
@@ -100,6 +101,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/categories" component={Categories} />
+      <Route path="/collections/:slug" component={CategoryCollection} />
       <Route path="/new-arrivals" component={NewArrivals} />
       <Route path="/auth/signup" component={Signup} />
       <Route path="/auth/login" component={Login} />

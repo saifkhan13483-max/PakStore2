@@ -28,7 +28,7 @@ export const sitemapService = {
       categoriesSnap.forEach((doc) => {
         const data = doc.data();
         items.push({
-          loc: `${domain}/products?category=${doc.id}`,
+          loc: `${domain}/collections/${data.slug}`,
           changefreq: "weekly",
           priority: 0.8,
         });
