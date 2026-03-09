@@ -12,6 +12,11 @@ interface ProductSchemaProps {
   inStock?: boolean;
 }
 
+interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -21,6 +26,7 @@ interface SEOProps {
   type?: string;
   productData?: ProductSchemaProps;
   schema?: Record<string, any>;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 function getAbsoluteUrl(url: string): string {
@@ -37,13 +43,25 @@ export default function SEO({
   url = typeof window !== "undefined" ? window.location.href : "https://pakcart.store",
   type = "website",
   productData,
-  schema
+  schema,
+  breadcrumbs
 }: SEOProps) {
   const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
   const defaultDescription = "Shop the best artisanal products and daily essentials at PakCart. Quality items delivered to your doorstep in Pakistan.";
   const absoluteImage = getAbsoluteUrl(image);
   const absoluteUrl = url.startsWith("http") ? url : `https://pakcart.store${url.startsWith("/") ? url : "/" + url}`;
+
+  const breadcrumbSchema = breadcrumbs ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": item.url.startsWith("http") ? item.url : `https://pakcart.store${item.url.startsWith("/") ? item.url : "/" + item.url}`
+    }))
+  } : null;
 
   const productSchema = schema ? schema : productData ? {
     "@context": "https://schema.org",
@@ -110,6 +128,13 @@ export default function SEO({
       <script type="application/ld+json">
         {JSON.stringify(productSchema)}
       </script>
+      
+      {/* Breadcrumb Schema */}
+      {breadcrumbSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      )}
     </Helmet>
   );
 }

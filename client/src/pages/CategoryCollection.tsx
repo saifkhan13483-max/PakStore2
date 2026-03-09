@@ -14,6 +14,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -110,6 +116,11 @@ export default function CategoryCollection() {
         title={`${category.name} Online in Pakistan | Affordable Prices at PakCart`}
         description={category.description || `Shop our curated collection of ${category.name.toLowerCase()} available online in Pakistan. Best prices, authentic products, fast delivery across Pakistan with free shipping over Rs. 10,000.`}
         url={`/collections/${category.slug}`}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Categories", url: "/categories" },
+          { name: category.name, url: `/collections/${category.slug}` }
+        ]}
         schema={{
           "@context": "https://schema.org/",
           "@type": "CollectionPage",
@@ -188,6 +199,67 @@ export default function CategoryCollection() {
             Showing {visibleProducts.length} of {filteredAndSortedProducts.length} products
           </div>
         </>
+      )}
+
+      {filteredAndSortedProducts.length > 0 && (
+        <section className="mt-16 pt-12 border-t">
+          <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="w-full max-w-3xl">
+            <AccordionItem value="delivery">
+              <AccordionTrigger className="text-lg font-semibold">
+                What are the shipping options for {category.name.toLowerCase()}?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                We offer fast and reliable shipping across Pakistan. Orders are typically dispatched within 24-48 hours. Delivery times vary by location, usually 3-7 business days. We provide free shipping on orders over Rs. 10,000.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="quality">
+              <AccordionTrigger className="text-lg font-semibold">
+                Are the {category.name.toLowerCase()} authentic and of good quality?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                Yes, all our {category.name.toLowerCase()} are carefully selected for quality and authenticity. Each product goes through our quality checks to ensure it meets our standards. We source from trusted suppliers and manufacturers to guarantee the best products for our customers.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="exchange">
+              <AccordionTrigger className="text-lg font-semibold">
+                What is your return and exchange policy?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                We offer a 7-day return/exchange policy on all products. Items must be unused and in original packaging. Return shipping is free for defective items. To initiate a return, contact our support team with your order details.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="warranty">
+              <AccordionTrigger className="text-lg font-semibold">
+                Do the {category.name.toLowerCase()} come with a warranty?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                Warranty availability depends on the specific product and manufacturer. Most of our {category.name.toLowerCase()} come with manufacturer warranties. Check the product details page for warranty information, or contact our support team for specifics.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="payment">
+              <AccordionTrigger className="text-lg font-semibold">
+                What payment methods do you accept?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                We accept multiple payment methods including credit/debit cards (Visa, Mastercard), bank transfers, and cash on delivery for eligible orders. All transactions are secure and encrypted to protect your information.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="bulk">
+              <AccordionTrigger className="text-lg font-semibold">
+                Do you offer bulk discounts on {category.name.toLowerCase()}?
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">
+                Yes, we offer special pricing for bulk orders. For orders of 10+ items, please contact our sales team directly at support@pakcart.store to discuss your requirements and get a custom quote.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
       )}
     </div>
   );

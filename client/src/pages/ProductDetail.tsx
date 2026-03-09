@@ -18,6 +18,12 @@ import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CommentSection } from "@/components/product/CommentSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { commentSchema } from "@shared/schema";
 import { where } from "firebase/firestore";
@@ -497,6 +503,12 @@ export default function ProductDetail() {
               Product details
             </TabsTrigger>
             <TabsTrigger 
+              value="faq" 
+              className="flex-shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-3 sm:px-6 py-3 font-semibold text-xs sm:text-base transition-none whitespace-nowrap"
+            >
+              FAQ
+            </TabsTrigger>
+            <TabsTrigger 
               value="reviews" 
               className="flex-shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-3 sm:px-6 py-3 font-semibold text-xs sm:text-base transition-none whitespace-nowrap"
             >
@@ -522,6 +534,74 @@ export default function ProductDetail() {
                   </div>
                 </div>
               )}
+            </div>
+          </TabsContent>
+          <TabsContent value="faq" className="pt-6 sm:pt-8 focus-visible:ring-0">
+            <div className="max-w-4xl">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="material-care">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    How should I care for this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    For best results, please refer to the care instructions provided with your product. Generally, handle with care and store in a dry place away from direct sunlight. If specific care instructions are available, they will be mentioned in the product specifications section above.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="sizing">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    What is the sizing or fit information for this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    Check the specifications and size chart above for detailed dimensions and sizing information. If you need personalized assistance with sizing, please contact our support team at support@pakcart.store.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="authenticity">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    How can I verify the authenticity of this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    All products sold on PakCart are authentic and sourced directly from authorized suppliers. We guarantee the authenticity of every item. If you have any concerns about the authenticity of your purchase, please contact us immediately for a full refund or replacement.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="shipping-time">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    How long does shipping take?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    Delivery times vary by location within Pakistan. Typically, orders are delivered within 3-7 business days from the date of dispatch. Orders are usually dispatched within 24-48 hours. You'll receive a tracking number via email once your order ships.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="return-policy">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Can I return this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    Yes, we offer a 7-day return/exchange policy. The product must be unused, in original packaging, and in resalable condition. Return shipping is free for defective items. To initiate a return, please contact our support team with your order number and reason for return.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="customization">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Is customization available for this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    Customization options depend on the specific product. Check the product options above to see available variants. For special customization requests beyond what's listed, please contact our team at support@pakcart.store to discuss your needs.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="reviews-help">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    How can I leave a review for this product?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    You can leave a review in the "Customer Reviews" tab above. Share your experience with the product, rate it from 1-5 stars, and help other customers make informed decisions. We value your feedback!
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="pt-6 sm:pt-8 focus-visible:ring-0">
