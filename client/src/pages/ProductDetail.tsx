@@ -240,6 +240,17 @@ export default function ProductDetail() {
         description={product.description}
         type="product"
         image={images[0]}
+        productData={{
+          name: product.name,
+          description: product.description,
+          image: images,
+          price: product.price,
+          priceCurrency: "PKR",
+          rating: parseFloat(displayRating),
+          reviewCount: displayReviewCount,
+          inStock: product.stock > 0,
+          availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+        }}
       />
       
       <Button variant="ghost" className="mb-6 group hover:bg-transparent p-0" asChild>
