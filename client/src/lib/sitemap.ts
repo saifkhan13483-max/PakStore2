@@ -34,10 +34,14 @@ export const sitemapService = {
         });
       });
 
-      // Fetch Products
-      const productsSnap = await getDocs(query(collection(db, "products"), orderBy("updatedAt", "desc")));
+      // Fetch Products (only active ones)
+      const productsSnap = await getDocs(query(
+        collection(db, "products"), 
+        orderBy("updatedAt", "desc")
+      ));
       productsSnap.forEach((doc) => {
         const data = doc.data();
+        if (data.active === false) return; // Skip inactive products
         const lastmod = data.updatedAt?.toDate 
           ? data.updatedAt.toDate().toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0];

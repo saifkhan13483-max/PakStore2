@@ -85,6 +85,27 @@ export default async function handler(req: any, res: any) {
   </url>`;
     });
 
+    // Add main product pages
+    xml += `
+  <url>
+    <loc>${domain}/products</loc>
+    <lastmod>${formatDate()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${domain}/categories</loc>
+    <lastmod>${formatDate()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${domain}/new-arrivals</loc>
+    <lastmod>${formatDate()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+
     // Add categories
     categories.forEach(cat => {
       xml += `
@@ -103,7 +124,7 @@ export default async function handler(req: any, res: any) {
     <loc>${domain}/products/${prod.slug}</loc>
     <lastmod>${prod.updatedAt}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>`;
     });
 
