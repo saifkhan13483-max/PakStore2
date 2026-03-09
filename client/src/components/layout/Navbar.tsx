@@ -72,7 +72,7 @@ export function Navbar() {
           <div className="flex items-center md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="mr-2">
+                <Button variant="ghost" size="icon" className="mr-2" data-testid="button-mobile-menu">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>

@@ -7,7 +7,7 @@ import { AlertCircle } from 'lucide-react';
 
 export function CloudinaryImage({
   publicId,
-  alt = '',
+  alt = 'Product image',
   width,
   height,
   transformations = {},

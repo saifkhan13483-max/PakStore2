@@ -105,9 +105,9 @@ export default function Categories() {
                         data-testid={`card-category-${cat.id}`}
                         className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200 text-center shadow-sm hover:shadow-md"
                       >
-                        {cat.imageUrl ? (
+                        {cat.image ? (
                           <img
-                            src={cat.imageUrl}
+                            src={cat.image}
                             alt={cat.name}
                             className="w-12 h-12 object-cover rounded-full border"
                           />

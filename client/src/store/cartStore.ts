@@ -65,13 +65,13 @@ export const useCartStore = create<CartState>()(
         (get() as any).syncToFirebase(newItems);
       },
 
-      removeFromCart: (productId) => {
+      removeFromCart: (productId: string) => {
         const newItems = get().items.filter((item) => item.productId !== productId);
         set({ items: newItems });
         (get() as any).syncToFirebase(newItems);
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId: string, quantity: number) => {
         if (quantity < 1) return;
         const newItems = get().items.map((item) =>
           item.productId === productId ? { ...item, quantity } : item
