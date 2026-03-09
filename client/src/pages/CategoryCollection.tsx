@@ -121,6 +121,14 @@ export default function CategoryCollection() {
           { name: "Categories", url: "/categories" },
           { name: category.name, url: `/collections/${category.slug}` }
         ]}
+        faqs={[
+          { question: `What are the shipping options for ${category.name.toLowerCase()}?`, answer: "We offer fast and reliable shipping across Pakistan. Orders are typically dispatched within 24-48 hours. Delivery times vary by location, usually 3-7 business days. We provide free shipping on orders over Rs. 10,000." },
+          { question: `Are the ${category.name.toLowerCase()} authentic and of good quality?`, answer: `Yes, all our ${category.name.toLowerCase()} are carefully selected for quality and authenticity. Each product goes through our quality checks to ensure it meets our standards. We source from trusted suppliers and manufacturers.` },
+          { question: "What is your return and exchange policy?", answer: "We offer a 7-day return/exchange policy on all products. Items must be unused and in original packaging. Return shipping is free for defective items. To initiate a return, contact our support team with your order details." },
+          { question: `Do the ${category.name.toLowerCase()} come with a warranty?`, answer: `Warranty availability depends on the specific product and manufacturer. Most of our ${category.name.toLowerCase()} come with manufacturer warranties. Check the product details page for warranty information.` },
+          { question: "What payment methods do you accept?", answer: "We accept multiple payment methods including credit/debit cards (Visa, Mastercard), bank transfers, and cash on delivery for eligible orders. All transactions are secure and encrypted." },
+          { question: `Do you offer bulk discounts on ${category.name.toLowerCase()}?`, answer: "Yes, we offer special pricing for bulk orders. For orders of 10+ items, please contact our sales team directly at support@pakcart.store to discuss your requirements and get a custom quote." }
+        ]}
         schema={{
           "@context": "https://schema.org/",
           "@type": "CollectionPage",

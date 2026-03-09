@@ -240,6 +240,16 @@ export default function ProductDetail() {
     );
   }
 
+  const faqItems = [
+    { question: "How should I care for this product?", answer: "For best results, please refer to the care instructions provided with your product. Generally, handle with care and store in a dry place away from direct sunlight." },
+    { question: "What is the sizing or fit information for this product?", answer: "Check the specifications and size chart above for detailed dimensions and sizing information. If you need personalized assistance with sizing, please contact our support team at support@pakcart.store." },
+    { question: "How can I verify the authenticity of this product?", answer: "All products sold on PakCart are authentic and sourced directly from authorized suppliers. We guarantee the authenticity of every item." },
+    { question: "How long does shipping take?", answer: "Delivery times vary by location within Pakistan. Typically, orders are delivered within 3-7 business days from the date of dispatch. Orders are usually dispatched within 24-48 hours." },
+    { question: "Can I return this product?", answer: "Yes, we offer a 7-day return/exchange policy. The product must be unused, in original packaging, and in resalable condition. Return shipping is free for defective items." },
+    { question: "Is customization available for this product?", answer: "Customization options depend on the specific product. Check the product options above to see available variants. For special customization requests, please contact our team at support@pakcart.store." },
+    { question: "How can I leave a review for this product?", answer: "You can leave a review in the Customer Reviews tab above. Share your experience with the product, rate it from 1-5 stars, and help other customers make informed decisions." }
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
@@ -258,6 +268,7 @@ export default function ProductDetail() {
           inStock: (product.stock ?? 0) > 0,
           availability: (product.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
         }}
+        faqs={faqItems}
       />
       
       <Button variant="ghost" className="mb-6 group hover:bg-transparent p-0" asChild>

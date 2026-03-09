@@ -17,6 +17,11 @@ interface BreadcrumbItem {
   url: string;
 }
 
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 interface SEOProps {
   title?: string;
   description?: string;
@@ -27,6 +32,7 @@ interface SEOProps {
   productData?: ProductSchemaProps;
   schema?: Record<string, any>;
   breadcrumbs?: BreadcrumbItem[];
+  faqs?: FAQItem[];
 }
 
 function getAbsoluteUrl(url: string): string {
@@ -44,7 +50,8 @@ export default function SEO({
   type = "website",
   productData,
   schema,
-  breadcrumbs
+  breadcrumbs,
+  faqs
 }: SEOProps) {
   const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
@@ -60,6 +67,19 @@ export default function SEO({
       "position": index + 1,
       "name": item.name,
       "item": item.url.startsWith("http") ? item.url : `https://pakcart.store${item.url.startsWith("/") ? item.url : "/" + item.url}`
+    }))
+  } : null;
+
+  const faqSchema = faqs && faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
     }))
   } : null;
 
@@ -85,7 +105,9 @@ export default function SEO({
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": productData.rating,
-        "reviewCount": productData.reviewCount
+        "reviewCount": productData.reviewCount,
+        "bestRating": "5",
+        "worstRating": "1"
       }
     } : {})
   } : {
@@ -94,7 +116,16 @@ export default function SEO({
     "name": siteName,
     "url": "https://pakcart.store",
     "logo": "https://pakcart.store/logo.png",
-    "description": defaultDescription
+    "description": defaultDescription,
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "PK"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "Customer Service",
+      "email": "support@pakcart.store"
+    }
   };
 
   return (
@@ -133,6 +164,13 @@ export default function SEO({
       {breadcrumbSchema && (
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
+        </script>
+      )}
+      
+      {/* FAQ Schema */}
+      {faqSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
         </script>
       )}
     </Helmet>
