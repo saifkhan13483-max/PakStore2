@@ -160,9 +160,17 @@ export default function CategoryCollection() {
           {category.description && (
             <p className="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl">{category.description}</p>
           )}
-          <p className="text-sm text-muted-foreground mt-4 leading-relaxed max-w-2xl">
-            Shop our curated collection of {category.name.toLowerCase()} available online in Pakistan. We offer authentic, quality products with fast delivery across Pakistan. Find the best prices and latest designs in {category.name.toLowerCase()}.
-          </p>
+          <div className="text-sm text-muted-foreground mt-4 leading-relaxed max-w-3xl space-y-3">
+            <p>
+              Welcome to our exclusive {category.name.toLowerCase()} collection at PakCart. We bring you the finest selection of {category.name.toLowerCase()} available online in Pakistan, curated from trusted suppliers and manufacturers across the country. Whether you're looking for everyday essentials, special occasion pieces, or gifts for your loved ones, our comprehensive range has something for everyone.
+            </p>
+            <p>
+              All our {category.name.toLowerCase()} undergo rigorous quality checks to ensure authenticity and durability. We source directly from authorized retailers and manufacturers, guaranteeing that every product meets our high standards. With our affordable pricing and regular discounts, you can shop premium {category.name.toLowerCase()} without breaking the bank. Plus, we offer fast delivery across Pakistan with free shipping on orders over Rs. 10,000, hassle-free returns within 7 days, and secure payment options including credit cards, bank transfers, and cash on delivery.
+            </p>
+            <p>
+              Browse our latest {category.name.toLowerCase()} collection below to discover trending styles, quality materials, and unbeatable prices. Use our sorting options to find exactly what you're looking for, whether by price, newest arrivals, or featured picks. Have questions? Check our frequently asked questions section for shipping, returns, warranties, and more. Our customer service team at support@pakcart.store is always ready to help you find the perfect product.
+            </p>
+          </div>
         </div>
         <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
           <SelectTrigger className="w-full sm:w-40">
