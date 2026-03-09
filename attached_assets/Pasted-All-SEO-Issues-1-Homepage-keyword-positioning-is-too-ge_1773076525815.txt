@@ -1,0 +1,998 @@
+All SEO Issues
+1) Homepage keyword positioning is too generic and mismatched
+What I found
+Your homepage messaging includes:
+
+“PakCart”
+“Authentic Pakistani Artisanal Products”
+“Bringing the finest craftsmanship of Pakistan to your doorstep”
+But your actual products in the sitemap include:
+
+watches
+slippers
+handbags
+bedsheets
+kids bags
+crossbody bags
+flip flops
+This is a major mismatch.
+
+Why it matters
+Google uses homepage signals to understand:
+
+what your business sells
+what topics your store is relevant for
+what categories deserve authority
+If your homepage says “authentic Pakistani artisanal products” but your catalog is mostly fashion accessories, footwear, watches, bags, and bedding, then topical relevance becomes weak and confusing.
+
+Exact fix
+Rewrite homepage positioning around your real commercial categories.
+
+Better homepage SEO angle
+Instead of:
+
+“Authentic Pakistani Artisanal Products”
+Use something closer to:
+
+Online Shopping in Pakistan for Watches, Bags, Footwear & Home Essentials
+Shop Women’s Bags, Men’s Watches, Slippers, Bedsheets & More in Pakistan
+Affordable Fashion Accessories, Footwear & Home Products in Pakistan
+2) Your sitemap includes parameter-based category URLs
+What I found
+Your sitemap contains URLs like:
+
+/products?category=6Ir5Lv1vZNgXEG1brDaI
+/products?category=8eBqTMy6GFtGKt97MNs0
+Why it matters
+This is bad for SEO because:
+
+query-parameter URLs are less clean and descriptive
+category names are hidden from Google
+these URLs are weaker for ranking
+they can create duplicate/indexation inefficiencies
+users also don’t understand them
+A strong eCommerce site should use URLs like:
+
+/category/womens-handbags
+/category/mens-watches
+/category/bedsheets
+/category/slippers
+Exact fix
+Replace parameter URLs with static SEO-friendly category URLs.
+
+Recommended structure
+/collections/womens-bags
+/collections/mens-watches
+/collections/bedsheets
+/collections/womens-footwear
+/collections/kids-bags
+Then:
+
+update internal links
+update sitemap
+add self-referencing canonicals
+301 redirect old parameter-based URLs to new clean category pages
+3) Category pages are extremely thin
+What I found
+The categories page content is very limited:
+
+“All Categories”
+“Explore our curated collection of authentic Pakistani artisanal products.”
+The products listing page also has very little unique keyword-rich text.
+
+Why it matters
+Category pages are usually the main revenue-driving SEO pages for eCommerce sites.
+
+Google expects category pages to include:
+
+clear keyword targeting
+useful intro text
+descriptive headings
+product relevance
+internal links to subcategories/products
+faceted navigation handled properly
+Thin category pages struggle to rank.
+
+Exact fix
+Create individual category landing pages with:
+
+150–300 words intro content above/below product grid
+unique H1
+SEO title
+optimized meta description
+FAQ section
+internal links to top products and related categories
+Example
+For a bags category:
+
+H1: Women’s Bags in Pakistan
+Intro copy:
+Shop stylish women’s bags in Pakistan including shoulder bags, tote bags, crossbody bags, mini bags, and handbag sets. PakCart offers trendy designs for daily use, casual wear, gifting, and special occasions with delivery across Pakistan.
+
+4) Product pages appear thin or poorly rendered for crawlers
+What I found
+Some product URLs did not return usable crawlable content through the fetch process, and one product page returned only very limited template text.
+
+That suggests one or more of these issues:
+
+JS-heavy rendering
+product content loaded client-side
+weak server-rendered HTML
+thin content
+incomplete crawlable product information
+Why it matters
+If Google cannot clearly access:
+
+product title
+price
+description
+reviews
+availability
+images
+structured data
+then product pages will struggle to rank and earn rich results.
+
+Exact fix
+Make sure every product page has server-rendered or fully crawlable HTML containing:
+
+product name
+short description
+long description
+price
+stock status
+delivery info
+return/exchange info
+FAQs
+review content
+related products
+Minimum product page content template
+H1: full product keyword
+80–120 word unique intro
+bullet features
+specifications
+shipping/return info
+2–4 FAQs
+related items
+schema markup
+5) Title tags and meta descriptions are likely too generic
+What I found
+Google shows titles like:
+
+“PakCart | Authentic Pakistani Artisanal Products”
+“Categories - PakCart”
+“New Arrivals - Latest Pakistani Artisanal Products - PakCart”
+These are too broad and do not match your highest-converting search demand.
+
+Why it matters
+Title tags are one of the strongest on-page ranking signals. If titles do not include the right category/product keywords, you miss rankings and clicks.
+
+Exact fix
+Write unique titles for homepage, categories, and products.
+
+Examples are provided below in the implementation section.
+
+6) Weak keyword targeting across the site
+What I found
+Current wording focuses on “artisanal products,” but your product inventory suggests people are more likely to search for:
+
+women bags online Pakistan
+bedsheets online Pakistan
+men watches Pakistan
+ladies slippers online Pakistan
+kids bags Pakistan
+Why it matters
+You rank better when page keywords match real search intent.
+
+Exact fix
+Shift keyword strategy from generic branding to commercial keyword clusters.
+
+7) Internal linking is weak
+What I found
+The homepage appears to link generally to categories and products, but there is no evidence of a strong SEO internal link system.
+
+Why it matters
+Internal linking helps Google understand:
+
+your important categories
+product relationships
+topical relevance
+crawl priorities
+Exact fix
+Add internal links from:
+
+homepage → main categories
+categories → subcategories/top products
+product pages → related products / parent category
+blog posts → category pages / products
+footer → major SEO categories
+8) URL structure is not fully SEO-friendly
+What I found
+Product URLs are decent:
+
+/products/mens-skechers-comfort-flip-flops
+But category indexing uses parameterized URLs in sitemap.
+
+Why it matters
+Clean URL architecture improves:
+
+relevance
+crawl efficiency
+CTR
+user trust
+Exact fix
+Use:
+
+/collections/bedsheets
+/collections/womens-handbags
+/collections/mens-watches
+And keep product URLs short, descriptive, and consistent.
+
+9) Duplicate content risk across similar products
+What I found
+Sitemap includes many similar product names like:
+
+premium crystal cotton double bedsheet set 4
+set 5
+set 6
+set 7
+set 8
+set 9
+set 11
+set 12
+Also repeated watch/bag naming patterns.
+
+Why it matters
+If multiple products have almost identical pages except minor naming changes, Google may treat them as low-value or duplicative.
+
+Exact fix
+For similar products:
+
+create stronger unique descriptions
+include unique image alt text
+unique specs
+unique pattern/color/style details
+unique FAQs if relevant
+If variants are basically the same product, consider consolidating them into one product with selectable variants instead of many near-duplicate URLs.
+
+10) Likely missing or weak schema markup
+What I found
+I could not verify strong visible structured data from the crawl output.
+
+Why it matters
+For eCommerce, schema helps Google understand:
+
+product name
+price
+availability
+reviews
+breadcrumbs
+It can improve rich results and CTR.
+
+Exact fix
+Add:
+
+Product schema
+Review schema
+Breadcrumb schema
+Organization schema
+Website schema with search action if relevant
+Examples are below.
+
+11) robots.txt is okay but basic
+What I found
+Your robots.txt is:
+
+Allow: /
+Disallow: /admin
+Sitemap: https://pakcart.store/sitemap.xml
+Why it matters
+This is fine as a basic file, but for eCommerce stores you may also need to control crawl waste if faceted/filter URLs multiply.
+
+Exact fix
+Keep current robots file, but once filters/facets expand, consider handling:
+
+sort params
+filter params
+search result pages
+duplicate faceted combinations
+Do this carefully so important pages are not blocked.
+
+12) XML sitemap quality needs improvement
+What I found
+Your sitemap exists and is a positive sign.
+But it includes query-parameter category pages, which is not ideal.
+
+Why it matters
+A sitemap should list:
+
+clean canonical URLs only
+index-worthy pages only
+no thin/duplicate/filter junk
+Exact fix
+Update sitemap to include only:
+
+homepage
+clean category pages
+key product pages
+blog pages
+informational pages
+Remove:
+
+parameter-based category URLs
+duplicate or non-canonical URLs
+13) Canonical setup needs review
+What I found
+I couldn’t reliably verify canonical implementation from the crawl output.
+
+Why it matters
+Canonical tags prevent duplicate indexing problems, especially on:
+
+parameter URLs
+filtered pages
+paginated pages
+duplicate product variations
+Exact fix
+Add self-referencing canonicals on all canonical pages. For example:
+
+homepage canonical → homepage
+category canonical → clean category URL
+product canonical → main product URL
+Filtered URLs should canonicalize to the primary category page unless they are meant to rank independently.
+
+14) Mobile UX and Core Web Vitals likely need work
+What I found
+The site appears visually built and dynamic. Some pages were harder to fetch. This often correlates with:
+
+JS-heavy rendering
+slower mobile performance
+layout instability
+delayed content rendering
+Why it matters
+Google uses page experience and mobile performance as quality signals. Slow stores hurt:
+
+rankings
+conversion rate
+bounce rate
+Exact fix
+Check and improve:
+
+image compression
+lazy loading
+reduced JS bundles
+font loading
+server response time
+preloading critical assets
+avoiding unnecessary animations
+You should test key templates with:
+
+Google PageSpeed Insights
+Lighthouse
+Search Console Core Web Vitals
+Priority pages:
+
+homepage
+top 5 category pages
+top 20 products
+15) No visible blog/content engine for informational SEO
+What I found
+I did not find an active content hub/blog in the visible audit.
+
+Why it matters
+Without informational content, you rely only on product/category pages. That limits:
+
+keyword coverage
+topical authority
+backlinks
+discovery at top/mid funnel
+Exact fix
+Create a blog/content hub targeting:
+
+buying guides
+comparison posts
+gift ideas
+style guides
+care guides
+sizing guides
+Examples below.
+
+16) Brand trust signals need improvement
+What I found
+You have contact info and support messaging, which is good.
+But trust visibility appears limited from an SEO and conversion perspective.
+
+Why it matters
+Google and users both look for trust signals:
+
+real business identity
+reviews
+policies
+shipping info
+returns
+social proof
+FAQ
+about page depth
+Exact fix
+Strengthen:
+
+About page
+Contact page
+shipping policy
+returns/exchange page
+FAQs
+customer reviews
+real images/video
+business details consistent across web profiles
+17) Competitors are much stronger in category-level SEO
+What I found
+For category searches, competitors have dedicated ranking pages:
+
+Bedsheets competitors
+Nishat Home
+Tulips
+Aspire Bedding
+Gul Ahmed
+K-Linen
+Women’s bags competitors
+Sapphire
+Laam
+Astore
+Maria.B
+Julke
+AK Galleria
+Watches competitors
+Rafiq Sons
+Timecheck
+Gharyal
+Sveston
+WatchCentre
+Why it matters
+These competitors usually have:
+
+strong category pages
+better content depth
+stronger brand trust
+backlinks
+cleaner taxonomy
+better search intent matching
+Exact fix
+You do not need to beat them everywhere.
+Focus on niche + affordability + long-tail + underserved combinations.
+
+For example:
+
+affordable women handbags in Pakistan
+girls crossbody bags online Pakistan
+ladies ceramic watches Pakistan
+crystal cotton bedsheets Pakistan
+men comfort slides Pakistan
+Why Each Issue Matters
+In simple terms:
+
+Google ranks pages it understands best
+Google favors pages with strong intent match
+Google rewards sites with better structure, trust, and content
+eCommerce SEO works best when category pages are optimized first
+Your store currently has products, but not enough SEO structure around them
+Exact Fixes
+Technical SEO Fixes
+1) Clean up URL architecture
+Change:
+
+/products?category=abc123
+To:
+
+/collections/womens-bags
+/collections/mens-watches
+/collections/bedsheets
+2) Add canonicals
+Every page should have:
+
+Copy<link rel="canonical" href="https://pakcart.store/collections/womens-bags" />
+3) Improve sitemap
+Include only canonical pages.
+
+4) Fix crawlable rendering
+Ensure content is visible in source HTML for:
+
+products
+categories
+new arrivals
+5) Check broken links
+Run a full crawl with Screaming Frog or Sitebulb and fix:
+
+404 internal links
+redirect chains
+orphan pages
+6) Faceted navigation SEO
+If filters create many URLs:
+
+noindex low-value combinations
+canonicalize to primary category
+allow only high-intent facets if you want them indexed
+7) Add schema markup
+At minimum on product/category pages.
+
+On-Page SEO Fixes
+Homepage
+Target broad commercial terms:
+
+online shopping in Pakistan
+women bags Pakistan
+watches Pakistan
+slippers Pakistan
+bedsheets Pakistan
+Category pages
+Each category needs:
+
+unique H1
+intro copy
+FAQs
+product links
+optimized title/meta
+Product pages
+Each product needs:
+
+unique copy
+specs
+use cases
+keyword-rich but natural title
+image alt text
+schema
+Keyword Research for Your Site
+Based on your visible catalog, your likely best keyword groups are:
+
+Primary commercial keywords
+online shopping Pakistan
+women bags online Pakistan
+handbags online Pakistan
+watches online Pakistan
+bedsheets online Pakistan
+slippers online Pakistan
+crossbody bags Pakistan
+kids bags Pakistan
+Long-tail keywords
+ladies shoulder bags online in Pakistan
+affordable women handbags in Pakistan
+girls crossbody bags online Pakistan
+men comfort flip flops Pakistan
+premium bedsheets online Pakistan
+cotton double bedsheet set Pakistan
+ladies ceramic watch Pakistan
+men quartz watches online Pakistan
+Transactional keywords
+buy women bags online Pakistan
+buy bedsheets online Pakistan
+order men watches Pakistan
+shop ladies slippers online Pakistan
+buy kids bags online Pakistan
+Informational keywords for blog
+how to choose the best handbag for daily use
+best bedsheet fabric for summer in Pakistan
+how to style women handbags for events
+difference between tote bag and shoulder bag
+how to choose a watch for gifting
+best slippers for daily wear at home
+how to care for cotton bedsheets
+Keyword Mapping
+Homepage
+Primary:
+
+online shopping in Pakistan
+women bags, watches, slippers, bedsheets in Pakistan
+Category examples
+Women’s Bags category
+Primary:
+
+women bags online Pakistan Secondary:
+handbags for women Pakistan
+shoulder bags Pakistan
+crossbody bags Pakistan
+Bedsheets category
+Primary:
+
+bedsheets online Pakistan Secondary:
+cotton bedsheets Pakistan
+double bedsheet set Pakistan
+king size bedsheets Pakistan
+Men’s Watches category
+Primary:
+
+watches online Pakistan Secondary:
+men watches Pakistan
+quartz watches Pakistan
+stainless steel watches Pakistan
+Slippers category
+Primary:
+
+slippers online Pakistan Secondary:
+women slippers Pakistan
+men comfort slides Pakistan
+platform slippers Pakistan
+Content Strategy
+What content should be added
+Category descriptions
+Product buying guides
+Product comparison content
+Seasonal shopping content
+FAQ blocks on category and product pages
+Brand/trust pages
+Style/use-case content
+Blog topic ideas
+Best Women Bags for Daily Use in Pakistan
+Best Bedsheets Online in Pakistan: Fabric, Size & Buying Guide
+How to Choose the Right Men’s Watch for Everyday Wear
+Best Gift Ideas for Women in Pakistan
+Tote Bag vs Shoulder Bag: Which One Should You Buy?
+Best Slippers for Summer in Pakistan
+How to Pick the Perfect Bedsheet Set for Your Bedroom
+Best Crossbody Bags for Girls in Pakistan
+Buying guides
+women handbags buying guide
+bedsheet fabric and size guide
+watch gifting guide
+slippers comfort guide
+FAQs to add
+Do you offer cash on delivery in Pakistan?
+How long does delivery take?
+Can I exchange a product?
+Are the product images real?
+What material is this product made from?
+Is this available in other colors/sizes?
+eCommerce SEO Recommendations
+Product schema
+Add product structured data with:
+
+name
+image
+description
+sku
+brand
+offers
+price
+availability
+Review schema
+Add only if you have real reviews.
+
+Breadcrumb schema
+Use breadcrumbs on:
+
+Home > Category > Product
+Category optimization
+Every category should have:
+
+SEO intro
+FAQs
+internal links
+filter handling
+clean canonical
+Filters and faceted navigation
+Do not let every filter combination become indexable by default.
+
+Out-of-stock pages handling
+If temporarily out of stock:
+
+keep page live
+show out-of-stock status
+add related products
+allow restock alert
+If permanently gone:
+
+301 redirect to closest replacement or parent category
+Pagination SEO
+If categories paginate:
+
+keep paginated pages crawlable
+self-canonical each page or canonical carefully based on your setup
+ensure page 2+ still accessible via links
+do not orphan deeper products
+Off-Page SEO
+Backlink strategy
+You need foundational links first.
+
+Start with:
+Pakistani business directories
+local shopping directories
+niche fashion/home blogs
+gift guide placements
+influencer collaborations
+PR mentions
+supplier/manufacturer mentions if relevant
+Link building ideas
+“Best online stores in Pakistan” list placements
+handbag/bedsheet/watch gift guide outreach
+fashion/lifestyle blogger product review outreach
+Ramadan/Eid gift guide features
+women fashion and home décor bloggers
+university/lifestyle micro-influencers
+Brand mentions
+Create and optimize:
+
+Facebook
+Instagram
+TikTok
+Pinterest
+LinkedIn business page
+Google Business Profile if applicable
+Social signals
+Social signals are not direct ranking factors in a simple way, but they help:
+
+discovery
+branded search
+link attraction
+trust
+Competitor SEO: What They’re Doing Better
+What top competitors do better
+strong category-specific landing pages
+better keyword matching
+stronger titles/meta
+more trust signals
+often better structured data
+stronger backlink profiles
+clearer brand/category specialization
+Your current gaps
+homepage mismatch
+weak category page depth
+query-based category URLs
+limited informational content
+weak authority in any single vertical
+probably limited reviews/social proof
+How you can outrank them
+Do not compete too broadly.
+
+Better strategy
+Pick 2–3 priority verticals first:
+
+women bags
+bedsheets
+watches
+Then build:
+
+strong category pages
+long-tail product pages
+supporting blog content
+better internal links
+higher trust signals
+backlinks to those categories specifically
+Practical Implementation
+Sample SEO titles and meta descriptions
+Homepage
+Title:
+PakCart – Buy Women’s Bags, Watches, Slippers & Bedsheets Online in Pakistan
+
+Meta description:
+Shop women’s bags, men’s watches, slippers, bedsheets and more at PakCart. Affordable prices, secure checkout and delivery across Pakistan.
+
+Category page: Women’s Bags
+Title:
+Women’s Bags Online in Pakistan | Handbags, Totes & Crossbody Bags – PakCart
+
+Meta description:
+Shop stylish women’s bags online in Pakistan including handbags, shoulder bags, tote bags and crossbody bags. Fast delivery and affordable prices.
+
+Category page: Bedsheets
+Title:
+Bedsheets Online in Pakistan | Cotton & Double Bedsheet Sets – PakCart
+
+Meta description:
+Buy premium bedsheets online in Pakistan. Explore cotton bedsheets, double bedsheet sets and elegant designs for your home at PakCart.
+
+Category page: Men’s Watches
+Title:
+Men’s Watches Online in Pakistan | Quartz & Stainless Steel Watches – PakCart
+
+Meta description:
+Shop men’s watches online in Pakistan including quartz, leather strap and stainless steel styles. Great prices and nationwide delivery.
+
+Product page example
+For: mens-skechers-comfort-flip-flops
+
+Title:
+Men’s Comfort Flip Flops Online in Pakistan | Lightweight Casual Slippers – PakCart
+
+Meta description:
+Buy men’s comfort flip flops online in Pakistan. Lightweight, stylish and ideal for daily wear with easy nationwide delivery from PakCart.
+
+Suggested improved headings
+Homepage
+H1:
+Online Shopping in Pakistan for Bags, Watches, Footwear & Home Essentials
+
+H2s:
+
+Shop by Category
+Best Selling Products
+New Arrivals
+Why Shop with PakCart
+Frequently Asked Questions
+Women’s Bags category
+H1:
+Women’s Bags Online in Pakistan
+
+H2s:
+
+Shop Handbags, Shoulder Bags & Crossbody Bags
+Affordable Bag Styles for Everyday Use
+Frequently Asked Questions About Women’s Bags
+Bedsheets category
+H1:
+Bedsheets Online in Pakistan
+
+H2s:
+
+Cotton Bedsheets for Everyday Comfort
+Double and King Size Bedsheet Sets
+Bedsheet Buying FAQs
+Schema markup example
+Product schema example
+Copy<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "Men's Comfort Flip Flops",
+  "image": [
+    "https://pakcart.store/path-to-image.jpg"
+  ],
+  "description": "Lightweight men's comfort flip flops for casual daily wear.",
+  "brand": {
+    "@type": "Brand",
+    "name": "PakCart"
+  },
+  "sku": "PC-FF-001",
+  "offers": {
+    "@type": "Offer",
+    "url": "https://pakcart.store/products/mens-skechers-comfort-flip-flops",
+    "priceCurrency": "PKR",
+    "price": "2499",
+    "availability": "https://schema.org/InStock",
+    "itemCondition": "https://schema.org/NewCondition"
+  }
+}
+</script>
+Breadcrumb schema example
+Copy<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://pakcart.store/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Men's Slippers",
+      "item": "https://pakcart.store/collections/mens-slippers"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Men's Comfort Flip Flops",
+      "item": "https://pakcart.store/products/mens-skechers-comfort-flip-flops"
+    }
+  ]
+}
+</script>
+Content examples you can directly use
+Category intro example: Women’s Bags
+Shop women’s bags online in Pakistan at PakCart. Explore stylish handbags, shoulder bags, tote bags, crossbody bags and mini bags designed for daily use, casual outfits and special occasions. Whether you need a practical everyday bag or a fashionable statement piece, our collection offers trendy designs at affordable prices with delivery across Pakistan.
+
+Category intro example: Bedsheets
+Buy bedsheets online in Pakistan from PakCart. Discover comfortable and stylish bedsheet sets for double and king size beds, including printed and cotton designs for everyday use. Our collection is ideal for refreshing your bedroom with elegant patterns, quality fabric and affordable prices.
+
+Product description example
+Men’s Comfort Flip Flops
+Upgrade your everyday footwear with these men’s comfort flip flops, designed for lightweight support and casual daily wear. The easy slip-on style makes them ideal for home, travel, and outdoor use, while the comfortable sole helps reduce fatigue during extended wear. A practical choice for men looking for style, comfort, and value in one pair.
+
+Product FAQ example
+Q: Are these flip flops suitable for daily use?
+Yes, they are designed for comfortable daily wear at home or outdoors.
+
+Q: Do you offer delivery across Pakistan?
+Yes, PakCart delivers nationwide.
+
+Q: Is this product available in multiple sizes?
+Please check the size options listed on the product page.
+
+Exact Pages That Need Improvement First
+Based on the current structure, prioritize these pages:
+
+Homepage
+https://pakcart.store/
+
+All products page
+https://pakcart.store/products
+
+Categories page
+https://pakcart.store/categories
+
+Parameter category URLs in sitemap
+Examples:
+
+https://pakcart.store/products?category=6Ir5Lv1vZNgXEG1brDaI
+https://pakcart.store/products?category=8eBqTMy6GFtGKt97MNs0
+and the other category parameter URLs in sitemap
+Top product templates Examples:
+https://pakcart.store/products/mens-skechers-comfort-flip-flops
+https://pakcart.store/products/premium-crystal-cotton-double-bedsheet-set-3pc-7
+New arrivals page
+https://pakcart.store/new-arrivals
+About and Contact pages
+https://pakcart.store/about
+https://pakcart.store/contact
+These should also be optimized for trust and internal linking.
+
+Priority-Based Action Plan
+High Priority
+Fix homepage messaging and keyword targeting
+Create SEO-friendly category URLs
+Build dedicated category landing pages
+Rewrite title tags and meta descriptions
+Improve product page content depth
+Add product/breadcrumb schema
+Fix canonical setup
+Clean sitemap to include only canonical URLs
+Strengthen internal linking
+Audit mobile speed and Core Web Vitals
+Medium Priority
+Add FAQ sections to categories/products
+Consolidate near-duplicate product pages where possible
+Add blog/content hub
+Improve About, Contact, shipping, returns pages
+Add review collection strategy
+Optimize image alt text
+Improve faceted navigation SEO
+Low Priority
+Digital PR campaigns
+Influencer outreach at scale
+Advanced schema enhancements
+Category video content
+Deep competitor link gap campaigns
+30-Day, 60-Day, 90-Day SEO Plan
+First 30 Days
+Fix homepage SEO
+Map all categories properly
+replace parameter category URLs with clean static URLs
+update sitemap
+add canonical tags
+rewrite title/meta for homepage, categories, top 20 products
+improve 10 most important product pages
+set up schema on products and breadcrumbs
+add category intro content
+Days 31–60
+optimize all main category pages
+improve internal linking
+add FAQ content to category and product pages
+create 5–8 blog posts
+improve trust pages: shipping, returns, exchange, FAQs
+consolidate duplicate/variant-like products where needed
+optimize image alt text and product specs
+Days 61–90
+publish more long-tail blog content
+begin backlink outreach
+secure directory/citation links
+collaborate with influencers/bloggers
+add more user reviews
+analyze Search Console data
+expand winning categories with deeper subcategory pages
+Simple Implementation Roadmap
+Phase 1: Fix structure
+clean URLs
+canonicals
+sitemap
+crawlable HTML
+category architecture
+Phase 2: Fix relevance
+keyword mapping
+titles/meta
+headings
+content
+internal links
+Phase 3: Build authority
+blogs
+FAQs
+reviews
+backlinks
+mentions
