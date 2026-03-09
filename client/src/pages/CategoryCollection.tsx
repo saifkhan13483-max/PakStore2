@@ -107,9 +107,16 @@ export default function CategoryCollection() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO
-        title={category.name}
-        description={category.description || `Shop our ${category.name} collection at PakCart. Authentic products delivered across Pakistan.`}
+        title={`${category.name} Online in Pakistan | Affordable Prices at PakCart`}
+        description={category.description || `Shop our curated collection of ${category.name.toLowerCase()} available online in Pakistan. Best prices, authentic products, fast delivery across Pakistan with free shipping over Rs. 10,000.`}
         url={`/collections/${category.slug}`}
+        schema={{
+          "@context": "https://schema.org/",
+          "@type": "CollectionPage",
+          "name": category.name,
+          "description": category.description || `Shop ${category.name.toLowerCase()} online`,
+          "url": `https://pakcart.store/collections/${category.slug}`
+        }}
       />
 
       <Breadcrumb className="mb-6">

@@ -20,6 +20,7 @@ interface SEOProps {
   url?: string;
   type?: string;
   productData?: ProductSchemaProps;
+  schema?: Record<string, any>;
 }
 
 function getAbsoluteUrl(url: string): string {
@@ -35,7 +36,8 @@ export default function SEO({
   image = "/og-image.png", 
   url = typeof window !== "undefined" ? window.location.href : "https://pakcart.store",
   type = "website",
-  productData
+  productData,
+  schema
 }: SEOProps) {
   const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
@@ -43,7 +45,7 @@ export default function SEO({
   const absoluteImage = getAbsoluteUrl(image);
   const absoluteUrl = url.startsWith("http") ? url : `https://pakcart.store${url.startsWith("/") ? url : "/" + url}`;
 
-  const productSchema = productData ? {
+  const productSchema = schema ? schema : productData ? {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": productData.name,

@@ -263,11 +263,11 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">EXPLORE OUR</span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Categories</h2>
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">SHOP BY CATEGORY</span>
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Women's Bags, Watches, Slippers & More</h2>
                 <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Discover our diverse range of authentic Pakistani products, handcrafted with care and tradition for your lifestyle.
+                  Browse our curated collections of women's handbags, men's watches, comfortable slippers, quality bedsheets, and kids bags. All delivered fast across Pakistan.
                 </p>
               </motion.div>
             </div>

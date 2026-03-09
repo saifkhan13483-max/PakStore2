@@ -33,8 +33,8 @@ export default function Categories() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO
-        title="Categories"
-        description="Browse all categories of authentic Pakistani artisanal products."
+        title="Shop by Category - Women's Bags, Watches, Slippers & Bedsheets Online Pakistan | PakCart"
+        description="Browse all product categories including women's handbags, men's watches, comfortable slippers, quality bedsheets, flip flops, and kids bags available online in Pakistan. Fast delivery nationwide."
       />
 
       <Breadcrumb className="mb-6">
@@ -50,9 +50,9 @@ export default function Categories() {
       </Breadcrumb>
 
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">All Categories</h1>
-        <p className="text-muted-foreground mt-2">
-          Explore our curated collection of authentic Pakistani artisanal products.
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Shop All Categories</h1>
+        <p className="text-muted-foreground mt-2 text-base leading-relaxed max-w-3xl">
+          Discover our complete collection of affordable fashion accessories, footwear, and home essentials available online in Pakistan. Shop women's handbags, men's watches, comfortable slippers, quality bedsheets, flip flops, and kids bags - all with fast delivery across Pakistan.
         </p>
       </div>
 
