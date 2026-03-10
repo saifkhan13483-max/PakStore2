@@ -77,7 +77,7 @@ const Header = () => {
   return (
     <header 
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
+        "sticky top-0 z-50 w-full transition-all duration-300 min-h-[64px]",
         isScrolled 
           ? "bg-background/80 backdrop-blur-lg border-b shadow-sm py-2" 
           : "bg-transparent py-4"

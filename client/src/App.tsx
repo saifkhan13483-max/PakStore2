@@ -212,6 +212,7 @@ function Router() {
       <Helmet>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preload" as="image" href="https://res.cloudinary.com/dftvtsjcg/image/upload/f_auto,q_auto,w_1920/v1772789701/ChatGPT_Image_Mar_6_2026_02_15_28_PM_1_t8uwak.png" />
       </Helmet>
       <Suspense fallback={<PageLoader />}>
         {routes}

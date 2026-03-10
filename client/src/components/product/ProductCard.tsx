@@ -64,6 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -12 }}
       className="group relative bg-white dark:bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-primary/20"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '300px 400px' }}
     >
       {/* Image Container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted flex items-center justify-center">
@@ -73,6 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
             loading="lazy"
+            decoding="async"
             onError={() => {
               console.error(`Failed to load image for product: ${product.name}`, imageUrl);
               setImageError(true);
