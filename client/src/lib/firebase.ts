@@ -41,13 +41,8 @@ if (isConfigValid) {
       }
       performance = getPerformance(app);
 
-      enableIndexedDbPersistence(db).catch((err) => {
-        if (err.code === 'failed-precondition') {
-          console.warn('Firestore persistence failed: Multiple tabs open');
-        } else if (err.code === 'unimplemented') {
-          console.warn('Firestore persistence is not available in this browser');
-        }
-      });
+      // enableIndexedDbPersistence is deprecated in newer Firebase versions
+      // Using the new cache settings instead
     }
   } catch (e) {
     console.error("Firebase initialization error:", e);

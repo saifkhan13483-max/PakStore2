@@ -27,23 +27,6 @@ import { db } from "./firebase";
 import { z } from "zod";
 
 /**
- * Enable offline persistence for better user experience and reduced read operations
- */
-try {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time.
-      console.warn('Firestore persistence failed: multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      // The current browser does not support all of the features required to enable persistence
-      console.warn('Firestore persistence failed: browser not supported');
-    }
-  });
-} catch (e) {
-  console.error("Error enabling Firestore persistence", e);
-}
-
-/**
  * Enhanced Firestore Service Layer with Zod Validation and Error Handling
  */
 
