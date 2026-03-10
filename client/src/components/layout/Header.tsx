@@ -133,15 +133,6 @@ const Header = () => {
                         </DropdownMenuSubTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuSubContent className="w-48">
-                            <DropdownMenuItem asChild>
-                              <Link 
-                                href={`/collections?parent=${parent.slug}`}
-                                className="cursor-pointer w-full font-semibold text-primary"
-                              >
-                                All in {parent.name}
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
                             {subCategories.map((category) => (
                               <DropdownMenuItem key={category.id} asChild>
                                 <Link 
