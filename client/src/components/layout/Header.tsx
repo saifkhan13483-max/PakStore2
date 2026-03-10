@@ -87,9 +87,12 @@ const Header = () => {
         <div className="flex h-12 items-center justify-between gap-4">
           <Link href="/" className="flex items-center group">
             <img 
-              src={getOptimizedImageUrl(logoImg)} 
+              src={getOptimizedImageUrl(logoImg, { width: 160, height: 40, crop: 'fit' })} 
               alt="PakCart" 
               className="h-10 w-auto transition-transform group-hover:scale-105" 
+              width="160"
+              height="40"
+              fetchPriority="high"
             />
           </Link>
 

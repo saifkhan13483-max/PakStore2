@@ -56,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
     }).format(price);
   };
 
-  const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500 }) : null;
+  const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500, crop: 'fill' }) : null;
 
   return (
     <motion.div 
@@ -75,6 +75,8 @@ export function ProductCard({ product }: ProductCardProps) {
             className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
             loading="lazy"
             decoding="async"
+            width="400"
+            height="500"
             onError={() => {
               console.error(`Failed to load image for product: ${product.name}`, imageUrl);
               setImageError(true);

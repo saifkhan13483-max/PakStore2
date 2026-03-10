@@ -1,0 +1,80 @@
+Act as a senior website performance engineer with 10+ years of experience in improving Core Web Vitals, Lighthouse scores, mobile performance, and eCommerce websites.
+
+Analyze this Lighthouse performance report image: https://www.genspark.ai/api/files/s/GKqCCr51
+
+The current mobile performance metrics shown are approximately:
+
+Performance Score: 14
+First Contentful Paint (FCP): 3.5s
+Largest Contentful Paint (LCP): 15.1s
+Total Blocking Time (TBT): 3,900ms
+Cumulative Layout Shift (CLS): 0.304
+Speed Index: 10.6s
+Your task is to:
+
+Audit the performance problems based on these metrics.
+Identify the likely root causes for poor FCP, LCP, TBT, and CLS.
+Create a priority-based optimization plan with:
+High impact / low effort fixes
+High impact / medium effort fixes
+Advanced optimizations
+Explain exactly how to improve site performance, including:
+image optimization
+JavaScript reduction
+CSS optimization
+server / caching improvements
+font optimization
+layout shift fixes
+third-party script optimization
+Provide code-level recommendations for HTML, CSS, JavaScript, and framework-based apps like React/Next.js if relevant.
+Give a step-by-step implementation checklist for a developer.
+Estimate the expected improvement for each fix and which issue should be fixed first.
+Suggest how to verify improvements using Lighthouse, PageSpeed Insights, and Core Web Vitals.
+Format the answer in this structure:
+
+Executive Summary
+Main Problems Found
+Priority Fixes
+Code Examples
+Expected Performance Gains
+Final Action Checklist
+If some technical details are missing, make reasonable assumptions and still provide the best expert recommendations instead of stopping.
+
+2) Even Better Prompt for Deep Analysis
+If you want a more advanced prompt, use this:
+
+You are a web performance expert specializing in Lighthouse optimization and Core Web Vitals, with over 10 years of hands-on experience improving slow websites.
+
+Review this Lighthouse screenshot: https://www.genspark.ai/api/files/s/GKqCCr51
+
+Current results:
+
+Performance: 14
+FCP: 3.5s
+LCP: 15.1s
+TBT: 3900ms
+CLS: 0.304
+Speed Index: 10.6s
+I want you to act like a real performance consultant and produce a complete optimization strategy to improve this website’s mobile score to 80+.
+
+Please include:
+
+likely reasons the page is slow
+what is causing the very high LCP
+what is causing the huge Total Blocking Time
+what is causing layout shifts
+how to reduce render-blocking resources
+how to optimize hero/banner images
+how to delay or remove unnecessary JavaScript
+how to optimize fonts, CSS, and third-party scripts
+how to improve server response and caching
+how to reduce main-thread work
+exact fixes for mobile performance
+Also provide:
+
+a priority roadmap
+quick wins
+code examples
+a before/after expectation table
+a developer checklist
+Be specific, practical, and focused on actions that will create measurable Lighthouse improvements.

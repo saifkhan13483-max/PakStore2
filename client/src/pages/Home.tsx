@@ -151,7 +151,7 @@ export default function Home() {
           tabIndex={0}
         >
           {isHeroLoading ? (
-            <Skeleton className="w-full h-full" />
+            <div className="w-full h-full bg-muted animate-pulse" />
           ) : HERO_SLIDES.length > 0 ? (
             <>
           <AnimatePresence mode="wait">
@@ -160,18 +160,23 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1.2, ease: "easeInOut" }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
               className="absolute inset-0"
             >
                   <picture>
-                    {HERO_SLIDES[currentSlide].image_webp_url && (
+                    {HERO_SLIDES[currentSlide].image_webp_url ? (
                       <source srcSet={HERO_SLIDES[currentSlide].image_webp_url} type="image/webp" />
+                    ) : (
+                      <source srcSet={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image_url, { format: 'webp' })} type="image/webp" />
                     )}
                     <img 
-                      src={HERO_SLIDES[currentSlide].image_url} 
-                      alt={`Slide ${currentSlide + 1}`}
+                      src={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image_url, { quality: 'auto', format: 'auto' })} 
+                      alt={HERO_SLIDES[currentSlide].title || `Slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
+                      fetchPriority={currentSlide === 0 ? "high" : "low"}
+                      width="1920"
+                      height="700"
                     />
                   </picture>
                 </motion.div>

@@ -309,7 +309,7 @@ export default function ProductDetail() {
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
                   }`}
                 >
-                  <img src={getOptimizedImageUrl(img, { width: 100, height: 100 })} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(img, { width: 100, height: 100, crop: 'fill' })} alt={`${product.name} thumbnail ${idx + 1}`} className="w-full h-full object-cover" width="100" height="100" loading="lazy" />
                 </button>
               ))}
             </div>
@@ -340,9 +340,12 @@ export default function ProductDetail() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    src={getOptimizedImageUrl(activeImageUrl, { width: 800, height: 800 })}
+                    src={getOptimizedImageUrl(activeImageUrl, { width: 800, height: 800, crop: 'fill' })}
                     alt={product.name}
                     className="w-full h-full object-cover"
+                    width="800"
+                    height="800"
+                    fetchPriority="high"
                   />
                 )}
               </AnimatePresence>
