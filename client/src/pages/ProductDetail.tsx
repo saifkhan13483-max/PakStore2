@@ -247,7 +247,9 @@ export default function ProductDetail() {
     { question: "How long does shipping take?", answer: "Delivery times vary by location within Pakistan. Typically, orders are delivered within 3-7 business days from the date of dispatch. Orders are usually dispatched within 24-48 hours." },
     { question: "Can I return this product?", answer: "Yes, we offer a 7-day return/exchange policy. The product must be unused, in original packaging, and in resalable condition. Return shipping is free for defective items." },
     { question: "Is customization available for this product?", answer: "Customization options depend on the specific product. Check the product options above to see available variants. For special customization requests, please contact our team at support@pakcart.store." },
-    { question: "How can I leave a review for this product?", answer: "You can leave a review in the Customer Reviews tab above. Share your experience with the product, rate it from 1-5 stars, and help other customers make informed decisions." }
+    { question: "How can I leave a review for this product?", answer: "You can leave a review in the Customer Reviews tab above. Share your experience with the product, rate it from 1-5 stars, and help other customers make informed decisions." },
+    { question: "Are there any discounts for first-time buyers?", answer: "We frequently offer promotions and seasonal discounts. Sign up for our newsletter to receive the latest updates on exclusive deals and offers for our valued customers." },
+    { question: "What should I do if my order arrives damaged?", answer: "If you receive a damaged product, please contact us immediately at support@pakcart.store with photos of the damage and your order number. We will arrange for a replacement or refund as per our policy." }
   ];
 
   return (

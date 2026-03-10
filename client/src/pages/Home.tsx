@@ -26,6 +26,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { homepageSlideService } from "@/services/homepageSlideService";
 import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
+import SEO from "@/components/SEO";
 
 import { useAuthStore } from "@/store/authStore";
 import { seedRandomComments } from "@/lib/seed-comments";
@@ -111,6 +112,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
+      <SEO 
+        title="Best Online Shopping in Pakistan - Women's Bags, Watches & More"
+        description="Shop the latest collection of women's handbags, premium watches, comfortable slippers, and quality bedsheets at PakCart. Fast delivery across Pakistan with free shipping on orders over Rs. 10,000."
+        keywords="online shopping pakistan, womens bags pakistan, ladies watches pakistan, slippers online pakistan, bedsheets online pakistan, pakcart store"
+      />
       {isAdmin && (
         <div className="fixed bottom-4 right-4 z-50">
           <Button 
