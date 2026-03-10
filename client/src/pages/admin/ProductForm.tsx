@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 // @ts-ignore - VideoUpload.jsx doesn't have TypeScript declarations
 import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
@@ -269,11 +270,9 @@ export default function AdminProductForm() {
                       <FormItem>
                         <FormLabel>Long Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Detailed product information..." 
-                            className="min-h-[180px] bg-background/50"
-                            {...field} 
-                            value={field.value || ""}
+                          <RichTextEditor 
+                            value={field.value || ""} 
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage />

@@ -530,9 +530,10 @@ export default function ProductDetail() {
           </TabsList>
           <TabsContent value="description" className="pt-6 sm:pt-8 focus-visible:ring-0">
             <div className="max-w-4xl">
-              <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed">
-                <p className="whitespace-pre-wrap">{product.longDescription || "No detailed description available for this product."}</p>
-              </div>
+              <div 
+                className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: product.longDescription || "No detailed description available for this product." }}
+              />
               
               {product.specifications && Object.keys(product.specifications).length > 0 && (
                 <div className="mt-12">
