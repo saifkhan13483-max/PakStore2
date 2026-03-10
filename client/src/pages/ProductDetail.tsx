@@ -280,20 +280,20 @@ export default function ProductDetail() {
         </Link>
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-16 mb-12 lg:mb-20">
-        <div className="flex flex-col md:flex-row gap-4 lg:sticky lg:top-24 h-fit">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 xl:gap-12 mb-8 sm:mb-12 lg:mb-16 xl:mb-20">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 lg:sticky lg:top-24 h-fit">
           {images.length > 0 && (
-            <div className="flex flex-row md:flex-col gap-3 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 md:pr-2 scrollbar-hide md:max-h-[400px] lg:max-h-[500px] order-2 md:order-1">
+            <div className="flex flex-row sm:flex-col gap-2 sm:gap-3 overflow-x-auto sm:overflow-y-auto pb-2 sm:pb-0 sm:pr-2 scrollbar-hide sm:max-h-[300px] md:max-h-[400px] lg:max-h-[500px] order-2 sm:order-1">
               {product.videoUrl && (
                 <button
                   onClick={() => setShowVideo(true)}
-                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center bg-black ${
+                  className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all flex items-center justify-center bg-black ${
                     showVideo 
                       ? "border-primary ring-2 ring-primary/10" 
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
                   }`}
                 >
-                  <Play className="w-8 h-8 text-white" />
+                  <Play className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                 </button>
               )}
               {images.map((img, idx) => (
@@ -303,7 +303,7 @@ export default function ProductDetail() {
                     setActiveImage(idx);
                     setShowVideo(false);
                   }}
-                  className={`relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                  className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${
                     !showVideo && activeImage === idx 
                       ? "border-primary ring-2 ring-primary/10" 
                       : "border-transparent opacity-70 hover:opacity-100 hover:border-primary/30"
@@ -315,7 +315,7 @@ export default function ProductDetail() {
             </div>
           )}
           
-          <Card className="flex-1 overflow-hidden border border-border/50 shadow-sm rounded-2xl order-1 md:order-2">
+          <Card className="flex-1 overflow-hidden border border-border/50 shadow-sm rounded-xl sm:rounded-2xl order-1 sm:order-2">
             <CardContent className="p-0 aspect-square relative bg-black">
               <AnimatePresence mode="wait">
                 {showVideo && product.videoUrl ? (
@@ -353,58 +353,58 @@ export default function ProductDetail() {
           </Card>
         </div>
 
-        <div className="flex flex-col">
-          <div className="space-y-6">
-            <div className="space-y-2">
+        <div className="flex flex-col gap-4 sm:gap-6">
+          <div className="space-y-3 sm:space-y-4 md:space-y-6">
+            <div className="space-y-1.5 sm:space-y-2">
               {category && (
-                <p className="text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-widest">
+                <p className="text-xs sm:text-xs md:text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   {category.name}
                 </p>
               )}
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight break-words">
                 {product.name}
               </h1>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {isLoadingReviews ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/30 rounded-full border">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/30 rounded-full border text-xs sm:text-sm">
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin text-muted-foreground" />
                 </div>
               ) : (Number(displayReviewCount) > 0 && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30">
-                  <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 dark:bg-yellow-950/30 rounded-full border border-yellow-200/50 dark:border-yellow-800/30 text-xs sm:text-sm">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-500 text-yellow-500" />
                   <span className="font-bold text-yellow-700 dark:text-yellow-500">{displayRating}</span>
                 </div>
               ))}
-              <span className="text-muted-foreground text-sm">({displayReviewCount} reviews)</span>
-              <Separator orientation="vertical" className="h-4 hidden sm:block" />
-              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3">
+              <span className="text-muted-foreground text-xs sm:text-sm">({displayReviewCount} reviews)</span>
+              <Separator orientation="vertical" className="h-3 hidden sm:block" />
+              <Badge variant={product.inStock ? "secondary" : "destructive"} className="rounded-full px-3 text-xs sm:text-sm">
                 {product.inStock ? "In Stock" : "Out of Stock"}
               </Badge>
             </div>
             
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl md:text-4xl font-bold text-primary">
+            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+              <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary">
                 {formatPrice(currentPrice)}
               </span>
               {product.originalPrice && (
-                <span className="text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal ml-2">
+                <span className="text-lg sm:text-xl text-muted-foreground line-through decoration-muted-foreground/50 font-normal">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
 
-            <div className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-2xl">
+            <div className="text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed max-w-full break-words">
               {product.description}
             </div>
 
             {/* Product Variants Selection */}
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-6 pt-4">
+              <div className="space-y-4 sm:space-y-6 pt-4 border-t border-border/50">
                 {product.variants.map((variant) => (
-                  <div key={variant.name} className="space-y-3">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <div key={variant.name} className="space-y-2 sm:space-y-3">
+                    <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2 flex-wrap">
                       {variant.name}
                       {selectedVariants[variant.name] && (
                         <span className="text-primary normal-case font-normal text-xs bg-primary/10 px-2 py-0.5 rounded-full">
@@ -417,7 +417,7 @@ export default function ProductDetail() {
                         <button
                           key={option.id}
                           onClick={() => handleVariantSelect(variant.name, option.id)}
-                          className={`group relative overflow-hidden px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                          className={`group relative overflow-hidden px-3 sm:px-4 py-2 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all ${
                             selectedVariants[variant.name] === option.id
                               ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
                               : "border-border/50 bg-background hover:border-primary/30 hover:bg-accent/50"
@@ -428,13 +428,13 @@ export default function ProductDetail() {
                               <img 
                                 src={getOptimizedImageUrl(option.image, { width: 40, height: 40 })} 
                                 alt={option.value}
-                                className="w-6 h-6 rounded-md object-cover border border-border/50"
+                                className="w-5 h-5 sm:w-6 sm:h-6 rounded-md object-cover border border-border/50"
                               />
                             )}
-                            <span>{option.value}</span>
+                            <span className="truncate">{option.value}</span>
                           </div>
                           {option.price && option.price !== product.price && (
-                            <span className="ml-1.5 opacity-60">
+                            <span className="ml-1 sm:ml-1.5 opacity-60 text-xs">
                               ({formatPrice(option.price)})
                             </span>
                           )}
@@ -447,12 +447,12 @@ export default function ProductDetail() {
             )}
 
             {product.features && product.features.length > 0 && (
-              <div className="py-4 border-t border-border/50 mt-6">
-                <h3 className="font-bold text-foreground mb-4 uppercase text-xs tracking-widest">Key Features</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+              <div className="py-4 sm:py-6 border-t border-border/50 mt-4 sm:mt-6">
+                <h3 className="font-bold text-foreground mb-3 sm:mb-4 uppercase text-xs tracking-widest">Key Features</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-2 sm:gap-y-3">
                   {product.features.map((feature, i) => (
-                    <div key={i} className="flex items-start text-sm text-muted-foreground bg-accent/30 p-2 rounded-lg border border-border/10">
-                      <Check className="mt-0.5 w-4 h-4 text-primary mr-3 flex-shrink-0" />
+                    <div key={i} className="flex items-start text-xs sm:text-sm text-muted-foreground bg-accent/30 p-2 sm:p-3 rounded-lg border border-border/10">
+                      <Check className="mt-0.5 w-3 h-3 sm:w-4 sm:h-4 text-primary mr-2 sm:mr-3 flex-shrink-0" />
                       {feature}
                     </div>
                   ))}
@@ -460,51 +460,50 @@ export default function ProductDetail() {
               </div>
             )}
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border/50">
-                <div className="flex items-center border rounded-md bg-background p-1 w-full sm:w-fit justify-between sm:justify-start">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 no-default-hover-elevate"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="w-12 text-center font-bold text-lg">{quantity}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-9 w-9 no-default-hover-elevate"
-                    onClick={() => setQuantity(quantity + 1)}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="flex flex-1 gap-3">
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    className="flex-1 h-12 rounded-md gap-3 font-bold text-lg shadow-sm transition-all active:scale-[0.98]" 
-                    onClick={() => handleAddToCart(false)}
-                    disabled={!product.inStock}
-                    data-testid="button-add-to-cart"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    {product.inStock ? "Add to Cart" : "Out of Stock"}
-                  </Button>
-                  <Button 
-                    size="lg"
-                    className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white rounded-md gap-3 font-bold text-lg shadow-md transition-all active:scale-[0.98]" 
-                    onClick={handleBuyNow}
-                    disabled={!product.inStock}
-                    data-testid="button-buy-now"
-                  >
-                    <Zap className="w-5 h-5 fill-current" />
-                    Buy Now
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3 sm:gap-4 pt-4 sm:pt-6 md:pt-8 border-t border-border/50 mt-4 sm:mt-6">
+              <div className="flex items-center border rounded-md bg-background p-1 w-full sm:w-fit justify-between">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 sm:h-9 sm:w-9 no-default-hover-elevate"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
+                <span className="w-10 sm:w-12 text-center font-bold text-base sm:text-lg">{quantity}</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 sm:h-9 sm:w-9 no-default-hover-elevate"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                </Button>
               </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Button 
+                  variant="outline"
+                  className="flex-1 h-11 sm:h-12 rounded-md gap-2 sm:gap-3 font-bold text-sm sm:text-base shadow-sm transition-all active:scale-[0.98]" 
+                  onClick={() => handleAddToCart(false)}
+                  disabled={!product.inStock}
+                  data-testid="button-add-to-cart"
+                >
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden xs:inline">{product.inStock ? "Add to Cart" : "Out of Stock"}</span>
+                  <span className="inline xs:hidden">{product.inStock ? "Add" : "Out"}</span>
+                </Button>
+                <Button 
+                  className="flex-1 h-11 sm:h-12 bg-primary hover:bg-primary/90 text-white rounded-md gap-2 sm:gap-3 font-bold text-sm sm:text-base shadow-md transition-all active:scale-[0.98]" 
+                  onClick={handleBuyNow}
+                  disabled={!product.inStock}
+                  data-testid="button-buy-now"
+                >
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                  Buy Now
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -531,21 +530,33 @@ export default function ProductDetail() {
               Customer Reviews
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="pt-6 sm:pt-8 focus-visible:ring-0">
-            <div className="max-w-4xl">
+          <TabsContent value="description" className="pt-4 sm:pt-6 md:pt-8 focus-visible:ring-0 px-0">
+            <div className="max-w-full md:max-w-4xl">
               <div 
-                className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-base sm:text-lg leading-relaxed"
+                className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed prose-sm sm:prose-base"
+                style={{
+                  "--tw-prose-p-margin": "1em 0",
+                  "--tw-prose-headings-font-weight": "700",
+                  "--tw-prose-li-marker-color": "hsl(var(--primary))",
+                  "--tw-prose-hr-border-color": "hsl(var(--border))",
+                  "--tw-prose-strong-color": "hsl(var(--foreground))",
+                  "--tw-prose-code-bg": "hsl(var(--accent) / 0.1)",
+                  "--tw-prose-code-color": "hsl(var(--primary))",
+                  "--tw-prose-th-borders-color": "hsl(var(--border))",
+                  "--tw-prose-td-borders-color": "hsl(var(--border))",
+                  "--tw-prose-table-border-color": "hsl(var(--border))",
+                } as any}
                 dangerouslySetInnerHTML={{ __html: product.longDescription || "No detailed description available for this product." }}
               />
               
               {product.specifications && Object.keys(product.specifications).length > 0 && (
-                <div className="mt-12">
-                  <h3 className="text-xl font-bold mb-6">Specifications</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-8 sm:mt-10 md:mt-12">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-5 md:mb-6 text-foreground">Specifications</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 sm:gap-3 md:gap-4 overflow-x-auto">
                     {Object.entries(product.specifications).map(([key, value]) => (
-                      <div key={key} className="flex border-b border-border/50 pb-2">
-                        <span className="font-semibold text-foreground w-1/3">{key}</span>
-                        <span className="text-muted-foreground">{String(value)}</span>
+                      <div key={key} className="flex flex-col sm:flex-row gap-2 sm:gap-3 border-b border-border/50 pb-3 sm:pb-3 min-w-0">
+                        <span className="font-semibold text-foreground sm:w-1/3 break-words text-sm sm:text-base">{key}</span>
+                        <span className="text-muted-foreground text-sm sm:text-base break-words">{String(value)}</span>
                       </div>
                     ))}
                   </div>
