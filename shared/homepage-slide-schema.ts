@@ -1,11 +1,15 @@
 import { z } from "zod";
 import { baseDocumentSchema } from "./schema";
 
+export const heroSectionTypeEnum = z.enum(["desktop", "mobile"]);
+export type HeroSectionType = z.infer<typeof heroSectionTypeEnum>;
+
 export const homepageSlideSchema = baseDocumentSchema.extend({
   image_url: z.string().min(1),
   image_webp_url: z.string().nullable().optional(),
   is_active: z.boolean().default(true),
   display_order: z.number().int().min(0).default(0),
+  hero_section_type: heroSectionTypeEnum.default("desktop"),
 });
 
 export type HomepageSlide = z.infer<typeof homepageSlideSchema>;

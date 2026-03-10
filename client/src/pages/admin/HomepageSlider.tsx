@@ -25,6 +25,15 @@ import { insertHomepageSlideSchema } from "@shared/homepage-slide-schema";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUploader } from "@/components/product/ImageUploader";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export default function HomepageSlider() {
   const { toast } = useToast();
@@ -73,6 +82,21 @@ export default function HomepageSlider() {
     },
   });
 
+  const [selectedHeroType, setSelectedHeroType] = useState<"desktop" | "mobile">("desktop");
+
+  const heroSectionSpecs = {
+    desktop: {
+      label: "Desktop Hero Section",
+      dimensions: "1920 × 700",
+      description: "Optimized for desktop and tablet displays",
+    },
+    mobile: {
+      label: "Mobile Hero Section",
+      dimensions: "768 × 1024",
+      description: "Optimized for mobile devices",
+    },
+  };
+
   const form = useForm({
     resolver: zodResolver(insertHomepageSlideSchema),
     defaultValues: {
@@ -80,6 +104,7 @@ export default function HomepageSlider() {
       image_webp_url: "",
       is_active: true,
       display_order: 0,
+      hero_section_type: "desktop",
     },
   });
 
@@ -115,10 +140,42 @@ export default function HomepageSlider() {
       })} className="space-y-4">
                 <FormField
                   control={form.control}
+                  name="hero_section_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hero Section Type</FormLabel>
+                      <Select value={field.value} onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedHeroType(value as "desktop" | "mobile");
+                      }}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-hero-type">
+                            <SelectValue placeholder="Select hero section type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="desktop">Desktop Hero Section (1920 × 700)</SelectItem>
+                          <SelectItem value="mobile">Mobile Hero Section (768 × 1024)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+                  <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <AlertDescription className="ml-2 text-sm text-blue-900 dark:text-blue-300">
+                    <strong>{heroSectionSpecs[selectedHeroType].label}</strong> - Recommended size: <strong>{heroSectionSpecs[selectedHeroType].dimensions}</strong>. {heroSectionSpecs[selectedHeroType].description}
+                  </AlertDescription>
+                </Alert>
+
+                <FormField
+                  control={form.control}
                   name="image_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Slide Image (Recommended: 1920x700, Max: 2MB)</FormLabel>
+                      <FormLabel>Slide Image</FormLabel>
                       <FormControl>
                         <ImageUploader
                           value={field.value ? [field.value] : []}
@@ -176,7 +233,7 @@ export default function HomepageSlider() {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead className="w-[120px] py-4">Thumbnail</TableHead>
-              <TableHead>File Name</TableHead>
+              <TableHead>Hero Type</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Display Order</TableHead>
               <TableHead>Date Added</TableHead>
@@ -201,8 +258,21 @@ export default function HomepageSlider() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate font-mono text-xs">
-                    {slide.image_url.split('/').pop()?.split('?')[0]}
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={slide.hero_section_type || "desktop"} 
+                        onValueChange={(value) => updateMutation.mutate({ id: slide.id, data: { hero_section_type: value as "desktop" | "mobile" } })}
+                      >
+                        <SelectTrigger className="w-40 h-8 text-xs" data-testid={`select-type-${slide.id}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="desktop">Desktop (1920×700)</SelectItem>
+                          <SelectItem value="mobile">Mobile (768×1024)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
