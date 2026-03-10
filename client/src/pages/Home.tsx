@@ -38,6 +38,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const [showMoreNewArrivals, setShowMoreNewArrivals] = useState(false);
   const [showMoreFeatured, setShowMoreFeatured] = useState(false);
@@ -48,12 +49,27 @@ export default function Home() {
     queryFn: () => homepageSlideService.getActiveSlides(),
   });
 
+  // Detect screen size on mount and on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Call once on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const HERO_SLIDES = useMemo(() => {
     if (slides && slides.length > 0) {
-      return slides;
+      // Filter slides by device type
+      const deviceType = isMobile ? "mobile" : "desktop";
+      const filteredSlides = slides.filter(slide => slide.hero_section_type === deviceType);
+      // Fall back to all slides if no slides match the device type
+      return filteredSlides.length > 0 ? filteredSlides : slides;
     }
     return [];
-  }, [slides]);
+  }, [slides, isMobile]);
 
   useEffect(() => {
     if (HERO_SLIDES.length <= 1 || isPaused) return;
