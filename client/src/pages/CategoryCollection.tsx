@@ -113,8 +113,8 @@ export default function CategoryCollection() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO
-        title={`${category.name} Online in Pakistan | Affordable Prices at PakCart`}
-        description={category.description || `Shop our curated collection of ${category.name.toLowerCase()} available online in Pakistan. Best prices, authentic products, fast delivery across Pakistan with free shipping over Rs. 10,000.`}
+        title={`${category.name} Online Shopping in Pakistan | Best Prices at PakCart`}
+        description={category.description || `Explore our exclusive collection of ${category.name.toLowerCase()} available online in Pakistan. Shop authentic products with fast delivery and free shipping on orders over Rs. 10,000.`}
         url={`/collections/${category.slug}`}
         breadcrumbs={[
           { name: "Home", url: "/" },

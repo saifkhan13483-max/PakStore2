@@ -255,8 +255,8 @@ export default function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title={product.name} 
-        description={product.description}
+        title={`${product.name} | Buy Online in Pakistan - PakCart`} 
+        description={`${product.description.substring(0, 150)}... Buy ${product.name} at the best price in Pakistan. Fast shipping and 7-day easy returns.`}
         type="product"
         image={images[0]}
         productData={{
