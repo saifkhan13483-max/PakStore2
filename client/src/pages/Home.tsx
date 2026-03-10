@@ -276,10 +276,10 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
               >
                 <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">SHOP BY CATEGORY</span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Women's Bags, Watches, Slippers & More</h2>
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Premium Collection: Bags, Watches & More</h2>
                 <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Browse our curated collections of women's handbags, men's watches, comfortable slippers, quality bedsheets, and kids bags. All delivered fast across Pakistan.
+                  Experience the pinnacle of Pakistani craftsmanship. From elegant handbags to luxury timepieces, discover quality that defines your style.
                 </p>
               </motion.div>
             </div>

@@ -34,20 +34,22 @@ const Footer = () => {
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-8">
             {/* Quick Links */}
             <div className="space-y-4">
-              <h4 className="font-display font-semibold text-lg">Quick Links</h4>
+              <h4 className="font-display font-semibold text-lg">Shop</h4>
               <nav className="flex flex-col gap-3">
-                <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Shop All Products</Link>
+                <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">All Products</Link>
                 <Link href="/new-arrivals" className="text-sm text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link>
+                <Link href="/categories" className="text-sm text-muted-foreground hover:text-primary transition-colors">Collections</Link>
               </nav>
             </div>
 
             {/* Customer Service */}
             <div className="space-y-4">
-              <h4 className="font-display font-semibold text-lg">Help & Info</h4>
+              <h4 className="font-display font-semibold text-lg">Company</h4>
               <nav className="flex flex-col gap-3">
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</Link>
+                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Story</Link>
+                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Support</Link>
                 <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
-                <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link>
+                <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
               </nav>
             </div>
 
