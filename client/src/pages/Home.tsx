@@ -120,6 +120,8 @@ export default function Home() {
     }
   };
 
+  const safeSlide = HERO_SLIDES.length > 0 ? HERO_SLIDES[Math.min(currentSlide, HERO_SLIDES.length - 1)] : undefined;
+
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
 
@@ -183,7 +185,7 @@ export default function Home() {
         >
           {isHeroLoading ? (
             <div className="w-full h-full bg-muted animate-pulse" />
-          ) : HERO_SLIDES.length > 0 ? (
+          ) : HERO_SLIDES.length > 0 && safeSlide ? (
             <>
           <AnimatePresence mode="wait">
             <motion.div
@@ -195,13 +197,13 @@ export default function Home() {
               className="absolute inset-0"
             >
                   <picture>
-                    {HERO_SLIDES[currentSlide].image_webp_url ? (
-                      <source srcSet={HERO_SLIDES[currentSlide].image_webp_url} type="image/webp" />
+                    {safeSlide.image_webp_url ? (
+                      <source srcSet={safeSlide.image_webp_url} type="image/webp" />
                     ) : (
-                      <source srcSet={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image_url, { format: 'webp' })} type="image/webp" />
+                      <source srcSet={getOptimizedImageUrl(safeSlide.image_url, { format: 'webp' })} type="image/webp" />
                     )}
                     <img 
-                      src={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image_url, { quality: 'auto', format: 'auto' })} 
+                      src={getOptimizedImageUrl(safeSlide.image_url, { quality: 'auto', format: 'auto' })} 
                       alt={`Hero slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
