@@ -143,6 +143,12 @@ export default function Products() {
     setVisibleCount((prev) => Math.min(prev + 10, filteredAndSortedProducts.length));
   };
 
+  useEffect(() => {
+    if (!isLoading) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [isLoading]);
+
   const handleFilterChange = (newFilters: FilterState) => {
     setFilterState(newFilters);
     setVisibleCount(10); // Reset visibility when filters change

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearch } from "wouter";
 import SEO from "@/components/SEO";
 import { ProductCard as ProductCardComponent } from "@/components/product/ProductCard";
@@ -101,6 +101,12 @@ export default function NewArrivals() {
     setFilterState(newFilters);
     setVisibleCount(10);
   };
+
+  useEffect(() => {
+    if (!isLoading) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [isLoading]);
 
   return (
     <div className="container mx-auto px-4 py-8">

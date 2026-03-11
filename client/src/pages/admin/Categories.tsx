@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Category, ParentCategory, insertCategorySchema, insertParentCategorySchema } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
@@ -95,6 +96,7 @@ export default function AdminCategories() {
 
   return (
     <div className="space-y-8 p-6">
+      <SEO title="Admin Categories - PakCart" robots="noindex,follow" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
           <CardHeader>

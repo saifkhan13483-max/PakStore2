@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,6 +127,7 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Admin Orders - PakCart" robots="noindex,follow" />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-900">Manage Orders</h1>

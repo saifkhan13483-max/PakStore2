@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ParentCategory, Category, insertCategorySchema, insertParentCategorySchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -107,6 +108,7 @@ export default function ManageCategories() {
 
   return (
     <div className="space-y-8 p-6 animate-in fade-in duration-500">
+      <SEO title="Admin Categories - PakCart" robots="noindex,follow" />
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Manage Categories</h1>
         <p className="text-muted-foreground">

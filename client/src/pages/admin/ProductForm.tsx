@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -186,6 +187,7 @@ export default function AdminProductForm() {
 
   return (
     <div className="space-y-8 p-1">
+      <SEO title="Admin Product Form - PakCart" robots="noindex,follow" />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <Link href="/admin/products">

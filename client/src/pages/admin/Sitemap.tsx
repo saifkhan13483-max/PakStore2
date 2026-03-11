@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { sitemapService } from "@/lib/sitemap";
 
 export default function Sitemap() {
@@ -15,6 +16,7 @@ export default function Sitemap() {
 
   return (
     <div className="container mx-auto py-10">
+      <SEO title="Admin Sitemap - PakCart" robots="noindex,follow" />
       <h1 className="text-2xl font-bold mb-4">Sitemap Management</h1>
       <p className="mb-6">Generate and download the latest SEO-optimized sitemap for search engines.</p>
       <button 

@@ -135,6 +135,12 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [HERO_SLIDES.length]);
 
+  useEffect(() => {
+    if (!isAllProductsLoading && !isCategoriesLoading && !isHeroLoading) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [isAllProductsLoading, isCategoriesLoading, isHeroLoading]);
+
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
       <SEO 

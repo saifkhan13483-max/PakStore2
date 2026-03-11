@@ -12,6 +12,8 @@
 |---|---|---|
 | Client-side rendering, no meaningful HTML for bots | Empty `<div id="root">` on load | `window.__SEO_PAGE_READY__` signal + prerender script ready |
 | Missing noindex on 9 user/auth/admin routes | All routes defaulted to index | Explicit `noindex,follow` on all private routes |
+| Missing noindex on 8 admin pages | Admin pages crawlable/indexable | `SEO robots="noindex,follow"` added to all 8 admin pages |
+| `__SEO_PAGE_READY__` missing from 4 public pages | Home/Products/Categories/NewArrivals lacked ready signal | Signal added via `useEffect` on data load completion |
 | Missing SEO on 4 info pages | No title/canonical/description | Full SEO component on About/Contact/Privacy/Terms |
 | Canonical URLs including query params | `?sort=`, `?filter=` captured in canonical | Canonical stripped to `pathname` only |
 | Static sitemaps blocking dynamic API | Static `sitemap.xml` served instead of API | `vercel.json` routes API first; API with smart fallback |

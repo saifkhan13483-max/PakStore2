@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Package, Users, ShoppingCart, BarChart, Tags, Loader2, RefreshCw, TrendingUp, TrendingDown, Clock, ArrowRight, RotateCcw } from "lucide-react";
 import { Link } from "wouter";
@@ -109,6 +110,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 p-1">
+      <SEO title="Admin Dashboard - PakCart" robots="noindex,follow" />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>

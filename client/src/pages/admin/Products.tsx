@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Table, 
@@ -199,6 +200,7 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
+      <SEO title="Admin Products - PakCart" robots="noindex,follow" />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Products</h2>

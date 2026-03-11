@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -221,6 +222,7 @@ export default function HomepageSlider() {
 
   return (
     <div className="p-6 space-y-6">
+      <SEO title="Admin Homepage Slider - PakCart" robots="noindex,follow" />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Homepage Slider Management</h1>
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

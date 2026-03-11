@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import SEO from "@/components/SEO";
@@ -26,6 +27,12 @@ export default function Categories() {
   });
 
   const isLoading = loadingParents || loadingCategories;
+
+  useEffect(() => {
+    if (!isLoading) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [isLoading]);
 
   const getSubcategories = (parentId: string) =>
     (categories || []).filter((c) => String(c.parentCategoryId) === String(parentId));
