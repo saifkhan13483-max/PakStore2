@@ -231,6 +231,7 @@ export default function Signup() {
       <SEO
         title="Create Account"
         description="Join thousands of satisfied customers shopping across Pakistan. Free delivery, cash on delivery available."
+        robots="noindex,follow"
       />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

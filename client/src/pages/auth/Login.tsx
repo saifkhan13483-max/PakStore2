@@ -35,6 +35,14 @@ export default function Login() {
   const { signInWithEmail: login, signInWithGoogle: loginWithGoogle, resetPassword } = useAuthStore();
   const cartStore = useCartStore();
 
+  const seoElement = (
+    <SEO 
+      title="Sign In - PakCart"
+      description="Sign in to your PakCart account to access your orders, profile, and saved items."
+      robots="noindex,follow"
+    />
+  );
+
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -187,6 +195,7 @@ export default function Login() {
       <SEO
         title="Login - PakCart"
         description="Sign in to your PakCart account. Pakistani artisanal products, nationwide COD, and easy order tracking."
+        robots="noindex,follow"
       />
       
       <div className="space-y-6">
