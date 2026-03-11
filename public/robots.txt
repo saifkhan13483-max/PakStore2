@@ -1,9 +1,13 @@
 User-agent: *
 Allow: /
+Allow: /assets/
+Allow: /*.js
+Allow: /*.css
+
 Disallow: /admin
 Disallow: /admin/
-Disallow: /auth/
 Disallow: /auth
+Disallow: /auth/
 Disallow: /profile
 Disallow: /profile/
 Disallow: /checkout
@@ -14,5 +18,10 @@ Disallow: /thank-you
 Disallow: /thank-you/
 Disallow: /orders
 Disallow: /orders/
+Disallow: /*?*
+Disallow: /*&*
 
 Sitemap: https://pakcart.store/sitemap.xml
+
+User-agent: Googlebot
+Allow: /

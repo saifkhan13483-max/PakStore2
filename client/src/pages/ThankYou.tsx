@@ -2,7 +2,7 @@ import { CheckCircle2, ShoppingBag, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Helmet } from "react-helmet-async";
+import SEO from "@/components/SEO";
 import { useCartStore } from "@/store/cartStore";
 import { useEffect, useState } from "react";
 
@@ -17,10 +17,11 @@ export default function ThankYou() {
 
   return (
     <div className="container mx-auto px-4 py-16 text-center">
-      <Helmet>
-        <title>Order Confirmed - Thank You | PakCart</title>
-        <meta name="description" content="Thank you for your order! Your request has been received and is being processed." />
-      </Helmet>
+      <SEO
+        title="Order Confirmed - Thank You"
+        description="Thank you for your order! Your request has been received and is being processed."
+        robots="noindex,follow"
+      />
 
       <div className="max-w-2xl mx-auto">
         <div className="mb-8 flex justify-center">
