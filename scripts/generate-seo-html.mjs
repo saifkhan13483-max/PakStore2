@@ -73,7 +73,7 @@ function buildHead({ title, description, canonical, robots = "index,follow", ima
 }
 
 function buildBodyContent(content) {
-  return `<div id="seo-prerender" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">${content}</div>`;
+  return content;
 }
 
 function injectIntoShell(shell, head, bodyContent) {
@@ -82,8 +82,11 @@ function injectIntoShell(shell, head, bodyContent) {
   result = result.replace(/<title>[^<]*<\/title>/, `<title>${head.title}</title>`);
   // Inject meta/canonical/og/schema tags right before </head>
   result = result.replace("</head>", `${head.meta}\n</head>`);
-  // Inject SEO body content right after <body ...> or <body>
-  result = result.replace(/<body([^>]*)>/, `<body$1>\n${bodyContent}`);
+  // Inject visible SEO content INSIDE #root — React replaces this on hydration (proper SSR pattern)
+  result = result.replace(
+    /(<div id="root">)(<\/div>)?/,
+    `$1<div id="seo-content" style="font-family:system-ui,sans-serif;padding:16px;color:#111">${bodyContent}</div></div>`
+  );
   return result;
 }
 

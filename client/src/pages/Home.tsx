@@ -147,6 +147,8 @@ export default function Home() {
         title="PakCart | #1 Online Shopping in Pakistan - Women's Bags, Watches & Decor"
         description="Shop the latest collection of premium women's handbags, luxury men's watches, comfortable slippers, and quality bedsheets at PakCart. Enjoy free delivery on orders over Rs. 10,000 across Pakistan."
         keywords="online shopping pakistan, womens bags pakistan, ladies watches pakistan, slippers online pakistan, bedsheets online pakistan, pakcart store"
+        url="https://pakcart.store/"
+        robots="index,follow"
       />
       {isAdmin && (
         <div className="fixed bottom-4 right-4 z-50">

@@ -21,6 +21,9 @@
 | Internal links using query-param URLs | `/collections?parent=slug`, `/products?categoryId=id` | All converted to canonical `/collections/:slug` |
 | TypeScript check failures | 4 pre-existing errors prevented `npm run check` | All 4 errors fixed, check passes clean |
 | Duplicate query-param sitemap entries | Query-param URLs in static sitemap | All removed; only canonical URLs remain |
+| **Duplicate canonical tags on every page** | App.tsx had global `<link rel="canonical" href="pakcart.store/">` + page-level canonical = two canonical tags | Removed global canonical from App.tsx; each page's SEO component is the sole source |
+| **Pre-render content hidden (cloaking risk)** | `generate-seo-html.mjs` injected content in visually-hidden div (`clip:rect(0,0,0,0)`) | Content now injected directly into `#root` — visible to crawlers, replaced by React on hydration |
+| **Home.tsx missing explicit canonical URL** | Home page canonical resolved from `window.location.pathname` only | Explicit `url="https://pakcart.store/"` + `robots="index,follow"` added to Home SEO component |
 
 ---
 
