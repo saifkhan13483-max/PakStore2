@@ -185,7 +185,7 @@ export function Navbar() {
                             {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
                               <DropdownMenuItem key={category.id} asChild className="p-0 focus:bg-transparent">
                                 <Link 
-                                  href={`/products?categoryId=${category.id}`} 
+                                  href={`/collections/${category.slug}`} 
                                   className="group flex items-center justify-between w-full rounded-md px-2 py-1.5 text-[13px] text-muted-foreground transition-all hover:bg-primary/5 hover:text-primary active:translate-x-0.5"
                                 >
                                   <span className="font-medium">{category.name}</span>

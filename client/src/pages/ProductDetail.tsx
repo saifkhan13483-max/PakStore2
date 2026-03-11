@@ -657,7 +657,7 @@ export default function ProductDetail() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold">Related Products</h2>
             <Button variant="ghost" asChild className="p-0 h-auto">
-              <Link href={`/products?categoryId=${product.categoryId}`}>View all</Link>
+              <Link href={category?.slug ? `/collections/${category.slug}` : "/categories"}>View all</Link>
             </Button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

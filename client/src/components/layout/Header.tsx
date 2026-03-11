@@ -306,10 +306,10 @@ const Header = () => {
                                       {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
                                         <Link
                                           key={category.id}
-                                          href={`/products?categoryId=${category.id}`}
+                                          href={`/collections/${category.slug}`}
                                           className={cn(
                                             "py-1 text-base font-medium transition-colors",
-                                            location.includes(`categoryId=${category.id}`) ? "text-primary" : "text-foreground hover:text-primary"
+                                            location.includes(`/collections/${category.slug}`) ? "text-primary" : "text-foreground hover:text-primary"
                                           )}
                                         >
                                           {category.name}

@@ -26,12 +26,14 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     ? [
         ...(products?.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4).map(p => ({
           id: p.id,
+          slug: p.slug,
           title: p.name,
           category: "PRODUCT",
           type: "product"
         })) || []),
         ...(categories?.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 2).map(c => ({
           id: c.id,
+          slug: c.slug,
           title: c.name,
           category: "CATEGORY",
           type: "category"
@@ -40,12 +42,14 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     : [
         ...(products?.slice(0, 3).map(p => ({
           id: p.id,
+          slug: p.slug,
           title: p.name,
           category: "POPULAR",
           type: "product"
         })) || []),
         ...(categories?.slice(0, 2).map(c => ({
           id: c.id,
+          slug: c.slug,
           title: c.name,
           category: "TRENDING",
           type: "category"
@@ -79,9 +83,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         const selected = results[selectedIndex];
         if (selected) {
           if (selected.type === "product") {
-            setLocation(`/products?search=${encodeURIComponent(selected.title)}`);
+            setLocation(`/products/${selected.slug}`);
           } else {
-            setLocation(`/products?categoryId=${selected.id}`);
+            setLocation(`/collections/${selected.slug}`);
           }
           onClose();
         }
@@ -146,9 +150,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 key={`${item.type}-${item.id}`}
                 onClick={() => {
                   if (item.type === "product") {
-                    setLocation(`/products?search=${encodeURIComponent(item.title)}`);
+                    setLocation(`/products/${item.slug}`);
                   } else {
-                    setLocation(`/products?categoryId=${item.id}`);
+                    setLocation(`/collections/${item.slug}`);
                   }
                   onClose();
                 }}
