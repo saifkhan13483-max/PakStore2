@@ -105,7 +105,7 @@ export function useCloudinary(): UseCloudinaryReturn {
         resolve({ success: false, error: "Network error" });
       });
 
-      xhr.timeout = 60000;
+      xhr.timeout = 120000;
       xhr.addEventListener("timeout", () => {
         resolve({ success: false, error: "Upload timed out. Your connection might be too slow." });
       });
