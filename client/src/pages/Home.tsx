@@ -149,7 +149,7 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
         <section 
-          className="relative w-full aspect-[1920/700] min-h-[250px] sm:min-h-[400px] overflow-hidden bg-black group"
+          className="relative w-full aspect-[1920/700] min-h-[350px] sm:min-h-[400px] overflow-hidden bg-black group"
           style={{ containIntrinsicSize: '1920px 700px', contentVisibility: 'auto' }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
