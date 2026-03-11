@@ -1,6 +1,41 @@
 User-agent: *
 Allow: /
+Allow: /assets/
+Allow: /*.js
+Allow: /*.css
+
 Disallow: /admin
 Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
+Disallow: /profile
+Disallow: /profile/
+Disallow: /checkout
+Disallow: /checkout/
+Disallow: /cart
+Disallow: /cart/
+Disallow: /thank-you
+Disallow: /thank-you/
+Disallow: /orders
+Disallow: /orders/
+Disallow: /*?*
+Disallow: /*&*
 
 Sitemap: https://pakcart.store/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+Allow: /assets/
+Allow: /*.js
+Allow: /*.css
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
+Disallow: /profile
+Disallow: /checkout
+Disallow: /cart
+Disallow: /thank-you
+Disallow: /orders
+Disallow: /*?*

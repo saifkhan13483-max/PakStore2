@@ -66,6 +66,12 @@ export default function CategoryCollection() {
     retry: false
   });
 
+  useEffect(() => {
+    if (category && productsData) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [category, productsData]);
+
   const filteredAndSortedProducts = useMemo(() => {
     if (!productsData) return [];
     let result = [...productsData];
@@ -104,6 +110,11 @@ export default function CategoryCollection() {
   if (!category) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <SEO
+          title="Category Not Found"
+          description="The category you are looking for may have been removed or is no longer available."
+          robots="noindex,follow"
+        />
         <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
         <p className="text-muted-foreground">The category you're looking for doesn't exist.</p>
       </div>

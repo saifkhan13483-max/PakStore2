@@ -1,14 +1,16 @@
-import { Helmet } from "react-helmet-async";
+import SEO from "@/components/SEO";
 import ContactForm from "@/components/contact/ContactForm";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 export default function Contact() {
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <Helmet>
-        <title>Contact Us | PakCart</title>
-        <meta name="description" content="Get in touch with PakCart for any inquiries about our authentic Pakistani artisanal products." />
-      </Helmet>
+      <SEO
+        title="Contact Us - Get in Touch with PakCart"
+        description="Get in touch with PakCart for any inquiries about our authentic Pakistani artisanal products. Email, phone, or use our contact form. We're here to help."
+        url="https://pakcart.store/contact"
+        robots="index,follow"
+      />
 
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">

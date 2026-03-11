@@ -78,6 +78,12 @@ export default function ProductDetail() {
   const [showVideo, setShowVideo] = useState(false);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (product) {
+      (window as any).__SEO_PAGE_READY__ = true;
+    }
+  }, [product]);
+
   const images = useMemo(() => {
     const baseImages = product?.images && product.images.length > 0 
       ? product.images 
@@ -231,6 +237,11 @@ export default function ProductDetail() {
   if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
+        <SEO
+          title="Product Not Found"
+          description="The product you are looking for may have been removed or is no longer available."
+          robots="noindex,follow"
+        />
         <h2 className="text-2xl font-bold mb-4 text-foreground">Product Not Found</h2>
         <p className="text-muted-foreground mb-8">The product you are looking for might have been moved or removed.</p>
         <Button asChild>
@@ -257,6 +268,7 @@ export default function ProductDetail() {
       <SEO 
         title={`${product.name} | Buy Online in Pakistan - PakCart`} 
         description={`${product.description.substring(0, 150)}... Buy ${product.name} at the best price in Pakistan. Fast shipping and 7-day easy returns.`}
+        url={`https://pakcart.store/products/${product.slug}`}
         type="product"
         image={images[0]}
         productData={{

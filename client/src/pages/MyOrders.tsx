@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useMemo } from "react";
+import SEO from "@/components/SEO";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -52,6 +53,11 @@ export default function MyOrders() {
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+      <SEO
+        title="My Orders"
+        description="View and manage your orders on PakCart."
+        robots="noindex,follow"
+      />
       <div className="flex flex-col gap-2 mb-8">
         <h1 className="text-3xl font-bold tracking-tight">My Orders</h1>
         <p className="text-muted-foreground">Track and manage your recent purchases</p>

@@ -47,7 +47,7 @@ export default function SEO({
   description, 
   keywords, 
   image = "/og-image.png", 
-  url = typeof window !== "undefined" ? window.location.href : "https://pakcart.store",
+  url = typeof window !== "undefined" ? `${window.location.origin}${window.location.pathname}` : "https://pakcart.store",
   type = "website",
   productData,
   schema,

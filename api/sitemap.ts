@@ -3,7 +3,6 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 const domain = "https://pakcart.store";
 
-// Helper to format date to ISO string (YYYY-MM-DD)
 const formatDate = (date?: any) => {
   if (!date) return new Date().toISOString().split('T')[0];
   if (typeof date.toDate === 'function') {
@@ -12,16 +11,39 @@ const formatDate = (date?: any) => {
   return new Date(date).toISOString().split('T')[0];
 };
 
+const staticPages = [
+  { url: '/', priority: '1.0', changefreq: 'daily' },
+  { url: '/products', priority: '0.9', changefreq: 'daily' },
+  { url: '/categories', priority: '0.8', changefreq: 'weekly' },
+  { url: '/new-arrivals', priority: '0.8', changefreq: 'weekly' },
+  { url: '/about', priority: '0.5', changefreq: 'monthly' },
+  { url: '/contact', priority: '0.5', changefreq: 'monthly' },
+  { url: '/privacy', priority: '0.3', changefreq: 'yearly' },
+  { url: '/terms', priority: '0.3', changefreq: 'yearly' },
+];
+
+function buildXml(urls: { loc: string; lastmod?: string; changefreq: string; priority: string }[]): string {
+  const today = new Date().toISOString().split('T')[0];
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  for (const u of urls) {
+    xml += `
+  <url>
+    <loc>${u.loc}</loc>
+    <lastmod>${u.lastmod || today}</lastmod>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`;
+  }
+  xml += `\n</urlset>`;
+  return xml;
+}
+
 export default async function handler(req: any, res: any) {
   try {
-    // Initialize Firebase Admin if not already initialized
     if (getApps().length === 0) {
-      // TODO: Ensure these environment variables are set in your Vercel project settings
-      // VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_CLIENT_EMAIL, VITE_FIREBASE_PRIVATE_KEY
       const serviceAccount = {
         projectId: process.env.VITE_FIREBASE_PROJECT_ID,
         clientEmail: process.env.VITE_FIREBASE_CLIENT_EMAIL,
-        // Replace escaped newlines if they exist in the env var
         privateKey: process.env.VITE_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       };
 
@@ -29,125 +51,70 @@ export default async function handler(req: any, res: any) {
         throw new Error("Missing Firebase service account environment variables");
       }
 
-      initializeApp({
-        credential: cert(serviceAccount),
-      });
+      initializeApp({ credential: cert(serviceAccount) });
     }
 
     const db = getFirestore();
+    const today = new Date().toISOString().split('T')[0];
 
-    // 1. Fetch Categories
-    const categoriesSnapshot = await db.collection('categories')
-      .where('active', '==', true) // Using 'active' per existing schema.ts, adjust if needed
-      .get();
-    
-    const categories = categoriesSnapshot.docs.map(doc => ({
-      slug: doc.data().slug,
-      updatedAt: formatDate(doc.data().updatedAt)
+    const urls: { loc: string; lastmod?: string; changefreq: string; priority: string }[] = staticPages.map(p => ({
+      loc: `${domain}${p.url}`,
+      lastmod: today,
+      changefreq: p.changefreq,
+      priority: p.priority,
     }));
 
-    // 2. Fetch Products
-    const productsSnapshot = await db.collection('products')
-      .where('active', '==', true)
-      .get();
-    
-    const products = productsSnapshot.docs.map(doc => ({
-      slug: doc.data().slug,
-      updatedAt: formatDate(doc.data().updatedAt)
-    }));
+    // Fetch active categories (try with active filter, fall back to all if no results)
+    let categoriesSnapshot = await db.collection('categories').where('active', '==', true).get();
+    if (categoriesSnapshot.empty) {
+      categoriesSnapshot = await db.collection('categories').get();
+    }
 
-    // 3. Static Pages
-    const staticPages = [
-      { url: '/about', priority: 0.5, changefreq: 'monthly' },
-      { url: '/contact', priority: 0.5, changefreq: 'monthly' },
-      { url: '/privacy', priority: 0.5, changefreq: 'monthly' },
-      { url: '/terms', priority: 0.5, changefreq: 'monthly' },
-    ];
+    for (const doc of categoriesSnapshot.docs) {
+      const data = doc.data();
+      if (!data.slug) continue;
+      urls.push({
+        loc: `${domain}/collections/${data.slug}`,
+        lastmod: formatDate(data.updatedAt),
+        changefreq: 'weekly',
+        priority: '0.8',
+      });
+    }
 
-    // 4. Construct XML
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${domain}/</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>`;
+    // Fetch active products (try with active filter, fall back to all if no results)
+    let productsSnapshot = await db.collection('products').where('active', '==', true).get();
+    if (productsSnapshot.empty) {
+      productsSnapshot = await db.collection('products').get();
+    }
 
-    // Add static pages
-    staticPages.forEach(page => {
-      xml += `
-  <url>
-    <loc>${domain}${page.url}</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`;
-    });
+    for (const doc of productsSnapshot.docs) {
+      const data = doc.data();
+      if (!data.slug) continue;
+      urls.push({
+        loc: `${domain}/products/${data.slug}`,
+        lastmod: formatDate(data.updatedAt),
+        changefreq: 'weekly',
+        priority: '0.7',
+      });
+    }
 
-    // Add main product pages
-    xml += `
-  <url>
-    <loc>${domain}/products</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${domain}/categories</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${domain}/new-arrivals</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-
-    // Add categories
-    categories.forEach(cat => {
-      xml += `
-  <url>
-    <loc>${domain}/collections/${cat.slug}</loc>
-    <lastmod>${cat.updatedAt}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-    });
-
-    // Add products
-    products.forEach(prod => {
-      xml += `
-  <url>
-    <loc>${domain}/products/${prod.slug}</loc>
-    <lastmod>${prod.updatedAt}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`;
-    });
-
-    xml += `
-</urlset>`;
-
-    res.setHeader('Content-Type', 'application/xml');
+    const xml = buildXml(urls);
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
     res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
     return res.status(200).send(xml);
 
   } catch (error: any) {
     console.error("Sitemap generation error:", error);
-    // Fallback XML with just the homepage if everything fails
-    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${domain}/</loc>
-    <lastmod>${formatDate()}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-</urlset>`;
-    res.setHeader('Content-Type', 'application/xml');
+
+    // Fallback: serve static pages only
+    const fallbackUrls = staticPages.map(p => ({
+      loc: `${domain}${p.url}`,
+      changefreq: p.changefreq,
+      priority: p.priority,
+    }));
+
+    const fallbackXml = buildXml(fallbackUrls);
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
     return res.status(200).send(fallbackXml);
   }
 }

@@ -1,3 +1,4 @@
+import SEO from "@/components/SEO";
 import { useRealtimeDocument } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +41,11 @@ export default function OrderDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <SEO
+        title="Order Details"
+        description="View the details of your order on PakCart."
+        robots="noindex,follow"
+      />
       <Button variant="ghost" className="mb-6 group hover:bg-transparent p-0" asChild>
         <Link href="/orders">
           <ChevronLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />

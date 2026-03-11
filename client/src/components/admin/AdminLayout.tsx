@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "../admin-sidebar";
 import { ThemeToggle } from "../theme-toggle";
@@ -15,6 +16,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
+      <Helmet>
+        <meta name="robots" content="noindex,follow" />
+      </Helmet>
       <div className="flex h-screen w-full bg-background">
         <AdminSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">

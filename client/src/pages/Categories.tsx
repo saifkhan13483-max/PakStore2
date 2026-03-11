@@ -33,8 +33,10 @@ export default function Categories() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO
-        title="Shop by Category - Women's Bags, Watches, Slippers & Bedsheets Online Pakistan | PakCart"
+        title="Shop by Category - Women's Bags, Watches, Slippers & Bedsheets Online Pakistan"
         description="Browse all product categories including women's handbags, men's watches, comfortable slippers, quality bedsheets, flip flops, and kids bags available online in Pakistan. Fast delivery nationwide."
+        url="https://pakcart.store/categories"
+        robots="index,follow"
       />
 
       <Breadcrumb className="mb-6">

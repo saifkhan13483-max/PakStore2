@@ -1,8 +1,17 @@
+import SEO from "@/components/SEO";
+
 export default function Privacy() {
   const lastUpdated = "February 07, 2026";
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <>
+      <SEO
+        title="Privacy Policy - PakCart"
+        description="Read PakCart's privacy policy to understand how we collect, use, and protect your personal data when you shop online in Pakistan."
+        url="https://pakcart.store/privacy"
+        robots="index,follow"
+      />
+      <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto prose prose-emerald dark:prose-invert">
         <h1 className="text-4xl font-serif text-emerald-900 mb-4">Privacy Policy</h1>
         <p className="text-muted-foreground mb-8">Last updated: {lastUpdated}</p>
@@ -59,6 +68,7 @@ export default function Privacy() {
           </p>
         </section>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

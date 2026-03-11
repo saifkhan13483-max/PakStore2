@@ -151,8 +151,10 @@ export default function Products() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title="Shop All Products" 
-        description="Browse our complete collection of authentic Pakistani artisanal products, including apparel, home decor, and food."
+        title="Shop All Products - Bags, Watches, Slippers & More"
+        description="Browse our complete collection of women's bags, men's watches, slippers, bedsheets, and kids bags online in Pakistan. Fast delivery, best prices."
+        url="https://pakcart.store/products"
+        robots="index,follow"
       />
 
       <Breadcrumb className="mb-6">

@@ -105,8 +105,10 @@ export default function NewArrivals() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title="New Arrivals - Latest Pakistani Artisanal Products" 
-        description="Discover our newest collection of authentic Pakistani artisanal products, freshly added to PakCart."
+        title="New Arrivals - Latest Bags, Watches, Slippers & More"
+        description="Discover our newest collection of women's bags, men's watches, slippers, and bedsheets freshly added to PakCart. Shop the latest arrivals with fast delivery across Pakistan."
+        url="https://pakcart.store/new-arrivals"
+        robots="index,follow"
       />
 
       <Breadcrumb className="mb-6">

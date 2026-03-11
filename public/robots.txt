@@ -25,3 +25,17 @@ Sitemap: https://pakcart.store/sitemap.xml
 
 User-agent: Googlebot
 Allow: /
+Allow: /assets/
+Allow: /*.js
+Allow: /*.css
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
+Disallow: /profile
+Disallow: /checkout
+Disallow: /cart
+Disallow: /thank-you
+Disallow: /orders
+Disallow: /*?*

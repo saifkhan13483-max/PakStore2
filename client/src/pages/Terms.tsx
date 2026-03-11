@@ -1,8 +1,17 @@
+import SEO from "@/components/SEO";
+
 export default function Terms() {
   const lastUpdated = "February 07, 2026";
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <>
+      <SEO
+        title="Terms & Conditions - PakCart"
+        description="Read PakCart's terms and conditions for using our online shopping platform in Pakistan. Learn about your rights and our policies."
+        url="https://pakcart.store/terms"
+        robots="index,follow"
+      />
+      <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto prose prose-emerald dark:prose-invert">
         <h1 className="text-4xl font-serif text-emerald-900 mb-4">Terms & Conditions</h1>
         <p className="text-muted-foreground mb-8">Last updated: {lastUpdated}</p>
@@ -52,6 +61,7 @@ export default function Terms() {
           </p>
         </section>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
