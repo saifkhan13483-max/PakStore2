@@ -211,3 +211,29 @@ scripts/                   # Utility scripts
 - Enhanced product reviews & ratings display
 - Structured data for all product variations
 - Internal linking strategy optimization
+
+## Phase 3 - Hero Section Device-Specific Slides (COMPLETED)
+
+### Changes Made:
+1. **Enhanced Mobile Hero Section Height** ✓
+   - **File**: `client/src/pages/Home.tsx`
+   - **Change**: Increased mobile hero section minimum height from 350px to 500px
+   - **Details**: Updated line 155 className from `min-h-[350px] sm:min-h-[400px]` to `min-h-[500px] sm:min-h-[500px]`
+   - **Impact**: Mobile hero section now displays taller on mobile devices for better visual impact
+
+2. **Device-Type Slide Assignment (Already Implemented)** ✓
+   - **Schema**: `shared/homepage-slide-schema.ts` - Already includes `hero_section_type` enum with "desktop" and "mobile" options
+   - **Admin Panel**: `client/src/pages/admin/HomepageSlider.tsx` - Already includes device type selector dropdown
+   - **Frontend Filtering**: `client/src/pages/Home.tsx` - Already filters slides by device type (lines 63-72)
+   - **Functionality**:
+     - Admin can add slides and select "Desktop Hero Section (1920×700)" or "Mobile Hero Section (768×1024)"
+     - Desktop slides only display on desktop devices
+     - Mobile slides only display on mobile devices
+     - Automatically detects screen size (isMobile when width < 768px)
+     - Falls back to all slides if device-specific slides aren't available
+
+### Implementation Details:
+- **Device Detection**: Uses window.innerWidth < 768 breakpoint to determine device type
+- **Filtering Logic**: Filters HERO_SLIDES based on `hero_section_type` matching current device type
+- **Admin Selection**: Dropdown in add/edit slide modal with device-specific dimension recommendations
+- **Responsive**: Both desktop and mobile heights maintained appropriately for each device
