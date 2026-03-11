@@ -102,7 +102,7 @@ export function Navbar() {
                                   </p>
                                   <div className="flex flex-col gap-2 pl-4">
                                     {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                                      <Link key={category.id} href={`/products?categoryId=${category.id}`} className="text-base font-medium hover:text-primary transition-colors">
+                                      <Link key={category.id} href={`/collections/${category.slug}`} className="text-base font-medium hover:text-primary transition-colors">
                                         {category.name}
                                       </Link>
                                     ))}

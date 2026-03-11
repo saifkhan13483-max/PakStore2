@@ -152,7 +152,7 @@ const Header = () => {
                   return (
                     <DropdownMenuItem key={parent.id} asChild>
                       <Link 
-                        href={`/products?parentCategoryId=${parent.id}`}
+                        href={`/collections/${parent.slug}`}
                         className="cursor-pointer w-full font-medium"
                       >
                         {parent.name}

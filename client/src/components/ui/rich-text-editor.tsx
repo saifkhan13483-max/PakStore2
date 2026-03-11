@@ -28,9 +28,7 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        history: true,
-      }),
+      StarterKit.configure({}),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),

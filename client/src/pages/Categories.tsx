@@ -88,7 +88,7 @@ export default function Categories() {
                 <div className="flex items-center gap-3 mb-5">
                   <h2 className="text-xl font-bold tracking-tight">{parent.name}</h2>
                   <Link
-                    href={`/collections?parent=${parent.slug}`}
+                    href={`/collections/${parent.slug}`}
                     className="text-sm text-primary font-medium hover:underline ml-auto"
                     data-testid={`link-view-all-${parent.id}`}
                   >
@@ -125,7 +125,7 @@ export default function Categories() {
                     ))
                   ) : (
                     <Link
-                      href={`/collections?parent=${parent.slug}`}
+                      href={`/collections/${parent.slug}`}
                       data-testid={`card-parent-browse-${parent.id}`}
                       className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border bg-card hover:bg-accent hover:border-primary/30 transition-all duration-200 text-center shadow-sm hover:shadow-md col-span-2 sm:col-span-1"
                     >

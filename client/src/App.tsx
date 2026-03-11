@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelmetProvider, Helmet } from "react-helmet-async";
 import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState, type LazyExoticComponent, type ComponentType } from "react";
 
 // Deployment version detection for catching stale chunk references
 const getDeploymentVersion = async (): Promise<string> => {
@@ -22,8 +22,8 @@ const getDeploymentVersion = async (): Promise<string> => {
 };
 
 // Robust Lazy Loading with exponential backoff retry logic
-const lazyWithRetry = (componentImport: () => Promise<any>) => {
-  return lazy(async () => {
+const lazyWithRetry = (componentImport: () => Promise<any>): LazyExoticComponent<ComponentType<any>> => {
+  return lazy(async (): Promise<{ default: ComponentType<any> }> => {
     const maxRetries = 3;
     const retryKey = 'chunk-load-retry-count';
     const versionKey = 'deployment-version';
@@ -71,14 +71,14 @@ const lazyWithRetry = (componentImport: () => Promise<any>) => {
         await new Promise(resolve => setTimeout(resolve, backoffDelay));
         
         // Retry the import
-        return lazyWithRetry(componentImport);
+        return await componentImport();
       }
       
       // After max retries, attempt hard refresh as last resort
       if (isDynamicImportError && currentRetries >= maxRetries) {
         console.error('Chunk load failed after retries. Performing hard refresh.', error);
         window.localStorage.setItem(retryKey, '0');
-        window.location.reload(true); // Force bypass cache
+        window.location.reload(); // Force bypass cache
         return { default: () => null };
       }
       

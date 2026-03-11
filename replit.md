@@ -181,18 +181,30 @@ scripts/                   # Utility scripts
 - **Crawlability**: All content properly structured for search engine crawlers
 - **User Experience**: Clear navigation, trust signals, and comprehensive information on all pages
 
-## Next Phases (Not Started)
-### Phase 3: Content Marketing & Authority
-- Launch blog/content hub
-- Create buying guides, comparison posts, care guides
-- Target informational keywords
-- Build topical authority
+## Technical SEO Audit Phases (Completed)
 
-### Phase 4: Advanced Technical SEO
-- Image optimization (alt text, lazy loading)
-- Mobile Core Web Vitals optimization
-- Faceted navigation handling
-- Advanced sitemap management
+### Phase 1 — Audit
+- Created `docs/indexing-audit.md` with 7 root causes identified
+
+### Phase 2 — Implementation (COMPLETE)
+All canonical, noindex, sitemap, robots.txt, and internal link fixes applied.  
+See `docs/indexing-fixes-summary.md` for full file change list.
+
+Key changes:
+- `SEO.tsx` canonical strips query params  
+- All private routes (admin, auth, cart, checkout, orders, profile) explicitly `noindex,follow`  
+- All public routes (products, categories, collections, info pages) explicitly `index,follow` with absolute canonical URLs  
+- `vercel.json` routes `/sitemap.xml` to `/api/sitemap` before static file  
+- `client/public/robots.txt` comprehensive rules blocking private paths + query params  
+- `api/sitemap.ts` fully rewritten with Firebase Admin + graceful fallback  
+- `window.__SEO_PAGE_READY__` signal added to ProductDetail + CategoryCollection  
+- Internal links fixed: no query-param `href`s remain in navigation  
+
+### Phase 3 — Verification (COMPLETE)
+- `npm run check` — passes (0 TypeScript errors; fixed 4 pre-existing errors)  
+- `npm run build` — passes (~19s build time)  
+- All 15 Phase 3 checklist items verified ✅  
+- `docs/indexing-fixes-summary.md` updated with full verification results and GSC next steps
 
 ## SEO Issues Addressed (from audit)
 1. ✓ Homepage keyword positioning
