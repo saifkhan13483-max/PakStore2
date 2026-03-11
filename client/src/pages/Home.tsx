@@ -62,11 +62,13 @@ export default function Home() {
 
   const HERO_SLIDES = useMemo(() => {
     if (slides && slides.length > 0) {
-      // Filter slides by device type
+      // Filter slides by device type and ensure they are sorted by display_order
       const deviceType = isMobile ? "mobile" : "desktop";
-      const filteredSlides = slides.filter(slide => slide.hero_section_type === deviceType);
-      // Fall back to all slides if no slides match the device type
-      return filteredSlides.length > 0 ? filteredSlides : slides;
+      const filteredSlides = slides
+        .filter(slide => slide.hero_section_type === deviceType)
+        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+      // Fall back to all slides (sorted) if no slides match the device type
+      return filteredSlides.length > 0 ? filteredSlides : slides.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
     }
     return [];
   }, [slides, isMobile]);
@@ -149,8 +151,15 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
         <section 
-          className="relative w-full aspect-[1920/700] min-h-[500px] sm:min-h-[500px] overflow-hidden bg-black group"
-          style={{ containIntrinsicSize: '1920px 700px', contentVisibility: 'auto' }}
+          className={`relative w-full overflow-hidden bg-black group ${
+            isMobile 
+              ? "aspect-[768/1024] min-h-[600px] sm:min-h-[700px]" 
+              : "aspect-[1920/700] min-h-[500px] sm:min-h-[500px]"
+          }`}
+          style={{ 
+            containIntrinsicSize: isMobile ? '768px 1024px' : '1920px 700px', 
+            contentVisibility: 'auto' 
+          }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
@@ -165,6 +174,7 @@ export default function Home() {
             touchStart.current = null;
           }}
           tabIndex={0}
+          data-testid="hero-section"
         >
           {isHeroLoading ? (
             <div className="w-full h-full bg-muted animate-pulse" />
@@ -187,12 +197,12 @@ export default function Home() {
                     )}
                     <img 
                       src={getOptimizedImageUrl(HERO_SLIDES[currentSlide].image_url, { quality: 'auto', format: 'auto' })} 
-                      alt={HERO_SLIDES[currentSlide].title || `Slide ${currentSlide + 1}`}
+                      alt={`Hero slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
                       fetchPriority={currentSlide === 0 ? "high" : "low"}
-                      width="1920"
-                      height="700"
+                      width={isMobile ? "768" : "1920"}
+                      height={isMobile ? "1024" : "700"}
                     />
                   </picture>
                 </motion.div>
@@ -201,13 +211,14 @@ export default function Home() {
               {/* Slider Controls */}
               {HERO_SLIDES.length > 1 && (
                 <>
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2" data-testid="hero-pagination">
                     {HERO_SLIDES.map((_, idx) => (
                       <button
                         key={idx}
                         onClick={() => setCurrentSlide(idx)}
                         className={`h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                         aria-label={`Go to slide ${idx + 1}`}
+                        data-testid={`hero-dot-${idx}`}
                       />
                     ))}
                   </div>
@@ -216,6 +227,7 @@ export default function Home() {
                       onClick={prevSlide}
                       className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100 hidden sm:block"
                       aria-label="Previous slide"
+                      data-testid="hero-button-prev"
                     >
                       <ChevronLeft className="h-6 w-6" />
                     </button>
@@ -223,6 +235,7 @@ export default function Home() {
                       onClick={nextSlide}
                       className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-all pointer-events-auto opacity-0 group-hover:opacity-100 hidden sm:block"
                       aria-label="Next slide"
+                      data-testid="hero-button-next"
                     >
                       <ChevronRight className="h-6 w-6" />
                     </button>
