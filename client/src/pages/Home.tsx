@@ -158,7 +158,7 @@ export default function Home() {
         <section 
           className={`relative w-full overflow-hidden bg-black group ${
             isMobile 
-              ? "aspect-[768/1024] min-h-[600px] sm:min-h-[700px]" 
+              ? "aspect-[768/1024] min-h-[280px]" 
               : "aspect-[1920/700] min-h-[500px] sm:min-h-[500px]"
           }`}
           style={{ 
