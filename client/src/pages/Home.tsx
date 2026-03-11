@@ -73,6 +73,11 @@ export default function Home() {
     return [];
   }, [slides, isMobile]);
 
+  // Reset currentSlide when HERO_SLIDES changes to prevent out-of-bounds access
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [HERO_SLIDES.length]);
+
   useEffect(() => {
     if (HERO_SLIDES.length <= 1 || isPaused) return;
     const timer = setInterval(() => {
