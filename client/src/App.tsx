@@ -8,33 +8,80 @@ import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
 import { Suspense, lazy, useEffect, useState } from "react";
 
-// Robust Lazy Loading with retry logic
+// Deployment version detection for catching stale chunk references
+const getDeploymentVersion = async (): Promise<string> => {
+  try {
+    const response = await fetch(`${window.location.origin}/index.html?t=${Date.now()}`, {
+      method: 'HEAD',
+      cache: 'no-store',
+    });
+    return response.headers.get('etag') || response.headers.get('last-modified') || String(Date.now());
+  } catch {
+    return String(Date.now());
+  }
+};
+
+// Robust Lazy Loading with exponential backoff retry logic
 const lazyWithRetry = (componentImport: () => Promise<any>) => {
   return lazy(async () => {
-    const pageHasBeenForceRefreshed = JSON.parse(
-      window.localStorage.getItem('page-has-been-force-refreshed') || 'false'
-    );
+    const maxRetries = 3;
+    const retryKey = 'chunk-load-retry-count';
+    const versionKey = 'deployment-version';
+    
+    const currentRetries = parseInt(window.localStorage.getItem(retryKey) || '0');
+    const storedVersion = window.localStorage.getItem(versionKey);
+    const currentVersion = await getDeploymentVersion();
+    
+    // Detect deployment version change
+    const isNewDeployment = storedVersion && storedVersion !== currentVersion;
+    if (isNewDeployment) {
+      window.localStorage.setItem(versionKey, currentVersion);
+      window.localStorage.setItem(retryKey, '0');
+      window.location.reload();
+      // Return null while reload happens
+      return { default: () => null };
+    }
+    
+    // Store current deployment version
+    if (!storedVersion) {
+      window.localStorage.setItem(versionKey, currentVersion);
+    }
 
     try {
       const component = await componentImport();
-      if (pageHasBeenForceRefreshed) {
-        window.localStorage.setItem('page-has-been-force-refreshed', 'false');
-      }
+      // Clear retry counter on success
+      window.localStorage.setItem(retryKey, '0');
       return component;
     } catch (error: any) {
       // Check for common network/module loading errors
       const isDynamicImportError = 
         error?.message?.includes('Failed to fetch dynamically imported module') ||
         error?.message?.includes('error loading dynamically imported module') ||
+        error?.message?.includes('loading dynamically imported') ||
+        error?.code === 'LOAD_ERROR' ||
         error?.name === 'ChunkLoadError';
 
-      if (isDynamicImportError) {
-        if (!pageHasBeenForceRefreshed) {
-          window.localStorage.setItem('page-has-been-force-refreshed', 'true');
-          window.location.reload();
-          return { default: () => null };
-        }
+      if (isDynamicImportError && currentRetries < maxRetries) {
+        // Exponential backoff: 1000ms, 3000ms, 9000ms
+        const backoffDelay = Math.min(1000 * Math.pow(3, currentRetries), 10000);
+        
+        window.localStorage.setItem(retryKey, String(currentRetries + 1));
+        
+        // Wait for backoff period, then retry
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+        
+        // Retry the import
+        return lazyWithRetry(componentImport);
       }
+      
+      // After max retries, attempt hard refresh as last resort
+      if (isDynamicImportError && currentRetries >= maxRetries) {
+        console.error('Chunk load failed after retries. Performing hard refresh.', error);
+        window.localStorage.setItem(retryKey, '0');
+        window.location.reload(true); // Force bypass cache
+        return { default: () => null };
+      }
+      
       throw error;
     }
   });
