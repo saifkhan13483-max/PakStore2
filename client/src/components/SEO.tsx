@@ -33,6 +33,7 @@ interface SEOProps {
   schema?: Record<string, any>;
   breadcrumbs?: BreadcrumbItem[];
   faqs?: FAQItem[];
+  robots?: string;
 }
 
 function getAbsoluteUrl(url: string): string {
@@ -51,7 +52,8 @@ export default function SEO({
   productData,
   schema,
   breadcrumbs,
-  faqs
+  faqs,
+  robots = "index,follow"
 }: SEOProps) {
   const siteName = "PakCart";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
@@ -136,6 +138,7 @@ export default function SEO({
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta charSet="utf-8" />
       {keywords && <meta name="keywords" content={keywords} />}
+      <meta name="robots" content={robots} />
       
       {/* Canonical URL */}
       <link rel="canonical" href={absoluteUrl} />

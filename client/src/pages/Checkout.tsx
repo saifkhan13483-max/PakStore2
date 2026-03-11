@@ -15,6 +15,7 @@ import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
 
 const checkoutInfoSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -42,6 +43,15 @@ export default function Checkout() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<"info" | "payment">("info");
+  
+  // SEO for checkout page
+  const seoElement = (
+    <SEO 
+      title="Checkout" 
+      description="Complete your purchase securely"
+      robots="noindex,follow"
+    />
+  );
 
   const form = useForm<CheckoutInfo>({
     resolver: zodResolver(checkoutInfoSchema),
@@ -138,17 +148,22 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4 text-emerald-900">Your cart is empty</h1>
-        <Button asChild className="bg-emerald-800 hover:bg-emerald-900">
-          <Link href="/products">Go to Shop</Link>
-        </Button>
-      </div>
+      <>
+        {seoElement}
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-2xl font-bold mb-4 text-emerald-900">Your cart is empty</h1>
+          <Button asChild className="bg-emerald-800 hover:bg-emerald-900">
+            <Link href="/products">Go to Shop</Link>
+          </Button>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <>
+      {seoElement}
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Progress Indicator */}
       <div className="mb-12">
         <div className="flex items-center justify-center max-w-3xl mx-auto">
@@ -422,5 +437,6 @@ export default function Checkout() {
         </div>
       </div>
     </div>
+    </>
   );
 }

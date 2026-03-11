@@ -3,7 +3,16 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /auth/
+Disallow: /auth
+Disallow: /profile
 Disallow: /profile/
+Disallow: /checkout
 Disallow: /checkout/
+Disallow: /cart
+Disallow: /cart/
+Disallow: /thank-you
+Disallow: /thank-you/
+Disallow: /orders
+Disallow: /orders/
 
 Sitemap: https://pakcart.store/sitemap.xml

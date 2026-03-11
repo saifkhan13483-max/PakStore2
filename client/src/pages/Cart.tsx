@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCartStore();
@@ -34,6 +35,7 @@ export default function Cart() {
   const totalPrice = getTotalPrice();
   const shippingThreshold = 10000;
   const shippingCost = totalPrice >= shippingThreshold ? 0 : 250;
+  
   
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
   const [showClearCartAlert, setShowClearCartAlert] = useState(false);
@@ -72,7 +74,13 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <>
+        <SEO 
+          title="Shopping Cart" 
+          description="Review and manage your shopping cart"
+          robots="noindex,follow"
+        />
+        <div className="container mx-auto px-4 py-16 text-center">
         <div className="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
           <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
             <ShoppingBag className="w-12 h-12 text-muted-foreground" />
@@ -86,11 +94,18 @@ export default function Cart() {
           </Button>
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
+      <SEO 
+        title="Shopping Cart" 
+        description="Review and manage your shopping cart"
+        robots="noindex,follow"
+      />
+      <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <ShoppingCart className="w-6 h-6 text-primary" />
@@ -290,5 +305,6 @@ export default function Cart() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </>
   );
 }
