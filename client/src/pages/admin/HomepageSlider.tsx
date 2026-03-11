@@ -114,13 +114,14 @@ export default function HomepageSlider() {
     },
   });
 
+  // Move useMemo hooks BEFORE the loading check to comply with Rules of Hooks
+  const desktopSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "desktop") || [], [slides]);
+  const mobileSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "mobile") || [], [slides]);
+
   // Derive selectedHeroType from form field value instead of separate state
   const selectedHeroType = form.watch("hero_section_type");
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin" /></div>;
-
-  const desktopSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "desktop") || [], [slides]);
-  const mobileSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "mobile") || [], [slides]);
 
   const renderSlideTable = (tableSlides: HomepageSlide[], sectionTitle: string, testIdPrefix: string) => (
     <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
