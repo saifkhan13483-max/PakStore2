@@ -35,6 +35,27 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
+const heroSectionSpecs = {
+  desktop: {
+    label: "Desktop Hero Section",
+    dimensions: "1920 × 700",
+    description: "Optimized for desktop and tablet displays",
+  },
+  mobile: {
+    label: "Mobile Hero Section",
+    dimensions: "768 × 1024",
+    description: "Optimized for mobile devices",
+  },
+} as const;
+
+interface SlideFormData {
+  image_url: string;
+  image_webp_url?: string | null;
+  is_active: boolean;
+  display_order: number;
+  hero_section_type: "desktop" | "mobile";
+}
+
 export default function HomepageSlider() {
   const { toast } = useToast();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -42,6 +63,17 @@ export default function HomepageSlider() {
   const { data: slides, isLoading } = useQuery({
     queryKey: ["/api/homepage-slides"],
     queryFn: () => homepageSlideService.getAllSlides(),
+  });
+
+  const form = useForm<SlideFormData>({
+    resolver: zodResolver(insertHomepageSlideSchema),
+    defaultValues: {
+      image_url: "",
+      image_webp_url: "",
+      is_active: true,
+      display_order: 0,
+      hero_section_type: "desktop",
+    },
   });
 
   const createMutation = useMutation({
@@ -82,31 +114,8 @@ export default function HomepageSlider() {
     },
   });
 
-  const [selectedHeroType, setSelectedHeroType] = useState<"desktop" | "mobile">("desktop");
-
-  const heroSectionSpecs = {
-    desktop: {
-      label: "Desktop Hero Section",
-      dimensions: "1920 × 700",
-      description: "Optimized for desktop and tablet displays",
-    },
-    mobile: {
-      label: "Mobile Hero Section",
-      dimensions: "768 × 1024",
-      description: "Optimized for mobile devices",
-    },
-  };
-
-  const form = useForm({
-    resolver: zodResolver(insertHomepageSlideSchema),
-    defaultValues: {
-      image_url: "",
-      image_webp_url: "",
-      is_active: true,
-      display_order: 0,
-      hero_section_type: "desktop",
-    },
-  });
+  // Derive selectedHeroType from form field value instead of separate state
+  const selectedHeroType = form.watch("hero_section_type");
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin" /></div>;
 
@@ -240,10 +249,7 @@ export default function HomepageSlider() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Hero Section Type</FormLabel>
-                      <Select value={field.value} onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedHeroType(value as "desktop" | "mobile");
-                      }}>
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger data-testid="select-hero-type">
                             <SelectValue placeholder="Select hero section type" />
