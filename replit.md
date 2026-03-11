@@ -232,8 +232,19 @@ scripts/                   # Utility scripts
      - Automatically detects screen size (isMobile when width < 768px)
      - Falls back to all slides if device-specific slides aren't available
 
+3. **Admin Panel Redesign - Separated Desktop & Mobile Sections** ✓
+   - **File**: `client/src/pages/admin/HomepageSlider.tsx`
+   - **Changes**:
+     - Created two separate sections with dedicated tables: "💻 Computer / Desktop Slides" and "📱 Mobile Slides"
+     - Each section shows count of total slides, active slides, and inactive slides
+     - Removed "Hero Type" column from tables (no longer needed since each table shows only one type)
+     - Cleaner, more organized interface for managing device-specific content
+     - All functionality preserved: toggle active status, edit display order, delete slides
+   - **UX Improvement**: Admins can now easily see and manage desktop vs. mobile slides separately
+
 ### Implementation Details:
 - **Device Detection**: Uses window.innerWidth < 768 breakpoint to determine device type
 - **Filtering Logic**: Filters HERO_SLIDES based on `hero_section_type` matching current device type
 - **Admin Selection**: Dropdown in add/edit slide modal with device-specific dimension recommendations
 - **Responsive**: Both desktop and mobile heights maintained appropriately for each device
+- **Admin Organization**: Two clear sections for easy management of device-specific slides

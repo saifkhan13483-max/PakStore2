@@ -110,8 +110,104 @@ export default function HomepageSlider() {
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin" /></div>;
 
-  const activeCount = slides?.filter(s => s.is_active).length || 0;
-  const inactiveCount = (slides?.length || 0) - activeCount;
+  const desktopSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "desktop") || [], [slides]);
+  const mobileSlides = useMemo(() => slides?.filter(s => s.hero_section_type === "mobile") || [], [slides]);
+
+  const renderSlideTable = (tableSlides: HomepageSlide[], sectionTitle: string, testIdPrefix: string) => (
+    <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
+      <div className="bg-muted/50 px-6 py-4 border-b">
+        <h2 className="text-lg font-semibold">{sectionTitle}</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          {tableSlides.length} slide{tableSlides.length !== 1 ? "s" : ""} • 
+          {" "}{tableSlides.filter(s => s.is_active).length} active, {tableSlides.filter(s => !s.is_active).length} inactive
+        </p>
+      </div>
+      <Table>
+        <TableHeader className="bg-muted/30">
+          <TableRow>
+            <TableHead className="w-[120px] py-4">Thumbnail</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Display Order</TableHead>
+            <TableHead>Date Added</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tableSlides.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                No {sectionTitle.toLowerCase()} slides. Click "Add New Slide" to create one.
+              </TableCell>
+            </TableRow>
+          ) : (
+            tableSlides.map((slide) => (
+              <TableRow key={slide.id} className="hover:bg-muted/30 transition-colors">
+                <TableCell className="py-4">
+                  <div className="relative group cursor-pointer" onClick={() => window.open(slide.image_url, '_blank')}>
+                    <img src={slide.image_url} alt="Slide" className="w-20 h-12 object-cover rounded-lg border shadow-sm" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
+                      <ImageIcon className="text-white h-4 w-4" />
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={slide.is_active} 
+                      onCheckedChange={(checked) => updateMutation.mutate({ id: slide.id, data: { is_active: checked } })}
+                      data-testid={`switch-active-${slide.id}`}
+                    />
+                    <Badge variant={slide.is_active ? "default" : "secondary"} className="ml-2">
+                      {slide.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Input 
+                    type="number" 
+                    className="w-24 bg-transparent border-transparent hover:border-input focus:bg-background transition-all" 
+                    defaultValue={slide.display_order}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (val !== slide.display_order) {
+                        updateMutation.mutate({ id: slide.id, data: { display_order: val } });
+                      }
+                    }}
+                    data-testid={`input-order-${slide.id}`}
+                  />
+                </TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {slide.createdAt ? (() => {
+                    try {
+                      const date = typeof slide.createdAt === 'object' && 'seconds' in slide.createdAt 
+                        ? new Date(slide.createdAt.seconds * 1000)
+                        : new Date(slide.createdAt);
+                      return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM d, yyyy");
+                    } catch (e) {
+                      return "Invalid Date";
+                    }
+                  })() : "N/A"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      if(confirm("Are you sure you want to delete this slide?")) deleteMutation.mutate(slide.id);
+                    }}
+                    data-testid={`button-delete-${slide.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
   return (
     <div className="p-6 space-y-6">
@@ -209,127 +305,9 @@ export default function HomepageSlider() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Active Slides</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">{activeCount}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Inactive Slides</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-muted-foreground">{inactiveCount}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="border rounded-xl bg-card shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              <TableHead className="w-[120px] py-4">Thumbnail</TableHead>
-              <TableHead>Hero Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Display Order</TableHead>
-              <TableHead>Date Added</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {slides?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                  No slides found. Click "Add New Slide" to get started.
-                </TableCell>
-              </TableRow>
-            ) : (
-              slides?.map((slide) => (
-                <TableRow key={slide.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="py-4">
-                    <div className="relative group cursor-pointer" onClick={() => window.open(slide.image_url, '_blank')}>
-                      <img src={slide.image_url} alt="Slide" className="w-20 h-12 object-cover rounded-lg border shadow-sm" />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-lg transition-opacity">
-                        <ImageIcon className="text-white h-4 w-4" />
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Select 
-                        value={slide.hero_section_type || "desktop"} 
-                        onValueChange={(value) => updateMutation.mutate({ id: slide.id, data: { hero_section_type: value as "desktop" | "mobile" } })}
-                      >
-                        <SelectTrigger className="w-40 h-8 text-xs" data-testid={`select-type-${slide.id}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="desktop">Desktop (1920×700)</SelectItem>
-                          <SelectItem value="mobile">Mobile (768×1024)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={slide.is_active} 
-                        onCheckedChange={(checked) => updateMutation.mutate({ id: slide.id, data: { is_active: checked } })}
-                        data-testid={`switch-active-${slide.id}`}
-                      />
-                      <Badge variant={slide.is_active ? "default" : "secondary"} className="ml-2">
-                        {slide.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number" 
-                      className="w-24 bg-transparent border-transparent hover:border-input focus:bg-background transition-all" 
-                      defaultValue={slide.display_order}
-                      onBlur={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (val !== slide.display_order) {
-                          updateMutation.mutate({ id: slide.id, data: { display_order: val } });
-                        }
-                      }}
-                      data-testid={`input-order-${slide.id}`}
-                    />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {slide.createdAt ? (() => {
-                      try {
-                        const date = typeof slide.createdAt === 'object' && 'seconds' in slide.createdAt 
-                          ? new Date(slide.createdAt.seconds * 1000)
-                          : new Date(slide.createdAt);
-                        return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM d, yyyy");
-                      } catch (e) {
-                        return "Invalid Date";
-                      }
-                    })() : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => {
-                        if(confirm("Are you sure you want to delete this slide?")) deleteMutation.mutate(slide.id);
-                      }}
-                      data-testid={`button-delete-${slide.id}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <div className="space-y-8">
+        {renderSlideTable(desktopSlides, "💻 Computer / Desktop Slides", "desktop")}
+        {renderSlideTable(mobileSlides, "📱 Mobile Slides", "mobile")}
       </div>
     </div>
   );
