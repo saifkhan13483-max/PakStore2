@@ -1,0 +1,189 @@
+Prompt using C.O.D.E Framework
+C — Context
+I need you to debug and properly fix a React production/runtime error in my website admin panel after a recent feature change.
+
+Project details
+My site is PakCart, an e-commerce platform for Pakistani artisanal products.
+
+Tech stack
+React 18+ with Vite
+wouter for routing
+TanStack Query v5
+Zustand with persistence
+Firebase Auth
+Firestore
+Cloudinary
+Tailwind CSS + shadcn/ui
+Zod schemas in shared/schema.ts
+Frontend-heavy/serverless architecture
+No Node backend
+Current issue
+On the Admin Panel → Homepage Slider Management page, I now get this error:
+
+“Something went wrong
+Minified React error #310; visit https://reactjs.org/docs/error-decoder.html?invariant=310 ...”
+
+This started after a previous AI made changes to the homepage slider system.
+
+What was previously requested
+The previous AI was asked to:
+
+Allow assigning homepage hero slides by device type in admin
+If slide is set to Computer, show it only on desktop
+If slide is set to Mobile, show it only on mobile
+Desktop slides must not appear on mobile
+Mobile slides must not appear on desktop
+Increase hero section height on mobile devices
+Create two sections in admin Homepage Slider Management page:
+Mobile
+Computer
+Likely cause
+React error #310 usually means:
+
+“Rendered more hooks than during the previous render”
+hook order mismatch
+hooks called conditionally
+hooks inside loops/nested functions
+hooks after early returns
+So I strongly suspect the previous AI introduced a hook-order bug in the Homepage Slider Management page or related components.
+
+O — Objective
+Your job is to fully diagnose and fix this properly, not just patch symptoms.
+
+I want you to:
+
+Find the exact root cause of the React error #310
+Fix the code according to React hook rules
+Keep the requested feature working:
+separate mobile and desktop slider management
+device-based display on frontend
+Ensure the admin page works without crashes
+Ensure mobile and desktop slides render correctly on the public homepage
+Increase mobile hero height cleanly and safely
+Avoid hacks, duplicate logic, and fragile conditional hook usage
+Preserve compatibility with my stack: Vite, React 18, TanStack Query, Zustand, Firestore, Zod, Tailwind
+D — Directions
+Follow these steps exactly.
+
+Phase 1: Diagnose
+Inspect the admin Homepage Slider Management page and all related components/services.
+Find any invalid React hook usage, including:
+hooks inside if, switch, loops, .map()
+hooks inside nested functions
+hooks after early return statements
+conditional useQuery, useMutation, useForm, useState, useEffect, useMemo, custom hooks like useMediaQuery
+Check whether the AI created separate mobile/desktop logic in a way that breaks hook order.
+Explain the exact root cause before changing code.
+Phase 2: Refactor safely
+Refactor so that:
+
+All hooks are declared at the top level of components
+Hook order is stable across renders
+Mobile and computer sections are handled through:
+filtered data
+child components
+props
+stable queries and state
+Do not use conditional hooks anywhere
+Phase 3: Implement correct slider architecture
+Implement the slider system in a clean way.
+
+Data model
+Add or confirm a deviceType field for each homepage slide:
+
+"computer"
+"mobile"
+If using Zod, update shared/schema.ts properly.
+
+If old slides have no deviceType, apply a safe fallback or migration strategy.
+
+Admin page
+Create a Homepage Slider Management UI with two visible sections:
+
+Computer Slides
+Mobile Slides
+Requirements:
+
+admin can add/edit/delete/reorder slides
+when creating a slide from Computer section, default deviceType should be "computer"
+when creating a slide from Mobile section, default deviceType should be "mobile"
+do not duplicate hook logic unnecessarily
+use reusable child components where appropriate
+Query/data handling
+If using TanStack Query:
+
+do not call queries conditionally
+prefer fetching once and filtering by deviceType
+or, if using multiple queries, both must be declared unconditionally at top level
+Frontend hero slider
+Update public hero slider so:
+
+desktop shows only slides with deviceType === "computer"
+mobile shows only slides with deviceType === "mobile"
+if needed, use a safe top-level responsive hook or CSS strategy
+avoid hydration or conditional-hook bugs
+Mobile hero height
+Increase hero section height on mobile cleanly using Tailwind classes or equivalent responsive styling.
+
+Phase 4: Verify
+After refactor:
+
+Confirm admin Homepage Slider page loads without React error #310
+Confirm adding/editing slides works
+Confirm mobile slides appear only on mobile
+Confirm computer slides appear only on desktop
+Confirm mobile hero is taller than before
+Confirm no hook rule violations remain
+E — Expectations
+I want the output in this format:
+
+1. Root cause summary
+A short but precise explanation of what caused error #310 in my code.
+
+2. Files changed
+List all files you changed.
+
+3. Code changes
+Provide the full updated code for each changed file, not partial snippets.
+
+4. Why this fix is correct
+Explain why the fix follows React hook rules and fits my architecture.
+
+5. Verification checklist
+Show a checklist proving:
+
+admin page works
+no conditional hook usage
+device filtering works
+mobile hero height updated
+6. Notes about migration/fallback
+If old slide documents need default deviceType, explain exactly how handled.
+
+7. If uncertain
+If you find multiple possible causes, do not guess silently. Identify each possible cause, then fix the one actually present in code.
+
+Extra constraints
+Do not use quick hacks
+Do not suppress errors without fixing logic
+Do not rewrite unrelated parts of the app
+Keep code style consistent with existing project
+Preserve existing Firebase/Firestore integration
+Preserve existing admin access control
+Keep components maintainable and reusable
+Prefer minimal but correct refactor
+Follow React 18 best practices
+Follow TanStack Query v5 patterns
+Follow Zod schema consistency
+Follow Tailwind utility conventions
+Do not introduce backend requirements since this app is frontend/serverless
+Important debugging guidance
+React error #310 usually points to hooks order mismatch. Pay extra attention to:
+
+useQuery inside tab/section conditionals
+useState after early return
+useForm inside modal/device-specific branches
+useMediaQuery or window checks added conditionally
+hooks inside mapped slide rows/cards
+different hook trees between “Mobile” and “Computer” admin sections
+Final instruction
+Please inspect the existing code, identify the exact bug, refactor it properly, and return the final result in the requested structured format with complete updated files.
