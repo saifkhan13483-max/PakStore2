@@ -10,7 +10,8 @@ import {
   Menu,
   FileSearch,
   Image as ImageIcon,
-  Megaphone
+  Megaphone,
+  MessageSquare,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";

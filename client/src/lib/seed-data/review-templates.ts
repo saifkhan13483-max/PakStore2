@@ -115,13 +115,14 @@ function weightedHour(): number {
  * 40–60% of timestamps within ±3 days of those bursts, and spreads the rest
  * randomly across the full 90-day window. Results are sorted chronologically.
  */
-export function generateClusteredTimestamps(count: number): Date[] {
+export function generateClusteredTimestamps(count: number, maxDays = 90): Date[] {
   const now = Date.now();
   const numBursts = Math.random() < 0.5 ? 1 : 2;
   const burstMs: number[] = [];
+  const safeMax = Math.max(6, maxDays); // ensure room for ±3 day buffer
 
   for (let b = 0; b < numBursts; b++) {
-    const daysAgo = Math.floor(Math.random() * 84) + 4; // 4–88 days ago (±3 day buffer)
+    const daysAgo = Math.floor(Math.random() * (safeMax - 5)) + 4; // 4–(maxDays-1) days ago
     burstMs.push(now - daysAgo * 86_400_000);
   }
 
@@ -135,11 +136,11 @@ export function generateClusteredTimestamps(count: number): Date[] {
       const offsetMs = (Math.random() * 6 - 3) * 86_400_000; // ±3 days
       ms = burst + offsetMs;
     } else {
-      const daysAgo = Math.floor(Math.random() * 90) + 1;
+      const daysAgo = Math.floor(Math.random() * safeMax) + 1;
       ms = now - daysAgo * 86_400_000;
     }
-    // Clamp: never in the future, never older than 90 days
-    ms = Math.max(now - 90 * 86_400_000, Math.min(now - 60_000, ms));
+    // Clamp: never in the future, never older than maxDays
+    ms = Math.max(now - safeMax * 86_400_000, Math.min(now - 60_000, ms));
 
     const d = new Date(ms);
     const pktHour = weightedHour();
