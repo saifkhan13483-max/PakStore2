@@ -66,6 +66,7 @@ const TYPE_BADGE_VARIANTS: Record<
 };
 
 const QUERY_KEY = ["/api/announcements"];
+const ACTIVE_QUERY_KEY = ["/api/announcements", "active"];
 
 type AnnouncementFormData = InsertAnnouncement;
 
@@ -259,11 +260,16 @@ export default function AdminAnnouncements() {
     queryFn: () => announcementService.getAnnouncements(),
   });
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: ACTIVE_QUERY_KEY });
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: InsertAnnouncement) =>
       announcementService.createAnnouncement(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      invalidateAll();
       toast({ title: "Created", description: "Announcement created successfully." });
       setIsCreateOpen(false);
     },
@@ -280,7 +286,7 @@ export default function AdminAnnouncements() {
     mutationFn: ({ id, data }: { id: string; data: Partial<Announcement> }) =>
       announcementService.updateAnnouncement(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      invalidateAll();
       toast({ title: "Updated", description: "Announcement updated successfully." });
       setEditTarget(null);
     },
@@ -296,7 +302,7 @@ export default function AdminAnnouncements() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => announcementService.deleteAnnouncement(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      invalidateAll();
       toast({ title: "Deleted", description: "Announcement deleted." });
     },
     onError: (error: any) => {
