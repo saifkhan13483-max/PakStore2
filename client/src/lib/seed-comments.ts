@@ -1,109 +1,130 @@
 import { db } from "./firebase";
-import { collection, getDocs, addDoc, doc, updateDoc, query, where, Timestamp, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc,
+  query,
+  where,
+  Timestamp,
+  deleteDoc,
+} from "firebase/firestore";
+import { getRandomName, getDiceBearUrl } from "./seed-data/name-pool";
+import {
+  detectCategory,
+  getRealisticRating,
+  getCommentCount,
+  generateReviewContent,
+  generateRealisticTimestamp,
+} from "./seed-data/review-templates";
 
-const RANDOM_COMMENTS = [
-  "Amazing product! Highly recommended.",
-  "The quality is better than I expected.",
-  "Fast delivery and great packaging.",
-  "Worth every penny. I will buy again.",
-  "Exactly as described in the pictures.",
-  "Very artisanal and unique. Love it!",
-  "Great customer service and high-quality item.",
-  "A bit expensive but the craftsmanship is superb.",
-  "Perfect gift for my friend, they loved it.",
-  "Five stars! Excellent experience."
-];
+/**
+ * Seeds realistic, product-aware comments for every product in Firestore.
+ *
+ * - Deletes previously seeded comments (userId === "system-seed") first.
+ * - Generates 2–7 comments per product depending on price tier.
+ * - Picks ratings using a weighted distribution (5★ most common, 1★ rare).
+ * - Matches review text to product category and star rating.
+ * - Spreads timestamps across the last 90 days with realistic hours.
+ * - Recalculates each product's averageRating and reviewCount.
+ */
+export async function seedRandomComments(): Promise<true> {
+  console.log("Starting to seed realistic comments...");
 
-const RANDOM_NAMES = [
-  "Ahmed Khan", "Sara Ali", "Zainab Malik", "Omar Farooq", "Fatima Shah",
-  "Bilal Hassan", "Ayesha Siddiqui", "Hamza Javed", "Mariam Tariq", "Usman Sheikh"
-];
+  const productsSnapshot = await getDocs(collection(db, "products"));
+  console.log(`Found ${productsSnapshot.size} products.`);
 
-export async function seedRandomComments() {
-  console.log("Starting to seed random comments...");
-  
-  try {
-    const productsSnapshot = await getDocs(collection(db, "products"));
-    console.log(`Found ${productsSnapshot.size} products.`);
+  if (productsSnapshot.empty) {
+    console.log("No products found to seed comments for.");
+    return true;
+  }
 
-    if (productsSnapshot.empty) {
-      console.log("No products found to seed comments for.");
-      return true;
+  for (const productDoc of productsSnapshot.docs) {
+    const productId = productDoc.id;
+    const data = productDoc.data();
+    const productName: string = data.name ?? "this product";
+    const product = {
+      name: productName,
+      category: data.category ?? data.categoryName ?? "",
+      price: data.price ?? data.discountedPrice ?? 0,
+      description: data.description ?? "",
+    };
+
+    // --- Remove old seeded comments ---
+    const oldQuery = query(
+      collection(db, "comments"),
+      where("productId", "==", productId),
+      where("userId", "==", "system-seed")
+    );
+    const oldSnapshot = await getDocs(oldQuery);
+    for (const oldDoc of oldSnapshot.docs) {
+      try {
+        await deleteDoc(doc(db, "comments", oldDoc.id));
+      } catch (e: any) {
+        console.error(`Failed to delete old comment: ${e.message}`);
+      }
     }
 
-    for (const productDoc of productsSnapshot.docs) {
-      const productId = productDoc.id;
-      const productName = productDoc.data().name;
-      
-      // Check if this product already has seeded comments
-      const existingCommentsQuery = query(collection(db, "comments"), where("productId", "==", productId), where("userId", "==", "system-seed"));
-      const existingCommentsSnapshot = await getDocs(existingCommentsQuery);
-      
-      if (existingCommentsSnapshot.size > 0) {
-        console.log(`${productName} already has seeded comments. Deleting old ones to reseed...`);
-        // Delete existing seed comments
-        for (const commentDoc of existingCommentsSnapshot.docs) {
-          try {
-            await deleteDoc(doc(db, "comments", commentDoc.id));
-          } catch (e: any) {
-            console.error(`Failed to delete old comment: ${e.message}`);
-          }
-        }
-      }
-      
-      const numComments = Math.floor(Math.random() * 2) + 2;
-      console.log(`Adding ${numComments} comments to ${productName}...`);
-      
-      for (let i = 0; i < numComments; i++) {
-        const comment = RANDOM_COMMENTS[Math.floor(Math.random() * RANDOM_COMMENTS.length)];
-        const name = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
-        const rating = Math.floor(Math.random() * 2) + 4;
+    // --- Generate new comments ---
+    const category = detectCategory(product);
+    const numComments = getCommentCount(product);
+    console.log(`Adding ${numComments} comments to "${productName}" (${category})...`);
 
-        try {
-          await addDoc(collection(db, "comments"), {
-            productId,
-            userName: name,
-            content: comment,
-            rating,
-            userId: "system-seed",
-            userPhoto: "",
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now()
-          });
-        } catch (e: any) {
-          console.error(`Failed to add comment for ${productName}:`, e);
-          if (e.code === 'permission-denied') {
-             throw new Error("Missing or insufficient permissions. Please check your Firestore Rules to allow writes to the 'comments' collection.");
-          }
-          throw e;
-        }
-      }
-
-      const commentsQuery = query(collection(db, "comments"), where("productId", "==", productId));
-      const commentsSnapshot = await getDocs(commentsQuery);
-      const comments = commentsSnapshot.docs.map(d => d.data());
-      const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
-      const averageRating = Number((totalRating / (comments.length || 1)).toFixed(1));
+    for (let i = 0; i < numComments; i++) {
+      const { name } = getRandomName();
+      const rating = getRealisticRating();
+      const content = generateReviewContent(productName, category, rating as 1 | 2 | 3 | 4 | 5);
+      const ts = generateRealisticTimestamp();
+      const firestoreTs = Timestamp.fromDate(ts);
 
       try {
-        await updateDoc(doc(db, "products", productId), {
-          rating: averageRating,
-          reviewCount: comments.length,
-          updatedAt: Timestamp.now()
+        await addDoc(collection(db, "comments"), {
+          productId,
+          userName: name,
+          content,
+          rating,
+          userId: "system-seed",
+          userPhoto: getDiceBearUrl(name),
+          createdAt: firestoreTs,
+          updatedAt: firestoreTs,
         });
       } catch (e: any) {
-        console.error(`Failed to update product ${productName}:`, e);
-        if (e.code === 'permission-denied') {
-           throw new Error("Missing or insufficient permissions. Please check your Firestore Rules to allow updates to the 'products' collection.");
+        console.error(`Failed to add comment for "${productName}":`, e);
+        if (e.code === "permission-denied") {
+          throw new Error(
+            "Missing or insufficient permissions. Please check your Firestore Rules to allow writes to the 'comments' collection."
+          );
         }
         throw e;
       }
     }
 
-    console.log("Seeding complete!");
-    return true;
-  } catch (error) {
-    console.error("Error seeding comments:", error);
-    throw error;
+    // --- Recalculate product averageRating & reviewCount ---
+    const allCommentsSnapshot = await getDocs(
+      query(collection(db, "comments"), where("productId", "==", productId))
+    );
+    const allComments = allCommentsSnapshot.docs.map((d) => d.data());
+    const total = allComments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+    const averageRating = Number((total / (allComments.length || 1)).toFixed(1));
+
+    try {
+      await updateDoc(doc(db, "products", productId), {
+        rating: averageRating,
+        reviewCount: allComments.length,
+        updatedAt: Timestamp.now(),
+      });
+    } catch (e: any) {
+      console.error(`Failed to update product "${productName}":`, e);
+      if (e.code === "permission-denied") {
+        throw new Error(
+          "Missing or insufficient permissions. Please check your Firestore Rules to allow updates to the 'products' collection."
+        );
+      }
+      throw e;
+    }
   }
+
+  console.log("Seeding complete!");
+  return true;
 }
