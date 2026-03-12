@@ -2,7 +2,11 @@
  * Pakistani name pool for realistic seeded reviews.
  * Contains 80+ diverse names reflecting Punjabi, Sindhi, Pathan,
  * Balochi, and Urdu-speaking demographics. Each entry carries a
- * gender tag so avatars can be matched consistently.
+ * gender tag so avatars can be matched appropriately.
+ *
+ * Phase 4: getDiceBearUrl now rotates across multiple DiceBear styles
+ * and has a 15% chance of returning an empty string (mimicking users
+ * who have no profile photo).
  */
 
 export interface SeedName {
@@ -94,17 +98,45 @@ export const NAME_POOL: SeedName[] = [
   { name: "Areeba Habib", gender: "female" },
 ];
 
-/**
- * Returns a randomly selected name entry from the pool.
- */
+// ---------------------------------------------------------------------------
+// DiceBear style pools — gender-appropriate groupings
+// ---------------------------------------------------------------------------
+
+const MALE_STYLES = ["avataaars", "personas", "adventurer"];
+const FEMALE_STYLES = ["avataaars", "personas", "big-smile"];
+const NEUTRAL_STYLES = ["avataaars", "personas", "adventurer", "big-smile"];
+
+// ---------------------------------------------------------------------------
+// Exports
+// ---------------------------------------------------------------------------
+
+/** Returns a randomly selected name entry from the pool. */
 export function getRandomName(): SeedName {
   return NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)];
 }
 
 /**
- * Builds a DiceBear Avataaars avatar URL seeded by the reviewer's name
- * so the same name always gets the same avatar.
+ * Builds a DiceBear avatar URL for a reviewer.
+ *
+ * Phase 4 upgrades:
+ * - 15% chance of returning "" (mimics users without a profile photo)
+ * - Randomly rotates across avataaars / personas / adventurer / big-smile
+ * - Gender-appropriate style selection when gender is provided
+ *
+ * The avatar URL uses the name as a seed so the same name/style combo
+ * always produces the same avatar image.
  */
-export function getDiceBearUrl(name: string): string {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`;
+export function getDiceBearUrl(name: string, gender?: "male" | "female"): string {
+  // 15% chance: no avatar (empty string)
+  if (Math.random() < 0.15) return "";
+
+  const styles =
+    gender === "male"
+      ? MALE_STYLES
+      : gender === "female"
+      ? FEMALE_STYLES
+      : NEUTRAL_STYLES;
+
+  const style = styles[Math.floor(Math.random() * styles.length)];
+  return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(name)}`;
 }

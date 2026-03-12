@@ -1,0 +1,201 @@
+chance of a common typo ("recieved" instead of "received", "definately" instead of "definitely")
+      - 15% chance of using informal Pakistani English patterns:
+        * "Product is v good" (v for very)
+        * "Delivery was on time, no issues"
+        * "Will order again inshallah"
+        * "Bhai sab theek hai" (mixing Urdu casually) — only ~5% of reviews
+      
+   B) Sentence Structure Variation:
+      Don't start every review the same way. Vary sentence openers:
+      - Statement: "The product arrived in 3 days."
+      - Question hook: "Was skeptical at first but..."
+      - Exclamation: "Wow, didn't expect this quality!"
+      - Direct address: "If you're thinking about buying this, just do it."
+      - Comparison: "Better than what I expected for the price."
+      - Time reference: "After using for 2 weeks now..."
+
+2. CONTEXTUAL PRODUCT ATTRIBUTE MATCHING:
+   When generating a review, READ the actual product document and incorporate:
+   - If product has a `discountPrice` → some reviews mention "great deal" or "worth the sale price"
+   - If product has multiple `variants` (sizes/colors) → mention the specific variant
+     "Ordered the Blue color, looks exactly like the picture"
+   - If product `price` is high (>5000 PKR) → reviews might mention "investment" or "worth the money"
+   - If product `price` is low (<500 PKR) → reviews mention "can't beat this price" or "good for the price"
+   - If product name contains brand indicators → reference brand quality
+
+3. SEASONAL/TEMPORAL AWARENESS:
+   Reviews should reference seasons/occasions when relevant:
+   - If comment date is near Eid → "Bought for Eid, perfect timing"
+   - If date is in summer (May-Aug) → summer-relevant comments for seasonal products
+   - If date is near year-end → "Great for gifting season"
+   - If product category is seasonal → cluster more reviews in relevant season
+
+4. DUPLICATE DETECTION:
+   Before writing seeded comments:
+   - Check that no two comments on the same product have the same reviewer name
+   - Check that no two comments on the same product start with the same 5 words
+   - Check that the same name doesn't appear more than 3 times across ALL products
+   - If a real comment already exists on a product, read its content and make sure 
+     seeded comments don't say the exact same thing
+
+5. PHOTO AVATAR DIVERSITY:
+   Upgrade avatar generation:
+   - Use different DiceBear styles randomly: avataaars, personas, adventurer, big-smile
+   - 15% chance of NO avatar (empty string) — mimics users who don't upload photos
+   - Ensure gender-appropriate avatar style matches the name gender
+
+6. GRACEFUL COEXISTENCE WITH REAL COMMENTS:
+   When a product has REAL comments (userId !== "system-seed"):
+   - Read existing real comment ratings
+   - Seed fewer comments for that product (cap at max 3 seeded if real ones exist)
+   - Don't let seeded ratings dramatically differ from real ratings 
+     (if real average is 3.0, don't seed all 5-stars)
+   - When recalculating averageRating, weight real comments and seeded equally
+
+FILE CHANGES:
+- Create: client/src/lib/seed-data/naturalness-engine.ts (typo sim, variation, imperfections)
+- Create: client/src/lib/seed-data/product-context-reader.ts (reads product attributes for smart content)
+- Create: client/src/lib/seed-data/seasonal-context.ts (date/season awareness)
+- Create: client/src/lib/seed-data/duplicate-detector.ts (dedup logic)
+- Update: client/src/lib/seed-data/review-templates.ts (integrate new engines)
+- Update: client/src/lib/seed-comments.ts (integrate all intelligence)
+- Update: scripts/seed-comments.ts (same)
+
+Generate complete code. TypeScript. Maintain all Phase 1-3 functionality.
+PHASE 5: Analytics, Monitoring & Auto-Maintenance
+Goal: Long-term management — see the impact of seeded comments and keep them fresh.
+
+PHASE 5 PROMPT:
+
+CONTEXT: [You are working on an existing e-commerce site called PakStore (project: pakstore-45ec7).
+It is a pure client-side Vite + React + TypeScript app using Firebase (Firestore, Auth),
+Cloudinary for images, Zustand for state, and wouter for routing.
+
+There is NO backend server. All logic runs client-side or via CLI scripts using Firebase Admin SDK.
+
+The existing seed comments system lives in:
+- client/src/lib/seed-comments.ts (frontend logic)
+- scripts/seed-comments.ts (CLI script)
+- client/src/pages/Home.tsx (admin trigger button)
+
+Current comment schema in Firestore "comments" collection:
+{
+  productId: string,
+  userName: string,
+  content: string,
+  rating: number (currently only 4 or 5),
+  userId: "system-seed",
+  userPhoto: string,
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Products collection has: averageRating, reviewCount fields that get recalculated after seeding.
+
+IMPORTANT CONSTRAINTS:
+- Keep userId: "system-seed" convention for all seeded comments (cleanup ability)
+- Must work in both frontend (admin button) and CLI script contexts
+- No backend/Cloud Functions — everything client-side or CLI
+- All Firebase config for CLI is hardcoded in scripts/ for project pakstore-45ec7
+- Maintain backward compatibility with existing comment rendering components]
+PREREQUISITE: Phases 1-4 are complete.
+
+TASK: Add analytics, monitoring, and auto-refresh capabilities to the seed system.
+
+REQUIREMENTS:
+
+1. SEED ANALYTICS DASHBOARD (add to /admin/seed-comments page):
+   
+   A) Statistics Cards:
+      - Total seeded vs real comments (pie chart or ratio display)
+      - Average rating of seeded vs real (comparison)
+      - Products with ONLY seeded comments (count + list)
+      - Products with 0 comments at all (count + list)
+      - Rating distribution chart (bar chart showing 1-5 star breakdown for seeded)
+   
+   B) Per-Product Breakdown Table:
+      Sortable/searchable table showing:
+      | Product Name | Real Comments | Seeded Comments | Avg Rating | Last Comment Date |
+      - Click a product row to expand and see all its seeded comments inline
+      - Quick actions: "Re-seed this product" | "Remove seeded from this product"
+
+   C) Health Score:
+      Calculate a "Comment Realism Score" (0-100) based on:
+      - Rating distribution matches expected curve: +20 points
+      - Comment dates are well-spread: +20 points
+      - No duplicate content detected: +20 points
+      - Name diversity is high: +15 points
+      - Review lengths are varied: +15 points
+      - Avatar diversity: +10 points
+      Display this score prominently with color coding (green >80, yellow >60, red <60)
+
+2. AUTO-REFRESH SYSTEM:
+   
+   A) Stale Comment Detection:
+      - Flag products where ALL comments (seeded) are older than 60 days
+      - Show these in a "Needs Refresh" list on the admin page
+      - One-click "Refresh Stale" button that re-seeds only stale products
+        (deletes old seeded comments, creates new ones with recent dates)
+   
+   B) New Product Watcher:
+      - When admin visits the seed page, automatically detect products added 
+        since the last seed run that have 0 comments
+      - Show notification: "5 new products have no reviews. Seed them?"
+      - One-click action to seed just those products
+
+3. EXPORT/IMPORT:
+   - "Export Seed Config" button → downloads a JSON file with current settings,
+     templates, and seed log
+   - "Import Seed Config" → upload a JSON to restore settings
+   - This enables backing up the seed configuration
+
+4. COMMENT QUALITY AUDIT:
+   - Button: "Run Audit" that scans all seeded comments and reports:
+     * Duplicate content found (exact or near-match)
+     * Same reviewer name used too many times
+     * Rating distribution anomalies
+     * Comments with timestamps in the future
+     * Comments with missing required fields
+   - Display audit results in a clean report format
+   - "Auto-fix" button that resolves found issues automatically
+
+5. SIMPLE CHARTS/VISUALIZATION:
+   Since there's no charting library currently, either:
+   - Use simple CSS-based bar charts (div widths as percentages), OR
+   - Add a lightweight chart library (like Chart.js or recharts — pick whichever 
+     is smaller) — keep the bundle impact minimal
+   
+   Charts needed:
+   - Rating distribution (horizontal bar chart)
+   - Comments over time (last 90 days, line chart)
+   - Seeded vs Real ratio (donut chart)
+
+FILE CHANGES:
+- Create: client/src/components/admin/SeedAnalytics.tsx (dashboard cards + charts)
+- Create: client/src/components/admin/ProductBreakdownTable.tsx (per-product table)
+- Create: client/src/components/admin/SeedHealthScore.tsx (realism score)
+- Create: client/src/components/admin/CommentAudit.tsx (audit UI)
+- Create: client/src/lib/seed-data/analytics.ts (calculation logic)
+- Create: client/src/lib/seed-data/audit.ts (audit logic)
+- Create: client/src/lib/seed-data/auto-refresh.ts (stale detection, new product detection)
+- Update: client/src/pages/admin/SeedComments.tsx (integrate all new sections)
+- Update: package.json (add chart library if chosen)
+
+Generate complete code. TypeScript + React. Maintain all Phase 1-4 functionality.
+Implementation Order & Dependencies
+Phase	Name	Depends On	Estimated Complexity
+1	Realistic Data Engine	Nothing (standalone upgrade)	Medium
+2	Temporal Realism & Engagement	Phase 1	Medium
+3	Admin Dashboard	Phases 1 & 2	High
+4	Smart Intelligence & Anti-Detection	Phases 1 & 2	High
+5	Analytics & Monitoring	Phases 1–4	Medium-High
+How to Use These Prompts
+Step 1: Copy the Master Context block and the Phase 1 prompt. Paste them together into your AI coding assistant. Review and implement the generated code.
+
+Step 2: Test Phase 1 thoroughly — run the seeder, check Firestore, verify the comments look realistic on product pages.
+
+Step 3: Move to Phase 2. Always include the Master Context at the top, and mention that previous phases are complete.
+
+Step 4: Continue sequentially. Each phase builds on the previous ones.
+
+Between phases, if you've made any structural changes (renamed files, changed schemas, added new collections), update the Master Context block to reflect those changes before feeding the next phase prompt.
