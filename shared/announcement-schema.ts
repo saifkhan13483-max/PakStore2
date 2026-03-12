@@ -4,11 +4,15 @@ import { baseDocumentSchema } from "./schema";
 export const announcementTypeEnum = z.enum(["info", "promo", "warning", "success"]);
 export type AnnouncementType = z.infer<typeof announcementTypeEnum>;
 
+export const announcementDisplayModeEnum = z.enum(["banner", "popup"]);
+export type AnnouncementDisplayMode = z.infer<typeof announcementDisplayModeEnum>;
+
 export const announcementSchema = baseDocumentSchema.extend({
   message: z.string().min(1, "Message is required").max(300, "Message must be 300 characters or fewer"),
   is_active: z.boolean().default(true),
   display_order: z.number().int().min(0).default(0),
   type: announcementTypeEnum.default("info"),
+  display_mode: announcementDisplayModeEnum.default("banner"),
   link_url: z.string().url("Must be a valid URL").nullable().optional(),
   link_text: z.string().max(60).nullable().optional(),
 });
