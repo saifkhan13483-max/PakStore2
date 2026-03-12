@@ -1,0 +1,260 @@
+PakCart Announcement System Prompt — Split Into Phases
+Shared Context for All Phases
+Use this as the persistent context across every phase:
+
+Act as a senior React + TypeScript + Firebase engineer and implement a complete announcement system for my website, PakCart (pakcart.store).
+
+Project context
+PakCart is a full-stack Pakistani e-commerce platform selling fashion accessories, footwear, and home essentials. The project is frontend-heavy / serverless-first.
+
+Architecture
+Frontend: React 18 + TypeScript + Vite
+Routing: wouter
+UI: shadcn/ui + Tailwind CSS
+State: Zustand + TanStack Query v5
+Database: Firebase Firestore
+Auth: Firebase Auth
+Media: Cloudinary
+SEO: react-helmet-async
+Sitemap: Vercel serverless function
+Validation: Zod in shared/schema.ts
+Critical constraints
+Do NOT use or modify server/ for data operations
+All reads/writes must go through the existing client-side service layer in client/src/services/
+Firestore is the real database; ignore PostgreSQL/Drizzle leftovers
+Use TanStack Query v5 object syntax only
+Use wouter for routing/navigation
+Use the existing Firebase setup; do not reinstall or reconfigure Firebase
+Do not edit package.json scripts
+Frontend env vars must use import.meta.env.VITE_*
+Relevant structure
+client/src/components/
+client/src/pages/
+client/src/pages/admin/
+client/src/services/
+client/src/store/
+client/src/hooks/
+client/src/types/
+shared/schema.ts
+Existing Firestore collections
+products
+categories
+orders
+users
+comments
+homepage_slides
+Goal
+Add a full announcement system with:
+
+Public announcement display on the site
+Announcement management in the admin panel
+Full CRUD:
+Create
+Edit
+Delete
+Toggle active/inactive
+Announcements fetched dynamically from Firestore
+Keep the implementation lightweight, clean, production-ready, and aligned with existing project patterns.
+
+Phase 1 — Analyze the Best Approach
+Prompt
+Using the shared PakCart context above, first analyze the best implementation approach for adding an announcement system to this codebase.
+
+Your task in this phase:
+
+Briefly explain the least disruptive implementation strategy
+Propose the Firestore schema for a new announcements collection
+Decide whether to use a simple or slightly extended schema, and explain why
+Identify how announcements should be fetched and displayed publicly
+Identify how admin CRUD should fit into existing patterns
+List all files that should be created or modified
+State any small assumptions clearly if something is missing
+Keep the response focused and practical.
+
+Output format:
+
+Implementation approach
+Proposed schema
+Files to create/modify
+Assumptions
+Phase 2 — Types, Schema, and Service Layer
+Prompt
+Using the previously agreed PakCart implementation plan, now implement Phase 2 only: data model, TypeScript types, Zod validation, and Firestore service layer for announcements.
+
+Requirements:
+
+Create the announcements collection model
+Add/update TypeScript types in client/src/types/
+Add Zod validation if it matches the current project pattern
+Create service functions in client/src/services/:
+getAnnouncements
+getActiveAnnouncements
+createAnnouncement
+updateAnnouncement
+deleteAnnouncement
+subscribeToAnnouncements (only if real-time fits existing patterns)
+Use Firestore from the client service layer only
+Use existing Firebase setup only
+Keep code lightweight and production-ready
+Important:
+
+Do not implement admin UI yet
+Do not implement public display yet
+Do not redesign unrelated services
+Output format:
+
+File-by-file changes
+Full code for each file
+Short explanation of design choices
+Phase 3 — Admin Panel CRUD UI
+Prompt
+Using the PakCart shared context and the announcement service/type layer already created, now implement Phase 3 only: admin announcement management UI.
+
+Requirements:
+
+Add announcement management under /admin
+Admin must be able to:
+List announcements
+Create a new announcement
+Edit an existing announcement
+Delete an announcement
+Toggle active/inactive
+Add reordering only if it is easy and consistent with current patterns
+Match existing admin UI style and structure
+Use shadcn/ui + Tailwind
+Use TanStack Query v5 object syntax for fetching/mutations
+Respect existing auth/role logic for admin-only access
+Do not touch server/
+Also:
+
+Add any needed admin components/forms/dialogs in the cleanest way
+Reuse existing patterns where possible
+Do not implement public site display yet
+Output format:
+
+Files created/modified
+Full code file by file
+Short notes on how CRUD flow works
+Phase 4 — Routing and Admin Navigation
+Prompt
+Using the PakCart shared context and the completed admin announcement UI, now implement Phase 4 only: route and navigation updates.
+
+Requirements:
+
+Add the admin route/page for announcement management
+Add an announcement link in admin navigation if needed
+Keep routing fully consistent with wouter
+Preserve current admin auth/role protection behavior
+Ensure admin pages remain private/noindex according to existing SEO patterns
+Important:
+
+Make the smallest possible routing/navigation changes
+Do not redesign the admin layout
+Output format:
+
+Files created/modified
+Full code
+Brief explanation of route integration
+Phase 5 — Public Announcement Display
+Prompt
+Using the PakCart shared context and the completed announcement data layer, now implement Phase 5 only: public announcement display on the website.
+
+Requirements:
+
+Create a reusable public announcement component
+Show active announcements only
+Keep the design clean, lightweight, and mobile-friendly
+Use shadcn/ui + Tailwind
+Fetch announcements dynamically from Firestore via the service layer
+Integrate the component into the most appropriate public location (sitewide layout, homepage, or top banner depending on current app structure)
+Do not break current SEO setup
+Guidance:
+
+Prefer the least disruptive placement
+Support optional link and link text if included in the schema
+Keep the component reusable
+Output format:
+
+Files created/modified
+Full code
+Short explanation of placement choice
+Phase 6 — Final Integration Review and Cleanup
+Prompt
+Using the PakCart shared context and all previous announcement system work, now perform Phase 6 only: final integration review and cleanup.
+
+Your job:
+
+Verify the full announcement system is consistent with PakCart architecture
+Check that all CRUD flows work logically end to end
+Confirm Firestore is used through the client service layer only
+Confirm TanStack Query v5 object syntax is used consistently
+Confirm wouter is used for routing
+Confirm admin access and SEO behavior are preserved
+Suggest any minimal cleanup needed to keep the feature production-ready
+Output format:
+
+Final file-by-file change summary
+Any small fixes needed
+Final refined code if anything must be adjusted
+Short implementation summary
+Phase 7 — Testing Checklist and Acceptance Validation
+Prompt
+Using the completed PakCart announcement system implementation, now provide Phase 7 only: testing and acceptance validation.
+
+Requirements:
+
+Give a concise manual testing checklist
+Map each acceptance criterion to the implementation
+Note any assumptions or edge cases
+Acceptance criteria:
+
+Admin can create, edit, delete, and enable/disable announcements
+Announcements are stored in Firestore
+Active announcements are shown on the public site
+Implementation follows PakCart’s current stack and architecture
+No Express/API layer is introduced
+No broken patterns (React Router, old TanStack syntax, server-side CRUD, etc.)
+Output format:
+
+Testing checklist
+Acceptance criteria validation
+Edge cases / assumptions
+Final brief summary
+Optional: Single “Strict Phase-by-Phase” Master Prompt
+If you want the AI to work sequentially and stop after each phase, use this version:
+
+Act as a senior React + TypeScript + Firebase engineer working on PakCart (pakcart.store).
+
+Follow this implementation strictly in phases and stop after each phase for review before continuing.
+
+Global constraints
+React 18 + TypeScript + Vite
+wouter routing
+shadcn/ui + Tailwind
+Zustand + TanStack Query v5
+Firestore + Firebase Auth
+Do not use or modify server/
+All reads/writes must go through client/src/services/
+Use existing Firebase setup
+Use import.meta.env.VITE_*
+Ignore PostgreSQL/Drizzle leftovers
+Respect existing auth/SEO/admin patterns
+Goal
+Build a full announcement system with Firestore-backed CRUD, admin management, and public display.
+
+Work phases
+Analyze implementation approach and list files
+Implement types, validation, and service layer
+Implement admin CRUD UI
+Implement admin route/navigation updates
+Implement public announcement display
+Review/fix final integration
+Provide testing checklist and acceptance validation
+For each phase:
+
+Only do that phase
+Output file-by-file changes
+Provide full code
+Make the least disruptive choices
+State assumptions clearly
+Stop and wait for the next instruction
