@@ -28,13 +28,9 @@ import { type HomepageSlide } from "@shared/homepage-slide-schema";
 import { useQuery } from "@tanstack/react-query";
 import SEO from "@/components/SEO";
 
-import { useAuthStore } from "@/store/authStore";
-import { seedRandomComments } from "@/lib/seed-comments";
-
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
   const { categories, isLoading: isCategoriesLoading } = useCategories();
-  const { isAdmin } = useAuthStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
@@ -105,21 +101,6 @@ export default function Home() {
   const isLikedLoading = isAllProductsLoading;
   const isNewArrivalsLoading = isAllProductsLoading;
 
-  const [isSeeding, setIsSeeding] = useState(false);
-  const handleSeed = async () => {
-    setIsSeeding(true);
-    try {
-      await seedRandomComments();
-      alert("Random comments added successfully!");
-      window.location.reload();
-    } catch (error: any) {
-      console.error(error);
-      alert("Failed to seed comments: " + (error.message || "Unknown error"));
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
   const safeSlide = HERO_SLIDES.length > 0 ? HERO_SLIDES[Math.min(currentSlide, HERO_SLIDES.length - 1)] : undefined;
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
@@ -150,19 +131,6 @@ export default function Home() {
         url="https://pakcart.store/"
         robots="index,follow"
       />
-      {isAdmin && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button 
-            onClick={handleSeed} 
-            disabled={isSeeding}
-            variant="secondary"
-            size="sm"
-            className="opacity-70 hover:opacity-100 bg-primary text-primary-foreground border-none shadow-lg"
-          >
-            {isSeeding ? "Seeding..." : "Seed Comments"}
-          </Button>
-        </div>
-      )}
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
         <section 

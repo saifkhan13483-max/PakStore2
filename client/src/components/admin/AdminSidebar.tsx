@@ -28,6 +28,7 @@ const menuItems = [
   { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
   { icon: ImageIcon, label: "Homepage Slider", href: "/admin/homepage-slider" },
   { icon: Megaphone, label: "Announcements", href: "/admin/announcements" },
+  { icon: MessageSquare, label: "Seed Comments", href: "/admin/seed-comments" },
   { icon: FileSearch, label: "Sitemap", href: "/admin/sitemap" },
 ];
 
