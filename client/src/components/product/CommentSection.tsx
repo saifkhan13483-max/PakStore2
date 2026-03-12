@@ -297,18 +297,23 @@ export function CommentSection({ productId }: CommentSectionProps) {
               <CardContent className="pt-6 space-y-3">
                 {/* Reviewer header */}
                 <div className="flex items-start gap-4">
-                  {comment.userPhoto ? (
-                    <Avatar>
-                      <AvatarImage src={comment.userPhoto} />
-                      <AvatarFallback>{comment.userName[0]}</AvatarFallback>
-                    </Avatar>
-                  ) : (
+                  {comment.userId === "system-seed" || !comment.userPhoto ? (
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
                       style={{ backgroundColor: getAvatarColor(comment.userName) }}
                     >
                       {comment.userName[0]?.toUpperCase()}
                     </div>
+                  ) : (
+                    <Avatar>
+                      <AvatarImage src={comment.userPhoto} />
+                      <AvatarFallback
+                        className="text-white font-bold text-lg"
+                        style={{ backgroundColor: getAvatarColor(comment.userName) }}
+                      >
+                        {comment.userName[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                   )}
 
                   <div className="flex-1 space-y-1.5">
