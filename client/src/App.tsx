@@ -8,52 +8,41 @@ import Layout from "@/components/layout/Layout";
 import NotFound from "@/pages/not-found";
 import { Suspense, lazy, useEffect, useState, type LazyExoticComponent, type ComponentType } from "react";
 
-// Deployment version detection for catching stale chunk references
-const getDeploymentVersion = async (): Promise<string> => {
-  try {
-    const response = await fetch(`${window.location.origin}/index.html?t=${Date.now()}`, {
-      method: 'HEAD',
-      cache: 'no-store',
-    });
-    return response.headers.get('etag') || response.headers.get('last-modified') || String(Date.now());
-  } catch {
-    return String(Date.now());
-  }
+// Check for deployment version changes in the background (non-blocking)
+const checkDeploymentVersion = (): void => {
+  const versionKey = 'deployment-version';
+  fetch(`${window.location.origin}/index.html?t=${Date.now()}`, {
+    method: 'HEAD',
+    cache: 'no-store',
+  }).then(response => {
+    const currentVersion = response.headers.get('etag') || response.headers.get('last-modified') || String(Date.now());
+    const storedVersion = window.localStorage.getItem(versionKey);
+    if (storedVersion && storedVersion !== currentVersion) {
+      window.localStorage.setItem(versionKey, currentVersion);
+      window.location.reload();
+    } else if (!storedVersion) {
+      window.localStorage.setItem(versionKey, currentVersion);
+    }
+  }).catch(() => {});
 };
+
+// Run version check after page loads — does not block any component loading
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', checkDeploymentVersion, { once: true });
+}
 
 // Robust Lazy Loading with exponential backoff retry logic
 const lazyWithRetry = (componentImport: () => Promise<any>): LazyExoticComponent<ComponentType<any>> => {
   return lazy(async (): Promise<{ default: ComponentType<any> }> => {
     const maxRetries = 3;
     const retryKey = 'chunk-load-retry-count';
-    const versionKey = 'deployment-version';
-    
     const currentRetries = parseInt(window.localStorage.getItem(retryKey) || '0');
-    const storedVersion = window.localStorage.getItem(versionKey);
-    const currentVersion = await getDeploymentVersion();
-    
-    // Detect deployment version change
-    const isNewDeployment = storedVersion && storedVersion !== currentVersion;
-    if (isNewDeployment) {
-      window.localStorage.setItem(versionKey, currentVersion);
-      window.localStorage.setItem(retryKey, '0');
-      window.location.reload();
-      // Return null while reload happens
-      return { default: () => null };
-    }
-    
-    // Store current deployment version
-    if (!storedVersion) {
-      window.localStorage.setItem(versionKey, currentVersion);
-    }
 
     try {
       const component = await componentImport();
-      // Clear retry counter on success
       window.localStorage.setItem(retryKey, '0');
       return component;
     } catch (error: any) {
-      // Check for common network/module loading errors
       const isDynamicImportError = 
         error?.message?.includes('Failed to fetch dynamically imported module') ||
         error?.message?.includes('error loading dynamically imported module') ||
@@ -62,26 +51,19 @@ const lazyWithRetry = (componentImport: () => Promise<any>): LazyExoticComponent
         error?.name === 'ChunkLoadError';
 
       if (isDynamicImportError && currentRetries < maxRetries) {
-        // Exponential backoff: 1000ms, 3000ms, 9000ms
         const backoffDelay = Math.min(1000 * Math.pow(3, currentRetries), 10000);
-        
         window.localStorage.setItem(retryKey, String(currentRetries + 1));
-        
-        // Wait for backoff period, then retry
         await new Promise(resolve => setTimeout(resolve, backoffDelay));
-        
-        // Retry the import
         return await componentImport();
       }
-      
-      // After max retries, attempt hard refresh as last resort
+
       if (isDynamicImportError && currentRetries >= maxRetries) {
         console.error('Chunk load failed after retries. Performing hard refresh.', error);
         window.localStorage.setItem(retryKey, '0');
-        window.location.reload(); // Force bypass cache
+        window.location.reload();
         return { default: () => null };
       }
-      
+
       throw error;
     }
   });

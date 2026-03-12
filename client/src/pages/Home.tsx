@@ -172,8 +172,7 @@ export default function Home() {
               : "aspect-[1920/700] min-h-[500px] sm:min-h-[500px]"
           }`}
           style={{ 
-            containIntrinsicSize: isMobile ? '768px 1024px' : '1920px 700px', 
-            contentVisibility: 'auto' 
+            containIntrinsicSize: isMobile ? '768px 1024px' : '1920px 700px'
           }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
