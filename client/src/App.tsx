@@ -97,16 +97,20 @@ const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSl
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 
 import { trackEvent } from "@/lib/firebase";
-import { Loader2 } from "lucide-react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  </div>
-);
+const LoaderDismiss = () => {
+  useEffect(() => {
+    const loader = document.getElementById("app-loading");
+    if (loader) {
+      loader.classList.add("hidden");
+      setTimeout(() => loader.remove(), 250);
+    }
+  }, []);
+  return null;
+};
 
 function Router() {
   const [location] = useLocation();
@@ -233,7 +237,7 @@ function Router() {
   );
 
   if (isAdminPath) {
-    return <Suspense fallback={<PageLoader />}>{routes}</Suspense>;
+    return <Suspense fallback={null}><LoaderDismiss />{routes}</Suspense>;
   }
 
   return (
@@ -242,7 +246,8 @@ function Router() {
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </Helmet>
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={null}>
+        <LoaderDismiss />
         {routes}
       </Suspense>
     </Layout>
