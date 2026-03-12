@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, X, ChevronDown, ShoppingBag } from "lucide-react";
+import { ShoppingCart, Menu, Search, User, X, ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { Badge } from "@/components/ui/badge";
@@ -36,10 +36,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => {
@@ -47,11 +43,20 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hoveredParentId, setHoveredParentId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { user, isAuthenticated, logout } = useAuthStore();
   
   const { categories: categoriesData, parentCategories, isLoading: categoriesLoading } = useCategories();
+
+  const activeParent = hoveredParentId
+    ? parentCategories?.find(p => String(p.id) === hoveredParentId)
+    : parentCategories?.[0];
+
+  const activeSubCategories = categoriesData?.filter(
+    c => String(c.parentCategoryId) === String(activeParent?.id)
+  ) || [];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,62 +115,66 @@ const Header = () => {
               Home
             </Link>
 
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => { if (!open) setHoveredParentId(null); }}>
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
                     "flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary py-1 px-0.5 focus:outline-none",
-                    location.startsWith("/products") ? "text-primary" : "text-muted-foreground"
+                    location.startsWith("/collections") || location.startsWith("/categories")
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   )}
                 >
                   Categories <ChevronDown className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 p-2">
-                {parentCategories?.map((parent) => {
-                  const subCategories = categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)) || [];
-                  
-                  if (subCategories.length > 0) {
-                    return (
-                      <DropdownMenuSub key={parent.id}>
-                        <DropdownMenuSubTrigger className="cursor-pointer">
-                          <span className="font-medium">{parent.name}</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent className="w-48">
-                            {subCategories.map((category) => (
-                              <DropdownMenuItem key={category.id} asChild>
-                                <Link 
-                                  href={`/collections/${category.slug}`} 
-                                  className="cursor-pointer w-full"
-                                >
-                                  {category.name}
-                                </Link>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                    );
-                  }
+              <DropdownMenuContent align="start" className="p-0 w-auto shadow-lg rounded-lg overflow-hidden">
+                <div className="flex">
+                  {/* Left panel — parent categories */}
+                  <div className="w-52 py-2 border-r border-border/50 bg-background">
+                    {parentCategories?.map((parent) => {
+                      const isActive = String(activeParent?.id) === String(parent.id);
+                      return (
+                        <div
+                          key={parent.id}
+                          onMouseEnter={() => setHoveredParentId(String(parent.id))}
+                          className={cn(
+                            "flex items-center justify-between px-4 py-2.5 cursor-pointer text-sm font-medium transition-colors",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-muted"
+                          )}
+                        >
+                          <span>{parent.name}</span>
+                          <ChevronRight className="h-4 w-4 opacity-60" />
+                        </div>
+                      );
+                    })}
+                    <div className="border-t border-border/50 mt-1 pt-1">
+                      <DropdownMenuItem asChild className="mx-1">
+                        <Link href="/products" className="cursor-pointer w-full text-sm font-medium px-3 py-2">
+                          Shop All Products
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  </div>
 
-                  return (
-                    <DropdownMenuItem key={parent.id} asChild>
-                      <Link 
-                        href={`/collections/${parent.slug}`}
-                        className="cursor-pointer w-full font-medium"
-                      >
-                        {parent.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  );
-                })}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/products" className="cursor-pointer w-full font-medium">
-                    Shop All Products
-                  </Link>
-                </DropdownMenuItem>
+                  {/* Right panel — sub-categories of active parent */}
+                  {activeSubCategories.length > 0 && (
+                    <div className="w-48 py-2 bg-background">
+                      {activeSubCategories.map((category) => (
+                        <DropdownMenuItem key={category.id} asChild>
+                          <Link
+                            href={`/collections/${category.slug}`}
+                            className="cursor-pointer px-4 py-2.5 text-sm text-muted-foreground hover:text-primary w-full block"
+                          >
+                            {category.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 
