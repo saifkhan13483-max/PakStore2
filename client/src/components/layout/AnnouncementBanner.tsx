@@ -113,7 +113,7 @@ export default function AnnouncementBanner() {
   });
 
   const visible = (announcements ?? []).filter(
-    (a) => !dismissed.includes(a.id)
+    (a) => !dismissed.includes(a.id) && (a.display_mode === "banner" || !a.display_mode)
   );
 
   if (visible.length === 0) return null;

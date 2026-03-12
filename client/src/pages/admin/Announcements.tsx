@@ -8,6 +8,7 @@ import {
   type InsertAnnouncement,
   insertAnnouncementSchema,
   announcementTypeEnum,
+  announcementDisplayModeEnum,
 } from "@shared/announcement-schema";
 import {
   Table,
@@ -46,7 +47,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Loader2, Megaphone } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Megaphone, PanelTop, RectangleEllipsis } from "lucide-react";
 
 const TYPE_LABELS: Record<string, string> = {
   info: "Info",
@@ -63,6 +64,11 @@ const TYPE_BADGE_VARIANTS: Record<
   promo: "secondary",
   warning: "destructive",
   success: "outline",
+};
+
+const DISPLAY_MODE_LABELS: Record<string, string> = {
+  banner: "Banner",
+  popup: "Pop-up",
 };
 
 const QUERY_KEY = ["/api/announcements"];
@@ -149,25 +155,50 @@ function AnnouncementForm({
 
           <FormField
             control={form.control}
-            name="display_order"
+            name="display_mode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Display Order</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
-                    data-testid="input-announcement-order"
-                  />
-                </FormControl>
+                <FormLabel>Display As</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger data-testid="select-announcement-display-mode">
+                      <SelectValue placeholder="Select display mode" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {announcementDisplayModeEnum.options.map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {DISPLAY_MODE_LABELS[opt]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="display_order"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Display Order</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) =>
+                    field.onChange(parseInt(e.target.value) || 0)
+                  }
+                  data-testid="input-announcement-order"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -317,6 +348,7 @@ export default function AdminAnnouncements() {
   const createDefaults: AnnouncementFormData = {
     message: "",
     type: "info",
+    display_mode: "banner",
     is_active: true,
     display_order: 0,
     link_url: null,
@@ -363,8 +395,9 @@ export default function AdminAnnouncements() {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
-              <TableHead className="w-[40%]">Message</TableHead>
+              <TableHead className="w-[35%]">Message</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Display</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Order</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -374,7 +407,7 @@ export default function AdminAnnouncements() {
             {!announcements || announcements.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="text-center py-12 text-muted-foreground"
                 >
                   No announcements yet. Click "Add Announcement" to create one.
@@ -412,6 +445,19 @@ export default function AdminAnnouncements() {
                     >
                       {TYPE_LABELS[announcement.type] ?? announcement.type}
                     </Badge>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      {announcement.display_mode === "popup" ? (
+                        <RectangleEllipsis className="h-4 w-4" />
+                      ) : (
+                        <PanelTop className="h-4 w-4" />
+                      )}
+                      <span>
+                        {DISPLAY_MODE_LABELS[announcement.display_mode ?? "banner"]}
+                      </span>
+                    </div>
                   </TableCell>
 
                   <TableCell>
@@ -521,6 +567,7 @@ export default function AdminAnnouncements() {
               defaultValues={{
                 message: editTarget.message,
                 type: editTarget.type,
+                display_mode: editTarget.display_mode ?? "banner",
                 is_active: editTarget.is_active,
                 display_order: editTarget.display_order,
                 link_url: editTarget.link_url ?? null,
