@@ -16,21 +16,31 @@ import {
   getRealisticRating,
   getCommentCount,
   generateReviewContent,
-  generateRealisticTimestamp,
+  generateClusteredTimestamps,
 } from "./seed-data/review-templates";
+import {
+  generateHelpfulCount,
+  generateIsVerifiedPurchase,
+  generateSellerReply,
+} from "./seed-data/engagement-simulator";
 
 /**
  * Seeds realistic, product-aware comments for every product in Firestore.
  *
- * - Deletes previously seeded comments (userId === "system-seed") first.
- * - Generates 2–7 comments per product depending on price tier.
- * - Picks ratings using a weighted distribution (5★ most common, 1★ rare).
- * - Matches review text to product category and star rating.
- * - Spreads timestamps across the last 90 days with realistic hours.
- * - Recalculates each product's averageRating and reviewCount.
+ * Phase 1 features:
+ *   - Product-aware review content matched to category
+ *   - Weighted rating distribution (5★ 45% → 1★ 2%)
+ *   - 80+ realistic Pakistani reviewer names with DiceBear avatars
+ *   - 2–7 comments per product based on price tier
+ *
+ * Phase 2 additions:
+ *   - Clustered timestamps (burst pattern mimicking post-sale review spikes)
+ *   - helpfulCount correlated with review length
+ *   - isVerifiedPurchase badge (~70% of comments)
+ *   - sellerReply + sellerReplyDate (~20% of comments, matched to rating)
  */
 export async function seedRandomComments(): Promise<true> {
-  console.log("Starting to seed realistic comments...");
+  console.log("Starting to seed realistic comments (Phase 2)...");
 
   const productsSnapshot = await getDocs(collection(db, "products"));
   console.log(`Found ${productsSnapshot.size} products.`);
@@ -69,26 +79,38 @@ export async function seedRandomComments(): Promise<true> {
     // --- Generate new comments ---
     const category = detectCategory(product);
     const numComments = getCommentCount(product);
+    const timestamps = generateClusteredTimestamps(numComments);
+
     console.log(`Adding ${numComments} comments to "${productName}" (${category})...`);
 
     for (let i = 0; i < numComments; i++) {
       const { name } = getRandomName();
       const rating = getRealisticRating();
       const content = generateReviewContent(productName, category, rating as 1 | 2 | 3 | 4 | 5);
-      const ts = generateRealisticTimestamp();
-      const firestoreTs = Timestamp.fromDate(ts);
+      const commentDate = timestamps[i];
+      const firestoreTs = Timestamp.fromDate(commentDate);
+
+      const helpfulCount = generateHelpfulCount(content);
+      const isVerifiedPurchase = generateIsVerifiedPurchase();
+      const replyData = generateSellerReply(rating, commentDate);
+
+      const commentPayload: Record<string, unknown> = {
+        productId,
+        userName: name,
+        content,
+        rating,
+        userId: "system-seed",
+        userPhoto: getDiceBearUrl(name),
+        createdAt: firestoreTs,
+        updatedAt: firestoreTs,
+        helpfulCount,
+        isVerifiedPurchase,
+        sellerReply: replyData?.sellerReply ?? null,
+        sellerReplyDate: replyData ? Timestamp.fromDate(replyData.sellerReplyDate) : null,
+      };
 
       try {
-        await addDoc(collection(db, "comments"), {
-          productId,
-          userName: name,
-          content,
-          rating,
-          userId: "system-seed",
-          userPhoto: getDiceBearUrl(name),
-          createdAt: firestoreTs,
-          updatedAt: firestoreTs,
-        });
+        await addDoc(collection(db, "comments"), commentPayload);
       } catch (e: any) {
         console.error(`Failed to add comment for "${productName}":`, e);
         if (e.code === "permission-denied") {

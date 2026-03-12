@@ -102,10 +102,52 @@ export function generateRealisticTimestamp(): Date {
   return base;
 }
 
-/** Picks an hour (0-23) weighted toward 9-23. */
+/** Picks an hour (0-23) weighted toward 9-23 PKT. */
 function weightedHour(): number {
   const activeHours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
   return activeHours[Math.floor(Math.random() * activeHours.length)];
+}
+
+/**
+ * Generates `count` timestamps with a realistic burst-clustering pattern.
+ *
+ * Picks 1–2 random "burst dates" (mimicking post-sale review spikes), clusters
+ * 40–60% of timestamps within ±3 days of those bursts, and spreads the rest
+ * randomly across the full 90-day window. Results are sorted chronologically.
+ */
+export function generateClusteredTimestamps(count: number): Date[] {
+  const now = Date.now();
+  const numBursts = Math.random() < 0.5 ? 1 : 2;
+  const burstMs: number[] = [];
+
+  for (let b = 0; b < numBursts; b++) {
+    const daysAgo = Math.floor(Math.random() * 84) + 4; // 4–88 days ago (±3 day buffer)
+    burstMs.push(now - daysAgo * 86_400_000);
+  }
+
+  const clusterCount = Math.round(count * (0.4 + Math.random() * 0.2)); // 40–60%
+  const timestamps: Date[] = [];
+
+  for (let i = 0; i < count; i++) {
+    let ms: number;
+    if (i < clusterCount) {
+      const burst = burstMs[Math.floor(Math.random() * burstMs.length)];
+      const offsetMs = (Math.random() * 6 - 3) * 86_400_000; // ±3 days
+      ms = burst + offsetMs;
+    } else {
+      const daysAgo = Math.floor(Math.random() * 90) + 1;
+      ms = now - daysAgo * 86_400_000;
+    }
+    // Clamp: never in the future, never older than 90 days
+    ms = Math.max(now - 90 * 86_400_000, Math.min(now - 60_000, ms));
+
+    const d = new Date(ms);
+    const pktHour = weightedHour();
+    d.setUTCHours(((pktHour - 5) + 24) % 24, Math.floor(Math.random() * 60), Math.floor(Math.random() * 60), 0);
+    timestamps.push(d);
+  }
+
+  return timestamps.sort((a, b) => a.getTime() - b.getTime());
 }
 
 // ---------------------------------------------------------------------------

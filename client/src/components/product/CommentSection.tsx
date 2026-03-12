@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Loader2, Send, MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { Star, Loader2, Send, MoreVertical, Edit2, Trash2, CheckCircle, ThumbsUp, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { Comment, InsertComment, commentSchema } from "@shared/schema";
@@ -41,8 +41,35 @@ import {
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { getAvatarColor } from "@/lib/avatar-colors";
 
+// ---------------------------------------------------------------------------
+// Extended comment type — new Phase 2 fields are all optional so real user
+// comments (which don't have these fields) continue to render without issues.
+// ---------------------------------------------------------------------------
+interface ExtendedComment extends Comment {
+  helpfulCount?: number;
+  isVerifiedPurchase?: boolean;
+  sellerReply?: string | null;
+  sellerReplyDate?: { seconds: number; nanoseconds: number } | Date | string | null;
+}
+
 interface CommentSectionProps {
   productId: string;
+}
+
+/** Converts any Firestore timestamp shape or Date/string into a formatted string. */
+function formatTimestamp(
+  ts: { seconds: number; nanoseconds: number } | Date | string | null | undefined
+): string {
+  if (!ts) return "";
+  try {
+    const date =
+      typeof ts === "object" && "seconds" in ts
+        ? new Date((ts as { seconds: number }).seconds * 1000)
+        : new Date(ts as Date | string);
+    return isNaN(date.getTime()) ? "" : format(date, "MMM d, yyyy");
+  } catch {
+    return "";
+  }
 }
 
 export function CommentSection({ productId }: CommentSectionProps) {
@@ -52,24 +79,22 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [rating, setRating] = useState(5);
   const [images, setImages] = useState<string[]>([]);
 
-  // Edit/Delete states
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editRating, setEditRating] = useState(5);
   const [editImages, setEditImages] = useState<string[]>([]);
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
-  const { data: comments, isLoading } = useRealtimeCollection(
+  const { data: rawComments, isLoading } = useRealtimeCollection(
     "comments",
     commentSchema,
     ["comments", productId],
     useMemo(() => [where("productId", "==", productId)], [productId])
   );
 
-  const refetch = () => {
-    // Realtime collection handles updates automatically, 
-    // but we keep the name for compatibility if needed.
-  };
+  const comments = rawComments as ExtendedComment[] | undefined;
+
+  const refetch = () => {};
 
   const mutation = useMutation({
     mutationFn: (newComment: InsertComment) => {
@@ -77,7 +102,6 @@ export function CommentSection({ productId }: CommentSectionProps) {
       return commentFirestoreService.createComment(newComment);
     },
     onSuccess: async () => {
-      console.log("DEBUG Mutation success, invalidating comments for:", productId);
       await queryClient.invalidateQueries({ queryKey: ["comments", productId] });
       await refetch();
       setContent("");
@@ -121,24 +145,24 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated || !user) {
-      toast({ 
-        variant: "destructive", 
-        title: "Authentication required", 
-        description: "Please login to post a review" 
+      toast({
+        variant: "destructive",
+        title: "Authentication required",
+        description: "Please login to post a review",
       });
       return;
     }
     if (!content.trim()) {
-      toast({ 
-        variant: "destructive", 
-        title: "Validation error", 
-        description: "Please enter a comment" 
+      toast({
+        variant: "destructive",
+        title: "Validation error",
+        description: "Please enter a comment",
       });
       return;
     }
-    
+
     mutation.mutate({
-      id: '', // Will be set by server
+      id: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       productId,
@@ -172,8 +196,8 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const renderImages = (commentImages: string[]) => {
-    return commentImages.map((img: string, i: number) => (
+  const renderImages = (commentImages: string[]) =>
+    commentImages.map((img: string, i: number) => (
       <img
         key={i}
         src={getOptimizedImageUrl(img, { width: 200, height: 200 })}
@@ -182,11 +206,10 @@ export function CommentSection({ productId }: CommentSectionProps) {
         onClick={() => setSelectedImage(img)}
       />
     ));
-  };
 
   return (
     <div className="space-y-8">
-      {/* Image Viewer Dialog */}
+      {/* Full-size image viewer */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none">
           {selectedImage && (
@@ -199,13 +222,19 @@ export function CommentSection({ productId }: CommentSectionProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold">Customer Reviews</h2>
         <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border">
           <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
           <div className="flex items-baseline gap-1">
             <span className="text-xl font-bold leading-none">
-              {comments?.length ? (comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) / comments.length).toFixed(1) : "0.0"}
+              {comments?.length
+                ? (
+                    comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) /
+                    comments.length
+                  ).toFixed(1)
+                : "0.0"}
             </span>
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               ({comments?.length || 0} reviews)
@@ -214,6 +243,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
         </div>
       </div>
 
+      {/* New review form */}
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -240,24 +270,32 @@ export function CommentSection({ productId }: CommentSectionProps) {
               <ImageUploader value={images} onChange={setImages} maxImages={3} />
             </div>
             <Button type="submit" disabled={mutation.isPending} className="w-full sm:w-auto">
-              {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+              {mutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
               Post Review
             </Button>
           </form>
         </CardContent>
       </Card>
 
+      {/* Review list */}
       <div className="space-y-6">
         {isLoading ? (
           <div className="flex justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : comments?.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No reviews yet. Be the first to review!</p>
+          <p className="text-center text-muted-foreground py-8">
+            No reviews yet. Be the first to review!
+          </p>
         ) : (
           comments?.map((comment) => (
             <Card key={comment.id}>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 space-y-3">
+                {/* Reviewer header */}
                 <div className="flex items-start gap-4">
                   {comment.userPhoto ? (
                     <Avatar>
@@ -272,21 +310,22 @@ export function CommentSection({ productId }: CommentSectionProps) {
                       {comment.userName[0]?.toUpperCase()}
                     </div>
                   )}
-                  <div className="flex-1 space-y-2">
+
+                  <div className="flex-1 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold">{comment.userName}</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-bold">{comment.userName}</h4>
+                        {/* Verified Purchase badge — only shown when present */}
+                        {comment.isVerifiedPurchase && (
+                          <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span className="text-xs font-medium">Verified Purchase</span>
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">
-                          {comment.createdAt ? (() => {
-                            try {
-                              const date = typeof comment.createdAt === 'object' && 'seconds' in comment.createdAt 
-                                ? new Date(comment.createdAt.seconds * 1000)
-                                : new Date(comment.createdAt);
-                              return isNaN(date.getTime()) ? "" : format(date, "MMM d, yyyy");
-                            } catch (e) {
-                              return "";
-                            }
-                          })() : ""}
+                          {formatTimestamp(comment.createdAt)}
                         </span>
                         {user?.uid === comment.userId && (
                           <DropdownMenu>
@@ -300,7 +339,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                                 <Edit2 className="w-4 h-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => setDeletingCommentId(comment.id)}
                               >
@@ -312,26 +351,79 @@ export function CommentSection({ productId }: CommentSectionProps) {
                         )}
                       </div>
                     </div>
+
+                    {/* Stars */}
                     <div className="flex text-yellow-500">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className={`w-4 h-4 ${i < comment.rating ? "fill-current" : "text-muted"}`} />
+                        <Star
+                          key={i}
+                          className={`w-4 h-4 ${i < comment.rating ? "fill-current" : "text-muted"}`}
+                        />
                       ))}
                     </div>
+
+                    {/* Review body */}
                     <p className="text-muted-foreground">{comment.content}</p>
+
+                    {/* Attached images */}
                     {comment.images && comment.images.length > 0 && (
-                      <div className="flex gap-2 pt-2">
-                        {renderImages(comment.images)}
-                      </div>
+                      <div className="flex gap-2 pt-1">{renderImages(comment.images)}</div>
                     )}
+
+                    {/* Helpful count + Was this helpful? buttons */}
+                    <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+                      {(comment.helpfulCount ?? 0) > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <ThumbsUp className="w-3 h-3" />
+                          {comment.helpfulCount}{" "}
+                          {comment.helpfulCount === 1 ? "person" : "people"} found this helpful
+                        </span>
+                      )}
+                      <div className="flex items-center gap-1 ml-auto">
+                        <span className="text-xs text-muted-foreground">Was this helpful?</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          data-testid={`btn-helpful-yes-${comment.id}`}
+                        >
+                          Yes
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          data-testid={`btn-helpful-no-${comment.id}`}
+                        >
+                          No
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {/* Seller reply — only rendered when present */}
+                {comment.sellerReply && (
+                  <div className="ml-14 mt-1 p-3 bg-muted/50 border-l-2 border-primary/40 rounded-r-md">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Store className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-xs font-semibold text-primary">PakCart Store</span>
+                      {comment.sellerReplyDate && (
+                        <span className="text-xs text-muted-foreground">
+                          · {formatTimestamp(comment.sellerReplyDate)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{comment.sellerReply}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))
         )}
       </div>
 
-      {/* Edit Dialog */}
+      {/* Edit dialog */}
       <Dialog open={!!editingComment} onOpenChange={(open) => !open && setEditingComment(null)}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -362,17 +454,24 @@ export function CommentSection({ productId }: CommentSectionProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingComment(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditingComment(null)}>
+              Cancel
+            </Button>
             <Button onClick={handleEditSubmit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {updateMutation.isPending && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
               Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deletingCommentId} onOpenChange={(open) => !open && setDeletingCommentId(null)}>
+      {/* Delete confirmation */}
+      <AlertDialog
+        open={!!deletingCommentId}
+        onOpenChange={(open) => !open && setDeletingCommentId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -387,7 +486,9 @@ export function CommentSection({ productId }: CommentSectionProps) {
               onClick={() => deletingCommentId && deleteMutation.mutate(deletingCommentId)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {deleteMutation.isPending && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -1,8 +1,11 @@
 /**
  * CLI seed script — run with:  npx tsx scripts/seed-comments.ts
  *
- * Uses the same data engine as the frontend admin button so results
- * are identical regardless of which entry point triggers the seeding.
+ * Uses the same data engine as the frontend admin button so results are
+ * identical regardless of which entry point triggers the seeding.
+ *
+ * Phase 2: Adds engagement signals (helpfulCount, isVerifiedPurchase,
+ * sellerReply, sellerReplyDate) and clustered timestamps.
  */
 
 import { initializeApp } from "firebase/app";
@@ -19,15 +22,19 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-// Shared data engine (same files used by the frontend)
 import { getRandomName, getDiceBearUrl } from "../client/src/lib/seed-data/name-pool";
 import {
   detectCategory,
   getRealisticRating,
   getCommentCount,
   generateReviewContent,
-  generateRealisticTimestamp,
+  generateClusteredTimestamps,
 } from "../client/src/lib/seed-data/review-templates";
+import {
+  generateHelpfulCount,
+  generateIsVerifiedPurchase,
+  generateSellerReply,
+} from "../client/src/lib/seed-data/engagement-simulator";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCy6W_iVKhOuawX5kLtq_arxsVfnxbfg94",
@@ -42,7 +49,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function seedRandomComments(): Promise<void> {
-  console.log("Starting to seed realistic comments...");
+  console.log("Starting to seed realistic comments (Phase 2)...");
 
   const productsSnapshot = await getDocs(collection(db, "products"));
   console.log(`Found ${productsSnapshot.size} products.`);
@@ -76,14 +83,20 @@ async function seedRandomComments(): Promise<void> {
     // --- Generate new comments ---
     const category = detectCategory(product);
     const numComments = getCommentCount(product);
+    const timestamps = generateClusteredTimestamps(numComments);
+
     console.log(`Adding ${numComments} comments to "${productName}" (${category})...`);
 
     for (let i = 0; i < numComments; i++) {
       const { name } = getRandomName();
       const rating = getRealisticRating();
       const content = generateReviewContent(productName, category, rating as 1 | 2 | 3 | 4 | 5);
-      const ts = generateRealisticTimestamp();
-      const firestoreTs = Timestamp.fromDate(ts);
+      const commentDate = timestamps[i];
+      const firestoreTs = Timestamp.fromDate(commentDate);
+
+      const helpfulCount = generateHelpfulCount(content);
+      const isVerifiedPurchase = generateIsVerifiedPurchase();
+      const replyData = generateSellerReply(rating, commentDate);
 
       await addDoc(collection(db, "comments"), {
         productId,
@@ -94,6 +107,10 @@ async function seedRandomComments(): Promise<void> {
         userPhoto: getDiceBearUrl(name),
         createdAt: firestoreTs,
         updatedAt: firestoreTs,
+        helpfulCount,
+        isVerifiedPurchase,
+        sellerReply: replyData?.sellerReply ?? null,
+        sellerReplyDate: replyData ? Timestamp.fromDate(replyData.sellerReplyDate) : null,
       });
     }
 
