@@ -85,7 +85,7 @@ function injectIntoShell(shell, head, bodyContent) {
   // Inject visible SEO content INSIDE #root — React replaces this on hydration (proper SSR pattern)
   result = result.replace(
     /(<div id="root">)(<\/div>)?/,
-    `$1<div id="seo-content" style="font-family:system-ui,sans-serif;padding:16px;color:#111">${bodyContent}</div></div>`
+    `$1<div id="seo-content" style="position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap;clip:rect(0,0,0,0);clip-path:inset(50%)">${bodyContent}</div></div>`
   );
   return result;
 }
