@@ -9,7 +9,8 @@ import {
   ChevronRight,
   Menu,
   FileSearch,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Megaphone
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const menuItems = [
   { icon: ListTree, label: "Categories", href: "/admin/categories" },
   { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
   { icon: ImageIcon, label: "Homepage Slider", href: "/admin/homepage-slider" },
+  { icon: Megaphone, label: "Announcements", href: "/admin/announcements" },
   { icon: FileSearch, label: "Sitemap", href: "/admin/sitemap" },
 ];
 

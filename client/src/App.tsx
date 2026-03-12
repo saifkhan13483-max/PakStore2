@@ -94,6 +94,7 @@ const AdminCategories = lazyWithRetry(() => import("@/pages/admin/ManageCategori
 const AdminOrders = lazyWithRetry(() => import("@/pages/admin/Orders"));
 const AdminSitemap = lazyWithRetry(() => import("@/pages/admin/Sitemap"));
 const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSlider"));
+const AdminAnnouncements = lazyWithRetry(() => import("@/pages/admin/Announcements"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 
 import { trackEvent } from "@/lib/firebase";
@@ -210,6 +211,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminHomepageSlider />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/announcements">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminAnnouncements />
           </AdminLayout>
         </AdminRoute>
       </Route>
