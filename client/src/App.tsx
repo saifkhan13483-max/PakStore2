@@ -101,17 +101,6 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/admin/AdminRoute";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
-const LoaderDismiss = () => {
-  useEffect(() => {
-    const loader = document.getElementById("app-loading");
-    if (loader) {
-      loader.classList.add("hidden");
-      setTimeout(() => loader.remove(), 250);
-    }
-  }, []);
-  return null;
-};
-
 function Router() {
   const [location] = useLocation();
 
@@ -237,7 +226,7 @@ function Router() {
   );
 
   if (isAdminPath) {
-    return <Suspense fallback={null}><LoaderDismiss />{routes}</Suspense>;
+    return <Suspense fallback={null}>{routes}</Suspense>;
   }
 
   return (
@@ -247,7 +236,6 @@ function Router() {
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       </Helmet>
       <Suspense fallback={null}>
-        <LoaderDismiss />
         {routes}
       </Suspense>
     </Layout>
