@@ -247,10 +247,14 @@ import { useCartStore } from "@/store/cartStore";
 
 import { AuthProvider } from "@/hooks/use-auth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
   return (
     <ErrorBoundary>
+      {loading && <LoadingScreen onFinish={() => setLoading(false)} />}
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <HelmetProvider>
