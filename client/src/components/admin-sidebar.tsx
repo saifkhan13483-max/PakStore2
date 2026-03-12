@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingBag, Tags, Home, ShoppingCart, Globe, Image as ImageIcon } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Tags, Home, ShoppingCart, Globe, Image as ImageIcon, Megaphone } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -51,6 +51,18 @@ export function AdminSidebar() {
                   <Link href="/admin/homepage-slider" className="flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
                     <span>Homepage Slider</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location === "/admin/announcements"}
+                  tooltip="Announcements"
+                >
+                  <Link href="/admin/announcements" className="flex items-center gap-2">
+                    <Megaphone className="h-4 w-4" />
+                    <span>Announcements</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
