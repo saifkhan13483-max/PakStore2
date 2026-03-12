@@ -39,14 +39,20 @@ export function Filters({ onFilterChange }: FiltersProps) {
     return params.get("category") || params.get("categoryId");
   }, [search]);
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category") || params.get("categoryId");
+    return cat ? [cat] : [];
+  });
   const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
 
-  // Synchronize state with URL parameter
+  // Synchronize state when URL parameter changes (e.g. navigating between category pages)
   useEffect(() => {
     if (urlCategoryId) {
-      setSelectedCategories([urlCategoryId]);
+      setSelectedCategories(prev =>
+        prev.length === 1 && prev[0] === urlCategoryId ? prev : [urlCategoryId]
+      );
     }
   }, [urlCategoryId]);
 

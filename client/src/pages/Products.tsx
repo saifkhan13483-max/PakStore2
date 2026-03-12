@@ -38,10 +38,14 @@ export default function Products() {
   const search = useSearch();
   const [visibleCount, setVisibleCount] = useState(10);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
-  const [filterState, setFilterState] = useState<FilterState>({
-    categories: [],
-    priceRange: null,
-    inStockOnly: false,
+  const [filterState, setFilterState] = useState<FilterState>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category") || params.get("categoryId");
+    return {
+      categories: cat ? [cat] : [],
+      priceRange: null,
+      inStockOnly: false,
+    };
   });
 
   const queryParam = useMemo(() => {
@@ -49,18 +53,17 @@ export default function Products() {
     return params.get("search") || params.get("q") || "";
   }, [search]);
 
-  // Handle URL parameters for initial filters
+  // Sync filter state when URL search params change (e.g. navigating between categories)
   useEffect(() => {
     const params = new URLSearchParams(search);
     const cat = params.get("category") || params.get("categoryId");
-    const parentCat = params.get("parentCategoryId");
     
     if (cat) {
       setFilterState(prev => {
         if (prev.categories.includes(cat) && prev.categories.length === 1) return prev;
         return { ...prev, categories: [cat] };
       });
-    } else if (parentCat) {
+    } else if (!params.get("parentCategoryId")) {
       setFilterState(prev => {
         if (prev.categories.length === 0) return prev;
         return { ...prev, categories: [] };
