@@ -28,6 +28,14 @@ import {
   generateIsVerifiedPurchase,
   generateSellerReply,
 } from "./seed-data/engagement-simulator";
+import { applyNaturalness } from "./seed-data/naturalness-engine";
+import {
+  getProductContextHint,
+  extractVariants,
+  type ProductContext,
+} from "./seed-data/product-context-reader";
+import { getSeasonalNote } from "./seed-data/seasonal-context";
+import { DuplicateDetector } from "./seed-data/duplicate-detector";
 
 // ---------------------------------------------------------------------------
 // Public Types
@@ -121,6 +129,23 @@ function getRatingByBias(bias: SeedOptions["ratingBias"]): number {
   return 3;
 }
 
+/**
+ * Phase 4: Nudges a rating toward the real average so seeded comments
+ * don't dramatically differ from genuine reviews on the same product.
+ *
+ * If the real average is < 3.5, prevents seeding an all-5-star set.
+ * If the real average is > 4.2, prevents seeding heavy 1-2 star reviews.
+ */
+function nudgeRating(raw: number, realAvg: number): number {
+  if (realAvg < 3.5 && raw === 5 && Math.random() < 0.6) {
+    return Math.max(2, Math.round(realAvg) + (Math.random() < 0.5 ? 0 : 1));
+  }
+  if (realAvg > 4.2 && raw <= 2 && Math.random() < 0.7) {
+    return 3;
+  }
+  return raw;
+}
+
 // ---------------------------------------------------------------------------
 // Internal: Write Seed Log
 // ---------------------------------------------------------------------------
@@ -170,13 +195,44 @@ async function recalcProductRating(productId: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Internal: Seed one product
+// Internal: Build enriched review content (Phase 4 pipeline)
+// ---------------------------------------------------------------------------
+
+/**
+ * Generates a review string using:
+ * 1. Category-matched template (Phases 1–2)
+ * 2. Naturalness imperfections (Phase 4)
+ * 3. Product context hint — price/variant mentions (Phase 4)
+ * 4. Seasonal/occasion note (Phase 4)
+ */
+function buildReviewContent(
+  productName: string,
+  category: ProductCategory,
+  rating: 1 | 2 | 3 | 4 | 5,
+  productCtx: ProductContext,
+  commentDate: Date
+): string {
+  let content = generateReviewContent(productName, category, rating);
+  content = applyNaturalness(content);
+
+  const contextHint = getProductContextHint(productCtx, rating);
+  if (contextHint) content = content.trimEnd() + " " + contextHint;
+
+  const seasonalNote = getSeasonalNote(commentDate, category);
+  if (seasonalNote) content = content.trimEnd() + " " + seasonalNote;
+
+  return content;
+}
+
+// ---------------------------------------------------------------------------
+// Internal: Seed one product  (Phase 4 enhanced)
 // ---------------------------------------------------------------------------
 
 async function seedOneProduct(
   productDoc: QueryDocumentSnapshot,
   options: SeedOptions,
-  signal: AbortSignal
+  signal: AbortSignal,
+  detector: DuplicateDetector
 ): Promise<number> {
   if (signal.aborted) throw new DOMException("Aborted", "AbortError");
 
@@ -203,34 +259,113 @@ async function seedOneProduct(
     await deleteDoc(doc(db, "comments", oldDoc.id));
   }
 
-  const category = detectCategory(product);
-  const numComments =
+  // Phase 4: fetch real (non-seeded) comments for graceful coexistence
+  const realSnap = await getDocs(
+    query(collection(db, "comments"), where("productId", "==", productId))
+  );
+  const realComments = realSnap.docs
+    .map((d) => d.data())
+    .filter((c) => c.userId !== "system-seed");
+
+  // Pre-load real comments into the detector so names/openers are respected
+  detector.loadExisting(
+    productId,
+    realComments.map((c) => ({
+      userName: String(c.userName ?? ""),
+      content: String(c.content ?? ""),
+    }))
+  );
+
+  // Phase 4: cap seeded count at 3 when real comments already exist
+  const rawCount =
     options.commentsPerProduct === "random"
       ? getCommentCount(product)
       : Math.max(1, Math.min(10, Number(options.commentsPerProduct)));
+  const numComments = realComments.length > 0 ? Math.min(3, rawCount) : rawCount;
 
+  // Phase 4: compute real average for rating nudging
+  const realAvg =
+    realComments.length > 0
+      ? realComments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) /
+        realComments.length
+      : -1;
+
+  const category = detectCategory(product);
   const timestamps = generateClusteredTimestamps(numComments, options.dateRangeDays);
+
+  // Phase 4: build full product context for context hint generation
+  const productCtx: ProductContext = {
+    name: productName,
+    price: data.price ?? data.discountedPrice,
+    discountPrice: data.discountedPrice ?? data.discountPrice,
+    variants: extractVariants(data.variants ?? data.colors ?? data.sizes),
+    description: data.description,
+    category: product.category,
+  };
+
   let created = 0;
 
   for (let i = 0; i < numComments; i++) {
     if (signal.aborted) throw new DOMException("Aborted", "AbortError");
 
-    const { name } = getRandomName();
-    const rating = getRatingByBias(options.ratingBias);
-    const content = generateReviewContent(productName, category, rating as 1 | 2 | 3 | 4 | 5);
+    // Phase 4: smart name picking — retry up to 20 times to avoid duplicates
+    let selectedName = getRandomName();
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const candidate = getRandomName();
+      if (
+        !detector.isNameUsedOnProduct(productId, candidate.name) &&
+        !detector.isNameOverused(candidate.name)
+      ) {
+        selectedName = candidate;
+        break;
+      }
+    }
+
+    const rawRating = getRatingByBias(options.ratingBias);
+    const rating = realAvg >= 0 ? nudgeRating(rawRating, realAvg) : rawRating;
     const commentDate = timestamps[i];
+
+    // Phase 4: build content with dedup retry
+    let content = buildReviewContent(
+      productName,
+      category,
+      rating as 1 | 2 | 3 | 4 | 5,
+      productCtx,
+      commentDate
+    );
+    let dedupAttempts = 0;
+    while (
+      (detector.isOpenerDuplicate(productId, content) ||
+        detector.isSimilarToExisting(productId, content)) &&
+      dedupAttempts < 5
+    ) {
+      content = buildReviewContent(
+        productName,
+        category,
+        rating as 1 | 2 | 3 | 4 | 5,
+        productCtx,
+        commentDate
+      );
+      dedupAttempts++;
+    }
+
+    detector.register(productId, selectedName.name, content);
+
     const firestoreTs = Timestamp.fromDate(commentDate);
     const helpfulCount = generateHelpfulCount(content);
     const isVerifiedPurchase = options.includeVerified ? generateIsVerifiedPurchase() : false;
     const replyData = options.includeReplies ? generateSellerReply(rating, commentDate) : null;
 
+    // Phase 4: gender-aware avatar with diversity (15% no-avatar chance built into getDiceBearUrl)
+    const userPhoto = getDiceBearUrl(selectedName.name, selectedName.gender);
+
     await addDoc(collection(db, "comments"), {
       productId,
-      userName: name,
+      userName: selectedName.name,
       content,
       rating,
       userId: "system-seed",
-      userPhoto: getDiceBearUrl(name),
+      userPhoto,
       createdAt: firestoreTs,
       updatedAt: firestoreTs,
       helpfulCount,
@@ -246,7 +381,7 @@ async function seedOneProduct(
 }
 
 // ---------------------------------------------------------------------------
-// Internal: Batch processor
+// Internal: Batch processor  (threads DuplicateDetector through all products)
 // ---------------------------------------------------------------------------
 
 async function runSeedBatch(
@@ -260,6 +395,9 @@ async function runSeedBatch(
   const errors: string[] = [];
   const BATCH_SIZE = 10;
 
+  // Phase 4: one shared detector per entire seed run
+  const detector = new DuplicateDetector(3);
+
   for (let i = 0; i < total; i += BATCH_SIZE) {
     const batch = productDocs.slice(i, i + BATCH_SIZE);
 
@@ -271,7 +409,7 @@ async function runSeedBatch(
       onProgress({ current, total, currentProductName: productName, commentsCreated, errors, done: false });
 
       try {
-        const count = await seedOneProduct(productDoc, options, signal);
+        const count = await seedOneProduct(productDoc, options, signal, detector);
         commentsCreated += count;
       } catch (e: any) {
         if (e.name === "AbortError" || signal.aborted) throw e;
@@ -556,7 +694,7 @@ export async function clearSeededOlderThan(date: Date, admin: AdminUser): Promis
 // Public API: Preview Generator (no Firestore writes)
 // ---------------------------------------------------------------------------
 
-const PREVIEW_SAMPLE_PRODUCTS = [
+const PREVIEW_SAMPLE_PRODUCTS: Array<ProductContext & { category: string }> = [
   { name: "Premium Leather Bag", category: "bags", price: 4500 },
   { name: "Classic Men's Watch", category: "watches", price: 3200 },
   { name: "Comfort Home Slippers", category: "slippers", price: 900 },
@@ -566,33 +704,60 @@ const PREVIEW_SAMPLE_PRODUCTS = [
 
 /**
  * Generates sample preview comments without writing anything to Firestore.
- * Used by the admin page to let admins see what comments would look like
- * before committing to a seed run.
+ * Phase 4: applies the full intelligence pipeline (naturalness, context hints,
+ * seasonal notes, avatar diversity, dedup) to previews as well.
  */
 export function generateCommentPreview(options: SeedOptions, count = 4): PreviewComment[] {
-  return Array.from({ length: count }).map((_, i) => {
+  const detector = new DuplicateDetector(3);
+  const results: PreviewComment[] = [];
+
+  for (let i = 0; i < count; i++) {
     const sample = PREVIEW_SAMPLE_PRODUCTS[i % PREVIEW_SAMPLE_PRODUCTS.length];
-    const { name } = getRandomName();
-    const rating = getRatingByBias(options.ratingBias);
-    const content = generateReviewContent(
+    const selectedName = getRandomName();
+    const rawRating = getRatingByBias(options.ratingBias);
+    const commentDate = generateRealisticTimestamp();
+
+    let content = buildReviewContent(
       sample.name,
       sample.category as ProductCategory,
-      rating as 1 | 2 | 3 | 4 | 5
+      rawRating as 1 | 2 | 3 | 4 | 5,
+      sample,
+      commentDate
     );
-    const commentDate = generateRealisticTimestamp();
-    const replyData = options.includeReplies ? generateSellerReply(rating, commentDate) : null;
 
-    return {
-      userName: name,
-      userPhoto: getDiceBearUrl(name),
-      rating,
+    let dedupAttempts = 0;
+    const previewId = `preview-${i}`;
+    while (
+      (detector.isOpenerDuplicate(previewId, content) ||
+        detector.isSimilarToExisting(previewId, content)) &&
+      dedupAttempts < 5
+    ) {
+      content = buildReviewContent(
+        sample.name,
+        sample.category as ProductCategory,
+        rawRating as 1 | 2 | 3 | 4 | 5,
+        sample,
+        commentDate
+      );
+      dedupAttempts++;
+    }
+    detector.register(previewId, selectedName.name, content);
+
+    const replyData = options.includeReplies ? generateSellerReply(rawRating, commentDate) : null;
+
+    results.push({
+      userName: selectedName.name,
+      userPhoto: getDiceBearUrl(selectedName.name, selectedName.gender),
+      rating: rawRating,
       content,
       isVerifiedPurchase: options.includeVerified ? generateIsVerifiedPurchase() : false,
       helpfulCount: generateHelpfulCount(content),
       sellerReply: replyData?.sellerReply ?? null,
       createdAt: commentDate,
-    };
-  });
+    });
+  }
+
+  return results;
 }
 
 // ---------------------------------------------------------------------------
