@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { announcementService } from "@/services/announcementService";
 import { type Announcement } from "@shared/announcement-schema";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, X, Megaphone } from "lucide-react";
+import { ExternalLink, Megaphone, ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
@@ -18,50 +23,60 @@ function getDismissedPopups(): string[] {
   }
 }
 
-function addDismissedPopup(id: string): void {
+function markDismissed(id: string): void {
   try {
     const current = getDismissedPopups();
-    sessionStorage.setItem(DISMISSED_POPUP_KEY, JSON.stringify([...current, id]));
+    if (!current.includes(id)) {
+      sessionStorage.setItem(DISMISSED_POPUP_KEY, JSON.stringify([...current, id]));
+    }
   } catch {
-    // silently ignore
+    // ignore
   }
 }
 
-const TYPE_STYLES: Record<string, { bg: string; text: string; border: string; badge: string }> = {
+const TYPE_CONFIG: Record<
+  string,
+  { accent: string; iconBg: string; iconColor: string; label: string; actionClass: string }
+> = {
   info: {
-    bg: "bg-primary/10 dark:bg-primary/20",
-    text: "text-primary",
-    border: "border-primary/30",
-    badge: "bg-primary text-primary-foreground",
+    accent: "bg-primary",
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
+    label: "Announcement",
+    actionClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
   },
   promo: {
-    bg: "bg-secondary/10 dark:bg-secondary/20",
-    text: "text-secondary-foreground",
-    border: "border-secondary/30",
-    badge: "bg-secondary text-secondary-foreground",
+    accent: "bg-amber-500",
+    iconBg: "bg-amber-500/10",
+    iconColor: "text-amber-600 dark:text-amber-400",
+    label: "Special Offer",
+    actionClass: "bg-amber-500 hover:bg-amber-500/90 text-white",
   },
   warning: {
-    bg: "bg-destructive/10 dark:bg-destructive/20",
-    text: "text-destructive",
-    border: "border-destructive/30",
-    badge: "bg-destructive text-destructive-foreground",
+    accent: "bg-destructive",
+    iconBg: "bg-destructive/10",
+    iconColor: "text-destructive",
+    label: "Important Notice",
+    actionClass: "bg-destructive hover:bg-destructive/90 text-destructive-foreground",
   },
   success: {
-    bg: "bg-emerald-500/10 dark:bg-emerald-500/20",
-    text: "text-emerald-700 dark:text-emerald-400",
-    border: "border-emerald-500/30",
-    badge: "bg-emerald-600 text-white",
+    accent: "bg-emerald-600",
+    iconBg: "bg-emerald-600/10",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
+    label: "Good News",
+    actionClass: "bg-emerald-600 hover:bg-emerald-600/90 text-white",
   },
 };
 
 function isExternalUrl(url: string): boolean {
-  return url.startsWith("http://") || url.startsWith("https://");
+  return /^https?:\/\//.test(url);
 }
 
 export default function AnnouncementPopup() {
-  const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState<Announcement | null>(null);
+  const initialized = useRef(false);
   const [queue, setQueue] = useState<Announcement[]>([]);
+  const [current, setCurrent] = useState<Announcement | null>(null);
+  const [open, setOpen] = useState(false);
 
   const { data: announcements } = useQuery({
     queryKey: ["/api/announcements", "active"],
@@ -69,111 +84,160 @@ export default function AnnouncementPopup() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Only initialise once — ignore re-fetches so dismissed popups don't reappear
   useEffect(() => {
-    if (!announcements) return;
+    if (initialized.current || !announcements) return;
+    initialized.current = true;
+
     const dismissed = getDismissedPopups();
     const pending = announcements.filter(
       (a) => a.display_mode === "popup" && !dismissed.includes(a.id)
     );
     if (pending.length === 0) return;
-    setQueue(pending.slice(1));
+
     setCurrent(pending[0]);
-    setOpen(true);
+    setQueue(pending.slice(1));
+    // Small delay so the page renders first before the popup appears
+    setTimeout(() => setOpen(true), 600);
   }, [announcements]);
 
-  function handleDismiss() {
+  function advance() {
     if (!current) return;
-    addDismissedPopup(current.id);
+    markDismissed(current.id);
     if (queue.length > 0) {
       setCurrent(queue[0]);
       setQueue((prev) => prev.slice(1));
+      // keep dialog open for next item
     } else {
       setOpen(false);
-      setCurrent(null);
+      setTimeout(() => setCurrent(null), 300);
     }
   }
 
   if (!current) return null;
 
-  const styles = TYPE_STYLES[current.type] ?? TYPE_STYLES.info;
+  const cfg = TYPE_CONFIG[current.type] ?? TYPE_CONFIG.info;
   const hasLink = !!current.link_url;
   const linkText = current.link_text || "Learn more";
   const isExternal = hasLink && isExternalUrl(current.link_url!);
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) handleDismiss(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) advance();
+      }}
+    >
+      {/* Hide the built-in X via DialogContent override below */}
       <DialogContent
-        className={cn(
-          "max-w-md rounded-2xl border-2 p-0 overflow-hidden",
-          styles.border
-        )}
+        className="max-w-sm w-[calc(100%-2rem)] rounded-2xl p-0 overflow-hidden gap-0 [&>button]:hidden"
         data-testid={`announcement-popup-${current.id}`}
       >
-        <DialogTitle className="sr-only">Announcement</DialogTitle>
+        {/* Required for accessibility */}
+        <DialogTitle className="sr-only">{cfg.label}</DialogTitle>
+        <DialogDescription className="sr-only">{current.message}</DialogDescription>
 
-        <div className={cn("px-6 pt-6 pb-2 flex items-center gap-3", styles.bg)}>
-          <span className={cn("inline-flex items-center justify-center rounded-full p-2", styles.badge)}>
-            <Megaphone className="h-4 w-4" />
-          </span>
-          <span className={cn("text-xs font-semibold uppercase tracking-wider", styles.text)}>
-            {current.type}
-          </span>
+        {/* Accent top bar */}
+        <div className={cn("h-1.5 w-full", cfg.accent)} />
+
+        {/* Header row */}
+        <div className="flex items-start justify-between px-5 pt-5 pb-3">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                cfg.iconBg
+              )}
+            >
+              <Megaphone className={cn("h-4 w-4", cfg.iconColor)} />
+            </span>
+            <span className={cn("text-sm font-semibold", cfg.iconColor)}>
+              {cfg.label}
+            </span>
+          </div>
+
+          {/* Custom close button */}
+          <button
+            type="button"
+            onClick={advance}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Dismiss"
+            data-testid={`popup-close-${current.id}`}
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <div className="px-6 py-5">
+        {/* Body */}
+        <div className="px-5 pb-4">
           <p
-            className="text-base leading-relaxed text-foreground"
+            className="text-sm leading-relaxed text-foreground"
             data-testid={`popup-message-${current.id}`}
           >
             {current.message}
           </p>
+        </div>
 
+        {/* Footer */}
+        <div
+          className={cn(
+            "flex items-center px-5 py-4 border-t gap-3",
+            hasLink ? "justify-between" : "justify-end"
+          )}
+        >
           {hasLink && (
-            <div className="mt-4">
-              {isExternal ? (
+            isExternal ? (
+              <a
+                href={current.link_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={advance}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                  cfg.actionClass
+                )}
+                data-testid={`popup-link-${current.id}`}
+              >
+                {linkText}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            ) : (
+              <Link href={current.link_url!}>
                 <a
-                  href={current.link_url!}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={advance}
                   className={cn(
-                    "inline-flex items-center gap-1.5 text-sm font-semibold underline underline-offset-4",
-                    styles.text
+                    "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                    cfg.actionClass
                   )}
                   data-testid={`popup-link-${current.id}`}
                 >
                   {linkText}
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </a>
-              ) : (
-                <Link href={current.link_url!}>
-                  <a
-                    onClick={handleDismiss}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 text-sm font-semibold underline underline-offset-4",
-                      styles.text
-                    )}
-                    data-testid={`popup-link-${current.id}`}
-                  >
-                    {linkText}
-                  </a>
-                </Link>
-              )}
-            </div>
+              </Link>
+            )
           )}
-        </div>
 
-        <div className="px-6 pb-6 flex justify-end">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            onClick={handleDismiss}
-            className="gap-2"
+            onClick={advance}
+            className="text-muted-foreground hover:text-foreground"
             data-testid={`popup-dismiss-${current.id}`}
           >
-            <X className="h-3.5 w-3.5" />
             Dismiss
           </Button>
         </div>
+
+        {/* Queue indicator */}
+        {queue.length > 0 && (
+          <div className="flex justify-center gap-1.5 pb-4">
+            <span className={cn("h-1.5 w-4 rounded-full", cfg.accent)} />
+            {queue.map((_, i) => (
+              <span key={i} className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
+            ))}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
