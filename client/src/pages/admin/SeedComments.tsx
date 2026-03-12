@@ -26,7 +26,8 @@ import {
 import {
   MessageSquare, RefreshCw, Loader2, Star, CheckCircle, ShieldCheck,
   ThumbsUp, Store, Trash2, Play, Eye, XCircle, AlertTriangle,
-  Package, BarChart3, Clock, Users,
+  Package, BarChart3, Clock, Users, Download, Upload, Zap,
+  TrendingUp, ShieldAlert, Bell, Wrench,
 } from "lucide-react";
 import {
   getSeededStats, getSeedLogs, generateCommentPreview, countSeededAll,
@@ -37,6 +38,12 @@ import {
   type SeedOptions, type SeedProgress, type SeedLog, type PreviewComment,
 } from "@/lib/seed-comments";
 import { type ProductCategory } from "@/lib/seed-data/review-templates";
+import { fetchAnalyticsData } from "@/lib/seed-data/analytics";
+import { detectStaleProducts, detectNewUnseededProducts } from "@/lib/seed-data/auto-refresh";
+import { SeedAnalytics } from "@/components/admin/SeedAnalytics";
+import { SeedHealthScore } from "@/components/admin/SeedHealthScore";
+import { ProductBreakdownTable } from "@/components/admin/ProductBreakdownTable";
+import { CommentAudit } from "@/components/admin/CommentAudit";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -124,7 +131,7 @@ function PreviewCard({ comment }: { comment: PreviewComment }) {
     <div className="border rounded-lg p-4 space-y-2 bg-card">
       <div className="flex items-start gap-3">
         <img
-          src={comment.userPhoto}
+          src={comment.userPhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.userName}`}
           alt={comment.userName}
           className="w-9 h-9 rounded-full border bg-muted shrink-0"
         />
@@ -212,6 +219,7 @@ export default function AdminSeedComments() {
   const { user } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // ── Settings ──────────────────────────────────────────────────────────────
   const [settings, setSettings] = useState<SeedOptions>({ ...DEFAULT_SEED_OPTIONS });
@@ -245,6 +253,10 @@ export default function AdminSeedComments() {
   const [cleanupCategory, setCleanupCategory] = useState<ProductCategory>("bags");
   const [cleanupOlderThanDays, setCleanupOlderThanDays] = useState<string>("60");
 
+  // ── Phase 5: stale refresh state ─────────────────────────────────────────
+  const [isRefreshingStale, setIsRefreshingStale] = useState(false);
+  const [isSeedingNew, setIsSeedingNew] = useState(false);
+
   // ── Queries ────────────────────────────────────────────────────────────────
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useQuery({
     queryKey: ["seeded-stats"],
@@ -267,8 +279,25 @@ export default function AdminSeedComments() {
     staleTime: 60_000,
   });
 
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    refetch: refetchAnalytics,
+  } = useQuery({
+    queryKey: ["analytics-data"],
+    queryFn: fetchAnalyticsData,
+    staleTime: 60_000,
+  });
+
   // ── Derived helpers ────────────────────────────────────────────────────────
   const adminUser = { uid: user?.uid ?? "", email: user?.email ?? null };
+
+  const staleProducts = analyticsData
+    ? detectStaleProducts(analyticsData.perProduct)
+    : [];
+  const newUnseeded = analyticsData
+    ? detectNewUnseededProducts(analyticsData.perProduct)
+    : [];
 
   const updateSetting = <K extends keyof SeedOptions>(key: K, val: SeedOptions[K]) => {
     setSettings((prev) => ({ ...prev, [key]: val }));
@@ -282,6 +311,12 @@ export default function AdminSeedComments() {
       const n = parseInt(val, 10);
       if (!isNaN(n) && n >= 1 && n <= 10) updateSetting("commentsPerProduct", n);
     }
+  };
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["seeded-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["seed-logs"] });
+    queryClient.invalidateQueries({ queryKey: ["analytics-data"] });
   };
 
   // ── Preview ────────────────────────────────────────────────────────────────
@@ -322,8 +357,7 @@ export default function AdminSeedComments() {
       }
 
       setSeedResult(result);
-      queryClient.invalidateQueries({ queryKey: ["seeded-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["seed-logs"] });
+      invalidateAll();
       toast({
         title: "Seeding complete!",
         description: `${result.created} comments created${result.errors.length > 0 ? `, ${result.errors.length} error(s)` : ""}.`,
@@ -342,6 +376,52 @@ export default function AdminSeedComments() {
 
   const handleCancel = () => {
     abortControllerRef.current?.abort();
+  };
+
+  // ── Phase 5: Refresh stale products ───────────────────────────────────────
+  const handleRefreshStale = async () => {
+    if (!staleProducts.length) return;
+    setIsRefreshingStale(true);
+    const ac = new AbortController();
+    let totalCreated = 0;
+    try {
+      for (const sp of staleProducts) {
+        const result = await seedSingleProduct(sp.productId, settings, adminUser, () => {}, ac.signal);
+        totalCreated += result.created;
+      }
+      invalidateAll();
+      toast({
+        title: "Stale products refreshed!",
+        description: `${staleProducts.length} products re-seeded, ${totalCreated} new comments created.`,
+      });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Refresh failed", description: e.message });
+    } finally {
+      setIsRefreshingStale(false);
+    }
+  };
+
+  // ── Phase 5: Seed new unseeded products ────────────────────────────────────
+  const handleSeedNew = async () => {
+    if (!newUnseeded.length) return;
+    setIsSeedingNew(true);
+    const ac = new AbortController();
+    let totalCreated = 0;
+    try {
+      for (const p of newUnseeded) {
+        const result = await seedSingleProduct(p.productId, settings, adminUser, () => {}, ac.signal);
+        totalCreated += result.created;
+      }
+      invalidateAll();
+      toast({
+        title: "New products seeded!",
+        description: `${newUnseeded.length} products seeded, ${totalCreated} new comments created.`,
+      });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Seeding failed", description: e.message });
+    } finally {
+      setIsSeedingNew(false);
+    }
   };
 
   // ── Delete confirmation ────────────────────────────────────────────────────
@@ -383,8 +463,7 @@ export default function AdminSeedComments() {
         deleted = await clearSeededOlderThan(deleteDialog.olderThanDate, adminUser);
       }
       toast({ title: "Deleted!", description: `${deleted} seeded comments removed.` });
-      queryClient.invalidateQueries({ queryKey: ["seeded-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["seed-logs"] });
+      invalidateAll();
       setDeleteDialog(null);
       setDeleteTyped("");
     } catch (e: any) {
@@ -392,6 +471,54 @@ export default function AdminSeedComments() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // ── Phase 5: Export / Import ───────────────────────────────────────────────
+  const handleExport = () => {
+    const exportData = {
+      version: "phase5",
+      exportedAt: new Date().toISOString(),
+      settings,
+      seedLogs: seedLogs ?? [],
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pakstore-seed-config-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported!", description: "Seed config downloaded as JSON." });
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        if (data.settings) {
+          setSettings({ ...DEFAULT_SEED_OPTIONS, ...data.settings });
+          if (data.settings.commentsPerProduct === "random") {
+            setCommentsPerProductInput("random");
+          } else if (typeof data.settings.commentsPerProduct === "number") {
+            setCommentsPerProductInput(String(data.settings.commentsPerProduct));
+          }
+          toast({ title: "Config imported!", description: "Settings restored from config file." });
+        } else {
+          toast({ variant: "destructive", title: "Invalid config", description: "No settings found in the uploaded file." });
+        }
+      } catch {
+        toast({ variant: "destructive", title: "Import failed", description: "The file is not valid JSON." });
+      }
+    };
+    reader.readAsText(file);
+    if (importInputRef.current) importInputRef.current.value = "";
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -403,8 +530,9 @@ export default function AdminSeedComments() {
       />
 
       <div className="p-6 space-y-8 max-w-6xl mx-auto">
+
         {/* Page Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <MessageSquare className="h-6 w-6 text-primary" />
@@ -414,16 +542,111 @@ export default function AdminSeedComments() {
               Generate and manage realistic seeded product reviews
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { refetchStats(); refetchLogs(); }}
-            data-testid="button-refresh-stats"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              data-testid="button-export-config"
+              title="Export seed config"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Config
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => importInputRef.current?.click()}
+              data-testid="button-import-config"
+              title="Import seed config"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleImportFile}
+              data-testid="input-import-file"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { refetchStats(); refetchLogs(); refetchAnalytics(); }}
+              data-testid="button-refresh-stats"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
+
+        {/* ── Phase 5: Auto-refresh notifications ─────────────────────────── */}
+        {(staleProducts.length > 0 || newUnseeded.length > 0) && (
+          <div className="space-y-3">
+            {staleProducts.length > 0 && (
+              <div className="flex items-start gap-3 rounded-lg border border-amber-300/50 bg-amber-50/50 dark:bg-amber-950/10 p-4">
+                <Bell className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                    {staleProducts.length} product{staleProducts.length !== 1 ? "s" : ""} with stale reviews (60+ days old)
+                  </p>
+                  <p className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                    {staleProducts.slice(0, 3).map((p) => p.productName).join(", ")}
+                    {staleProducts.length > 3 && ` and ${staleProducts.length - 3} more`}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-amber-400 text-amber-700 hover:bg-amber-100 dark:text-amber-400"
+                  onClick={handleRefreshStale}
+                  disabled={isRefreshingStale}
+                  data-testid="button-refresh-stale"
+                >
+                  {isRefreshingStale ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Zap className="h-4 w-4 mr-1" />
+                  )}
+                  Refresh Stale
+                </Button>
+              </div>
+            )}
+
+            {newUnseeded.length > 0 && (
+              <div className="flex items-start gap-3 rounded-lg border border-blue-300/50 bg-blue-50/50 dark:bg-blue-950/10 p-4">
+                <Bell className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                    {newUnseeded.length} product{newUnseeded.length !== 1 ? "s have" : " has"} no reviews. Seed them?
+                  </p>
+                  <p className="text-xs text-blue-700/80 dark:text-blue-400/80">
+                    {newUnseeded.slice(0, 3).map((p) => p.productName).join(", ")}
+                    {newUnseeded.length > 3 && ` and ${newUnseeded.length - 3} more`}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-blue-400 text-blue-700 hover:bg-blue-100 dark:text-blue-400"
+                  onClick={handleSeedNew}
+                  disabled={isSeedingNew}
+                  data-testid="button-seed-new"
+                >
+                  {isSeedingNew ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                  ) : (
+                    <Zap className="h-4 w-4 mr-1" />
+                  )}
+                  Seed Now
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Section A: Overview Panel ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -511,7 +734,7 @@ export default function AdminSeedComments() {
                 </div>
               </div>
 
-              {/* Category picker (only when scope = category) */}
+              {/* Category picker */}
               {scope === "category" && (
                 <div className="space-y-2">
                   <Label className="text-sm">Category</Label>
@@ -528,7 +751,7 @@ export default function AdminSeedComments() {
                 </div>
               )}
 
-              {/* Product picker (only when scope = single_product) */}
+              {/* Product picker */}
               {scope === "single_product" && (
                 <div className="space-y-2">
                   <Label className="text-sm">Product</Label>
@@ -742,6 +965,105 @@ export default function AdminSeedComments() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ── Phase 5: Analytics Dashboard ──────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2" data-testid="card-analytics">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Analytics Dashboard
+              </CardTitle>
+              <CardDescription>
+                Live overview of comment distribution, ratings, and activity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm">Loading analytics…</span>
+                </div>
+              ) : analyticsData ? (
+                <SeedAnalytics data={analyticsData} />
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No data available. Run a seed operation first.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* ── Health Score ─────────────────────────────────────────────── */}
+          <Card data-testid="card-health-score">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Comment Realism Score
+              </CardTitle>
+              <CardDescription>Quality rating of seeded comments (0–100)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              ) : analyticsData ? (
+                <SeedHealthScore score={analyticsData.healthScore} />
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No data yet
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ── Phase 5: Per-Product Breakdown ────────────────────────────────── */}
+        <Card data-testid="card-product-breakdown">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Package className="h-4 w-4 text-primary" />
+              Per-Product Breakdown
+            </CardTitle>
+            <CardDescription>
+              Sortable table of all products with real/seeded counts. Click a row to inspect comments.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {analyticsLoading ? (
+              <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="text-sm">Loading…</span>
+              </div>
+            ) : analyticsData ? (
+              <ProductBreakdownTable
+                perProduct={analyticsData.perProduct}
+                onRefreshNeeded={refetchAnalytics}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No data available
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Phase 5: Comment Quality Audit ────────────────────────────────── */}
+        <Card data-testid="card-audit">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-primary" />
+              Comment Quality Audit
+            </CardTitle>
+            <CardDescription>
+              Scan all seeded comments for quality issues — duplicates, overused names, future timestamps, and more.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CommentAudit />
+          </CardContent>
+        </Card>
 
         {/* ── Section C: Cleanup Controls ───────────────────────────────────── */}
         <Card data-testid="card-cleanup">

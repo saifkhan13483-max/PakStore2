@@ -260,3 +260,22 @@ Key changes:
 - **Admin Selection**: Dropdown in add/edit slide modal with device-specific dimension recommendations
 - **Responsive**: Both desktop and mobile heights maintained appropriately for each device
 - **Admin Organization**: Two clear sections for easy management of device-specific slides
+
+## Seed Comments System (Phases 1–5 COMPLETED)
+
+### Phase 5 — Analytics, Monitoring & Auto-Maintenance
+All logic files and UI components are complete.
+
+**Logic files:**
+- `client/src/lib/seed-data/analytics.ts` — Full analytics dataset (seeded vs real counts, rating distribution, per-product stats, 90-day time series, health score calculation)
+- `client/src/lib/seed-data/audit.ts` — Quality audit runner (duplicate content, overused names, future timestamps, missing fields, rating anomalies) + Firestore auto-fixer
+- `client/src/lib/seed-data/auto-refresh.ts` — Stale product detection (≥60 days) and new unseeded product detection
+
+**Admin UI components:**
+- `client/src/components/admin/SeedHealthScore.tsx` — 0–100 realism score with 6-factor breakdown bars
+- `client/src/components/admin/SeedAnalytics.tsx` — Recharts donut (seeded vs real), CSS rating distribution bars, line chart for 90-day activity, product coverage panels
+- `client/src/components/admin/ProductBreakdownTable.tsx` — Sortable/searchable table with inline comment expand, per-product re-seed and remove-seeded actions
+- `client/src/components/admin/CommentAudit.tsx` — Run audit + auto-fix UI with issue severity badges
+
+**Updated main page:**
+- `client/src/pages/admin/SeedComments.tsx` — Integrated all Phase 5 sections: auto-refresh banners (stale/new), Analytics Dashboard, Health Score card, Per-Product Breakdown, Quality Audit, Export/Import seed config JSON, plus all existing Phases 1–4 functionality preserved
