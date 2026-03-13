@@ -27,9 +27,12 @@ import { MegaDropdown } from "./MegaDropdown";
 import { MobileNav } from "./MobileNav";
 import { SearchOverlay } from "./SearchOverlay";
 
-const NAV_LINKS = [
+const NAV_LINKS_LEFT = [
   { href: "/", label: "Home" },
   { href: "/categories", label: "Collections" },
+];
+
+const NAV_LINKS_RIGHT = [
   { href: "/about", label: "Our Story" },
   { href: "/contact", label: "Support" },
 ];
@@ -152,7 +155,7 @@ const Header = () => {
 
             {/* CENTER: Nav links */}
             <nav className="flex items-center justify-center gap-5">
-              {NAV_LINKS.map((link) => {
+              {NAV_LINKS_LEFT.map((link) => {
                 const isActive = location === link.href;
                 return (
                   <Link
@@ -176,7 +179,7 @@ const Header = () => {
                 );
               })}
 
-              {/* Categories (mega dropdown trigger) */}
+              {/* Categories (mega dropdown trigger) — middle position */}
               <button
                 type="button"
                 onMouseEnter={handleMegaMouseEnter}
@@ -196,6 +199,30 @@ const Header = () => {
                   )}
                 />
               </button>
+
+              {NAV_LINKS_RIGHT.map((link) => {
+                const isActive = location === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    data-testid={`nav-link-${link.label.toLowerCase().replace(" ", "-")}`}
+                  >
+                    <span
+                      className={cn(
+                        "relative text-sm font-medium uppercase tracking-normal whitespace-nowrap transition-colors duration-200 py-1",
+                        "text-gray-700 hover:text-green-700",
+                        isActive && "text-green-700"
+                      )}
+                    >
+                      {link.label}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500 rounded-full" />
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* RIGHT: Icons */}
