@@ -1,10 +1,7 @@
-import { useState, useEffect } from "react";
-import { Search, X, Command, ArrowRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from "react";
+import { Search, X } from "lucide-react";
 import { useLocation } from "wouter";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 
@@ -13,92 +10,67 @@ interface SearchOverlayProps {
   onClose: () => void;
 }
 
+const POPULAR_SEARCHES = [
+  { label: "Bags", slug: "bags" },
+  { label: "Watches", slug: "watches" },
+  { label: "Slippers", slug: "khussas" },
+  { label: "Bedsheets", slug: "bedsheets" },
+  { label: "Eid Special", slug: "eid-special" },
+];
+
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [, setLocation] = useLocation();
-  
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const { data: products } = useProducts();
   const { categories } = useCategories();
 
-  // Combine products and categories for search results
-  const results = query.trim() 
-    ? [
-        ...(products?.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 4).map(p => ({
-          id: p.id,
-          slug: p.slug,
-          title: p.name,
-          category: "PRODUCT",
-          type: "product"
-        })) || []),
-        ...(categories?.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 2).map(c => ({
-          id: c.id,
-          slug: c.slug,
-          title: c.name,
-          category: "CATEGORY",
-          type: "category"
-        })) || [])
-      ]
-    : [
-        ...(products?.slice(0, 3).map(p => ({
-          id: p.id,
-          slug: p.slug,
-          title: p.name,
-          category: "POPULAR",
-          type: "product"
-        })) || []),
-        ...(categories?.slice(0, 2).map(c => ({
-          id: c.id,
-          slug: c.slug,
-          title: c.name,
-          category: "TRENDING",
-          type: "category"
-        })) || [])
-      ];
-
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setSelectedIndex(0);
+      setTimeout(() => inputRef.current?.focus(), 100);
     } else {
-      document.body.style.overflow = "unset";
+      setQuery("");
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % results.length);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const selected = results[selectedIndex];
-        if (selected) {
-          if (selected.type === "product") {
-            setLocation(`/products/${selected.slug}`);
-          } else {
-            setLocation(`/collections/${selected.slug}`);
-          }
-          onClose();
-        }
-      } else if (e.key === "Escape") {
+      if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, results, setLocation, onClose]);
+  }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  const results =
+    query.trim().length > 0
+      ? [
+          ...(products
+            ?.filter((p) =>
+              p.name.toLowerCase().includes(query.toLowerCase())
+            )
+            .slice(0, 4)
+            .map((p) => ({
+              id: p.id,
+              slug: p.slug,
+              title: p.name,
+              type: "product" as const,
+            })) ?? []),
+          ...(categories
+            ?.filter((c) =>
+              c.name.toLowerCase().includes(query.toLowerCase())
+            )
+            .slice(0, 3)
+            .map((c) => ({
+              id: c.id,
+              slug: c.slug,
+              title: c.name,
+              type: "category" as const,
+            })) ?? []),
+        ]
+      : [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,99 +80,130 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="fixed inset-x-0 top-0 z-[101] bg-background p-4 shadow-xl md:top-[10%] md:mx-auto md:max-w-2xl md:rounded-2xl border animate-in slide-in-from-top-4 duration-300 ease-out h-full md:h-auto overflow-y-auto">
-        <div className="flex items-center gap-2 mb-6 sticky top-0 bg-background pb-2">
-          <form onSubmit={handleSearch} className="relative flex-1 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              autoFocus
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSelectedIndex(0);
-              }}
-              placeholder="Search products..."
-              className="h-10 text-sm border-none bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20 transition-all rounded-xl pl-12 pr-12 shadow-none"
-            />
-            {query && (
-              <button 
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            )}
-          </form>
-          <Button variant="ghost" onClick={onClose} size="sm" className="text-muted-foreground hover:text-foreground rounded-xl px-4 h-10 text-xs">
-            Cancel
-          </Button>
-        </div>
+  const handleResultClick = (result: {
+    type: "product" | "category";
+    slug: string;
+  }) => {
+    if (result.type === "product") {
+      setLocation(`/products/${result.slug}`);
+    } else {
+      setLocation(`/collections/${result.slug}`);
+    }
+    onClose();
+  };
 
-        <div className="space-y-4 pb-4">
-          <div className="text-[10px] font-bold tracking-[0.1em] text-muted-foreground/50 uppercase px-2">
-            {query.trim() ? "Search Results" : "Quick Suggestions"}
-          </div>
-          
-          <div className="grid gap-1">
-            {results.map((item, index) => (
-              <button
-                key={`${item.type}-${item.id}`}
-                onClick={() => {
-                  if (item.type === "product") {
-                    setLocation(`/products/${item.slug}`);
-                  } else {
-                    setLocation(`/collections/${item.slug}`);
-                  }
-                  onClose();
-                }}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={cn(
-                  "w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left group border border-transparent hover-elevate",
-                  index === selectedIndex ? "bg-primary/10 border-primary/20 shadow-sm" : "hover:bg-muted/30"
-                )}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0 pr-6">
-                  <div className={cn(
-                    "p-1.5 rounded-lg transition-colors",
-                    index === selectedIndex ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                  )}>
-                    <Search className="h-3.5 w-3.5 shrink-0" />
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium transition-colors truncate max-w-[200px]",
-                    index === selectedIndex ? "text-primary" : "text-foreground"
-                  )}>
-                    {item.title}
-                  </span>
+  const handlePopularClick = (slug: string) => {
+    setLocation(`/collections/${slug}`);
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={onClose}
+          />
+
+          {/* Panel slides down from top */}
+          <motion.div
+            initial={{ y: "-100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg"
+            data-testid="search-overlay"
+          >
+            <div className="max-w-3xl mx-auto px-8 py-6">
+              {/* Input */}
+              <form onSubmit={handleSearch}>
+                <div className="flex items-center gap-3 border-b-2 border-green-500 pb-2">
+                  <Search className="h-6 w-6 text-gray-400 shrink-0" />
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search for bags, watches, bedsheets..."
+                    className="flex-1 text-xl text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+                    data-testid="search-overlay-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-full p-1.5 hover:bg-gray-100 transition-colors shrink-0"
+                    aria-label="Close search"
+                    data-testid="search-overlay-close"
+                  >
+                    <X className="h-5 w-5 text-gray-500" />
+                  </button>
                 </div>
-                <Badge 
-                  variant="outline" 
-                  className={cn(
-                    "text-[9px] font-bold px-1.5 h-4 uppercase shrink-0 transition-colors",
-                    index === selectedIndex 
-                      ? "border-primary/20 bg-primary/10 text-primary" 
-                      : "border-border/50 bg-muted/30 text-muted-foreground"
-                  )}
-                >
-                  {item.category}
-                </Badge>
-              </button>
-            ))}
-            {query.trim() && results.length === 0 && (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                No results found for "{query}"
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div 
-        className="absolute inset-0 z-[100]" 
-        onClick={onClose}
-      />
-    </div>
+              </form>
+
+              {/* Live results */}
+              {results.length > 0 && (
+                <div className="mt-4 space-y-1">
+                  {results.map((result) => (
+                    <button
+                      key={`${result.type}-${result.id}`}
+                      type="button"
+                      onClick={() => handleResultClick(result)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group"
+                      data-testid={`search-result-${result.type}-${result.id}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Search className="h-4 w-4 text-gray-400 group-hover:text-green-600 shrink-0" />
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          {result.title}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase text-gray-400 group-hover:text-green-600 bg-gray-100 group-hover:bg-green-100 px-2 py-0.5 rounded-full">
+                        {result.type}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Popular searches */}
+              {query.trim().length === 0 && (
+                <div className="mt-5">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Popular Searches
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {POPULAR_SEARCHES.map((item) => (
+                      <button
+                        key={item.slug}
+                        type="button"
+                        onClick={() => handlePopularClick(item.slug)}
+                        className="px-4 py-2 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:border-green-500 hover:text-green-700 hover:bg-green-50 transition-colors"
+                        data-testid={`search-popular-${item.slug}`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {query.trim().length > 0 && results.length === 0 && (
+                <div className="mt-6 text-center py-4">
+                  <p className="text-sm text-gray-500">
+                    No results found for &ldquo;{query}&rdquo;
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

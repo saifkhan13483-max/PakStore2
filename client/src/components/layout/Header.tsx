@@ -1,405 +1,432 @@
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, Search, User, X, ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
+import {
+  Search,
+  ShoppingBag,
+  Menu,
+  User,
+  LogOut,
+  Package,
+  ChevronDown,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/store/cartStore";
-import { Badge } from "@/components/ui/badge";
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Category, ParentCategory, Product } from "@shared/schema";
-import { getOptimizedImageUrl } from "@/lib/cloudinary";
-import logoImg from "@/assets/logo.png";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { SearchOverlay } from "./SearchOverlay";
-import { categoryFirestoreService } from "@/services/categoryFirestoreService";
-import { useCategories } from "@/hooks/use-categories";
-
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-
-import { useAuthStore } from "@/store/authStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import logoImg from "@/assets/logo.png";
+import { useCartStore } from "@/store/cartStore";
+import { useAuthStore } from "@/store/authStore";
+import { useCategories } from "@/hooks/use-categories";
+import { MegaDropdown } from "./MegaDropdown";
+import { MobileNav } from "./MobileNav";
+import { SearchOverlay } from "./SearchOverlay";
+
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/collections", label: "Collections" },
+  { href: "/about", label: "Our Story" },
+  { href: "/contact", label: "Support" },
+];
+
+const SCROLL_THRESHOLD = 50;
 
 const Header = () => {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
+  const isHomePage = location === "/";
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isMegaOpen, setIsMegaOpen] = useState(false);
   const [hoveredParentId, setHoveredParentId] = useState<string | null>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [prevCartCount, setPrevCartCount] = useState(0);
+  const [cartBadgePulse, setCartBadgePulse] = useState(false);
+
+  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { user, isAuthenticated, logout } = useAuthStore();
-  
-  const { categories: categoriesData, parentCategories, isLoading: categoriesLoading } = useCategories();
+  const { categories, parentCategories } = useCategories();
 
-  const activeParent = hoveredParentId
-    ? parentCategories?.find(p => String(p.id) === hoveredParentId)
-    : parentCategories?.[0];
-
-  const activeSubCategories = categoriesData?.filter(
-    c => String(c.parentCategoryId) === String(activeParent?.id)
-  ) || [];
-
+  // Debounced scroll listener
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+      scrollTimer.current = setTimeout(() => {
+        setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
+      }, 10);
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+    };
   }, []);
 
+  // Cart badge pulse on count change
   useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (totalItems > prevCartCount) {
+      setCartBadgePulse(true);
+      const t = setTimeout(() => setCartBadgePulse(false), 700);
+      return () => clearTimeout(t);
     }
-  }, [isSearchOpen]);
+    setPrevCartCount(totalItems);
+  }, [totalItems]);
 
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/products", label: "Shop" },
-    { href: "/categories", label: "Collections" },
-    { href: "/about", label: "Our Story" },
-    { href: "/contact", label: "Support" },
-  ];
+  // Close mega dropdown on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMegaOpen(false);
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Determine header visual state:
+  // On home page + not scrolled → transparent with white text
+  // Otherwise → white with dark text
+  const isTransparent = isHomePage && !isScrolled;
+
+  const handleMegaMouseEnter = useCallback(() => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+    setIsMegaOpen(true);
+  }, []);
+
+  const handleMegaMouseLeave = useCallback(() => {
+    megaCloseTimer.current = setTimeout(() => {
+      setIsMegaOpen(false);
+      setHoveredParentId(null);
+    }, 150);
+  }, []);
+
+  const handleParentHover = useCallback((id: string) => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+    setHoveredParentId(id);
+  }, []);
+
+  const handleMegaClose = useCallback(() => {
+    setIsMegaOpen(false);
+    setHoveredParentId(null);
+  }, []);
+
+  const userInitial = (user?.displayName ?? user?.email ?? "U")
+    .charAt(0)
+    .toUpperCase();
 
   return (
-    <header 
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 min-h-[64px]",
-        isScrolled 
-          ? "bg-background/80 backdrop-blur-lg border-b shadow-sm py-2" 
-          : "bg-transparent py-4"
-      )}
-    >
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex h-12 items-center justify-between gap-4">
-          <Link href="/" className="flex items-center group">
-            <img 
-              src={getOptimizedImageUrl(logoImg, { width: 160, height: 40, crop: 'fit' })} 
-              alt="PakCart" 
-              className="h-10 w-auto transition-transform group-hover:scale-105" 
-              width="160"
-              height="40"
+    <>
+      {/* ── DESKTOP HEADER ── */}
+      <header
+        className={cn(
+          "hidden lg:block sticky top-0 z-50 w-full transition-all duration-300",
+          isTransparent
+            ? "bg-transparent"
+            : "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
+        )}
+      >
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-3 items-center h-16">
+            {/* LEFT: Logo */}
+            <div className="flex items-center">
+              <Link href="/" data-testid="header-logo-link">
+                <img
+                  src={logoImg}
+                  alt="PakCart"
+                  className={cn(
+                    "h-10 w-auto transition-all duration-300",
+                    isTransparent ? "brightness-0 invert" : ""
+                  )}
+                  width="140"
+                  height="40"
+                  fetchPriority="high"
+                />
+              </Link>
+            </div>
+
+            {/* CENTER: Nav links */}
+            <nav className="flex items-center justify-center gap-7">
+              {NAV_LINKS.map((link) => {
+                const isActive = location === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    data-testid={`nav-link-${link.label.toLowerCase().replace(" ", "-")}`}
+                  >
+                    <span
+                      className={cn(
+                        "relative text-sm font-medium tracking-wide uppercase transition-colors duration-200 py-1",
+                        isTransparent
+                          ? "text-white/90 hover:text-white"
+                          : "text-gray-700 hover:text-green-700",
+                        isActive && !isTransparent && "text-green-700"
+                      )}
+                    >
+                      {link.label}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500 rounded-full" />
+                      )}
+                    </span>
+                  </Link>
+                );
+              })}
+
+              {/* Categories (mega dropdown trigger) */}
+              <div
+                className="relative"
+                onMouseEnter={handleMegaMouseEnter}
+                onMouseLeave={handleMegaMouseLeave}
+              >
+                <button
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1 text-sm font-medium tracking-wide uppercase transition-colors duration-200 py-1",
+                    isTransparent
+                      ? "text-white/90 hover:text-white"
+                      : "text-gray-700 hover:text-green-700",
+                    isMegaOpen && !isTransparent && "text-green-700"
+                  )}
+                  aria-expanded={isMegaOpen}
+                  data-testid="nav-categories-trigger"
+                >
+                  Categories
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 transition-transform duration-200",
+                      isMegaOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                {/* Mega dropdown */}
+                <div
+                  onMouseEnter={handleMegaMouseEnter}
+                  onMouseLeave={handleMegaMouseLeave}
+                >
+                  <MegaDropdown
+                    isOpen={isMegaOpen}
+                    parentCategories={parentCategories}
+                    categories={categories}
+                    hoveredParentId={hoveredParentId}
+                    onParentHover={handleParentHover}
+                    onClose={handleMegaClose}
+                  />
+                </div>
+              </div>
+            </nav>
+
+            {/* RIGHT: Icons */}
+            <div className="flex items-center justify-end gap-1">
+              {/* Search */}
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                className={cn(
+                  "w-10 h-10 flex items-center justify-center rounded-full transition-colors",
+                  isTransparent
+                    ? "text-white hover:bg-white/20"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-green-700"
+                )}
+                aria-label="Open search"
+                data-testid="header-search-btn"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+
+              {/* Cart */}
+              <Link href="/cart" data-testid="header-cart-link">
+                <button
+                  type="button"
+                  className={cn(
+                    "relative w-10 h-10 flex items-center justify-center rounded-full transition-colors",
+                    isTransparent
+                      ? "text-white hover:bg-white/20"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-green-700"
+                  )}
+                  aria-label="Cart"
+                  data-testid="header-cart-btn"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  <AnimatePresence>
+                    {totalItems > 0 && (
+                      <motion.span
+                        key="cart-badge"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className={cn(
+                          "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center transition-transform",
+                          cartBadgePulse && "animate-bounce"
+                        )}
+                        data-testid="cart-badge"
+                      >
+                        {totalItems > 99 ? "99+" : totalItems}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </button>
+              </Link>
+
+              {/* Auth */}
+              {isAuthenticated && user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ml-1",
+                        isTransparent
+                          ? "bg-white/20 text-white hover:bg-white/30"
+                          : "bg-green-100 text-green-700 hover:bg-green-200"
+                      )}
+                      aria-label="User menu"
+                      data-testid="header-user-avatar"
+                    >
+                      {userInitial}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52 mt-2 rounded-xl shadow-lg">
+                    <div className="px-3 py-2 border-b mb-1">
+                      <p className="text-sm font-semibold text-gray-800 truncate">
+                        {user.displayName ?? "User"}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">
+                        <span className="flex items-center gap-2 cursor-pointer w-full" data-testid="header-profile-link">
+                          <User className="h-4 w-4" />
+                          My Profile
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/orders">
+                        <span className="flex items-center gap-2 cursor-pointer w-full" data-testid="header-orders-link">
+                          <Package className="h-4 w-4" />
+                          My Orders
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => logout()}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                      data-testid="header-logout-btn"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-2 ml-1">
+                  <Link href="/auth/login" data-testid="header-login-link">
+                    <span
+                      className={cn(
+                        "text-sm font-medium transition-colors cursor-pointer",
+                        isTransparent
+                          ? "text-white hover:text-white/80"
+                          : "text-gray-700 hover:text-green-700"
+                      )}
+                    >
+                      Log In
+                    </span>
+                  </Link>
+                  <Link href="/auth/signup" data-testid="header-signup-link">
+                    <Button
+                      size="sm"
+                      className="rounded-full px-5 bg-green-600 hover:bg-green-700 text-white font-medium"
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── MOBILE HEADER ── */}
+      <header className="lg:hidden sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 h-14">
+          {/* Hamburger */}
+          <button
+            type="button"
+            onClick={() => setIsMobileNavOpen(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-700"
+            aria-label="Open menu"
+            data-testid="header-hamburger-btn"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          {/* Logo (center) */}
+          <Link href="/" data-testid="header-mobile-logo">
+            <img
+              src={logoImg}
+              alt="PakCart"
+              className="h-8 w-auto"
+              width="100"
+              height="32"
               fetchPriority="high"
             />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-            <Link
-              href="/"
-              className={cn(
-                "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
-                location === "/" 
-                  ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
-                  : "text-muted-foreground"
-              )}
+          {/* Cart */}
+          <Link href="/cart" data-testid="header-mobile-cart-link">
+            <button
+              type="button"
+              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-700"
+              aria-label="Cart"
+              data-testid="header-mobile-cart-btn"
             >
-              Home
-            </Link>
-
-            <DropdownMenu onOpenChange={(open) => { if (!open) setHoveredParentId(null); }}>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={cn(
-                    "flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary py-1 px-0.5 focus:outline-none",
-                    location.startsWith("/collections") || location.startsWith("/categories")
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  Categories <ChevronDown className="h-4 w-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="p-0 w-auto shadow-lg rounded-lg overflow-hidden">
-                <div className="flex">
-                  {/* Left panel — parent categories */}
-                  <div className="w-52 py-2 border-r border-border/50 bg-background">
-                    {parentCategories?.map((parent) => {
-                      const isActive = String(activeParent?.id) === String(parent.id);
-                      return (
-                        <div
-                          key={parent.id}
-                          onMouseEnter={() => setHoveredParentId(String(parent.id))}
-                          className={cn(
-                            "flex items-center justify-between px-4 py-2.5 cursor-pointer text-sm font-medium transition-colors",
-                            isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-muted"
-                          )}
-                        >
-                          <span>{parent.name}</span>
-                          <ChevronRight className="h-4 w-4 opacity-60" />
-                        </div>
-                      );
-                    })}
-                    <div className="border-t border-border/50 mt-1 pt-1">
-                      <DropdownMenuItem asChild className="mx-1">
-                        <Link href="/products" className="cursor-pointer w-full text-sm font-medium px-3 py-2">
-                          Shop All Products
-                        </Link>
-                      </DropdownMenuItem>
-                    </div>
-                  </div>
-
-                  {/* Right panel — sub-categories of active parent */}
-                  {activeSubCategories.length > 0 && (
-                    <div className="w-48 py-2 bg-background">
-                      {activeSubCategories.map((category) => (
-                        <DropdownMenuItem key={category.id} asChild>
-                          <Link
-                            href={`/collections/${category.slug}`}
-                            className="cursor-pointer px-4 py-2.5 text-sm text-muted-foreground hover:text-primary w-full block"
-                          >
-                            {category.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {navLinks.slice(2).map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "relative text-sm font-medium transition-colors hover:text-primary py-1 px-0.5",
-                  location === link.href 
-                    ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full" 
-                    : "text-muted-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1 sm:gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="hover-elevate"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-
-            <SearchOverlay 
-              isOpen={isSearchOpen} 
-              onClose={() => setIsSearchOpen(false)} 
-            />
-            
-            <Button variant="ghost" size="icon" className="relative hover-elevate" asChild>
-              <Link href="/cart">
-                <ShoppingCart className="h-5 w-5" />
+              <ShoppingBag className="h-5 w-5" />
+              <AnimatePresence>
                 {totalItems > 0 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px] font-bold animate-in zoom-in"
+                  <motion.span
+                    key="mobile-cart-badge"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center"
+                    data-testid="mobile-cart-badge"
                   >
-                    {totalItems}
-                  </Badge>
+                    {totalItems > 99 ? "99+" : totalItems}
+                  </motion.span>
                 )}
-              </Link>
-            </Button>
-
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hover-elevate">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user?.displayName || "Account"}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer w-full">Profile Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/orders" className="cursor-pointer w-full">My Orders</Link>
-                  </DropdownMenuItem>
-                  {user?.role === 'admin' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="cursor-pointer w-full font-medium text-primary">
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="text-destructive focus:text-destructive cursor-pointer"
-                    onClick={() => logout()}
-                  >
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild className="text-sm font-medium">
-                  <Link href="/auth/login">Log In</Link>
-                </Button>
-                <Button size="sm" asChild className="text-sm font-medium">
-                  <Link href="/auth/signup">Sign Up</Link>
-                </Button>
-              </div>
-            )}
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden hover-elevate">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
-                <div className="flex flex-col h-full bg-background">
-                  <SheetHeader className="p-6 border-b text-left">
-                    <SheetTitle className="font-display text-2xl font-bold text-primary">
-                      <img src={getOptimizedImageUrl(logoImg)} alt="PakCart" className="h-8 w-auto" />
-                    </SheetTitle>
-                  </SheetHeader>
-                  
-                  <div className="flex flex-col flex-1 overflow-y-auto py-6">
-                    <nav className="flex flex-col px-6">
-                      <Link
-                        href="/"
-                        className={cn(
-                          "flex items-center py-4 text-lg font-medium transition-colors border-b",
-                          location === "/" ? "text-primary" : "text-foreground hover:text-primary"
-                        )}
-                        onClick={() => {}}
-                      >
-                        Home
-                      </Link>
-
-                      <div className="flex flex-col border-b">
-                        <Accordion type="single" collapsible className="w-full border-none">
-                          <AccordionItem value="categories" className="border-none">
-                            <AccordionTrigger className="py-4 text-lg font-medium hover:no-underline">
-                              Categories
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-4">
-                              <div className="flex flex-col gap-4 pl-4">
-                                {parentCategories?.map((parent) => (
-                                  <div key={parent.id} className="flex flex-col gap-2">
-                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                                      {parent.name}
-                                    </p>
-                                    <div className="flex flex-col gap-1 pl-4">
-                                      {categoriesData?.filter(c => String(c.parentCategoryId) === String(parent.id)).map((category) => (
-                                        <Link
-                                          key={category.id}
-                                          href={`/collections/${category.slug}`}
-                                          className={cn(
-                                            "py-1 text-base font-medium transition-colors",
-                                            location.includes(`/collections/${category.slug}`) ? "text-primary" : "text-foreground hover:text-primary"
-                                          )}
-                                        >
-                                          {category.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      </div>
-
-                      {navLinks.slice(2).map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className={cn(
-                            "flex items-center py-4 text-lg font-medium transition-colors border-b last:border-0",
-                            location === link.href ? "text-primary" : "text-foreground hover:text-primary"
-                          )}
-                        >
-                          {link.label}
-                        </Link>
-                      ))}
-                    </nav>
-                    
-                    <div className="mt-auto p-6 flex flex-col gap-3 shrink-0">
-                      <Link href="/cart">
-                        <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
-                          <ShoppingCart className="h-5 w-5" />
-                          View Cart
-                          {totalItems > 0 && (
-                            <Badge variant="secondary" className="ml-auto rounded-full px-2 py-0.5">
-                              {totalItems}
-                            </Badge>
-                          )}
-                        </Button>
-                      </Link>
-                      {isAuthenticated ? (
-                        <>
-                          <Link href="/profile">
-                            <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
-                              <User className="h-5 w-5" />
-                              My Profile
-                            </Button>
-                          </Link>
-                          <Link href="/orders">
-                            <Button className="w-full justify-start gap-3 h-12 text-lg" variant="outline">
-                              <ShoppingBag className="h-5 w-5" />
-                              My Orders
-                            </Button>
-                          </Link>
-                          <Button 
-                            className="w-full justify-start gap-3 h-12 text-lg text-destructive" 
-                            variant="ghost"
-                            onClick={() => logout()}
-                          >
-                            Logout
-                          </Button>
-                        </>
-                      ) : (
-                        <div className="flex flex-col gap-3">
-                          <Link href="/auth/login">
-                            <Button className="w-full h-12 text-lg" variant="outline">Log In</Button>
-                          </Link>
-                          <Link href="/auth/signup">
-                            <Button className="w-full h-12 text-lg">Sign Up</Button>
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+              </AnimatePresence>
+            </button>
+          </Link>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* ── MOBILE NAV SHEET ── */}
+      <MobileNav
+        isOpen={isMobileNavOpen}
+        onClose={() => setIsMobileNavOpen(false)}
+        parentCategories={parentCategories}
+        categories={categories}
+      />
+
+      {/* ── SEARCH OVERLAY ── */}
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
+    </>
   );
 };
 
