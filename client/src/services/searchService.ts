@@ -64,6 +64,18 @@ function computeRelevanceScore(
   return score;
 }
 
+function countMatchedKeywords(nameTokens: string[], queryWords: string[]): number {
+  return queryWords.filter((word) =>
+    nameTokens.some((token) => token === word || token.startsWith(word))
+  ).length;
+}
+
+function getKeywordTier(matchCount: number): number {
+  if (matchCount >= 5) return 1;
+  if (matchCount >= 3) return 2;
+  return 3;
+}
+
 function sanitizeQuery(raw: string): string {
   return raw
     .trim()
@@ -134,15 +146,6 @@ export async function searchProductsPage(
     data: d.data() as RawIndexEntry,
   }));
 
-  if (queryWords.length > 1) {
-    const otherWords = queryWords.filter((w) => w !== anchorWord);
-    entries = entries.filter(({ data }) =>
-      otherWords.every((w) =>
-        data.nameTokens.some((t) => t === w || t.startsWith(w))
-      )
-    );
-  }
-
   if (inStockOnly) {
     entries = entries.filter(({ data }) => data.inStock);
   }
@@ -154,27 +157,39 @@ export async function searchProductsPage(
     entries = entries.filter(({ data }) => data.price <= maxPrice);
   }
 
-  const results: (SearchResult & { _doc: QueryDocumentSnapshot<DocumentData> })[] =
-    entries.map(({ doc, data }) => ({
-      _doc: doc,
-      productId: data.productId,
-      name: data.name,
-      slug: data.slug,
-      price: data.price,
-      primaryImage: data.primaryImage,
-      categoryName: data.categoryName,
-      categorySlug: data.categorySlug,
-      rating: data.rating,
-      reviewCount: data.reviewCount,
-      labels: data.labels,
-      inStock: data.inStock,
-      relevanceScore: computeRelevanceScore(data, queryLower, queryWords),
-    }));
+  const results: (SearchResult & { _doc: QueryDocumentSnapshot<DocumentData>; _keywordTier: number })[] =
+    entries.map(({ doc, data }) => {
+      const matchedCount = countMatchedKeywords(data.nameTokens, queryWords);
+      return {
+        _doc: doc,
+        _keywordTier: getKeywordTier(matchedCount),
+        productId: data.productId,
+        name: data.name,
+        slug: data.slug,
+        price: data.price,
+        primaryImage: data.primaryImage,
+        categoryName: data.categoryName,
+        categorySlug: data.categorySlug,
+        rating: data.rating,
+        reviewCount: data.reviewCount,
+        labels: data.labels,
+        inStock: data.inStock,
+        relevanceScore: computeRelevanceScore(data, queryLower, queryWords),
+      };
+    });
 
   if (sortBy === "relevance") {
-    results.sort((a, b) => b.relevanceScore - a.relevanceScore);
+    results.sort((a, b) => {
+      const tierDiff = a._keywordTier - b._keywordTier;
+      if (tierDiff !== 0) return tierDiff;
+      return b.relevanceScore - a.relevanceScore;
+    });
   } else if (sortBy === "rating") {
-    results.sort((a, b) => b.rating - a.rating);
+    results.sort((a, b) => {
+      const tierDiff = a._keywordTier - b._keywordTier;
+      if (tierDiff !== 0) return tierDiff;
+      return b.rating - a.rating;
+    });
   }
 
   const pageResults = results.slice(0, pageSize);
@@ -184,7 +199,7 @@ export async function searchProductsPage(
       : null;
 
   const cleanResults: SearchResult[] = pageResults.map(
-    ({ _doc: _unused, ...rest }) => rest
+    ({ _doc: _unused, _keywordTier: _tier, ...rest }) => rest
   );
 
   return { results: cleanResults, cursor: lastDoc };
