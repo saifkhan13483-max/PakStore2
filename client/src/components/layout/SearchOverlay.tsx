@@ -1,5 +1,15 @@
 import { useEffect, useRef, useId } from "react";
-import { Search, X, Clock, TrendingUp, ShoppingBag, AlertCircle, Tag } from "lucide-react";
+import {
+  Search,
+  X,
+  Clock,
+  TrendingUp,
+  ShoppingBag,
+  AlertCircle,
+  Tag,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "@/hooks/useSearch";
@@ -33,9 +43,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   } = useSearch();
 
   const isDropdownOpen =
-    isOpen && (query.length >= 1 || recentSearches.length > 0 || popularSearches.length > 0);
+    isOpen &&
+    (query.length >= 1 || recentSearches.length > 0 || popularSearches.length > 0);
 
-  const showSuggestions = query.length >= 2 && !isLoadingSuggestions && !isSuggestionsError && suggestions.length > 0;
+  const showSuggestions =
+    query.length >= 2 && !isLoadingSuggestions && !isSuggestionsError && suggestions.length > 0;
   const showRecentSearches = query.length === 0 && recentSearches.length > 0;
   const showPopular = query.length === 0 && popularSearches.length > 0;
 
@@ -80,7 +92,16 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, selectedSuggestionIndex, suggestions, recentSearches, showSuggestions, showRecentSearches, totalOptions]);
+  }, [
+    isOpen,
+    onClose,
+    selectedSuggestionIndex,
+    suggestions,
+    recentSearches,
+    showSuggestions,
+    showRecentSearches,
+    totalOptions,
+  ]);
 
   const navigateToSearch = (q: string) => {
     const trimmed = q.trim();
@@ -91,9 +112,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigateToSearch(query.trim());
-    }
+    if (query.trim()) navigateToSearch(query.trim());
   };
 
   const handleSuggestionClick = (s: { text: string; type: string; slug?: string }) => {
@@ -110,7 +129,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const thumbnailUrl = (url: string | undefined) =>
     url
-      ? getOptimizedImageUrl(url, { width: 48, height: 48, crop: "fill", quality: "auto:low" })
+      ? getOptimizedImageUrl(url, { width: 56, height: 56, crop: "fill", quality: "auto:low" })
       : null;
 
   const liveMessage = isLoadingSuggestions
@@ -123,284 +142,363 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/30 z-40"
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
             onClick={onClose}
           />
 
+          {/* Panel */}
           <motion.div
-            initial={{ y: "-100%", opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "-100%", opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg"
+            initial={{ y: -24, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -24, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-0 left-0 right-0 z-50"
             data-testid="search-overlay"
           >
-            <div className="max-w-3xl mx-auto px-4 sm:px-8 py-4 sm:py-6">
+            {/* Green accent bar at very top */}
+            <div className="h-1 bg-gradient-to-r from-green-400 via-green-500 to-emerald-500" />
 
-              {/* Live region for screen readers */}
-              <div
-                id={liveRegionId}
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-                className="sr-only"
-              >
-                {liveMessage}
-              </div>
+            <div className="bg-white shadow-2xl">
+              <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-6">
 
-              {/* Input */}
-              <form onSubmit={handleSearch} role="search">
-                <div className="flex items-center gap-2 sm:gap-3 border-b-2 border-green-500 pb-2">
-                  <Search className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0" aria-hidden="true" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    role="combobox"
-                    aria-expanded={isDropdownOpen}
-                    aria-controls={listboxId}
-                    aria-autocomplete="list"
-                    aria-activedescendant={
-                      selectedSuggestionIndex >= 0
-                        ? `search-option-${selectedSuggestionIndex}`
-                        : undefined
-                    }
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setSelectedSuggestionIndex(-1);
-                    }}
-                    placeholder="Search for bags, watches, bedsheets..."
-                    className="flex-1 text-base sm:text-xl text-gray-800 placeholder-gray-400 outline-none bg-transparent min-w-0"
-                    data-testid="search-overlay-input"
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Search PakCart"
-                    className="rounded-full p-1.5 hover:bg-green-50 transition-colors shrink-0"
-                    data-testid="search-overlay-submit"
-                  >
-                    <Search className="h-4 w-4 text-green-600" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-full p-1.5 hover:bg-gray-100 transition-colors shrink-0"
-                    aria-label="Close search"
-                    data-testid="search-overlay-close"
-                  >
-                    <X className="h-5 w-5 text-gray-500" aria-hidden="true" />
-                  </button>
+                {/* Live region */}
+                <div
+                  id={liveRegionId}
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="sr-only"
+                >
+                  {liveMessage}
                 </div>
-              </form>
 
-              {/* Dropdown */}
-              <div
-                id={listboxId}
-                role="listbox"
-                aria-label="Search suggestions"
-                className={cn("mt-2", !isDropdownOpen && "hidden")}
-              >
+                {/* ── Search input ── */}
+                <form onSubmit={handleSearch} role="search">
+                  <div className="relative flex items-center">
+                    {/* Search icon badge */}
+                    <div className="absolute left-4 flex items-center justify-center w-8 h-8 rounded-full bg-green-600 shadow-sm pointer-events-none z-10">
+                      <Search className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
 
-                {/* --- Firestore suggestions (query ≥ 2 chars) --- */}
-                {query.length >= 2 && (
-                  <>
-                    {isLoadingSuggestions && (
-                      <div className="py-4 flex items-center gap-2 text-sm text-gray-400 px-3">
-                        <span className="inline-block h-4 w-4 rounded-full border-2 border-green-400 border-t-transparent animate-spin" aria-hidden="true" />
-                        Loading suggestions…
-                      </div>
-                    )}
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      role="combobox"
+                      aria-expanded={isDropdownOpen}
+                      aria-controls={listboxId}
+                      aria-autocomplete="list"
+                      aria-activedescendant={
+                        selectedSuggestionIndex >= 0
+                          ? `search-option-${selectedSuggestionIndex}`
+                          : undefined
+                      }
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        setSelectedSuggestionIndex(-1);
+                      }}
+                      placeholder="Search for bags, watches, bedsheets…"
+                      className={cn(
+                        "w-full h-14 pl-16 pr-36 text-base sm:text-lg text-gray-800",
+                        "bg-gray-50 border-2 border-gray-200 rounded-2xl",
+                        "placeholder:text-gray-400 outline-none transition-all duration-200",
+                        "focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-100"
+                      )}
+                      data-testid="search-overlay-input"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
 
-                    {isSuggestionsError && !isLoadingSuggestions && (
-                      <div className="py-3 flex items-center gap-2 text-sm text-amber-600 px-3">
-                        <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-                        Couldn&apos;t load suggestions. Showing recent searches below.
-                      </div>
-                    )}
-
-                    {showSuggestions && (
-                      <div className="mt-1 space-y-0.5">
-                        {suggestions.map((s, idx) => {
-                          const thumb = thumbnailUrl(s.image);
-                          const isSelected = selectedSuggestionIndex === idx;
-                          return (
-                            <button
-                              key={`suggestion-${idx}`}
-                              id={`search-option-${idx}`}
-                              type="button"
-                              role="option"
-                              aria-selected={isSelected}
-                              onClick={() => handleSuggestionClick(s)}
-                              onMouseEnter={() => setSelectedSuggestionIndex(idx)}
-                              className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left group",
-                                isSelected ? "bg-green-50" : "hover:bg-green-50"
-                              )}
-                              data-testid={`search-suggestion-${s.type}-${idx}`}
-                            >
-                              {/* Thumbnail or icon */}
-                              {s.type === "product" ? (
-                                thumb ? (
-                                  <img
-                                    src={thumb}
-                                    alt=""
-                                    aria-hidden="true"
-                                    className="h-9 w-9 rounded-lg object-cover shrink-0 bg-gray-100"
-                                    loading="lazy"
-                                    width={36}
-                                    height={36}
-                                  />
-                                ) : (
-                                  <span className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0" aria-hidden="true">
-                                    <ShoppingBag className="h-4 w-4 text-gray-400" />
-                                  </span>
-                                )
-                              ) : (
-                                <span className="h-9 w-9 rounded-lg bg-green-50 flex items-center justify-center shrink-0" aria-hidden="true">
-                                  <Tag className="h-4 w-4 text-green-500" />
-                                </span>
-                              )}
-
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-700 group-hover:text-green-700 line-clamp-2 break-words">
-                                  {s.text}
-                                </p>
-                                {s.type === "category" && (
-                                  <p className="text-xs text-gray-400 mt-0.5">Category</p>
-                                )}
-                              </div>
-                              <Search className="h-3.5 w-3.5 text-gray-300 group-hover:text-green-400 shrink-0" aria-hidden="true" />
-                            </button>
-                          );
-                        })}
-
-                        {/* See all results */}
+                    {/* Right side actions */}
+                    <div className="absolute right-2 flex items-center gap-1.5">
+                      {query.length > 0 && (
                         <button
                           type="button"
-                          onClick={() => navigateToSearch(query.trim())}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group border-t border-gray-100 mt-1 pt-2"
-                          data-testid="search-see-all-results"
+                          onClick={() => { setQuery(""); setSelectedSuggestionIndex(-1); inputRef.current?.focus(); }}
+                          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                          aria-label="Clear search"
+                          data-testid="search-overlay-clear"
                         >
-                          <Search className="h-4 w-4 text-green-600 shrink-0" aria-hidden="true" />
-                          <span className="text-sm font-semibold text-green-700">
-                            See all results for &ldquo;{query}&rdquo;
-                          </span>
+                          <X className="h-4 w-4" aria-hidden="true" />
                         </button>
-                      </div>
-                    )}
+                      )}
+                      <button
+                        type="submit"
+                        aria-label="Search PakCart"
+                        className="h-10 px-5 rounded-xl bg-green-600 hover:bg-green-700 active:scale-95 text-white text-sm font-semibold transition-all duration-150 shadow-sm"
+                        data-testid="search-overlay-submit"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                </form>
 
-                    {/* No suggestions, no error */}
-                    {!isLoadingSuggestions && !isSuggestionsError && suggestions.length === 0 && query.length >= 2 && (
-                      <div className="mt-3 sm:mt-4">
-                        <p className="text-sm text-gray-500 mb-3 px-3">
-                          No suggestions for &ldquo;{query}&rdquo;
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => navigateToSearch(query.trim())}
-                          className="flex items-center gap-2 px-4 py-2 mx-3 rounded-full border border-green-200 text-sm font-medium text-green-700 hover:bg-green-50 transition-colors"
-                          data-testid="search-no-results-browse"
-                        >
-                          <Search className="h-4 w-4" aria-hidden="true" />
-                          Browse all products for &ldquo;{query}&rdquo;
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
+                {/* ── Dropdown content ── */}
+                <div
+                  id={listboxId}
+                  role="listbox"
+                  aria-label="Search suggestions"
+                  className={cn(!isDropdownOpen && "hidden")}
+                >
 
-                {/* query is 1 char — too short for suggestions */}
-                {query.length === 1 && (
-                  <p className="text-sm text-gray-400 px-3 py-3">
-                    Keep typing to see suggestions…
-                  </p>
-                )}
-
-                {/* --- Empty query: recent searches + popular --- */}
-                {query.length === 0 && (
-                  <>
-                    {showRecentSearches && (
-                      <div className="mt-3 sm:mt-4">
-                        <div className="flex items-center justify-between px-3 mb-2">
-                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                            Recent Searches
-                          </p>
-                          <button
-                            type="button"
-                            onClick={clearRecentSearches}
-                            className="text-xs text-blue-600 hover:underline"
-                            data-testid="search-clear-recents"
-                          >
-                            Clear
-                          </button>
+                  {/* ── Active query (≥ 2 chars) ── */}
+                  {query.length >= 2 && (
+                    <div className="mt-4">
+                      {isLoadingSuggestions && (
+                        <div className="py-6 flex items-center justify-center gap-3 text-sm text-gray-400">
+                          <span
+                            className="inline-block h-5 w-5 rounded-full border-2 border-green-400 border-t-transparent animate-spin"
+                            aria-hidden="true"
+                          />
+                          Finding matches…
                         </div>
+                      )}
+
+                      {isSuggestionsError && !isLoadingSuggestions && (
+                        <div className="py-3 flex items-center gap-2.5 text-sm text-amber-600 bg-amber-50 px-4 rounded-xl">
+                          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                          Couldn&apos;t load suggestions. Please try again.
+                        </div>
+                      )}
+
+                      {showSuggestions && (
                         <div className="space-y-0.5">
-                          {recentSearches.map((term, idx) => {
+                          {suggestions.map((s, idx) => {
+                            const thumb = thumbnailUrl(s.image);
                             const isSelected = selectedSuggestionIndex === idx;
+                            const isProduct = s.type === "product";
                             return (
                               <button
-                                key={term}
+                                key={`suggestion-${idx}`}
                                 id={`search-option-${idx}`}
                                 type="button"
                                 role="option"
                                 aria-selected={isSelected}
-                                onClick={() => navigateToSearch(term)}
+                                onClick={() => handleSuggestionClick(s)}
                                 onMouseEnter={() => setSelectedSuggestionIndex(idx)}
                                 className={cn(
-                                  "w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left group",
-                                  isSelected ? "bg-green-50" : "hover:bg-green-50"
+                                  "w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl transition-all text-left group",
+                                  isSelected
+                                    ? "bg-green-50 border-l-2 border-green-500 pl-2.5"
+                                    : "hover:bg-gray-50 border-l-2 border-transparent"
                                 )}
-                                data-testid={`search-recent-${idx}`}
+                                data-testid={`search-suggestion-${s.type}-${idx}`}
                               >
-                                <Clock className="h-4 w-4 text-gray-400 group-hover:text-green-500 shrink-0" aria-hidden="true" />
-                                <span className="text-sm text-gray-700 group-hover:text-green-700 truncate flex-1">
-                                  {term}
-                                </span>
-                                <Search className="h-3.5 w-3.5 text-gray-300 group-hover:text-green-400 shrink-0" aria-hidden="true" />
+                                {/* Thumbnail */}
+                                {isProduct ? (
+                                  thumb ? (
+                                    <img
+                                      src={thumb}
+                                      alt=""
+                                      aria-hidden="true"
+                                      className="h-11 w-11 rounded-xl object-cover shrink-0 bg-gray-100 ring-1 ring-gray-200"
+                                      loading="lazy"
+                                      width={44}
+                                      height={44}
+                                    />
+                                  ) : (
+                                    <span
+                                      className="h-11 w-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0"
+                                      aria-hidden="true"
+                                    >
+                                      <ShoppingBag className="h-5 w-5 text-gray-400" />
+                                    </span>
+                                  )
+                                ) : (
+                                  <span
+                                    className="h-11 w-11 rounded-xl bg-green-50 flex items-center justify-center shrink-0 ring-1 ring-green-100"
+                                    aria-hidden="true"
+                                  >
+                                    <Tag className="h-5 w-5 text-green-600" />
+                                  </span>
+                                )}
+
+                                {/* Text */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold text-gray-800 line-clamp-1">
+                                    {s.text}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {isProduct ? "Product" : "Category"}
+                                  </p>
+                                </div>
+
+                                {/* Arrow */}
+                                <ArrowRight
+                                  className={cn(
+                                    "h-4 w-4 shrink-0 transition-all duration-150",
+                                    isSelected
+                                      ? "text-green-500 translate-x-0.5"
+                                      : "text-gray-300 group-hover:text-gray-400"
+                                  )}
+                                  aria-hidden="true"
+                                />
                               </button>
                             );
                           })}
-                        </div>
-                      </div>
-                    )}
 
-                    {showPopular && (
-                      <div className={showRecentSearches ? "mt-4 sm:mt-5" : "mt-3 sm:mt-4"}>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3 flex items-center gap-1.5">
-                          <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                          Popular Searches
-                        </p>
-                        <div className="flex flex-wrap gap-2 px-3">
-                          {popularSearches.map((term) => (
+                          {/* See all results */}
+                          <button
+                            type="button"
+                            onClick={() => navigateToSearch(query.trim())}
+                            className="w-full flex items-center justify-between gap-3 mt-2 px-4 py-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 hover:from-green-100 hover:to-emerald-100 transition-all group"
+                            data-testid="search-see-all-results"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Search className="h-4 w-4 text-green-600 shrink-0" aria-hidden="true" />
+                              <span className="text-sm font-semibold text-green-700">
+                                See all results for &ldquo;{query}&rdquo;
+                              </span>
+                            </div>
+                            <ArrowRight className="h-4 w-4 text-green-500 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* No suggestions */}
+                      {!isLoadingSuggestions &&
+                        !isSuggestionsError &&
+                        suggestions.length === 0 &&
+                        query.length >= 2 && (
+                          <div className="py-8 text-center">
+                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                              <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-600 mb-1">
+                              No results for &ldquo;{query}&rdquo;
+                            </p>
+                            <p className="text-xs text-gray-400 mb-4">
+                              Try a different keyword or browse all products
+                            </p>
                             <button
-                              key={term}
                               type="button"
-                              onClick={() => navigateToSearch(term)}
-                              className="px-4 py-2 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:border-green-500 hover:text-green-700 hover:bg-green-50 transition-colors"
-                              data-testid={`search-popular-${term.toLowerCase().replace(/\s+/g, "-")}`}
+                              onClick={() => navigateToSearch(query.trim())}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors shadow-sm"
+                              data-testid="search-no-results-browse"
                             >
-                              {term}
+                              <Search className="h-4 w-4" aria-hidden="true" />
+                              Browse all products
                             </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                          </div>
+                        )}
+                    </div>
+                  )}
 
-                    {!showRecentSearches && !showPopular && (
-                      <p className="text-sm text-gray-400 px-3 py-3">
-                        Start typing to search…
-                      </p>
-                    )}
-                  </>
-                )}
+                  {/* 1-char hint */}
+                  {query.length === 1 && (
+                    <p className="text-sm text-gray-400 text-center py-6">
+                      Keep typing to see suggestions…
+                    </p>
+                  )}
+
+                  {/* ── Empty query: recents + popular ── */}
+                  {query.length === 0 && (
+                    <div className="mt-5 space-y-5">
+
+                      {showRecentSearches && (
+                        <div>
+                          <div className="flex items-center justify-between mb-2.5">
+                            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                              Recent
+                            </span>
+                            <button
+                              type="button"
+                              onClick={clearRecentSearches}
+                              className="text-xs text-gray-400 hover:text-red-500 transition-colors font-medium"
+                              data-testid="search-clear-recents"
+                            >
+                              Clear all
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {recentSearches.map((term, idx) => {
+                              const isSelected = selectedSuggestionIndex === idx;
+                              return (
+                                <button
+                                  key={term}
+                                  id={`search-option-${idx}`}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={isSelected}
+                                  onClick={() => navigateToSearch(term)}
+                                  onMouseEnter={() => setSelectedSuggestionIndex(idx)}
+                                  className={cn(
+                                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all",
+                                    isSelected
+                                      ? "bg-green-600 text-white border-green-600"
+                                      : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-green-50 hover:text-green-700 hover:border-green-300"
+                                  )}
+                                  data-testid={`search-recent-${idx}`}
+                                >
+                                  <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                  {term}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {showPopular && (
+                        <div>
+                          <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2.5">
+                            <Sparkles className="h-3.5 w-3.5 text-amber-400" aria-hidden="true" />
+                            Trending now
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {popularSearches.map((term) => (
+                              <button
+                                key={term}
+                                type="button"
+                                onClick={() => navigateToSearch(term)}
+                                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200 hover:from-green-600 hover:to-emerald-600 hover:text-white hover:border-green-600 transition-all duration-200"
+                                data-testid={`search-popular-${term.toLowerCase().replace(/\s+/g, "-")}`}
+                              >
+                                <TrendingUp className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                {term}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {!showRecentSearches && !showPopular && (
+                        <p className="text-sm text-gray-400 text-center py-4">
+                          Start typing to search products…
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Close hint */}
+                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                  <p className="text-xs text-gray-400 hidden sm:block">
+                    Press{" "}
+                    <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-100 border border-gray-200 rounded text-gray-500">
+                      Esc
+                    </kbd>{" "}
+                    to close
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="ml-auto flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Close search"
+                    data-testid="search-overlay-close"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
