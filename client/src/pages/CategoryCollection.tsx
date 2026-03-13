@@ -98,7 +98,7 @@ export default function CategoryCollection() {
     return (
       <div className="container mx-auto px-4 py-8">
         <Skeleton className="h-8 w-48 mb-6 rounded-xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-80 rounded-2xl" />
           ))}
@@ -203,7 +203,7 @@ export default function CategoryCollection() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-8" data-testid="products-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 mb-8" data-testid="products-grid">
             {visibleProducts.map((product) => (
               <ProductCardComponent key={product.id} product={product} data-testid={`product-card-${product.id}`} />
             ))}
