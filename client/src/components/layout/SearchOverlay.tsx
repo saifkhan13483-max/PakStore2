@@ -505,26 +505,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 )}
               </div>
 
-              {/* ── Footer ── */}
-              <div className="shrink-0 px-3 sm:px-6 py-2.5 sm:py-3 border-t border-gray-100 flex items-center justify-between bg-white">
-                <p className="text-xs text-gray-400 hidden sm:flex items-center gap-1">
-                  Press{" "}
-                  <kbd className="mx-1 px-1.5 py-0.5 text-xs font-mono bg-gray-100 border border-gray-200 rounded text-gray-500">
-                    Esc
-                  </kbd>
-                  to close
-                </p>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="ml-auto flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors py-1 px-2 rounded-lg hover:bg-gray-100 active:scale-95"
-                  aria-label="Close search"
-                  data-testid="search-overlay-close"
-                >
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Close</span>
-                </button>
-              </div>
             </div>
           </motion.div>
         </>
