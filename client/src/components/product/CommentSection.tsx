@@ -406,7 +406,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     </div>
 
                     {/* Review body */}
-                    <p className="text-muted-foreground break-words">{comment.content}</p>
+                    <p className="text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed break-words">{comment.content}</p>
 
                     {/* Attached images */}
                     {comment.images && comment.images.length > 0 && (
