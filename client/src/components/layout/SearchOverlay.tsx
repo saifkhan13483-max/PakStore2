@@ -45,9 +45,16 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const results =
     query.trim().length > 0
       ? (products
-          ?.filter((p) =>
-            p.name.toLowerCase().includes(query.toLowerCase())
-          )
+          ?.filter((p) => {
+            const q = query.toLowerCase();
+            return (
+              (p.name?.toLowerCase() || "").includes(q) ||
+              (p.description?.toLowerCase() || "").includes(q) ||
+              (Array.isArray((p as any).tags)
+                ? (p as any).tags.some((t: string) => t.toLowerCase().includes(q))
+                : false)
+            );
+          })
           .slice(0, 6)
           .map((p) => ({
             id: p.id,
@@ -105,18 +112,18 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg"
             data-testid="search-overlay"
           >
-            <div className="max-w-3xl mx-auto px-8 py-6">
+            <div className="max-w-3xl mx-auto px-4 sm:px-8 py-4 sm:py-6">
               {/* Input */}
               <form onSubmit={handleSearch}>
-                <div className="flex items-center gap-3 border-b-2 border-green-500 pb-2">
-                  <Search className="h-6 w-6 text-gray-400 shrink-0" />
+                <div className="flex items-center gap-2 sm:gap-3 border-b-2 border-green-500 pb-2">
+                  <Search className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 shrink-0" />
                   <input
                     ref={inputRef}
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search for bags, watches, bedsheets..."
-                    className="flex-1 text-xl text-gray-800 placeholder-gray-400 outline-none bg-transparent"
+                    className="flex-1 text-base sm:text-xl text-gray-800 placeholder-gray-400 outline-none bg-transparent min-w-0"
                     data-testid="search-overlay-input"
                   />
                   <button
@@ -133,32 +140,42 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
               {/* Live results */}
               {results.length > 0 && (
-                <div className="mt-4 space-y-1">
+                <div className="mt-3 sm:mt-4 space-y-0.5">
                   {results.map((result) => (
                     <button
                       key={`${result.type}-${result.id}`}
                       type="button"
                       onClick={() => handleResultClick(result)}
-                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group"
                       data-testid={`search-result-${result.type}-${result.id}`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Search className="h-4 w-4 text-gray-400 group-hover:text-green-600 shrink-0" />
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          {result.title}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold uppercase text-gray-400 group-hover:text-green-600 bg-gray-100 group-hover:bg-green-100 px-2 py-0.5 rounded-full">
-                        {result.type}
+                      <Search className="h-4 w-4 text-gray-400 group-hover:text-green-600 shrink-0" />
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 truncate">
+                        {result.title}
                       </span>
                     </button>
                   ))}
+                  {/* See all results shortcut */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocation(`/products?search=${encodeURIComponent(query.trim())}`);
+                      onClose();
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group border-t border-gray-100 mt-1 pt-2"
+                    data-testid="search-see-all-results"
+                  >
+                    <Search className="h-4 w-4 text-green-600 shrink-0" />
+                    <span className="text-sm font-semibold text-green-700">
+                      See all results for &ldquo;{query}&rdquo;
+                    </span>
+                  </button>
                 </div>
               )}
 
               {/* Popular searches */}
               {query.trim().length === 0 && (
-                <div className="mt-5">
+                <div className="mt-4 sm:mt-5">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                     Popular Searches
                   </p>
@@ -179,10 +196,22 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
               )}
 
               {query.trim().length > 0 && results.length === 0 && (
-                <div className="mt-6 text-center py-4">
-                  <p className="text-sm text-gray-500">
-                    No results found for &ldquo;{query}&rdquo;
+                <div className="mt-4 sm:mt-6">
+                  <p className="text-sm text-gray-500 mb-3">
+                    No products found for &ldquo;{query}&rdquo;
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocation(`/products?search=${encodeURIComponent(query.trim())}`);
+                      onClose();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-green-200 text-sm font-medium text-green-700 hover:bg-green-50 transition-colors"
+                    data-testid="search-no-results-browse"
+                  >
+                    <Search className="h-4 w-4" />
+                    Browse all products for &ldquo;{query}&rdquo;
+                  </button>
                 </div>
               )}
             </div>

@@ -92,7 +92,11 @@ export const productFirestoreService = {
         constraints.push(startAfter(filters.startAfterDoc));
       }
 
-      if (filters.limit) {
+      // When a search term is provided, skip the Firestore-level limit so that
+      // all products are fetched before client-side text filtering is applied.
+      // Without this, limit(100) would restrict the candidate set and cause
+      // valid search results to be silently dropped.
+      if (filters.limit && !filters.search) {
         constraints.push(limit(filters.limit));
       }
 
