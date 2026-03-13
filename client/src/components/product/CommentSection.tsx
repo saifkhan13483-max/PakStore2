@@ -334,7 +334,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
             <Card key={comment.id}>
               <CardContent className="pt-6 space-y-3">
                 {/* Reviewer header */}
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3">
                   {comment.userId === "system-seed" || !comment.userPhoto ? (
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
@@ -343,7 +343,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                       {comment.userName[0]?.toUpperCase()}
                     </div>
                   ) : (
-                    <Avatar>
+                    <Avatar className="flex-shrink-0">
                       <AvatarImage src={comment.userPhoto} />
                       <AvatarFallback
                         className="text-white font-bold text-lg"
@@ -354,45 +354,45 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     </Avatar>
                   )}
 
-                  <div className="flex-1 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-bold">{comment.userName}</h4>
-                        {/* Verified Purchase badge — only shown when present */}
-                        {comment.isVerifiedPurchase && (
-                          <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            <span className="text-xs font-medium">Verified Purchase</span>
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold leading-tight">{comment.userName}</h4>
+                          {/* Verified Purchase badge — only shown when present */}
+                          {comment.isVerifiedPurchase && (
+                            <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span className="text-xs font-medium">Verified Purchase</span>
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground">
                           {formatTimestamp(comment.createdAt)}
                         </span>
-                        {user?.uid === comment.userId && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => startEdit(comment)}>
-                                <Edit2 className="w-4 h-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
-                                onClick={() => setDeletingCommentId(comment.id)}
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
                       </div>
+                      {user?.uid === comment.userId && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => startEdit(comment)}>
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => setDeletingCommentId(comment.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
 
                     {/* Stars */}
@@ -406,18 +406,18 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     </div>
 
                     {/* Review body */}
-                    <p className="text-muted-foreground">{comment.content}</p>
+                    <p className="text-muted-foreground break-words">{comment.content}</p>
 
                     {/* Attached images */}
                     {comment.images && comment.images.length > 0 && (
-                      <div className="flex gap-2 pt-1">{renderImages(comment.images)}</div>
+                      <div className="flex flex-wrap gap-2 pt-1">{renderImages(comment.images)}</div>
                     )}
 
                     {/* Helpful count + Was this helpful? buttons */}
-                    <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 border-t border-border/40">
                       {(comment.helpfulCount ?? 0) > 0 && (
                         <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <ThumbsUp className="w-3 h-3" />
+                          <ThumbsUp className="w-3 h-3 flex-shrink-0" />
                           {comment.helpfulCount}{" "}
                           {comment.helpfulCount === 1 ? "person" : "people"} found this helpful
                         </span>
@@ -429,7 +429,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                           </span>
                         ) : (
                           <>
-                            <span className="text-xs text-muted-foreground">Was this helpful?</span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Was this helpful?</span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -457,7 +457,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
                 {/* Seller reply — only rendered when present */}
                 {comment.sellerReply && (
-                  <div className="ml-14 mt-1 p-3 bg-muted/50 border-l-2 border-primary/40 rounded-r-md">
+                  <div className="ml-12 sm:ml-14 mt-1 p-3 bg-muted/50 border-l-2 border-primary/40 rounded-r-md">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Store className="w-3.5 h-3.5 text-primary" />
                       <span className="text-xs font-semibold text-primary">PakCart Store</span>
