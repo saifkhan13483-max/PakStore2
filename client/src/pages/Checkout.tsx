@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
-import { sendOrderEmailNotification, sendOrderWhatsAppNotification } from "@/lib/notifications";
+import { sendOrderEmailNotification } from "@/lib/notifications";
 
 const checkoutInfoSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -148,7 +148,6 @@ export default function Checkout() {
       sendOrderEmailNotification(notificationData).catch(err =>
         console.warn("Email notification failed:", err)
       );
-      sendOrderWhatsAppNotification(notificationData);
 
       clearCart();
       setLocation("/thank-you");

@@ -1,7 +1,6 @@
 import emailjs from "@emailjs/browser";
 
 const ADMIN_EMAIL = "saifkhan16382@gmail.com";
-const ADMIN_WHATSAPP = "923188055850";
 
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "";
@@ -58,27 +57,3 @@ export async function sendOrderEmailNotification(order: OrderNotificationData): 
   await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
 }
 
-export function sendOrderWhatsAppNotification(order: OrderNotificationData): void {
-  const itemsList = order.items
-    .map((item, i) => `${i + 1}. ${item.name} x${item.quantity} = Rs. ${(item.price * item.quantity).toLocaleString()}`)
-    .join("%0A");
-
-  const message =
-    `🛒 *NEW ORDER - PakCart*%0A%0A` +
-    `📦 *Order ID:* %23${order.orderId}%0A` +
-    `📅 *Date:* ${new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" })}%0A%0A` +
-    `👤 *Customer Details:*%0A` +
-    `Name: ${order.customerName}%0A` +
-    `Email: ${order.customerEmail}%0A` +
-    `Phone: ${order.customerPhone}%0A` +
-    `Address: ${order.customerAddress}, ${order.customerCity}%0A%0A` +
-    `🛍️ *Items Ordered:*%0A${itemsList}%0A%0A` +
-    `💰 *Subtotal:* Rs. ${order.subtotal.toLocaleString()}%0A` +
-    `🚚 *Shipping:* ${order.shipping === 0 ? "Free" : `Rs. ${order.shipping.toLocaleString()}`}%0A` +
-    `✅ *Total:* Rs. ${order.total.toLocaleString()}%0A%0A` +
-    (order.notes ? `📝 *Notes:* ${order.notes}%0A%0A` : "") +
-    `💳 *Payment:* Cash on Delivery`;
-
-  const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP}?text=${message}`;
-  window.open(whatsappUrl, "_blank");
-}
