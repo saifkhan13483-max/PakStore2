@@ -34,14 +34,6 @@ export default function Profile() {
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [isSeedPickerOpen, setIsSeedPickerOpen] = useState(false);
 
-  const seoElement = (
-    <SEO
-      title="My Profile - PakCart"
-      description="Manage your PakCart account profile, addresses, and preferences."
-      robots="noindex,follow"
-    />
-  );
-
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -142,7 +134,11 @@ export default function Profile() {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-12 max-w-4xl pb-24 md:pb-12">
-      <SEO title="My Profile - PakCart" />
+      <SEO
+        title="My Profile - PakCart"
+        description="Manage your PakCart account profile, addresses, and preferences."
+        robots="noindex,follow"
+      />
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Account Settings</h1>
         <p className="text-muted-foreground text-sm md:text-base">Manage your personal information and preferences.</p>
