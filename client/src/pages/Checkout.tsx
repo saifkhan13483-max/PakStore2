@@ -145,9 +145,9 @@ export default function Checkout() {
         notes: data.notes,
       };
 
-      sendOrderEmailNotification(notificationData).catch(err =>
-        console.warn("Email notification failed:", err)
-      );
+      sendOrderEmailNotification(notificationData).catch(err => {
+        console.error("Email notification failed:", err);
+      });
 
       clearCart();
       setLocation("/thank-you");

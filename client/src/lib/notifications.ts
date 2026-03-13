@@ -32,7 +32,11 @@ function formatItemsList(items: OrderNotificationData["items"]): string {
 
 export async function sendOrderEmailNotification(order: OrderNotificationData): Promise<void> {
   if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
-    console.warn("EmailJS not configured. Skipping email notification.");
+    console.error("EmailJS not configured. Missing env vars:", {
+      serviceId: !!EMAILJS_SERVICE_ID,
+      templateId: !!EMAILJS_TEMPLATE_ID,
+      publicKey: !!EMAILJS_PUBLIC_KEY,
+    });
     return;
   }
 
@@ -54,6 +58,8 @@ export async function sendOrderEmailNotification(order: OrderNotificationData): 
     order_date: new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" }),
   };
 
-  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
+  console.log("Sending order email via EmailJS...", { serviceId: EMAILJS_SERVICE_ID, templateId: EMAILJS_TEMPLATE_ID });
+  const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
+  console.log("EmailJS response:", response.status, response.text);
 }
 
