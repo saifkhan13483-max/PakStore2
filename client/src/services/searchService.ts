@@ -5,6 +5,7 @@ import {
   orderBy,
   limit,
   getDocs,
+  startAfter,
   type QueryConstraint,
   type QueryDocumentSnapshot,
   type DocumentData,
@@ -36,6 +37,11 @@ interface RawIndexEntry {
   searchScore: number;
 }
 
+export interface PagedSearchResult {
+  results: SearchResult[];
+  cursor: QueryDocumentSnapshot<DocumentData> | null;
+}
+
 function getLongestWord(words: string[]): string {
   return words.reduce((a, b) => (a.length >= b.length ? a : b), "");
 }
@@ -57,21 +63,40 @@ function computeRelevanceScore(
   return score;
 }
 
+function sanitizeQuery(raw: string): string {
+  return raw
+    .trim()
+    .replace(/[<>{}[\]\\^`|]/g, "")
+    .substring(0, 100);
+}
+
 export async function searchProducts(
   rawQuery: string,
   options: SearchOptions = {}
 ): Promise<SearchResult[]> {
+  const { results } = await searchProductsPage(rawQuery, { ...options, pageSize: options.limit ?? 20 });
+  return results;
+}
+
+export async function searchProductsPage(
+  rawQuery: string,
+  options: SearchOptions & {
+    cursor?: QueryDocumentSnapshot<DocumentData> | null;
+    pageSize?: number;
+  } = {}
+): Promise<PagedSearchResult> {
   const {
-    limit: resultLimit = 20,
+    pageSize = 20,
     sortBy = "relevance",
     categorySlug,
     minPrice,
     maxPrice,
     inStockOnly = false,
+    cursor,
   } = options;
 
-  const queryLower = rawQuery.toLowerCase().trim();
-  if (!queryLower) return [];
+  const queryLower = sanitizeQuery(rawQuery).toLowerCase();
+  if (!queryLower) return { results: [], cursor: null };
 
   const queryWords = queryLower.split(/\s+/).filter((w) => w.length > 0);
   const anchorWord = getLongestWord(queryWords);
@@ -93,47 +118,57 @@ export async function searchProducts(
     baseConstraints.push(orderBy("searchScore", "desc"));
   }
 
-  baseConstraints.push(limit(100));
+  if (cursor) {
+    baseConstraints.push(startAfter(cursor));
+  }
+
+  baseConstraints.push(limit(pageSize * 5));
 
   const q = query(collection(db, SEARCH_INDEX_COLLECTION), ...baseConstraints);
   const snap = await getDocs(q);
 
-  let entries = snap.docs.map((d) => d.data() as RawIndexEntry);
+  let docs = snap.docs;
+  let entries = docs.map((d) => ({
+    doc: d,
+    data: d.data() as RawIndexEntry,
+  }));
 
   if (queryWords.length > 1) {
     const otherWords = queryWords.filter((w) => w !== anchorWord);
-    entries = entries.filter((entry) =>
+    entries = entries.filter(({ data }) =>
       otherWords.every((w) =>
-        entry.nameTokens.some((t) => t === w || t.startsWith(w))
+        data.nameTokens.some((t) => t === w || t.startsWith(w))
       )
     );
   }
 
   if (inStockOnly) {
-    entries = entries.filter((entry) => entry.inStock);
+    entries = entries.filter(({ data }) => data.inStock);
   }
 
   if (minPrice !== undefined) {
-    entries = entries.filter((entry) => entry.price >= minPrice);
+    entries = entries.filter(({ data }) => data.price >= minPrice);
   }
   if (maxPrice !== undefined) {
-    entries = entries.filter((entry) => entry.price <= maxPrice);
+    entries = entries.filter(({ data }) => data.price <= maxPrice);
   }
 
-  const results: SearchResult[] = entries.map((entry) => ({
-    productId: entry.productId,
-    name: entry.name,
-    slug: entry.slug,
-    price: entry.price,
-    primaryImage: entry.primaryImage,
-    categoryName: entry.categoryName,
-    categorySlug: entry.categorySlug,
-    rating: entry.rating,
-    reviewCount: entry.reviewCount,
-    labels: entry.labels,
-    inStock: entry.inStock,
-    relevanceScore: computeRelevanceScore(entry, queryLower, queryWords),
-  }));
+  const results: (SearchResult & { _doc: QueryDocumentSnapshot<DocumentData> })[] =
+    entries.map(({ doc, data }) => ({
+      _doc: doc,
+      productId: data.productId,
+      name: data.name,
+      slug: data.slug,
+      price: data.price,
+      primaryImage: data.primaryImage,
+      categoryName: data.categoryName,
+      categorySlug: data.categorySlug,
+      rating: data.rating,
+      reviewCount: data.reviewCount,
+      labels: data.labels,
+      inStock: data.inStock,
+      relevanceScore: computeRelevanceScore(data, queryLower, queryWords),
+    }));
 
   if (sortBy === "relevance") {
     results.sort((a, b) => b.relevanceScore - a.relevanceScore);
@@ -141,7 +176,17 @@ export async function searchProducts(
     results.sort((a, b) => b.rating - a.rating);
   }
 
-  return results.slice(0, resultLimit);
+  const pageResults = results.slice(0, pageSize);
+  const lastDoc =
+    pageResults.length === pageSize
+      ? pageResults[pageResults.length - 1]._doc
+      : null;
+
+  const cleanResults: SearchResult[] = pageResults.map(
+    ({ _doc: _unused, ...rest }) => rest
+  );
+
+  return { results: cleanResults, cursor: lastDoc };
 }
 
 export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {

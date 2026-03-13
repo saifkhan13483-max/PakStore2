@@ -19,14 +19,20 @@ const POPULAR_SEARCHES = [
 
 export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery] = useState("");
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const isOnSearchPage = location.startsWith("/search");
 
   const { data: products } = useProducts();
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
+      if (isOnSearchPage) {
+        const params = new URLSearchParams(window.location.search);
+        setQuery(params.get("q") ?? "");
+      }
     } else {
       setQuery("");
     }
@@ -46,7 +52,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
-    // Build plural/singular variants so "bags" matches "bag" and vice-versa
     const variants = new Set<string>([q]);
     if (q.endsWith("s") && q.length > 2) variants.add(q.slice(0, -1));
     else variants.add(q + "s");
@@ -77,11 +82,22 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     );
   })();
 
+  const navigateToSearch = (q: string) => {
+    const encoded = encodeURIComponent(q.trim());
+    if (isOnSearchPage) {
+      const current = new URLSearchParams(window.location.search);
+      current.set("q", q.trim());
+      setLocation(`/search?${current.toString()}`);
+    } else {
+      setLocation(`/search?q=${encoded}`);
+    }
+    onClose();
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      setLocation(`/products?search=${encodeURIComponent(query.trim())}`);
-      onClose();
+      navigateToSearch(query.trim());
     }
   };
 
@@ -171,10 +187,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   {/* See all results shortcut */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setLocation(`/products?search=${encodeURIComponent(query.trim())}`);
-                      onClose();
-                    }}
+                    onClick={() => navigateToSearch(query.trim())}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left group border-t border-gray-100 mt-1 pt-2"
                     data-testid="search-see-all-results"
                   >
@@ -215,10 +228,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setLocation(`/products?search=${encodeURIComponent(query.trim())}`);
-                      onClose();
-                    }}
+                    onClick={() => navigateToSearch(query.trim())}
                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-green-200 text-sm font-medium text-green-700 hover:bg-green-50 transition-colors"
                     data-testid="search-no-results-browse"
                   >

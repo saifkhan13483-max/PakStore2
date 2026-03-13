@@ -97,6 +97,7 @@ const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSl
 const AdminAnnouncements = lazyWithRetry(() => import("@/pages/admin/Announcements"));
 const AdminSeedComments = lazyWithRetry(() => import("@/pages/admin/SeedComments"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
+const SearchResults = lazyWithRetry(() => import("@/pages/SearchResults"));
 
 import { trackEvent } from "@/lib/firebase";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -157,6 +158,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/search" component={SearchResults} />
       
       {/* Admin Routes */}
       <Route path="/admin">
