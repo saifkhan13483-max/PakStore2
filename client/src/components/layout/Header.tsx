@@ -128,7 +128,7 @@ const Header = () => {
       {/* ── DESKTOP HEADER ── */}
       <header
         className={cn(
-          "hidden lg:block sticky top-0 z-50 w-full transition-all duration-300",
+          "hidden lg:block sticky top-0 z-50 w-full transition-all duration-300 relative",
           isTransparent
             ? "bg-white/90 backdrop-blur-md"
             : "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
@@ -177,44 +177,25 @@ const Header = () => {
               })}
 
               {/* Categories (mega dropdown trigger) */}
-              <div
-                className="relative"
+              <button
+                type="button"
                 onMouseEnter={handleMegaMouseEnter}
                 onMouseLeave={handleMegaMouseLeave}
+                className={cn(
+                  "flex items-center gap-1 text-sm font-medium uppercase tracking-normal whitespace-nowrap transition-colors duration-200 py-1 text-gray-700 hover:text-green-700",
+                  isMegaOpen && "text-green-700"
+                )}
+                aria-expanded={isMegaOpen}
+                data-testid="nav-categories-trigger"
               >
-                <button
-                  type="button"
+                Categories
+                <ChevronDown
                   className={cn(
-                    "flex items-center gap-1 text-sm font-medium uppercase tracking-normal whitespace-nowrap transition-colors duration-200 py-1 text-gray-700 hover:text-green-700",
-                    isMegaOpen && "text-green-700"
+                    "h-3.5 w-3.5 transition-transform duration-200",
+                    isMegaOpen && "rotate-180"
                   )}
-                  aria-expanded={isMegaOpen}
-                  data-testid="nav-categories-trigger"
-                >
-                  Categories
-                  <ChevronDown
-                    className={cn(
-                      "h-3.5 w-3.5 transition-transform duration-200",
-                      isMegaOpen && "rotate-180"
-                    )}
-                  />
-                </button>
-
-                {/* Mega dropdown */}
-                <div
-                  onMouseEnter={handleMegaMouseEnter}
-                  onMouseLeave={handleMegaMouseLeave}
-                >
-                  <MegaDropdown
-                    isOpen={isMegaOpen}
-                    parentCategories={parentCategories}
-                    categories={categories}
-                    hoveredParentId={hoveredParentId}
-                    onParentHover={handleParentHover}
-                    onClose={handleMegaClose}
-                  />
-                </div>
-              </div>
+                />
+              </button>
             </nav>
 
             {/* RIGHT: Icons */}
@@ -325,6 +306,21 @@ const Header = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Mega dropdown — anchored to full header width via parent relative */}
+        <div
+          onMouseEnter={handleMegaMouseEnter}
+          onMouseLeave={handleMegaMouseLeave}
+        >
+          <MegaDropdown
+            isOpen={isMegaOpen}
+            parentCategories={parentCategories}
+            categories={categories}
+            hoveredParentId={hoveredParentId}
+            onParentHover={handleParentHover}
+            onClose={handleMegaClose}
+          />
         </div>
       </header>
 
