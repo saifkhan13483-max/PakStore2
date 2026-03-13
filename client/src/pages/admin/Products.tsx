@@ -24,7 +24,8 @@ import {
   SlidersHorizontal,
   X,
   Eraser,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -58,6 +59,7 @@ import { Link } from "wouter";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { searchIndexService } from "@/services/searchIndexService";
 
 export default function AdminProducts() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -163,6 +165,23 @@ export default function AdminProducts() {
     return product.inStock && (product.reviewCount || 0) < 5;
   };
 
+  const rebuildSearchIndexMutation = useMutation({
+    mutationFn: () => searchIndexService.buildSearchIndex(),
+    onSuccess: () => {
+      toast({
+        title: "Search index rebuilt",
+        description: "All products have been re-indexed successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to rebuild search index.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const clearAllProductsMutation = useMutation({
     mutationFn: async () => {
       // Since we don't have a direct route yet, we'll delete them one by one if needed
@@ -209,6 +228,19 @@ export default function AdminProducts() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => rebuildSearchIndexMutation.mutate()}
+            disabled={rebuildSearchIndexMutation.isPending}
+            data-testid="button-rebuild-search-index"
+          >
+            {rebuildSearchIndexMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Rebuild Search Index
+          </Button>
           {products.length > 0 && (
             <Button 
               variant="outline" 

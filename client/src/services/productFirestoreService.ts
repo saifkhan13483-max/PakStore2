@@ -16,6 +16,7 @@ import {
 import { db } from "@/lib/firebase";
 import { type Product, type InsertProduct, insertProductSchema } from "@shared/schema";
 import { getPublicIdFromUrl, deleteCloudinaryImage } from "@/lib/cloudinary";
+import { searchIndexService } from "@/services/searchIndexService";
 
 const COLLECTION_NAME = "products";
 const productsRef = collection(db, COLLECTION_NAME);
@@ -218,7 +219,11 @@ export const productFirestoreService = {
         rating: productData.rating ?? 0,
         reviewCount: productData.reviewCount ?? 0
       });
-      return { ...productData, id: docRef.id } as Product;
+      const newProduct = { ...productData, id: docRef.id } as Product;
+      searchIndexService.updateSearchIndexForProduct(docRef.id).catch((err) =>
+        console.error("Failed to update search index after create:", err)
+      );
+      return newProduct;
     } catch (error: any) {
       console.error("Error creating product:", error);
       throw new Error(`Failed to create product: ${error.message}`);
@@ -257,10 +262,9 @@ export const productFirestoreService = {
     const cleanUpdates = cleanObject(updates);
 
     await updateDoc(docRef, { ...cleanUpdates, updatedAt: new Date() });
-    
-    // Trigger sitemap update notification if needed (e.g. ping search engines)
-    // sitemapService.pingSearchEngines();
-    
+    searchIndexService.updateSearchIndexForProduct(productId).catch((err) =>
+      console.error("Failed to update search index after update:", err)
+    );
     return { id: productId, ...updates };
   },
 
@@ -281,11 +285,19 @@ export const productFirestoreService = {
 
       // 3. Delete from Firestore
       await deleteDoc(doc(db, COLLECTION_NAME, productId));
+
+      // 4. Remove from search index
+      searchIndexService.deleteSearchIndexForProduct(productId).catch((err) =>
+        console.error("Failed to remove from search index after delete:", err)
+      );
       return true;
     } catch (error) {
       console.error("Error in deleteProduct:", error);
       // Still attempt to delete from Firestore even if image deletion fails
       await deleteDoc(doc(db, COLLECTION_NAME, productId));
+      searchIndexService.deleteSearchIndexForProduct(productId).catch((err) =>
+        console.error("Failed to remove from search index after delete:", err)
+      );
       return true;
     }
   }

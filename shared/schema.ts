@@ -208,3 +208,28 @@ export const signupSchema = z.object({
 export type LoginValues = z.infer<typeof loginSchema>;
 export type SignupValues = z.infer<typeof signupSchema>;
 export type ProfileValues = z.infer<typeof profileSchema>;
+
+/**
+ * Search Index Schemas
+ */
+
+export const searchIndexEntrySchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  nameLower: z.string(),
+  nameTokens: z.array(z.string()),
+  categoryName: z.string(),
+  categorySlug: z.string(),
+  parentCategoryName: z.string(),
+  price: z.number(),
+  primaryImage: z.string(),
+  slug: z.string(),
+  labels: z.array(z.string()),
+  inStock: z.boolean(),
+  active: z.boolean(),
+  rating: z.number(),
+  reviewCount: z.number(),
+  searchScore: z.number(),
+});
+
+export type SearchIndexEntry = z.infer<typeof searchIndexEntrySchema>;
