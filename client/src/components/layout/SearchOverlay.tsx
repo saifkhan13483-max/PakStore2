@@ -85,7 +85,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const navigateToSearch = (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;
-    setLocation(`/search?q=${encodeURIComponent(trimmed)}`);
+    setLocation(`/products?q=${encodeURIComponent(trimmed)}`);
     onClose();
   };
 
