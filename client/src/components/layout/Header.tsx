@@ -350,31 +350,16 @@ const Header = () => {
             />
           </Link>
 
-          {/* Cart */}
-          <Link href="/cart" data-testid="header-mobile-cart-link">
-            <button
-              type="button"
-              className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-700"
-              aria-label="Cart"
-              data-testid="header-mobile-cart-btn"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              <AnimatePresence>
-                {totalItems > 0 && (
-                  <motion.span
-                    key="mobile-cart-badge"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center"
-                    data-testid="mobile-cart-badge"
-                  >
-                    {totalItems > 99 ? "99+" : totalItems}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          </Link>
+          {/* Search */}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-700"
+            aria-label="Open search"
+            data-testid="header-mobile-search-btn"
+          >
+            <Search className="h-5 w-5" />
+          </button>
         </div>
       </header>
 

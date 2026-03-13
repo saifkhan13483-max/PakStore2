@@ -1,8 +1,6 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { User, ShoppingBag, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -40,17 +38,7 @@ export function MobileNav({
   parentCategories,
   categories,
 }: MobileNavProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [, setLocation] = useLocation();
   const { user, isAuthenticated, logout } = useAuthStore();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLocation(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      onClose();
-    }
-  };
 
   const handleLinkClick = () => {
     onClose();
@@ -79,19 +67,6 @@ export function MobileNav({
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Search */}
-          <div className="px-5 pt-4 pb-3">
-            <form onSubmit={handleSearch}>
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="rounded-full bg-gray-100 border-0 focus-visible:ring-green-500 pl-4"
-                data-testid="mobile-nav-search"
-              />
-            </form>
-          </div>
-
           {/* Navigation */}
           <nav className="px-2">
             {/* Plain links */}
