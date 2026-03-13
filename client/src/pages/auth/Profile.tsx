@@ -141,40 +141,40 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
+    <div className="container mx-auto px-4 py-6 md:py-12 max-w-4xl pb-24 md:pb-12">
       <SEO title="My Profile - PakCart" />
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
-        <p className="text-muted-foreground">Manage your personal information and preferences.</p>
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Account Settings</h1>
+        <p className="text-muted-foreground text-sm md:text-base">Manage your personal information and preferences.</p>
       </div>
 
-      <div className="grid gap-8">
+      <div className="grid gap-5 md:gap-8">
         {/* Account Information Section */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+              <User className="h-4 w-4 md:h-5 md:w-5" />
               Account Information
             </CardTitle>
-            <CardDescription>View your basic account details and security status</CardDescription>
+            <CardDescription className="text-xs md:text-sm">View your basic account details and security status</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center gap-6 pb-6 border-b">
-              <div className="relative group">
+          <CardContent className="space-y-4 md:space-y-6">
+            <div className="flex items-center gap-4 pb-4 md:pb-6 border-b">
+              <div className="relative group shrink-0">
                 <UserAvatar 
                   photoURL={user.photoURL}
                   displayName={user.displayName}
                   email={user.email}
-                  className="h-20 w-20 border-2 border-primary/20"
+                  className="h-16 w-16 md:h-20 md:w-20 border-2 border-primary/20"
                 />
                 <Dialog open={isAvatarDialogOpen} onOpenChange={setIsAvatarDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
                       size="icon" 
                       variant="secondary" 
-                      className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -bottom-1 -right-1 h-7 w-7 md:h-8 md:w-8 rounded-full shadow-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     >
-                      <Camera className="h-4 w-4" />
+                      <Camera className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md">
@@ -233,18 +233,18 @@ export default function Profile() {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold">{user.displayName || "Valued Customer"}</h3>
-                <p className="text-muted-foreground">{user.email}</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                    {user.providerId === 'password' ? 'Email/Password' : 'Google Authentication'}
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base md:text-xl font-semibold truncate">{user.displayName || "Valued Customer"}</h3>
+                <p className="text-muted-foreground text-xs md:text-sm truncate">{user.email}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-primary/10 text-primary">
+                    {user.providerId === 'password' ? 'Email/Password' : 'Google'}
                   </div>
                   {user.role === 'admin' && (
                     <Link href="/admin">
-                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 border-primary/20 hover:bg-primary/5">
+                      <Button variant="outline" size="sm" className="h-6 md:h-7 text-[10px] md:text-xs gap-1 border-primary/20 hover:bg-primary/5 px-2">
                         <LayoutDashboard className="h-3 w-3" />
-                        Admin Panel
+                        Admin
                       </Button>
                     </Link>
                   )}
@@ -252,7 +252,7 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-md bg-secondary/50">
                   <Mail className="h-4 w-4 text-primary" />
@@ -310,16 +310,16 @@ export default function Profile() {
 
         {/* Edit Profile Form */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 md:space-y-8">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <Phone className="h-4 w-4 md:h-5 md:w-5" />
                   Contact & Shipping
                 </CardTitle>
-                <CardDescription>Update your delivery information for faster checkout</CardDescription>
+                <CardDescription className="text-xs md:text-sm">Update your delivery information for faster checkout</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 md:space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -401,8 +401,8 @@ export default function Profile() {
                   )}
                 />
 
-                <div className="pt-4 flex justify-end">
-                  <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
+                <div className="pt-2 md:pt-4">
+                  <Button type="submit" disabled={isUpdating} className="w-full md:w-auto md:float-right">
                     {isUpdating ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
