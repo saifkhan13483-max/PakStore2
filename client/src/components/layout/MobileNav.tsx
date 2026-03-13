@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { X, User, ShoppingBag, LogOut } from "lucide-react";
+import { User, ShoppingBag, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,7 +15,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Link as WouterLink } from "wouter";
 import logoImg from "@/assets/logo.png";
 import type { Category, ParentCategory } from "@shared/schema";
 import { useAuthStore } from "@/store/authStore";
@@ -65,7 +64,7 @@ export function MobileNav({
         data-testid="mobile-nav-sheet"
       >
         {/* Sheet header */}
-        <SheetHeader className="flex flex-row items-center justify-between px-5 py-4 border-b shrink-0">
+        <SheetHeader className="px-5 py-4 border-b shrink-0 text-left">
           <SheetTitle className="p-0 m-0">
             <Link href="/" onClick={handleLinkClick}>
               <img
@@ -76,15 +75,6 @@ export function MobileNav({
               />
             </Link>
           </SheetTitle>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 hover:bg-gray-100 transition-colors"
-            aria-label="Close menu"
-            data-testid="mobile-nav-close"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
         </SheetHeader>
 
         {/* Scrollable body */}
