@@ -169,7 +169,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             <div className="bg-white shadow-2xl flex flex-col overflow-hidden">
 
               {/* ── Input section (sticky, never scrolls away) ── */}
-              <div className="px-3 sm:px-6 pt-3 sm:pt-5 pb-3 shrink-0">
+              <div className="px-3 sm:px-6 pt-3 sm:pt-5 pb-3 shrink-0 lg:max-w-2xl lg:mx-auto lg:w-full">
 
                 {/* Live region */}
                 <div
@@ -265,7 +265,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 role="listbox"
                 aria-label="Search suggestions"
                 className={cn(
-                  "overflow-y-auto overscroll-contain px-3 sm:px-6",
+                  "overflow-y-auto overscroll-contain px-3 sm:px-6 lg:max-w-2xl lg:mx-auto lg:w-full",
                   !isDropdownOpen && "hidden"
                 )}
                 style={{ maxHeight: "calc(92dvh - 80px)" }}
