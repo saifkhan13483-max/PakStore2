@@ -356,11 +356,6 @@ export default function Home() {
                 <h2 className="font-display text-4xl font-bold text-foreground mb-2">New Arrivals</h2>
                 <div className="h-1.5 w-16 bg-secondary rounded-full" />
               </motion.div>
-              <Link href="/new-arrivals">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-full transition-all duration-300">
-                  Shop New Collection
-                </Button>
-              </Link>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
@@ -448,13 +443,6 @@ export default function Home() {
               </div>
             )}
 
-            <div className="mt-12 text-center md:hidden">
-              <Link href="/products">
-                <Button size="lg" className="rounded-full w-full">
-                  View All Products
-                </Button>
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -472,11 +460,6 @@ export default function Home() {
                   <h2 className="font-display text-4xl font-bold text-foreground mb-2">Most Liked</h2>
                   <div className="h-1.5 w-16 bg-pink-500 rounded-full" />
                 </motion.div>
-                <Link href="/products">
-                  <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white rounded-full transition-all duration-300">
-                    Explore Liked Items
-                  </Button>
-                </Link>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
