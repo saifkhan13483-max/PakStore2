@@ -89,20 +89,22 @@ export function useRealtimeCollection<T extends { id?: string }>(
       (snapshot) => {
         try {
           const documents = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
+            ...doc.data(),
+            id: doc.id, // Always use Firestore's actual doc ID — overrides any stale "id" field in the stored data
           })) as T[];
           
           const validatedData = documents.map(doc => {
             try {
               const parsed = schema.parse(doc);
-              return { ...parsed, id: doc.id } as T;
+              return { ...parsed, id: (doc as any).id } as T;
             } catch (err) {
-              console.error(`Validation error for document ${doc.id} in ${collectionName}:`, err);
-              // Return a partial object or skip if validation fails to prevent the whole collection from failing
-              return { ...doc, id: doc.id } as unknown as T;
+              // Only log in development to avoid console noise in production
+              if (import.meta.env.DEV) {
+                console.warn(`Skipping invalid document in "${collectionName}":`, err);
+              }
+              return null;
             }
-          });
+          }).filter(Boolean) as T[];
           
           // Sync with TanStack Query cache
           queryClient.setQueryData(queryKey, validatedData);

@@ -15,7 +15,6 @@ import {
 } from "firebase/firestore";
 import { Comment, InsertComment } from "@shared/schema";
 
-// Helper to convert Firestore timestamps to Date
 function convertToDate(value: any): Date {
   if (value instanceof Date) return value;
   if (typeof value === 'string') return new Date(value);
@@ -29,29 +28,25 @@ export const commentFirestoreService = {
     try {
       if (!productId) return [];
       
-      console.log("DEBUG client getComments productId:", productId);
       const q = query(
         collection(db, "comments"),
         where("productId", "==", productId),
         orderBy("createdAt", "desc")
       );
       const snapshot = await getDocs(q);
-      console.log("DEBUG client getComments snapshot size:", snapshot.size);
-      const comments = snapshot.docs.map(doc => {
+      return snapshot.docs.map(doc => {
         const data = doc.data();
         return {
-          id: doc.id,
           ...data,
+          id: doc.id, // Always use Firestore doc ID last so it takes priority
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
           updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
         } as Comment;
       });
-      return comments;
     } catch (error) {
-      console.error("DEBUG Error fetching comments:", { productId, error });
+      console.error("Error fetching comments:", { productId, error });
       // Fallback: try without orderBy in case index is missing
       try {
-        console.log("DEBUG client getComments fallback (no orderBy)");
         const q = query(
           collection(db, "comments"),
           where("productId", "==", productId)
@@ -60,22 +55,21 @@ export const commentFirestoreService = {
         const comments = snapshot.docs.map(doc => {
           const data = doc.data();
           return {
-            id: doc.id,
             ...data,
+            id: doc.id,
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
             updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : data.updatedAt
           } as Comment;
         });
         return comments.sort((a, b) => convertToDate(b.createdAt).getTime() - convertToDate(a.createdAt).getTime());
       } catch (fallbackError) {
-        console.error("DEBUG client getComments fallback failed:", fallbackError);
+        console.error("Error fetching comments (fallback):", fallbackError);
         return [];
       }
     }
   },
 
   async createComment(comment: InsertComment): Promise<Comment> {
-    console.log("DEBUG Creating Comment:", comment);
     const data = {
       ...comment,
       createdAt: Timestamp.now(),
@@ -83,7 +77,6 @@ export const commentFirestoreService = {
     };
     try {
       const docRef = await addDoc(collection(db, "comments"), data);
-      console.log("DEBUG Comment Doc Created:", docRef.id);
       
       // Aggregate rating on product
       const q = query(
@@ -91,7 +84,6 @@ export const commentFirestoreService = {
         where("productId", "==", comment.productId)
       );
       const snapshot = await getDocs(q);
-      console.log("DEBUG Comments Snapshot size for aggregation:", snapshot.size);
       const comments = snapshot.docs.map(d => d.data());
       const totalRating = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
       const averageRating = totalRating / (comments.length || 1);
@@ -103,7 +95,6 @@ export const commentFirestoreService = {
         updatedAt: Timestamp.now()
       });
       
-      // Invalidate queries to refresh UI
       await queryClient.invalidateQueries({ queryKey: ["comments", comment.productId] });
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       await queryClient.invalidateQueries({ queryKey: ["product", comment.productId] });
@@ -121,7 +112,7 @@ export const commentFirestoreService = {
         updatedAt: data.updatedAt.toDate()
       } as Comment;
     } catch (error) {
-      console.error("DEBUG Error creating comment in Firestore:", error);
+      console.error("Error creating comment:", error);
       throw error;
     }
   },
@@ -138,7 +129,6 @@ export const commentFirestoreService = {
         updatedAt: Timestamp.now()
       });
 
-      // Re-aggregate
       const q = query(
         collection(db, "comments"),
         where("productId", "==", commentData.productId)
@@ -155,12 +145,11 @@ export const commentFirestoreService = {
         updatedAt: Timestamp.now()
       });
 
-      // Invalidate queries
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       await queryClient.invalidateQueries({ queryKey: ["product", commentData.productId] });
       await queryClient.invalidateQueries({ queryKey: ["product"] });
     } catch (error) {
-      console.error("Error updating comment in Firestore:", error);
+      console.error("Error updating comment:", error);
       throw error;
     }
   },
@@ -174,7 +163,6 @@ export const commentFirestoreService = {
 
       await deleteDoc(docRef);
 
-      // Re-aggregate
       const q = query(
         collection(db, "comments"),
         where("productId", "==", commentData.productId)
@@ -199,12 +187,11 @@ export const commentFirestoreService = {
         });
       }
 
-      // Invalidate queries
       await queryClient.invalidateQueries({ queryKey: ["products"] });
       await queryClient.invalidateQueries({ queryKey: ["product", commentData.productId] });
       await queryClient.invalidateQueries({ queryKey: ["product"] });
     } catch (error) {
-      console.error("Error deleting comment from Firestore:", error);
+      console.error("Error deleting comment:", error);
       throw error;
     }
   }
