@@ -44,7 +44,7 @@ export function MegaDropdown({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="absolute left-1/2 -translate-x-1/2 top-full bg-white shadow-2xl rounded-b-2xl border-t-2 border-green-500 overflow-hidden z-40 w-[620px]"
+          className="absolute left-0 right-0 top-full bg-white shadow-2xl rounded-b-2xl border-t-2 border-green-500 overflow-hidden z-40"
           onMouseLeave={onClose}
         >
           <div className="flex">
