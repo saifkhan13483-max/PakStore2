@@ -25,72 +25,98 @@
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
-  /* Modern Premium E-commerce Palette */
-  --background: 36 33% 97%;
-  --foreground: 170 25% 15%;
-  
-  --card: 0 0% 100%;
-  --card-foreground: 170 25% 15%;
-  
-  --popover: 0 0% 100%;
-  --popover-foreground: 170 25% 15%;
-  
-  --primary: 168 65% 28%;
-  --primary-hover: 168 65% 24%;
-  --primary-foreground: 0 0% 100%;
-  
-  --secondary: 42 75% 55%;
-  --secondary-hover: 42 75% 50%;
-  --secondary-foreground: 170 25% 15%;
-  
-  --muted: 165 25% 94%;
-  --muted-foreground: 170 12% 40%;
-  
-  --accent: 42 75% 55%;
-  --accent-foreground: 170 25% 15%;
-  
-  --destructive: 4 75% 55%;
-  --destructive-hover: 4 75% 50%;
+  /* PakCart Premium Design System — Light Mode */
+
+  /* Surfaces */
+  --background:          36 20% 98%;
+  --foreground:          170 22% 11%;
+
+  --card:                36 15% 99%;
+  --card-foreground:     170 22% 11%;
+
+  --popover:             0 0% 100%;
+  --popover-foreground:  170 22% 11%;
+
+  /* Brand — Primary Teal */
+  --primary:             168 58% 32%;
+  --primary-hover:       168 58% 27%;
+  --primary-foreground:  0 0% 100%;
+
+  /* Brand — Accent Gold */
+  --secondary:           38 68% 52%;
+  --secondary-hover:     38 68% 46%;
+  --secondary-foreground: 170 22% 10%;
+
+  /* Neutrals */
+  --muted:               168 18% 95%;
+  --muted-foreground:    168 10% 42%;
+
+  --accent:              38 68% 52%;
+  --accent-foreground:   170 22% 10%;
+
+  /* Utility */
+  --destructive:         5 70% 52%;
+  --destructive-hover:   5 70% 46%;
   --destructive-foreground: 0 0% 100%;
-  
-  --border: 170 15% 88%;
-  --input: 170 15% 88%;
-  --ring: 168 65% 28%;
-  
-  --radius: 0.75rem;
+
+  --border:              168 16% 90%;
+  --input:               168 16% 90%;
+  --ring:                168 58% 32%;
+
+  /* Radius — premium geometric, not pill, not sharp */
+  --radius: 0.625rem;
+
+  /* Teal-tinted shadows */
+  --shadow-sm:  0 1px 4px hsl(168 30% 15% / 0.06);
+  --shadow-md:  0 2px 12px hsl(168 30% 15% / 0.08);
+  --shadow-lg:  0 8px 28px hsl(168 30% 15% / 0.12);
+  --shadow-xl:  0 16px 48px hsl(168 30% 15% / 0.15);
 }
 
 .dark {
-  --background: 170 25% 5%;
-  --foreground: 36 33% 97%;
-  
-  --card: 170 25% 8%;
-  --card-foreground: 36 33% 97%;
-  
-  --popover: 170 25% 8%;
-  --popover-foreground: 36 33% 97%;
-  
-  --primary: 168 65% 35%;
-  --primary-hover: 168 65% 30%;
-  --primary-foreground: 0 0% 100%;
-  
-  --secondary: 42 75% 55%;
-  --secondary-hover: 42 75% 50%;
-  --secondary-foreground: 170 25% 5%;
-  
-  --muted: 170 20% 12%;
-  --muted-foreground: 170 12% 70%;
-  
-  --accent: 42 75% 55%;
-  --accent-foreground: 170 25% 5%;
-  
-  --destructive: 4 75% 55%;
-  --destructive-hover: 4 75% 50%;
+  /* PakCart Premium Design System — Dark Mode */
+
+  /* Surfaces — layered in 3% steps for depth */
+  --background:          170 24% 6%;
+  --foreground:          36 20% 96%;
+
+  --card:                170 22% 9%;
+  --card-foreground:     36 20% 96%;
+
+  --popover:             170 22% 11%;
+  --popover-foreground:  36 20% 96%;
+
+  /* Brand — Primary Teal */
+  --primary:             168 52% 40%;
+  --primary-hover:       168 52% 35%;
+  --primary-foreground:  0 0% 100%;
+
+  /* Brand — Accent Gold */
+  --secondary:           38 65% 58%;
+  --secondary-hover:     38 65% 52%;
+  --secondary-foreground: 170 24% 6%;
+
+  /* Neutrals */
+  --muted:               170 18% 13%;
+  --muted-foreground:    168 10% 62%;
+
+  --accent:              38 65% 58%;
+  --accent-foreground:   170 24% 6%;
+
+  /* Utility */
+  --destructive:         5 70% 55%;
+  --destructive-hover:   5 70% 50%;
   --destructive-foreground: 0 0% 100%;
-  
-  --border: 170 20% 15%;
-  --input: 170 20% 15%;
-  --ring: 168 65% 35%;
+
+  --border:              170 18% 16%;
+  --input:               170 18% 16%;
+  --ring:                168 52% 40%;
+
+  /* Teal-tinted shadows for dark mode */
+  --shadow-sm:  0 1px 4px hsl(168 30% 5% / 0.3);
+  --shadow-md:  0 2px 12px hsl(168 30% 5% / 0.4);
+  --shadow-lg:  0 8px 28px hsl(168 30% 5% / 0.5);
+  --shadow-xl:  0 16px 48px hsl(168 30% 5% / 0.6);
 }
 
 @layer base {
@@ -100,23 +126,95 @@
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary;
     font-family: var(--font-body);
-    line-height: 1.6;
+    font-weight: 400;
+    line-height: 1.65;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     @apply font-bold tracking-tight text-foreground;
+    line-height: 1.2;
   }
-  h1 { @apply text-4xl md:text-5xl lg:text-6xl; }
-  h2 { @apply text-3xl md:text-4xl; }
-  h3 { @apply text-2xl md:text-3xl; }
+  h1 { @apply text-4xl md:text-5xl lg:text-6xl; font-weight: 800; }
+  h2 { @apply text-3xl md:text-4xl; font-weight: 700; }
+  h3 { @apply text-2xl md:text-3xl; font-weight: 700; }
+  h4 { @apply text-xl md:text-2xl; font-weight: 600; }
+  h5 { @apply text-lg; font-weight: 600; }
+  h6 { @apply text-base; font-weight: 600; }
+
+  label {
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  button, [role="button"] {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-  
+
+  /* Teal-tinted shadow utilities */
+  .shadow-brand-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  .shadow-brand-md {
+    box-shadow: var(--shadow-md);
+  }
+  .shadow-brand-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  .shadow-brand-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Glass panel */
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl dark:bg-black/50 dark:border-white/10;
+    @apply bg-white/70 backdrop-blur-md border border-white/20 dark:bg-black/40 dark:border-white/8;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Premium card hover */
+  .card-hover {
+    @apply transition-all duration-200;
+    box-shadow: var(--shadow-md);
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  /* Button base feel */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground rounded-[10px] px-6 py-2.5 font-semibold transition-all duration-150;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover {
+    background-color: hsl(var(--primary-hover));
+    box-shadow: var(--shadow-md);
+    transform: scale(1.01);
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground rounded-[10px] px-6 py-2.5 font-semibold transition-all duration-150;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-secondary:hover {
+    background-color: hsl(var(--secondary-hover));
+    box-shadow: var(--shadow-md);
+    transform: scale(1.01);
+  }
+
+  /* Section spacing */
+  .section-padding {
+    @apply py-16 md:py-20;
+  }
+  .section-padding-sm {
+    @apply py-10 md:py-14;
   }
 }

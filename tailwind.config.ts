@@ -6,9 +6,18 @@ export default {
   theme: {
         extend: {
                 borderRadius: {
-                        lg: '.5625rem',
-                        md: '.375rem',
-                        sm: '.1875rem'
+                        lg: '0.75rem',
+                        md: '0.625rem',
+                        sm: '0.5rem',
+                        xl: '1rem',
+                        '2xl': '1.25rem',
+                        pill: '999px'
+                },
+                boxShadow: {
+                        'brand-sm': '0 1px 4px hsl(168 30% 15% / 0.06)',
+                        'brand-md': '0 2px 12px hsl(168 30% 15% / 0.08)',
+                        'brand-lg': '0 8px 28px hsl(168 30% 15% / 0.12)',
+                        'brand-xl': '0 16px 48px hsl(168 30% 15% / 0.15)',
                 },
                 colors: {
                         background: 'hsl(var(--background) / <alpha-value>)',
