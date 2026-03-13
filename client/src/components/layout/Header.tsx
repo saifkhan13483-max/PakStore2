@@ -138,7 +138,7 @@ const Header = () => {
         )}
       >
         <div className="container mx-auto px-6 relative">
-          <div className="grid grid-cols-3 items-center h-16">
+          <div className="grid grid-cols-3 items-center h-20">
             {/* LEFT: Logo */}
             <div className="flex items-center">
               <Link href="/" data-testid="header-logo-link">
@@ -353,7 +353,7 @@ const Header = () => {
 
       {/* ── MOBILE HEADER ── */}
       <header className="lg:hidden sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center justify-between px-4 h-16">
           {/* Hamburger */}
           <button
             type="button"
