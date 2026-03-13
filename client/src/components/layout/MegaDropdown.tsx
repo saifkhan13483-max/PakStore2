@@ -133,7 +133,17 @@ export function MegaDropdown({
           </div>
 
           {/* Bottom bar */}
-          <div className="bg-green-50 py-3 text-center border-t border-green-100">
+          <div className="bg-green-50 py-3 border-t border-green-100 flex items-center justify-center gap-8">
+            <Link
+              href="/collections"
+              onClick={onClose}
+              data-testid="mega-dropdown-view-collections"
+            >
+              <span className="text-sm font-medium text-green-700 hover:text-green-900 transition-colors">
+                Shop All Collections →
+              </span>
+            </Link>
+            <span className="text-green-200 select-none">|</span>
             <Link
               href="/categories"
               onClick={onClose}
