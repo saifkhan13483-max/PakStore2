@@ -3,7 +3,6 @@ import { Search, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProducts } from "@/hooks/use-products";
-import { useCategories } from "@/hooks/use-categories";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -24,7 +23,6 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: products } = useProducts();
-  const { categories } = useCategories();
 
   useEffect(() => {
     if (isOpen) {
@@ -46,30 +44,17 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
   const results =
     query.trim().length > 0
-      ? [
-          ...(products
-            ?.filter((p) =>
-              p.name.toLowerCase().includes(query.toLowerCase())
-            )
-            .slice(0, 4)
-            .map((p) => ({
-              id: p.id,
-              slug: p.slug,
-              title: p.name,
-              type: "product" as const,
-            })) ?? []),
-          ...(categories
-            ?.filter((c) =>
-              c.name.toLowerCase().includes(query.toLowerCase())
-            )
-            .slice(0, 3)
-            .map((c) => ({
-              id: c.id,
-              slug: c.slug,
-              title: c.name,
-              type: "category" as const,
-            })) ?? []),
-        ]
+      ? (products
+          ?.filter((p) =>
+            p.name.toLowerCase().includes(query.toLowerCase())
+          )
+          .slice(0, 6)
+          .map((p) => ({
+            id: p.id,
+            slug: p.slug,
+            title: p.name,
+            type: "product" as const,
+          })) ?? [])
       : [];
 
   const handleSearch = (e: React.FormEvent) => {
