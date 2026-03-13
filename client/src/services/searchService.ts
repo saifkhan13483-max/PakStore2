@@ -194,12 +194,13 @@ export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
   const queryLower = rawQuery.toLowerCase().trim();
   if (queryLower.length < 2) return [];
 
+  const emptyDocs: QueryDocumentSnapshot<DocumentData>[] = [];
+
+  // Use a simple array-contains query (no composite index needed)
   const productQuery = query(
     collection(db, SEARCH_INDEX_COLLECTION),
     where("nameTokens", "array-contains", queryLower),
-    where("active", "==", true),
-    orderBy("searchScore", "desc"),
-    limit(5)
+    limit(10)
   );
 
   const lastChar = rawQuery.trim().slice(-1);
@@ -212,22 +213,27 @@ export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
     limit(2)
   );
 
-  const emptyDocs: QueryDocumentSnapshot<DocumentData>[] = [];
-
   const [productSnap, categorySnap] = await Promise.all([
-    getDocs(productQuery),
+    getDocs(productQuery).catch(() => ({ docs: emptyDocs })),
     getDocs(categoryQuery).catch(() => ({ docs: emptyDocs })),
   ]);
 
-  const productSuggestions: Suggestion[] = productSnap.docs.map((d) => {
-    const data = d.data() as RawIndexEntry;
-    return {
-      text: data.name,
-      type: "product" as const,
-      slug: data.slug,
-      image: data.primaryImage,
-    };
-  });
+  const productSuggestions: Suggestion[] = productSnap.docs
+    .map((d) => {
+      const data = d.data() as RawIndexEntry;
+      return {
+        text: data.name,
+        type: "product" as const,
+        slug: data.slug,
+        image: data.primaryImage,
+        _score: data.searchScore ?? 0,
+        _active: data.active ?? true,
+      };
+    })
+    .filter((s) => s._active)
+    .sort((a, b) => b._score - a._score)
+    .slice(0, 5)
+    .map(({ _score: _s, _active: _a, ...s }) => s);
 
   const categorySuggestions: Suggestion[] = categorySnap.docs.map((d) => {
     const data = d.data();
@@ -244,17 +250,19 @@ export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
 export async function getPopularSearches(): Promise<string[]> {
   const q = query(
     collection(db, SEARCH_INDEX_COLLECTION),
-    where("active", "==", true),
-    orderBy("searchScore", "desc"),
-    limit(20)
+    limit(40)
   );
-  const snap = await getDocs(q);
+  const snap = await getDocs(q).catch(() => ({ docs: [] as QueryDocumentSnapshot<DocumentData>[] }));
+
+  const entries = snap.docs
+    .map((d) => d.data() as RawIndexEntry)
+    .filter((data) => data.active !== false)
+    .sort((a, b) => (b.searchScore ?? 0) - (a.searchScore ?? 0));
 
   const seen = new Set<string>();
   const result: string[] = [];
 
-  for (const d of snap.docs) {
-    const data = d.data() as RawIndexEntry;
+  for (const data of entries) {
     const catName = data.categoryName;
     if (catName && !seen.has(catName)) {
       seen.add(catName);
