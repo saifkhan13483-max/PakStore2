@@ -81,6 +81,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Search index: Public read, Admin write
+    match /searchIndex/{entryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Search analytics: Public read, Auth write
+    match /searchAnalytics/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;

@@ -190,17 +190,37 @@ export async function searchProductsPage(
   return { results: cleanResults, cursor: lastDoc };
 }
 
+function buildQueryVariants(queryLower: string): Set<string> {
+  const variants = new Set<string>([queryLower]);
+  if (queryLower.endsWith("s") && queryLower.length > 2) {
+    variants.add(queryLower.slice(0, -1));
+  } else {
+    variants.add(queryLower + "s");
+  }
+  if (queryLower.endsWith("es") && queryLower.length > 3) {
+    variants.add(queryLower.slice(0, -2));
+  }
+  return variants;
+}
+
+function matchesQuery(text: string, variants: Set<string>): boolean {
+  const t = text.toLowerCase();
+  for (const v of variants) if (t.includes(v)) return true;
+  return false;
+}
+
 export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
   const queryLower = rawQuery.toLowerCase().trim();
   if (queryLower.length < 2) return [];
 
+  const variants = buildQueryVariants(queryLower);
   const emptyDocs: QueryDocumentSnapshot<DocumentData>[] = [];
 
-  // Use a simple array-contains query (no composite index needed)
+  // Query products directly — products collection has public read access
   const productQuery = query(
-    collection(db, SEARCH_INDEX_COLLECTION),
-    where("nameTokens", "array-contains", queryLower),
-    limit(10)
+    collection(db, "products"),
+    where("active", "==", true),
+    limit(60)
   );
 
   const lastChar = rawQuery.trim().slice(-1);
@@ -210,7 +230,7 @@ export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
     collection(db, CATEGORIES_COLLECTION),
     where("name", ">=", rawQuery.trim()),
     where("name", "<", prefix + nextChar),
-    limit(2)
+    limit(3)
   );
 
   const [productSnap, categorySnap] = await Promise.all([
@@ -218,60 +238,59 @@ export async function getSuggestions(rawQuery: string): Promise<Suggestion[]> {
     getDocs(categoryQuery).catch(() => ({ docs: emptyDocs })),
   ]);
 
-  const productSuggestions: Suggestion[] = productSnap.docs
-    .map((d) => {
-      const data = d.data() as RawIndexEntry;
-      return {
-        text: data.name,
-        type: "product" as const,
-        slug: data.slug,
-        image: data.primaryImage,
-        _score: data.searchScore ?? 0,
-        _active: data.active ?? true,
-      };
-    })
-    .filter((s) => s._active)
-    .sort((a, b) => b._score - a._score)
-    .slice(0, 5)
-    .map(({ _score: _s, _active: _a, ...s }) => s);
+  type ScoredSuggestion = Suggestion & { _score: number };
 
-  const categorySuggestions: Suggestion[] = categorySnap.docs.map((d) => {
-    const data = d.data();
-    return {
-      text: data.name as string,
-      type: "category" as const,
-      slug: data.slug as string,
-    };
-  });
+  const productSuggestions: Suggestion[] = (
+    productSnap.docs
+      .map((d): ScoredSuggestion | null => {
+        const data = d.data();
+        const name: string = data.name ?? "";
+        const matches =
+          matchesQuery(name, variants) ||
+          (Array.isArray(data.labels) && data.labels.some((l: string) => matchesQuery(l, variants)));
+        if (!matches) return null;
+        const rating = Number(data.rating ?? 0);
+        const reviewCount = Number(data.reviewCount ?? 0);
+        const isBestSeller = Array.isArray(data.labels) && data.labels.includes("Best Seller");
+        const score = rating * reviewCount * 0.3 + (isBestSeller ? 50 : 0) + (data.inStock ? 20 : 0);
+        return {
+          text: name,
+          type: "product" as const,
+          slug: data.slug as string,
+          image: Array.isArray(data.images) ? (data.images[0] ?? "") : "",
+          _score: score,
+        };
+      })
+      .filter((s): s is ScoredSuggestion => s !== null)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 5)
+      .map(({ _score: _s, ...s }) => s)
+  );
+
+  const categorySuggestions: Suggestion[] = categorySnap.docs
+    .filter((d) => matchesQuery(d.data().name ?? "", variants))
+    .map((d) => {
+      const data = d.data();
+      return {
+        text: data.name as string,
+        type: "category" as const,
+        slug: data.slug as string,
+      };
+    });
 
   return [...productSuggestions, ...categorySuggestions].slice(0, 7);
 }
 
 export async function getPopularSearches(): Promise<string[]> {
-  const q = query(
-    collection(db, SEARCH_INDEX_COLLECTION),
-    limit(40)
+  // Use categories collection (public read) as popular search terms
+  const snap = await getDocs(collection(db, CATEGORIES_COLLECTION)).catch(
+    () => ({ docs: [] as QueryDocumentSnapshot<DocumentData>[] })
   );
-  const snap = await getDocs(q).catch(() => ({ docs: [] as QueryDocumentSnapshot<DocumentData>[] }));
 
-  const entries = snap.docs
-    .map((d) => d.data() as RawIndexEntry)
-    .filter((data) => data.active !== false)
-    .sort((a, b) => (b.searchScore ?? 0) - (a.searchScore ?? 0));
-
-  const seen = new Set<string>();
-  const result: string[] = [];
-
-  for (const data of entries) {
-    const catName = data.categoryName;
-    if (catName && !seen.has(catName)) {
-      seen.add(catName);
-      result.push(catName);
-    }
-    if (result.length >= 8) break;
-  }
-
-  return result;
+  return snap.docs
+    .map((d) => d.data().name as string)
+    .filter(Boolean)
+    .slice(0, 8);
 }
 
 export function getRecentSearches(): string[] {
