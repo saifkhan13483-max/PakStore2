@@ -121,31 +121,54 @@ export const productFirestoreService = {
       if (filters.search) {
         const searchLower = filters.search.toLowerCase().trim();
 
-        // Build a list of search variants to handle common plural/singular mismatches.
-        // e.g. "bags" → also try "bag"; "watch" → also try "watches"
-        const variants = new Set<string>([searchLower]);
-        if (searchLower.endsWith("s") && searchLower.length > 2) {
-          variants.add(searchLower.slice(0, -1)); // remove trailing 's'
-        } else {
-          variants.add(searchLower + "s"); // add trailing 's'
-        }
-        if (searchLower.endsWith("es") && searchLower.length > 3) {
-          variants.add(searchLower.slice(0, -2)); // remove trailing 'es'
+        // Split into individual keywords (ignore very short words)
+        const keywords = searchLower
+          .split(/\s+/)
+          .filter(w => w.length > 1);
+
+        // For each keyword, build plural/singular variants
+        function getKeywordVariants(word: string): string[] {
+          const v = [word];
+          if (word.endsWith("s") && word.length > 2) v.push(word.slice(0, -1));
+          else v.push(word + "s");
+          if (word.endsWith("es") && word.length > 3) v.push(word.slice(0, -2));
+          return v;
         }
 
-        const matchesAnyVariant = (text: string) => {
+        function keywordMatchesText(word: string, text: string): boolean {
           const t = text.toLowerCase();
-          for (const v of variants) if (t.includes(v)) return true;
-          return false;
-        };
+          return getKeywordVariants(word).some(v => t.includes(v));
+        }
 
-        result = result.filter(p =>
-          matchesAnyVariant(p.name || "") ||
-          matchesAnyVariant(p.description || "") ||
-          matchesAnyVariant(p.slug || "") ||
-          (Array.isArray(p.labels) && p.labels.some((l: string) => matchesAnyVariant(l))) ||
-          (Array.isArray(p.features) && p.features.some((f: string) => matchesAnyVariant(f)))
-        );
+        function countMatches(p: Product): number {
+          const fields = [
+            p.name || "",
+            p.description || "",
+            p.slug || "",
+            ...(Array.isArray(p.labels) ? p.labels : []),
+            ...(Array.isArray(p.features) ? p.features : []),
+          ];
+          return keywords.filter(kw =>
+            fields.some(field => keywordMatchesText(kw, field))
+          ).length;
+        }
+
+        // Compute match count once per product, then filter and sort
+        const withCounts = result
+          .map(p => ({ p, count: countMatches(p) }))
+          .filter(({ count }) => count >= 1);
+
+        // Tier: 5+ matches → tier 1, 3–4 → tier 2, 1–2 → tier 3
+        const getTier = (count: number) =>
+          count >= 5 ? 1 : count >= 3 ? 2 : 3;
+
+        withCounts.sort((a, b) => {
+          const tierDiff = getTier(a.count) - getTier(b.count);
+          if (tierDiff !== 0) return tierDiff;
+          return b.count - a.count; // more matches first within same tier
+        });
+
+        result = withCounts.map(({ p }) => p);
       }
 
       return result;
