@@ -42,27 +42,40 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const results =
-    query.trim().length > 0
-      ? (products
-          ?.filter((p) => {
-            const q = query.toLowerCase();
-            return (
-              (p.name?.toLowerCase() || "").includes(q) ||
-              (p.description?.toLowerCase() || "").includes(q) ||
-              (Array.isArray((p as any).tags)
-                ? (p as any).tags.some((t: string) => t.toLowerCase().includes(q))
-                : false)
-            );
-          })
-          .slice(0, 6)
-          .map((p) => ({
-            id: p.id,
-            slug: p.slug,
-            title: p.name,
-            type: "product" as const,
-          })) ?? [])
-      : [];
+  const results = (() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+
+    // Build plural/singular variants so "bags" matches "bag" and vice-versa
+    const variants = new Set<string>([q]);
+    if (q.endsWith("s") && q.length > 2) variants.add(q.slice(0, -1));
+    else variants.add(q + "s");
+    if (q.endsWith("es") && q.length > 3) variants.add(q.slice(0, -2));
+
+    const matches = (text: string) => {
+      const t = text.toLowerCase();
+      for (const v of variants) if (t.includes(v)) return true;
+      return false;
+    };
+
+    return (
+      products
+        ?.filter((p) =>
+          matches(p.name || "") ||
+          matches(p.description || "") ||
+          matches(p.slug || "") ||
+          (Array.isArray((p as any).labels) &&
+            (p as any).labels.some((l: string) => matches(l)))
+        )
+        .slice(0, 6)
+        .map((p) => ({
+          id: p.id,
+          slug: p.slug,
+          title: p.name,
+          type: "product" as const,
+        })) ?? []
+    );
+  })();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

@@ -118,10 +118,32 @@ export const productFirestoreService = {
       let result = products;
 
       if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        result = result.filter(p => 
-          (p.name?.toLowerCase() || "").includes(searchLower) ||
-          (p.description?.toLowerCase() || "").includes(searchLower)
+        const searchLower = filters.search.toLowerCase().trim();
+
+        // Build a list of search variants to handle common plural/singular mismatches.
+        // e.g. "bags" → also try "bag"; "watch" → also try "watches"
+        const variants = new Set<string>([searchLower]);
+        if (searchLower.endsWith("s") && searchLower.length > 2) {
+          variants.add(searchLower.slice(0, -1)); // remove trailing 's'
+        } else {
+          variants.add(searchLower + "s"); // add trailing 's'
+        }
+        if (searchLower.endsWith("es") && searchLower.length > 3) {
+          variants.add(searchLower.slice(0, -2)); // remove trailing 'es'
+        }
+
+        const matchesAnyVariant = (text: string) => {
+          const t = text.toLowerCase();
+          for (const v of variants) if (t.includes(v)) return true;
+          return false;
+        };
+
+        result = result.filter(p =>
+          matchesAnyVariant(p.name || "") ||
+          matchesAnyVariant(p.description || "") ||
+          matchesAnyVariant(p.slug || "") ||
+          (Array.isArray(p.labels) && p.labels.some((l: string) => matchesAnyVariant(l))) ||
+          (Array.isArray(p.features) && p.features.some((f: string) => matchesAnyVariant(f)))
         );
       }
 
