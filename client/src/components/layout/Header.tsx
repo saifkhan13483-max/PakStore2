@@ -137,7 +137,7 @@ const Header = () => {
             : "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
         )}
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-6 relative">
           <div className="grid grid-cols-3 items-center h-16">
             {/* LEFT: Logo */}
             <div className="flex items-center">
@@ -333,21 +333,21 @@ const Header = () => {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Mega dropdown — anchored to full header width via parent relative */}
-        <div
-          onMouseEnter={handleMegaMouseEnter}
-          onMouseLeave={handleMegaMouseLeave}
-        >
-          <MegaDropdown
-            isOpen={isMegaOpen}
-            parentCategories={parentCategories}
-            categories={categories}
-            hoveredParentId={hoveredParentId}
-            onParentHover={handleParentHover}
-            onClose={handleMegaClose}
-          />
+          {/* Mega dropdown — anchored to container width */}
+          <div
+            onMouseEnter={handleMegaMouseEnter}
+            onMouseLeave={handleMegaMouseLeave}
+          >
+            <MegaDropdown
+              isOpen={isMegaOpen}
+              parentCategories={parentCategories}
+              categories={categories}
+              hoveredParentId={hoveredParentId}
+              onParentHover={handleParentHover}
+              onClose={handleMegaClose}
+            />
+          </div>
         </div>
       </header>
 
