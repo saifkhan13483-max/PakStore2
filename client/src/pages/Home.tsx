@@ -233,7 +233,7 @@ export default function Home() {
         </section>
 
         {/* Trust Indicators */}
-        <section className="py-8 sm:py-12 border-b bg-card">
+        <section className="py-5 sm:py-7 border-b bg-card">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="flex items-center gap-3 sm:gap-4">
@@ -277,18 +277,18 @@ export default function Home() {
         </section>
 
         {/* Categories Section */}
-        <section className="py-20 sm:py-28 bg-muted/20 overflow-hidden relative">
+        <section className="py-10 sm:py-14 bg-muted/20 overflow-hidden relative">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="max-w-3xl mx-auto text-center mb-16">
+            <div className="max-w-3xl mx-auto text-center mb-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-4 block">SHOP BY CATEGORY</span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight text-foreground">Premium Collection: Bags, Watches & More</h2>
-                <div className="h-1 w-20 bg-secondary mx-auto mb-8 rounded-full" />
+                <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs mb-2 block">SHOP BY CATEGORY</span>
+                <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-3 tracking-tight text-foreground">Premium Collection: Bags, Watches & More</h2>
+                <div className="h-1 w-20 bg-secondary mx-auto mb-4 rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   Experience the pinnacle of Pakistani craftsmanship. From elegant handbags to luxury timepieces, discover quality that defines your style.
                 </p>
@@ -344,9 +344,9 @@ export default function Home() {
         </section>
 
         {/* New Arrivals */}
-        <section className="py-20 bg-muted/30">
+        <section className="py-10 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -383,7 +383,7 @@ export default function Home() {
             </div>
 
             {allProducts && allProducts.length > 5 && (
-              <div className="mt-12 text-center">
+              <div className="mt-6 text-center">
                 <Button 
                   variant="outline" 
                   size="lg"
@@ -398,11 +398,11 @@ export default function Home() {
         </section>
 
         {/* Featured Products */}
-        <section className="py-20">
+        <section className="py-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-12">
+            <div className="flex justify-between items-end mb-6">
               <div>
-                <h2 className="font-display text-4xl font-bold text-foreground mb-4">Best Sellers</h2>
+                <h2 className="font-display text-4xl font-bold text-foreground mb-2">Best Sellers</h2>
                 <p className="text-muted-foreground max-w-xl">
                   Discover our most coveted pieces, hand-picked for their exceptional quality and popularity.
                 </p>
@@ -431,7 +431,7 @@ export default function Home() {
             </div>
 
             {allProducts?.filter(p => p.labels?.includes("Best Seller")).length! > 5 && (
-              <div className="mt-12 text-center">
+              <div className="mt-6 text-center">
                 <Button 
                   variant="outline" 
                   size="lg"
@@ -448,9 +448,9 @@ export default function Home() {
 
         {/* Liked Products Section */}
         {likedProducts.length > 0 && (
-          <section className="py-20 bg-muted/20">
+          <section className="py-10 bg-muted/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -487,7 +487,7 @@ export default function Home() {
               </div>
 
               {allProducts?.filter(p => p.labels?.includes("Liked")).length! > 5 && (
-                <div className="mt-12 text-center">
+                <div className="mt-6 text-center">
                   <Button 
                     variant="outline" 
                     size="lg"
