@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
+import { sendOrderEmailNotification, sendOrderWhatsAppNotification } from "@/lib/notifications";
 
 const checkoutInfoSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -124,6 +125,30 @@ export default function Checkout() {
         title: "Order Placed Successfully!",
         description: `Thank you for shopping with us. Your order ID is #${result}`,
       });
+
+      // Send email & WhatsApp notifications to admin
+      const notificationData = {
+        orderId: result,
+        customerName: data.fullName,
+        customerEmail: data.email,
+        customerPhone: data.phone,
+        customerAddress: `${data.address}, ${data.area}`,
+        customerCity: data.city,
+        items: items.map(item => ({
+          name: String((item as any).name || "Unknown Product"),
+          quantity: Math.max(1, Math.floor(Number(item.quantity))),
+          price: Number((item as any).price || 0),
+        })),
+        total,
+        subtotal,
+        shipping,
+        notes: data.notes,
+      };
+
+      sendOrderEmailNotification(notificationData).catch(err =>
+        console.warn("Email notification failed:", err)
+      );
+      sendOrderWhatsAppNotification(notificationData);
 
       clearCart();
       setLocation("/thank-you");
