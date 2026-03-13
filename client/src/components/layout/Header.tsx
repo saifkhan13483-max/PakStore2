@@ -93,9 +93,8 @@ const Header = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Determine header visual state:
-  // On home page + not scrolled → transparent with white text
-  // Otherwise → white with dark text
+  // On home page + not scrolled → transparent background, always dark text
+  // On scroll or other pages → solid white with blur + shadow
   const isTransparent = isHomePage && !isScrolled;
 
   const handleMegaMouseEnter = useCallback(() => {
@@ -131,7 +130,7 @@ const Header = () => {
         className={cn(
           "hidden lg:block sticky top-0 z-50 w-full transition-all duration-300",
           isTransparent
-            ? "bg-transparent"
+            ? "bg-white/90 backdrop-blur-md"
             : "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
         )}
       >
@@ -143,10 +142,7 @@ const Header = () => {
                 <img
                   src={logoImg}
                   alt="PakCart"
-                  className={cn(
-                    "h-10 w-auto transition-all duration-300",
-                    isTransparent ? "brightness-0 invert" : ""
-                  )}
+                  className="h-10 w-auto transition-all duration-300"
                   width="140"
                   height="40"
                   fetchPriority="high"
@@ -155,7 +151,7 @@ const Header = () => {
             </div>
 
             {/* CENTER: Nav links */}
-            <nav className="flex items-center justify-center gap-7">
+            <nav className="flex items-center justify-center gap-5">
               {NAV_LINKS.map((link) => {
                 const isActive = location === link.href;
                 return (
@@ -166,11 +162,9 @@ const Header = () => {
                   >
                     <span
                       className={cn(
-                        "relative text-sm font-medium tracking-wide uppercase transition-colors duration-200 py-1",
-                        isTransparent
-                          ? "text-white/90 hover:text-white"
-                          : "text-gray-700 hover:text-green-700",
-                        isActive && !isTransparent && "text-green-700"
+                        "relative text-sm font-medium uppercase tracking-normal whitespace-nowrap transition-colors duration-200 py-1",
+                        "text-gray-700 hover:text-green-700",
+                        isActive && "text-green-700"
                       )}
                     >
                       {link.label}
@@ -191,11 +185,8 @@ const Header = () => {
                 <button
                   type="button"
                   className={cn(
-                    "flex items-center gap-1 text-sm font-medium tracking-wide uppercase transition-colors duration-200 py-1",
-                    isTransparent
-                      ? "text-white/90 hover:text-white"
-                      : "text-gray-700 hover:text-green-700",
-                    isMegaOpen && !isTransparent && "text-green-700"
+                    "flex items-center gap-1 text-sm font-medium uppercase tracking-normal whitespace-nowrap transition-colors duration-200 py-1 text-gray-700 hover:text-green-700",
+                    isMegaOpen && "text-green-700"
                   )}
                   aria-expanded={isMegaOpen}
                   data-testid="nav-categories-trigger"
@@ -232,12 +223,7 @@ const Header = () => {
               <button
                 type="button"
                 onClick={() => setIsSearchOpen(true)}
-                className={cn(
-                  "w-10 h-10 flex items-center justify-center rounded-full transition-colors",
-                  isTransparent
-                    ? "text-white hover:bg-white/20"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-green-700"
-                )}
+                className="w-10 h-10 flex items-center justify-center rounded-full transition-colors text-gray-600 hover:bg-gray-100 hover:text-green-700"
                 aria-label="Open search"
                 data-testid="header-search-btn"
               >
@@ -248,12 +234,7 @@ const Header = () => {
               <Link href="/cart" data-testid="header-cart-link">
                 <button
                   type="button"
-                  className={cn(
-                    "relative w-10 h-10 flex items-center justify-center rounded-full transition-colors",
-                    isTransparent
-                      ? "text-white hover:bg-white/20"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-green-700"
-                  )}
+                  className="relative w-10 h-10 flex items-center justify-center rounded-full transition-colors text-gray-600 hover:bg-gray-100 hover:text-green-700"
                   aria-label="Cart"
                   data-testid="header-cart-btn"
                 >
@@ -266,7 +247,7 @@ const Header = () => {
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
                         className={cn(
-                          "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center transition-transform",
+                          "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center",
                           cartBadgePulse && "animate-bounce"
                         )}
                         data-testid="cart-badge"
@@ -284,12 +265,7 @@ const Header = () => {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ml-1",
-                        isTransparent
-                          ? "bg-white/20 text-white hover:bg-white/30"
-                          : "bg-green-100 text-green-700 hover:bg-green-200"
-                      )}
+                      className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ml-1 bg-green-100 text-green-700 hover:bg-green-200"
                       aria-label="User menu"
                       data-testid="header-user-avatar"
                     >
@@ -333,14 +309,7 @@ const Header = () => {
               ) : (
                 <div className="flex items-center gap-2 ml-1">
                   <Link href="/auth/login" data-testid="header-login-link">
-                    <span
-                      className={cn(
-                        "text-sm font-medium transition-colors cursor-pointer",
-                        isTransparent
-                          ? "text-white hover:text-white/80"
-                          : "text-gray-700 hover:text-green-700"
-                      )}
-                    >
+                    <span className="text-sm font-medium transition-colors cursor-pointer text-gray-700 hover:text-green-700">
                       Log In
                     </span>
                   </Link>
