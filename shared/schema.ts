@@ -213,6 +213,43 @@ export type ProfileValues = z.infer<typeof profileSchema>;
  * Search Index Schemas
  */
 
+export const searchResultSchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  price: z.number(),
+  primaryImage: z.string(),
+  categoryName: z.string(),
+  categorySlug: z.string(),
+  rating: z.number(),
+  reviewCount: z.number(),
+  labels: z.array(z.string()),
+  inStock: z.boolean(),
+  relevanceScore: z.number(),
+});
+
+export type SearchResult = z.infer<typeof searchResultSchema>;
+
+export const suggestionSchema = z.object({
+  text: z.string(),
+  type: z.enum(["product", "category", "query"]),
+  slug: z.string().optional(),
+  image: z.string().optional(),
+});
+
+export type Suggestion = z.infer<typeof suggestionSchema>;
+
+export const searchOptionsSchema = z.object({
+  limit: z.number().optional(),
+  sortBy: z.enum(["relevance", "price_asc", "price_desc", "rating", "newest"]).optional(),
+  categorySlug: z.string().optional(),
+  minPrice: z.number().optional(),
+  maxPrice: z.number().optional(),
+  inStockOnly: z.boolean().optional(),
+});
+
+export type SearchOptions = z.infer<typeof searchOptionsSchema>;
+
 export const searchIndexEntrySchema = z.object({
   productId: z.string(),
   name: z.string(),
