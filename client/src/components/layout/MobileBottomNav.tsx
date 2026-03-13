@@ -31,13 +31,13 @@ const MobileBottomNav = () => {
       badge: totalItems > 0 ? totalItems : null,
     },
     {
-      href: "/my-orders",
+      href: "/orders",
       label: "Orders",
       icon: Package,
       testId: "bottom-nav-orders",
     },
     {
-      href: isAuthenticated ? "/account" : "/auth/login",
+      href: isAuthenticated ? "/profile" : "/auth/login",
       label: isAuthenticated ? "Account" : "Login",
       icon: User,
       testId: "bottom-nav-account",
