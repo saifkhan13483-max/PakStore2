@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SEO from "@/components/SEO";
@@ -275,22 +283,44 @@ export default function ProductDetail() {
           name: product.name,
           description: product.description,
           image: images,
-          price: product.price,
+          price: currentPrice,
           priceCurrency: "PKR",
           rating: parseFloat(displayRating),
           reviewCount: displayReviewCount,
           inStock: (product.stock ?? 0) > 0,
           availability: (product.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
         }}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          ...(category ? [{ name: category.name, url: `/collections/${category.slug || category.id}` }] : []),
+          { name: product.name, url: `/products/${product.slug}` }
+        ]}
         faqs={faqItems}
       />
       
-      <Button variant="ghost" className="mb-6 group hover:bg-transparent p-0" asChild>
-        <Link href="/products">
-          <ChevronLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
-          Back to Shop
-        </Link>
-      </Button>
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/products">Shop</BreadcrumbLink>
+          </BreadcrumbItem>
+          {category && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href={`/collections/${category.slug || category.id}`}>{category.name}</BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 xl:gap-12 mb-8 sm:mb-12 lg:mb-16 xl:mb-20">
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 lg:sticky lg:top-24 h-fit">

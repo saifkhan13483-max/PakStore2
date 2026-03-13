@@ -279,3 +279,59 @@ All logic files and UI components are complete.
 
 **Updated main page:**
 - `client/src/pages/admin/SeedComments.tsx` — Integrated all Phase 5 sections: auto-refresh banners (stale/new), Analytics Dashboard, Health Score card, Per-Product Breakdown, Quality Audit, Export/Import seed config JSON, plus all existing Phases 1–4 functionality preserved
+
+## Phase 6 - Technical SEO Hardening for Google Indexability (COMPLETED)
+
+### Root Cause Identified
+The primary cause of "Discovered – currently not indexed" in Google Search Console was that homepage category cards were linking to `/products?category=:id` (a query-parameter URL that `robots.txt` blocks with `Disallow: /*?*`). Google could not crawl from the homepage to any collection pages.
+
+### Changes Made:
+
+#### 1. **CategoryCard.tsx** — Fixed critical crawlability bug
+- Added optional `href` prop; default link changed from `/products?category=:slug` to `/collections/:slug`
+- Category cards now link to the correct canonical collection URLs
+
+#### 2. **Home.tsx** — Fixed internal linking
+- Changed `slug={String(category.id)}` to `slug={category.slug}` (was using Firestore doc ID instead of slug)
+- Added `href={/collections/${category.slug}}` explicitly for each category card
+- Added static crawlable "Browse All Categories" nav section (always rendered HTML, Google-readable)
+
+#### 3. **SEO.tsx** — Upgraded structured data
+- Added `isHomePage` prop that triggers `WebSite` + `Organization` schema (with `SearchAction`)
+- Improved `getCleanCanonical()` to strip query strings and fragments reliably
+- Added `brand` and `sku` fields to Product schema
+- Added `og:locale` meta tag
+
+#### 4. **ProductDetail.tsx** — Added breadcrumbs
+- Added HTML breadcrumb navigation (`<Breadcrumb>` component) with links: Home → Shop → Category → Product
+- Added `BreadcrumbList` JSON-LD schema with dynamic category link
+
+#### 5. **CategoryCollection.tsx** — Enhanced schema
+- Fixed canonical URL from relative to absolute (`https://pakcart.store/collections/:slug`)
+- Replaced simple `CollectionPage` schema with `@graph` containing both `CollectionPage` + `ItemList` (listing product URLs for Google discovery)
+- Includes breadcrumb schema nested in `CollectionPage`
+
+#### 6. **api/sitemap.ts** — Production-grade sitemap
+- Added URL deduplication (Set-based)
+- Added proper XML entity escaping (`&`, `<`, `>`, `"`, `'`)
+- Handles both `VITE_FIREBASE_*` and plain `FIREBASE_*` env var names
+- Filters out inactive/draft/unpublished products
+- Better error logging with per-section try/catch
+
+#### 7. **index.html** — Bot-friendly fallback HTML
+- Title changed from "PakCart - Premium Artisanal" to full keyword-rich title
+- Added `<meta name="description">`, `<meta name="robots">`, `<link rel="canonical">`
+- Added Open Graph and Twitter card meta tags as static fallback for crawlers that don't execute JS
+
+#### 8. **robots.txt** — No changes needed
+- Already correctly disallows private routes and `/*?*` query URLs
+- `Sitemap` directive already points to `/sitemap.xml` which Vercel routes to `/api/sitemap`
+
+### Sitemap Architecture
+`vercel.json` routes `/sitemap.xml` → `/api/sitemap` (Vercel serverless function). This generates a full dynamic sitemap with all Firestore products and collections when `VITE_FIREBASE_CLIENT_EMAIL` and `VITE_FIREBASE_PRIVATE_KEY` env vars are set in Vercel dashboard.
+
+### Post-Deploy Manual Steps Required
+1. In Google Search Console: resubmit sitemap at `https://pakcart.store/sitemap.xml`
+2. Use URL Inspection tool to request indexing for: homepage, `/categories`, 2-3 collection pages, 5+ product pages
+3. Validate Product schema at `https://search.google.com/test/rich-results`
+4. Monitor "Page indexing" report for 2-6 weeks

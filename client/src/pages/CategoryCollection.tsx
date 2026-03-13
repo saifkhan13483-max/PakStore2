@@ -126,7 +126,7 @@ export default function CategoryCollection() {
       <SEO
         title={`${category.name} Online Shopping in Pakistan | Best Prices at PakCart`}
         description={category.description || `Explore our exclusive collection of ${category.name.toLowerCase()} available online in Pakistan. Shop authentic products with fast delivery and free shipping on orders over Rs. 10,000.`}
-        url={`/collections/${category.slug}`}
+        url={`https://pakcart.store/collections/${category.slug}`}
         breadcrumbs={[
           { name: "Home", url: "/" },
           { name: "Categories", url: "/categories" },
@@ -141,11 +141,35 @@ export default function CategoryCollection() {
           { question: `Do you offer bulk discounts on ${category.name.toLowerCase()}?`, answer: "Yes, we offer special pricing for bulk orders. For orders of 10+ items, please contact our sales team directly at support@pakcart.store to discuss your requirements and get a custom quote." }
         ]}
         schema={{
-          "@context": "https://schema.org/",
-          "@type": "CollectionPage",
-          "name": category.name,
-          "description": category.description || `Shop ${category.name.toLowerCase()} online`,
-          "url": `https://pakcart.store/collections/${category.slug}`
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "CollectionPage",
+              "name": `${category.name} - Online Shopping in Pakistan`,
+              "description": category.description || `Shop ${category.name.toLowerCase()} online in Pakistan at PakCart`,
+              "url": `https://pakcart.store/collections/${category.slug}`,
+              "breadcrumb": {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pakcart.store/" },
+                  { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://pakcart.store/categories" },
+                  { "@type": "ListItem", "position": 3, "name": category.name, "item": `https://pakcart.store/collections/${category.slug}` }
+                ]
+              }
+            },
+            ...(productsData && productsData.length > 0 ? [{
+              "@type": "ItemList",
+              "name": `${category.name} Products`,
+              "url": `https://pakcart.store/collections/${category.slug}`,
+              "numberOfItems": productsData.length,
+              "itemListElement": productsData.slice(0, 20).map((p: any, idx: number) => ({
+                "@type": "ListItem",
+                "position": idx + 1,
+                "url": `https://pakcart.store/products/${p.slug}`,
+                "name": p.name
+              }))
+            }] : [])
+          ]
         }}
       />
 

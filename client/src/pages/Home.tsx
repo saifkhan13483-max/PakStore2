@@ -130,6 +130,7 @@ export default function Home() {
         keywords="online shopping pakistan, womens bags pakistan, ladies watches pakistan, slippers online pakistan, bedsheets online pakistan, pakcart store"
         url="https://pakcart.store/"
         robots="index,follow"
+        isHomePage={true}
       />
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}
@@ -327,7 +328,8 @@ export default function Home() {
                     >
                       <CategoryCard 
                         name={category.name} 
-                        slug={String(category.id)} 
+                        slug={category.slug || String(category.id)} 
+                        href={`/collections/${category.slug || String(category.id)}`}
                         count={0} 
                         image={categoryImage}
                       />
@@ -501,6 +503,31 @@ export default function Home() {
             </div>
           </section>
         )}
+        {/* Static crawlable internal links for search engine discovery */}
+        <nav aria-label="Browse all categories" className="py-8 bg-muted/10 border-t">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Browse All Categories</h2>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link href="/categories" className="text-primary hover:underline font-medium">All Categories</Link>
+              <span className="text-muted-foreground">•</span>
+              <Link href="/products" className="text-muted-foreground hover:text-primary hover:underline">All Products</Link>
+              <span className="text-muted-foreground">•</span>
+              <Link href="/new-arrivals" className="text-muted-foreground hover:text-primary hover:underline">New Arrivals</Link>
+              <span className="text-muted-foreground">•</span>
+              {categories.map((cat) => (
+                <span key={cat.id} className="inline-flex items-center gap-1">
+                  <Link href={`/collections/${cat.slug || cat.id}`} className="text-muted-foreground hover:text-primary hover:underline">
+                    {cat.name}
+                  </Link>
+                  <span className="text-muted-foreground">•</span>
+                </span>
+              ))}
+              <Link href="/about" className="text-muted-foreground hover:text-primary hover:underline">About Us</Link>
+              <span className="text-muted-foreground">•</span>
+              <Link href="/contact" className="text-muted-foreground hover:text-primary hover:underline">Contact</Link>
+            </div>
+          </div>
+        </nav>
       </main>
     </div>
   );

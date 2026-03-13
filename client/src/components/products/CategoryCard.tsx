@@ -8,16 +8,18 @@ interface CategoryCardProps {
   image: string;
   count: number;
   slug: string;
+  href?: string;
 }
 
-export function CategoryCard({ name, image, count, slug }: CategoryCardProps) {
+export function CategoryCard({ name, image, count, slug, href }: CategoryCardProps) {
+  const linkHref = href || `/collections/${slug}`;
   return (
     <motion.div
       whileHover={{ y: -8 }}
       transition={{ type: "spring", stiffness: 300 }}
       className="h-full"
     >
-      <Link href={`/products?category=${slug}`}>
+      <Link href={linkHref}>
         <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative">
           <CardContent className="p-0 relative aspect-[16/9] sm:aspect-[4/3] flex flex-col justify-end">
             <img 
