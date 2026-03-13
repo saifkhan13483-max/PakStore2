@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
@@ -7,13 +7,15 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   X,
-  ChevronDown,
   Star,
   ImageOff,
   Loader2,
   TrendingUp,
   Home,
   ChevronRight,
+  Lightbulb,
+  FolderOpen,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -27,11 +29,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { searchProductsPage } from "@/services/searchService";
-import { getPopularSearches, saveRecentSearch } from "@/services/searchService";
+import { searchProductsPage, getSmartSuggestions, saveRecentSearch } from "@/services/searchService";
+import { logSearch } from "@/services/searchAnalyticsService";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { useQuery } from "@tanstack/react-query";
-import type { SearchOptions, SearchResult } from "@shared/schema";
+import type { SearchOptions, SearchResult, SmartSuggestion } from "@shared/schema";
 
 type SortOption = "relevance" | "price_asc" | "price_desc" | "rating" | "newest";
 
@@ -189,69 +191,134 @@ function SkeletonCard() {
   );
 }
 
-function EmptyState({
+function SmartEmptyState({
   query,
-  popularSearches,
   onSearch,
 }: {
   query: string;
-  popularSearches: string[];
   onSearch: (q: string) => void;
 }) {
+  const { data: smart, isLoading } = useQuery<SmartSuggestion>({
+    queryKey: ["smart-suggestions", query],
+    queryFn: () => getSmartSuggestions(query),
+    enabled: query.length > 0,
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
+  });
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+    <div className="flex flex-col items-center py-12 px-4 text-center max-w-2xl mx-auto w-full">
       <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6">
         <Search className="w-10 h-10 text-gray-400" />
       </div>
-      <h2 className="text-xl font-bold text-gray-800 mb-2">
+      <h2 className="text-xl font-bold text-gray-800 dark:text-foreground mb-2">
         No results for &ldquo;{query}&rdquo;
       </h2>
       <p className="text-gray-500 text-sm mb-6 max-w-sm">
-        We couldn&rsquo;t find any products matching your search. Try these tips:
+        We couldn&rsquo;t find any products matching your search.
       </p>
-      <ul className="text-sm text-gray-500 space-y-1 mb-8 text-left list-none">
-        <li className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-          Check your spelling
-        </li>
-        <li className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-          Try more general terms
-        </li>
-        <li className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-          Browse our categories below
-        </li>
-      </ul>
 
-      <div className="mb-8">
-        <Link href="/categories">
-          <Button variant="outline" className="rounded-full">
-            Browse All Categories
-          </Button>
-        </Link>
-      </div>
-
-      {popularSearches.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5 justify-center">
-            <TrendingUp className="w-3.5 h-3.5" />
-            Popular right now
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {popularSearches.map((term) => (
-              <button
-                key={term}
-                type="button"
-                onClick={() => onSearch(term)}
-                className="px-4 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
-                data-testid={`empty-popular-${term}`}
-              >
-                {term}
-              </button>
-            ))}
-          </div>
+      {isLoading ? (
+        <div className="space-y-3 w-full max-w-sm">
+          <Skeleton className="h-5 w-48 mx-auto" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4 mx-auto" />
         </div>
+      ) : (
+        <>
+          {smart?.correctedQuery && (
+            <div className="mb-6 p-3 bg-primary/5 border border-primary/20 rounded-xl inline-flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Did you mean:{" "}
+                <button
+                  type="button"
+                  onClick={() => onSearch(smart.correctedQuery!)}
+                  className="font-semibold text-primary hover:underline"
+                  data-testid="did-you-mean-btn"
+                >
+                  {smart.correctedQuery}
+                </button>
+                ?
+              </span>
+            </div>
+          )}
+
+          {smart?.relatedCategories && smart.relatedCategories.length > 0 && (
+            <div className="mb-8 w-full">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5 justify-center">
+                <FolderOpen className="w-3.5 h-3.5" />
+                Browse by category
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {smart.relatedCategories.map((cat) => (
+                  <Link key={cat.id} href={`/collections/${cat.slug}`}>
+                    <span
+                      className="px-4 py-1.5 text-sm rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      data-testid={`empty-category-${cat.slug}`}
+                    >
+                      {cat.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {smart?.relatedProducts && smart.relatedProducts.length > 0 && (
+            <div className="mb-8 w-full">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-1.5 justify-center">
+                <ArrowRight className="w-3.5 h-3.5" />
+                Related products you might like
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {smart.relatedProducts.slice(0, 4).map((result) => (
+                  <SearchResultCard key={result.productId} result={result} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {smart?.trendingNow && smart.trendingNow.length > 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5 justify-center">
+                <TrendingUp className="w-3.5 h-3.5" />
+                Trending on PakCart
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {smart.trendingNow.map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => onSearch(term)}
+                    className="px-4 py-1.5 text-sm rounded-full border border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                    data-testid={`empty-trending-${term}`}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap gap-3 justify-center">
+            <ul className="text-sm text-gray-500 space-y-1 mb-2 text-left list-none">
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                Check your spelling
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                Try more general terms
+              </li>
+            </ul>
+          </div>
+          <Link href="/categories">
+            <Button variant="outline" className="mt-4 rounded-full">
+              Browse All Categories
+            </Button>
+          </Link>
+        </>
       )}
     </div>
   );
@@ -266,13 +333,6 @@ export default function SearchResults() {
 
   const [customMin, setCustomMin] = useState("");
   const [customMax, setCustomMax] = useState("");
-
-  const { data: popularSearches = [] } = useQuery<string[]>({
-    queryKey: ["search-popular"],
-    queryFn: getPopularSearches,
-    staleTime: 10 * 60_000,
-    gcTime: 30 * 60_000,
-  });
 
   const filters: SearchOptions = useMemo(
     () => ({
@@ -335,6 +395,17 @@ export default function SearchResults() {
     },
     [updateParams]
   );
+
+  // Fire-and-forget analytics logging when first page of results loads
+  const loggedQueryRef = useRef<string>("");
+  useEffect(() => {
+    if (!q || isLoading) return;
+    const firstPage = data?.pages[0];
+    if (firstPage === undefined) return;
+    if (loggedQueryRef.current === q) return;
+    loggedQueryRef.current = q;
+    logSearch(q, allResults.length);
+  }, [q, isLoading, data, allResults.length]);
 
   const handleSortChange = (val: string) => {
     updateParams({ sort: val });
@@ -643,9 +714,8 @@ export default function SearchResults() {
               ))}
             </div>
           ) : allResults.length === 0 && q ? (
-            <EmptyState
+            <SmartEmptyState
               query={q}
-              popularSearches={popularSearches}
               onSearch={handleNewSearch}
             />
           ) : (

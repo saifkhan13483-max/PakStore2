@@ -96,6 +96,7 @@ const AdminSitemap = lazyWithRetry(() => import("@/pages/admin/Sitemap"));
 const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSlider"));
 const AdminAnnouncements = lazyWithRetry(() => import("@/pages/admin/Announcements"));
 const AdminSeedComments = lazyWithRetry(() => import("@/pages/admin/SeedComments"));
+const AdminSearchAnalytics = lazyWithRetry(() => import("@/pages/admin/SearchAnalytics"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 const SearchResults = lazyWithRetry(() => import("@/pages/SearchResults"));
 
@@ -228,6 +229,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminSeedComments />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/search-analytics">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminSearchAnalytics />
           </AdminLayout>
         </AdminRoute>
       </Route>

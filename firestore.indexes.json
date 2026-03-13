@@ -119,6 +119,52 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "searchAnalytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "hasResults",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "count",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "searchAnalytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "hasResults",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastSearched",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "searchAnalytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "hasResults",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastSearched",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "count",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ]
 }

@@ -8,6 +8,7 @@ import {
   saveRecentSearch,
   clearRecentSearchesStorage,
 } from "@/services/searchService";
+import { logSearch } from "@/services/searchAnalyticsService";
 import type { SearchResult, SearchOptions, Suggestion } from "@shared/schema";
 
 export function useSearch() {
@@ -60,8 +61,10 @@ export function useSearch() {
       try {
         const results = await searchProducts(q, options);
         setSearchResults(results);
+        // fire-and-forget — never block search UX
+        logSearch(q, results.length);
       } catch (err) {
-        console.error("Search failed:", err);
+        if (import.meta.env.DEV) console.error("Search failed:", err);
         setSearchResults([]);
       } finally {
         setIsLoadingResults(false);

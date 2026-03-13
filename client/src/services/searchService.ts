@@ -11,7 +11,8 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { SearchResult, SearchOptions, Suggestion } from "@shared/schema";
+import type { SearchResult, SearchOptions, Suggestion, SmartSuggestion } from "@shared/schema";
+import { getTrendingSearches } from "@/services/searchAnalyticsService";
 
 const SEARCH_INDEX_COLLECTION = "searchIndex";
 const CATEGORIES_COLLECTION = "categories";
@@ -297,4 +298,98 @@ export function clearRecentSearchesStorage(): void {
   } catch {
     // ignore
   }
+}
+
+// ── Levenshtein distance — pure TypeScript, no libraries ──────────────────────
+export function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (__, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+  }
+  return dp[m][n];
+}
+
+// ── Smart No-Results Fallback ─────────────────────────────────────────────────
+export async function getSmartSuggestions(failedQuery: string): Promise<SmartSuggestion> {
+  const q = failedQuery.toLowerCase().trim();
+  const words = q.split(/\s+/).filter((w) => w.length > 0);
+
+  const [trending, relatedSnap, categoriesSnap] = await Promise.allSettled([
+    getTrendingSearches(5),
+    words[0]
+      ? getDocs(
+          query(
+            collection(db, SEARCH_INDEX_COLLECTION),
+            where("nameTokens", "array-contains", words[0]),
+            where("active", "==", true),
+            orderBy("searchScore", "desc"),
+            limit(8)
+          )
+        )
+      : Promise.resolve({ docs: [] as QueryDocumentSnapshot<DocumentData>[] }),
+    getDocs(collection(db, CATEGORIES_COLLECTION)),
+  ]);
+
+  const trendingNow =
+    trending.status === "fulfilled"
+      ? trending.value.map((t) => t.query)
+      : [];
+
+  const relatedProducts: SearchResult[] =
+    relatedSnap.status === "fulfilled"
+      ? (relatedSnap.value as { docs: QueryDocumentSnapshot<DocumentData>[] }).docs.map((d) => {
+          const data = d.data() as RawIndexEntry;
+          return {
+            productId: data.productId,
+            name: data.name,
+            slug: data.slug,
+            price: data.price,
+            primaryImage: data.primaryImage,
+            categoryName: data.categoryName,
+            categorySlug: data.categorySlug,
+            rating: data.rating,
+            reviewCount: data.reviewCount,
+            labels: data.labels,
+            inStock: data.inStock,
+            relevanceScore: data.searchScore,
+          };
+        })
+      : [];
+
+  const relatedCategories: Array<{ id: string; name: string; slug: string }> = [];
+  if (categoriesSnap.status === "fulfilled") {
+    for (const d of (categoriesSnap.value as { docs: QueryDocumentSnapshot<DocumentData>[] }).docs) {
+      const data = d.data();
+      const catName: string = (data.name ?? "").toLowerCase();
+      if (words.some((w) => catName.includes(w))) {
+        relatedCategories.push({
+          id: d.id,
+          name: data.name as string,
+          slug: data.slug as string,
+        });
+      }
+    }
+  }
+
+  // Spell-correction via Levenshtein against top trending queries
+  let correctedQuery: string | undefined;
+  for (const t of trendingNow) {
+    const dist = levenshteinDistance(q, t);
+    if (dist <= 2 && dist > 0) {
+      correctedQuery = t;
+      break;
+    }
+  }
+
+  return { correctedQuery, relatedProducts, relatedCategories, trendingNow };
 }

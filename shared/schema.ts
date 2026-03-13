@@ -270,3 +270,45 @@ export const searchIndexEntrySchema = z.object({
 });
 
 export type SearchIndexEntry = z.infer<typeof searchIndexEntrySchema>;
+
+/**
+ * Search Analytics Schemas (Phase 5)
+ */
+
+export const searchAnalyticsEntrySchema = z.object({
+  query: z.string(),
+  count: z.number(),
+  lastSearched: firestoreTimestampSchema,
+  resultsCount: z.number(),
+  hasResults: z.boolean(),
+});
+
+export type SearchAnalyticsEntry = z.infer<typeof searchAnalyticsEntrySchema>;
+
+export const trendingSearchSchema = z.object({
+  query: z.string(),
+  count: z.number(),
+});
+
+export type TrendingSearch = z.infer<typeof trendingSearchSchema>;
+
+export const zeroResultQuerySchema = z.object({
+  query: z.string(),
+  count: z.number(),
+  lastSearched: firestoreTimestampSchema,
+});
+
+export type ZeroResultQuery = z.infer<typeof zeroResultQuerySchema>;
+
+export const smartSuggestionSchema = z.object({
+  correctedQuery: z.string().optional(),
+  relatedProducts: z.array(searchResultSchema),
+  relatedCategories: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+  })),
+  trendingNow: z.array(z.string()),
+});
+
+export type SmartSuggestion = z.infer<typeof smartSuggestionSchema>;

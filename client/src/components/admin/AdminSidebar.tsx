@@ -6,12 +6,12 @@ import {
   Settings, 
   LogOut,
   ChevronLeft,
-  ChevronRight,
   Menu,
   FileSearch,
   Image as ImageIcon,
   Megaphone,
   MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ const menuItems = [
   { icon: ImageIcon, label: "Homepage Slider", href: "/admin/homepage-slider" },
   { icon: Megaphone, label: "Announcements", href: "/admin/announcements" },
   { icon: MessageSquare, label: "Seed Comments", href: "/admin/seed-comments" },
+  { icon: BarChart3, label: "Search Analytics", href: "/admin/search-analytics" },
   { icon: FileSearch, label: "Sitemap", href: "/admin/sitemap" },
 ];
 
