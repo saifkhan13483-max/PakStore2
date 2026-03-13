@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import { format } from "date-fns";
 import { commentFirestoreService } from "@/services/commentFirestoreService";
 import { useAuthStore } from "@/store/authStore";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
-import { where } from "firebase/firestore";
+import { where, doc, updateDoc, increment } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,6 +85,43 @@ export function CommentSection({ productId }: CommentSectionProps) {
   const [editRating, setEditRating] = useState(5);
   const [editImages, setEditImages] = useState<string[]>([]);
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+
+  // ── Helpful votes ──────────────────────────────────────────────────────────
+  // Track which comment IDs the current user has voted on (persisted in localStorage).
+  const [votedIds, setVotedIds] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("helpful_votes");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  const markVoted = useCallback((commentId: string) => {
+    setVotedIds((prev) => {
+      const next = new Set(prev);
+      next.add(commentId);
+      try {
+        localStorage.setItem("helpful_votes", JSON.stringify([...next]));
+      } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
+  const handleHelpfulYes = useCallback(async (commentId: string) => {
+    if (votedIds.has(commentId)) return;
+    markVoted(commentId);
+    try {
+      await updateDoc(doc(db, "comments", commentId), {
+        helpfulCount: increment(1),
+      });
+    } catch { /* silently ignore — UI already updated */ }
+  }, [votedIds, markVoted]);
+
+  const handleHelpfulNo = useCallback((commentId: string) => {
+    if (votedIds.has(commentId)) return;
+    markVoted(commentId);
+  }, [votedIds, markVoted]);
 
   const { data: rawComments, isLoading } = useRealtimeCollection(
     "comments",
@@ -385,23 +423,33 @@ export function CommentSection({ productId }: CommentSectionProps) {
                         </span>
                       )}
                       <div className="flex items-center gap-1 ml-auto">
-                        <span className="text-xs text-muted-foreground">Was this helpful?</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-xs"
-                          data-testid={`btn-helpful-yes-${comment.id}`}
-                        >
-                          Yes
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-xs"
-                          data-testid={`btn-helpful-no-${comment.id}`}
-                        >
-                          No
-                        </Button>
+                        {votedIds.has(comment.id) ? (
+                          <span className="text-xs text-muted-foreground italic">
+                            Thanks for your feedback!
+                          </span>
+                        ) : (
+                          <>
+                            <span className="text-xs text-muted-foreground">Was this helpful?</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                              onClick={() => handleHelpfulYes(comment.id)}
+                              data-testid={`btn-helpful-yes-${comment.id}`}
+                            >
+                              Yes
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
+                              onClick={() => handleHelpfulNo(comment.id)}
+                              data-testid={`btn-helpful-no-${comment.id}`}
+                            >
+                              No
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
