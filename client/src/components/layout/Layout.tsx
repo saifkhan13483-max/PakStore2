@@ -15,7 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <AnnouncementBanner />
       <Header />
       <main className="flex-1 pb-16 lg:pb-0">{children}</main>
-      <div className="pb-16 lg:pb-0">
+      <div className="hidden lg:block">
         <Footer />
       </div>
       <AnnouncementPopup />
