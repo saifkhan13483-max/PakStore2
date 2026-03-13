@@ -29,7 +29,7 @@ interface MobileNavProps {
 
 const PLAIN_NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/collections", label: "Collections" },
+  { href: "/categories", label: "Collections" },
   { href: "/about", label: "Our Story" },
   { href: "/contact", label: "Support" },
 ];
