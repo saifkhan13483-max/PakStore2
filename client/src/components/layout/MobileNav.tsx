@@ -29,7 +29,7 @@ const PLAIN_NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/categories", label: "Collections" },
   { href: "/about", label: "Our Story" },
-  { href: "/contact", label: "Support" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function MobileNav({
