@@ -34,7 +34,7 @@ const NAV_LINKS_LEFT = [
 
 const NAV_LINKS_RIGHT = [
   { href: "/about", label: "Our Story" },
-  { href: "/contact", label: "Support" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const SCROLL_THRESHOLD = 50;
