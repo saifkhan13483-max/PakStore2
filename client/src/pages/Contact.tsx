@@ -1,6 +1,7 @@
 import SEO from "@/components/SEO";
 import ContactForm from "@/components/contact/ContactForm";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 
 export default function Contact() {
   return (
@@ -42,10 +43,10 @@ export default function Contact() {
 
                 <div className="flex items-start gap-4">
                   <div className="bg-primary/10 p-3 rounded-full text-primary">
-                    <Phone className="h-6 w-6" />
+                    <SiWhatsapp className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">Phone</p>
+                    <p className="font-semibold text-foreground">WhatsApp</p>
                     <p className="text-muted-foreground">+92 318 8055850</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri, 9am - 6pm PKT</p>
                   </div>
