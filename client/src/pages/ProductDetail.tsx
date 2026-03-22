@@ -35,6 +35,7 @@ import {
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { commentSchema } from "@shared/schema";
 import { where } from "firebase/firestore";
+import { AIRecommendations } from "@/components/ai/AIRecommendations";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:slug");
@@ -76,6 +77,13 @@ export default function ProductDetail() {
     queryKey: ["products", "related", product?.categoryId],
     enabled: !!product?.categoryId,
     queryFn: () => productFirestoreService.getProductsByCategory(String(product!.categoryId!)),
+  });
+
+  const { data: allProductsPool } = useQuery({
+    queryKey: ["products", "ai-pool"],
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 20 }),
+    staleTime: 5 * 60_000,
+    enabled: !!product,
   });
 
   const [, setLocation] = useLocation();
@@ -696,6 +704,17 @@ export default function ProductDetail() {
             ))}
           </div>
         </section>
+      )}
+
+      {allProductsPool && allProductsPool.length > 1 && (
+        <AIRecommendations
+          currentProduct={{
+            name: product.name,
+            category: category?.name || product.categoryId || "",
+            price: product.price,
+          }}
+          allProducts={allProductsPool}
+        />
       )}
     </div>
   );

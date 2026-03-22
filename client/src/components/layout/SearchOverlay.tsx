@@ -1,4 +1,4 @@
-import { useEffect, useRef, useId } from "react";
+import { useEffect, useRef, useId, useState } from "react";
 import {
   Search,
   X,
@@ -9,12 +9,14 @@ import {
   Tag,
   ArrowRight,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "@/hooks/useSearch";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
+import { generateSmartSearchQuery } from "@/services/ai";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -27,6 +29,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const overlayId = useId();
   const listboxId = `search-listbox-${overlayId}`;
   const liveRegionId = `search-live-${overlayId}`;
+  const [isAISearching, setIsAISearching] = useState(false);
 
   const {
     query,
@@ -108,6 +111,25 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     if (!trimmed) return;
     setLocation(`/products?q=${encodeURIComponent(trimmed)}`);
     onClose();
+  };
+
+  const handleAISmartSearch = async () => {
+    if (!query.trim() || isAISearching) return;
+    setIsAISearching(true);
+    try {
+      const parsed = await generateSmartSearchQuery(query.trim());
+      const aiQuery = parsed.keywords.join(" ");
+      if (aiQuery) {
+        const params = new URLSearchParams({ q: aiQuery });
+        if (parsed.suggestedCategory) params.set("category", parsed.suggestedCategory);
+        setLocation(`/products?${params.toString()}`);
+        onClose();
+      }
+    } catch {
+      navigateToSearch(query.trim());
+    } finally {
+      setIsAISearching(false);
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -393,25 +415,41 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       !isSuggestionsError &&
                       suggestions.length === 0 &&
                       query.length >= 2 && (
-                        <div className="py-10 text-center">
+                        <div className="py-8 text-center">
                           <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
                             <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
                           </div>
                           <p className="text-sm font-medium text-gray-600 mb-1">
                             No results for &ldquo;{query}&rdquo;
                           </p>
-                          <p className="text-xs text-gray-400 mb-5">
-                            Try a different keyword
+                          <p className="text-xs text-gray-400 mb-4">
+                            Try a different keyword or let AI find the best match
                           </p>
-                          <button
-                            type="button"
-                            onClick={() => navigateToSearch(query.trim())}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors shadow-sm active:scale-95"
-                            data-testid="search-no-results-browse"
-                          >
-                            <Search className="h-4 w-4" aria-hidden="true" />
-                            Browse all products
-                          </button>
+                          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleAISmartSearch}
+                              disabled={isAISearching}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm font-semibold transition-all shadow-sm active:scale-95 disabled:opacity-60"
+                              data-testid="search-ai-smart"
+                            >
+                              {isAISearching ? (
+                                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                              ) : (
+                                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                              )}
+                              {isAISearching ? "AI searching…" : "Try AI Smart Search"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => navigateToSearch(query.trim())}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 text-sm font-semibold transition-colors active:scale-95"
+                              data-testid="search-no-results-browse"
+                            >
+                              <Search className="h-4 w-4" aria-hidden="true" />
+                              Browse all products
+                            </button>
+                          </div>
                         </div>
                       )}
                   </div>

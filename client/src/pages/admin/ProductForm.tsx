@@ -37,7 +37,9 @@ import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
-import { useAIDescription } from "@/hooks/use-ai";
+import { useAIDescription, useAISEO, useAIReviews } from "@/hooks/use-ai";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function AdminProductForm() {
   const [, params] = useRoute("/admin/products/:id/edit");
@@ -137,8 +139,81 @@ export default function AdminProductForm() {
     },
   });
 
-  // Auto-generate slug from name
+  const { generate: generateAIDesc, isLoading: isAIDescLoading } = useAIDescription();
+  const { generate: generateAISEOMeta, isLoading: isAISEOLoading } = useAISEO();
+  const { generate: generateAIReviews, isLoading: isAIReviewsLoading } = useAIReviews();
+
   const name = form.watch("name");
+
+  const handleGenerateDescription = async () => {
+    const productName = form.getValues("name");
+    const price = form.getValues("price");
+    const catId = form.getValues("categoryId");
+    const cat = categories?.find(c => c.id === catId);
+    if (!productName) {
+      toast({ title: "Enter a product name first", variant: "destructive" });
+      return;
+    }
+    const desc = await generateAIDesc(productName, cat?.name || catId || "General", price || 0);
+    if (desc) {
+      form.setValue("description", desc, { shouldValidate: true });
+      toast({ title: "AI Description Generated", description: "Description has been auto-filled." });
+    }
+  };
+
+  const handleGenerateSEO = async () => {
+    const productName = form.getValues("name");
+    const catId = form.getValues("categoryId");
+    const description = form.getValues("description") || "";
+    const cat = categories?.find(c => c.id === catId);
+    if (!productName) {
+      toast({ title: "Enter a product name first", variant: "destructive" });
+      return;
+    }
+    const meta = await generateAISEOMeta(productName, cat?.name || catId || "General", description);
+    if (meta) {
+      toast({
+        title: "AI SEO Meta Generated",
+        description: `Title: ${meta.title}`,
+      });
+    }
+  };
+
+  const handleGenerateReviews = async () => {
+    if (!isEditing || !id) {
+      toast({ title: "Save the product first before generating reviews.", variant: "destructive" });
+      return;
+    }
+    const productName = form.getValues("name");
+    const catId = form.getValues("categoryId");
+    const cat = categories?.find(c => c.id === catId);
+    if (!productName) {
+      toast({ title: "Enter a product name first", variant: "destructive" });
+      return;
+    }
+    const reviews = await generateAIReviews(productName, cat?.name || catId || "General", 5);
+    if (reviews && reviews.length > 0) {
+      const commentsRef = collection(db, "comments");
+      for (const review of reviews) {
+        await addDoc(commentsRef, {
+          productId: id,
+          userName: review.userName,
+          content: review.content,
+          rating: review.rating,
+          userId: "ai-generated",
+          isSeeded: true,
+          createdAt: serverTimestamp(),
+          helpfulCount: 0,
+        });
+      }
+      toast({
+        title: `${reviews.length} AI Reviews Generated`,
+        description: "Reviews have been added to this product.",
+      });
+    }
+  };
+
+  // Auto-generate slug from name
   useEffect(() => {
     if (!isEditing && name) {
       const slug = name
@@ -254,7 +329,25 @@ export default function AdminProductForm() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Short Description</FormLabel>
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <FormLabel>Short Description</FormLabel>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleGenerateDescription}
+                            disabled={isAIDescLoading}
+                            className="h-7 text-xs gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            data-testid="button-ai-generate-description"
+                          >
+                            {isAIDescLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3 w-3" />
+                            )}
+                            {isAIDescLoading ? "Generating…" : "Generate with AI"}
+                          </Button>
+                        </div>
                         <FormControl>
                           <Textarea 
                             placeholder="Brief overview of the product..." 
@@ -684,6 +777,53 @@ export default function AdminProductForm() {
                       </FormItem>
                     )}
                   />
+                </CardContent>
+              </Card>
+
+              <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-green-50/30 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-emerald-900 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-emerald-600" />
+                    AI Tools
+                  </CardTitle>
+                  <CardDescription className="text-xs">Generate content with AI to boost conversions</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-xs h-9 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                    onClick={handleGenerateDescription}
+                    disabled={isAIDescLoading}
+                    data-testid="button-ai-desc-sidebar"
+                  >
+                    {isAIDescLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-emerald-500" />}
+                    {isAIDescLoading ? "Generating description…" : "Generate Description"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-xs h-9 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                    onClick={handleGenerateSEO}
+                    disabled={isAISEOLoading}
+                    data-testid="button-ai-seo-sidebar"
+                  >
+                    {isAISEOLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-emerald-500" />}
+                    {isAISEOLoading ? "Generating SEO…" : "Generate SEO Meta"}
+                  </Button>
+                  {isEditing && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start gap-2 text-xs h-9 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                      onClick={handleGenerateReviews}
+                      disabled={isAIReviewsLoading}
+                      data-testid="button-ai-reviews-sidebar"
+                    >
+                      {isAIReviewsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-emerald-500" />}
+                      {isAIReviewsLoading ? "Generating reviews…" : "Generate AI Reviews (5)"}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
 

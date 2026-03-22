@@ -28,6 +28,7 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
+import { CartConversionBooster } from "@/components/ai/CartConversionBooster";
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCartStore();
@@ -252,6 +253,15 @@ export default function Cart() {
                   <span>Total</span>
                   <span className="text-primary" data-testid="text-total">Rs. {(totalPrice + shippingCost).toLocaleString()}</span>
                 </div>
+
+                <CartConversionBooster
+                  items={items.map(i => ({
+                    name: (i as any).name || "",
+                    price: (i as any).price || 0,
+                    quantity: i.quantity,
+                  }))}
+                  total={totalPrice + shippingCost}
+                />
 
                 <div className="pt-4 space-y-2">
                   <Button asChild size="default" className="w-full gap-2 text-sm h-10" data-testid="button-checkout">
