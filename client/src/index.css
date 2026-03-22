@@ -18,9 +18,9 @@
   --popover:             0 0% 100%;
   --popover-foreground:  158 45% 8%;
 
-  /* Brand — Rich Deep Emerald (PakCart signature green) */
-  --primary:             148 70% 25%;
-  --primary-hover:       148 70% 20%;
+  /* Brand — PakCart Signature Green rgb(34, 129, 110) */
+  --primary:             168 58% 32%;
+  --primary-hover:       168 58% 26%;
   --primary-foreground:  0 0% 100%;
 
   /* Brand — Luxurious Amber Gold */
@@ -29,8 +29,8 @@
   --secondary-foreground: 158 45% 8%;
 
   /* Neutrals — warm green-tinted */
-  --muted:               140 20% 91%;
-  --muted-foreground:    158 16% 38%;
+  --muted:               168 22% 91%;
+  --muted-foreground:    168 14% 38%;
 
   --accent:              39 92% 50%;
   --accent-foreground:   158 45% 8%;
@@ -40,9 +40,9 @@
   --destructive-hover:   4 74% 46%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:              145 20% 84%;
-  --input:               145 20% 84%;
-  --ring:                148 70% 25%;
+  --border:              168 22% 84%;
+  --input:               168 22% 84%;
+  --ring:                168 58% 32%;
 
   /* Radius — refined */
   --radius: 0.625rem;
@@ -67,9 +67,9 @@
   --popover:             158 32% 11%;
   --popover-foreground:  34 28% 94%;
 
-  /* Brand — Bright Emerald (more vibrant in dark mode) */
-  --primary:             148 64% 42%;
-  --primary-hover:       148 64% 36%;
+  /* Brand — PakCart Signature Green (brighter in dark mode) */
+  --primary:             168 56% 44%;
+  --primary-hover:       168 56% 37%;
   --primary-foreground:  0 0% 100%;
 
   /* Brand — Rich Gold */
@@ -89,9 +89,9 @@
   --destructive-hover:   4 72% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:              158 22% 16%;
-  --input:               158 22% 16%;
-  --ring:                148 64% 42%;
+  --border:              168 22% 16%;
+  --input:               168 22% 16%;
+  --ring:                168 56% 44%;
 
   /* Deep emerald shadows for dark mode */
   --shadow-sm:  0 1px 4px hsl(158 50% 3% / 0.35);

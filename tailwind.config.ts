@@ -1,5 +1,19 @@
 import type { Config } from "tailwindcss";
 
+const brandGreen = {
+  50:  '#f3fcfa',
+  100: '#e3f8f3',
+  200: '#c3efe6',
+  300: '#8ee1d0',
+  400: '#4ed0b6',
+  500: '#2fb197',
+  600: '#22816e',
+  700: '#1c6959',
+  800: '#155145',
+  900: '#0e342d',
+  950: '#09201b',
+};
+
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
@@ -14,12 +28,15 @@ export default {
                         pill: '999px'
                 },
                 boxShadow: {
-                        'brand-sm': '0 1px 4px hsl(148 50% 10% / 0.07)',
-                        'brand-md': '0 3px 14px hsl(148 50% 10% / 0.09)',
-                        'brand-lg': '0 8px 30px hsl(148 50% 10% / 0.13)',
-                        'brand-xl': '0 20px 56px hsl(148 50% 10% / 0.17)',
+                        'brand-sm': '0 1px 4px hsl(168 50% 10% / 0.07)',
+                        'brand-md': '0 3px 14px hsl(168 50% 10% / 0.09)',
+                        'brand-lg': '0 8px 30px hsl(168 50% 10% / 0.13)',
+                        'brand-xl': '0 20px 56px hsl(168 50% 10% / 0.17)',
                 },
                 colors: {
+                        green: brandGreen,
+                        emerald: brandGreen,
+                        teal: brandGreen,
                         background: 'hsl(var(--background) / <alpha-value>)',
                         foreground: 'hsl(var(--foreground) / <alpha-value>)',
                         border: 'hsl(var(--border) / <alpha-value>)',
