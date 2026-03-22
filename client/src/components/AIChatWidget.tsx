@@ -263,8 +263,8 @@ export default function AIChatWidget() {
 
   const chatPanel = (
     <div className="flex flex-col overflow-hidden bg-white dark:bg-gray-900
-      fixed inset-0 z-50 h-screen
-      sm:inset-auto sm:h-[480px] sm:bottom-[5.5rem] sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-2xl sm:shadow-2xl sm:border sm:border-border
+      fixed inset-0 z-[60] h-screen
+      sm:z-50 sm:inset-auto sm:h-[480px] sm:bottom-[5.5rem] sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-2xl sm:shadow-2xl sm:border sm:border-border
       lg:bottom-6 lg:right-6"
     >
       <div
@@ -387,7 +387,7 @@ export default function AIChatWidget() {
       {isOpen && chatPanel}
 
       <div
-        className={`fixed z-50 bottom-5 right-4 sm:bottom-[5.5rem] sm:right-4 lg:bottom-6 lg:right-6 ${
+        className={`fixed z-50 bottom-20 right-4 sm:bottom-[5.5rem] sm:right-4 lg:bottom-6 lg:right-6 ${
           isOpen ? "hidden sm:block" : "block"
         }`}
       >
