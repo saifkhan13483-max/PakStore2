@@ -54,6 +54,42 @@ function groqApiPlugin() {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
         groqProxy(req, res, "llama-3.1-8b-instant", { max_tokens: 512, temperature: 0.7 });
       });
+
+      server.middlewares.use("/api/groq-proxy", (req: any, res: any) => {
+        if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
+        let body = "";
+        req.on("data", (chunk: Buffer) => { body += chunk.toString(); });
+        req.on("end", async () => {
+          try {
+            const parsed = JSON.parse(body);
+            const apiKey = process.env.GROQ_API_KEY;
+            if (!apiKey) {
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: "GROQ_API_KEY not configured" }));
+              return;
+            }
+            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: parsed.model ?? "llama-3.3-70b-versatile",
+                messages: parsed.messages,
+                max_tokens: parsed.max_tokens ?? 1024,
+                temperature: parsed.temperature ?? 0.7,
+              }),
+            });
+            const data = await groqRes.json();
+            res.writeHead(groqRes.status, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(data));
+          } catch (err: any) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: err.message }));
+          }
+        });
+      });
     },
   };
 }
