@@ -394,17 +394,17 @@ export default function AIChatWidget() {
         <button
           data-testid="button-open-chat"
           onClick={() => setIsOpen((o) => !o)}
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative"
+          className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative"
           style={{ background: "hsl(168 58% 32%)" }}
           aria-label="Open AI chat assistant"
         >
           {isOpen ? (
-            <X size={20} className="text-white" />
+            <X className="text-white w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
           ) : (
-            <MessageCircle size={20} className="text-white" />
+            <MessageCircle className="text-white w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
           )}
           {hasUnread && !isOpen && (
-            <span className="absolute top-0.5 right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-orange-500 rounded-full border-2 border-white" />
+            <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 bg-orange-500 rounded-full border-2 border-white" />
           )}
         </button>
       </div>
