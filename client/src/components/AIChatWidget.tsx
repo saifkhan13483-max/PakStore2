@@ -387,8 +387,8 @@ export default function AIChatWidget() {
       {isOpen && chatPanel}
 
       <div
-        className={`fixed z-50 bottom-20 right-4 sm:bottom-[5.5rem] sm:right-4 lg:bottom-6 lg:right-6 ${
-          isOpen ? "hidden sm:block" : "block"
+        className={`fixed z-50 bottom-20 right-4 sm:bottom-20 sm:right-4 lg:bottom-6 lg:right-6 ${
+          isOpen ? "hidden" : "block"
         }`}
       >
         <button
