@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers } from "lucide-react";
+import { ChevronLeft, Loader2, Save, Plus, Trash2, TrendingUp, Layers, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { ImageUploader } from "@/components/product/ImageUploader";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
@@ -37,6 +37,7 @@ import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
+import { useAIDescription } from "@/hooks/use-ai";
 
 export default function AdminProductForm() {
   const [, params] = useRoute("/admin/products/:id/edit");
