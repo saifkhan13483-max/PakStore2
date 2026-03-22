@@ -386,21 +386,25 @@ export default function AIChatWidget() {
     <>
       {isOpen && chatPanel}
 
-      <div className="fixed bottom-20 right-4 z-50 lg:bottom-6 lg:right-6">
+      <div
+        className={`fixed z-50 bottom-5 right-4 sm:bottom-[5.5rem] sm:right-4 lg:bottom-6 lg:right-6 ${
+          isOpen ? "hidden sm:block" : "block"
+        }`}
+      >
         <button
           data-testid="button-open-chat"
           onClick={() => setIsOpen((o) => !o)}
-          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative"
           style={{ background: "hsl(168 58% 32%)" }}
           aria-label="Open AI chat assistant"
         >
           {isOpen ? (
-            <X size={22} className="text-white" />
+            <X size={20} className="text-white" />
           ) : (
-            <MessageCircle size={22} className="text-white" />
+            <MessageCircle size={20} className="text-white" />
           )}
           {hasUnread && !isOpen && (
-            <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-orange-500 rounded-full border-2 border-white" />
+            <span className="absolute top-0.5 right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-orange-500 rounded-full border-2 border-white" />
           )}
         </button>
       </div>
