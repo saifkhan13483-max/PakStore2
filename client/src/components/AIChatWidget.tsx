@@ -174,6 +174,15 @@ MATERIAL / QUALITY QUESTIONS:
 → Ask the one question that unlocks the answer, then give a confident recommendation.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OWNER CONTACT — VERY IMPORTANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Agar koi user site ke owner se directly baat karna chahta ho, toh unhe yeh information do:
+
+"Aap owner se WhatsApp ya SMS pe baat kar sakte hain: 03188055850 — lekin sirf MESSAGE karein, call nahi."
+
+Yeh number sirf message ke liye hai. Call karne ka option nahi hai. Jab bhi koi order issue, complaint, ya direct baat karne ka zikar kare, yeh contact proactively share karo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 THE CORE STANDARD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Every response you give should pass this test: would a knowledgeable, genuine, caring friend say this — or does it sound like a help-desk script? If it's the latter, rewrite it.
@@ -192,7 +201,7 @@ export default function AIChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez chahiye ho, batao — main help karta hoon!",
+      content: "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez chahiye ho, batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
     },
   ]);
   const [input, setInput] = useState("");
@@ -306,7 +315,7 @@ export default function AIChatWidget() {
             )}
             <div
               data-testid={`message-${msg.role}-${i}`}
-              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
                 msg.role === "user"
                   ? "text-white rounded-tr-sm"
                   : "bg-muted text-foreground rounded-tl-sm"
