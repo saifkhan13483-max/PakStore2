@@ -4,6 +4,7 @@ import Footer from './Footer';
 import AnnouncementBanner from './AnnouncementBanner';
 import AnnouncementPopup from './AnnouncementPopup';
 import MobileBottomNav from './MobileBottomNav';
+import AIChatWidget from '@/components/AIChatWidget';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
       <AnnouncementPopup />
       <MobileBottomNav />
+      <AIChatWidget />
     </div>
   );
 };
