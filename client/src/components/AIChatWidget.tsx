@@ -189,12 +189,6 @@ Every response you give should pass this test: would a knowledgeable, genuine, c
 
 Stay warm. Stay specific. Stay real.`;
 
-const QUICK_REPLIES = [
-  "What products do you sell?",
-  "How do I track my order?",
-  "Tell me about Kashmiri Pashminas",
-  "What payment methods do you accept?",
-];
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -349,20 +343,6 @@ export default function AIChatWidget() {
         <div ref={messagesEndRef} />
       </div>
 
-      {messages.length === 1 && (
-        <div className="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
-          {QUICK_REPLIES.map((reply) => (
-            <button
-              key={reply}
-              data-testid={`button-quick-reply-${reply}`}
-              onClick={() => sendMessage(reply)}
-              className="text-xs px-2.5 py-1.5 rounded-full border border-border hover:border-primary hover:text-primary transition-colors bg-white dark:bg-gray-800 text-muted-foreground"
-            >
-              {reply}
-            </button>
-          ))}
-        </div>
-      )}
 
       <div className="px-3 pt-2 border-t border-border flex-shrink-0" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
         <div className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2">
