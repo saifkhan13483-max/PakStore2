@@ -52,7 +52,7 @@ function groqApiPlugin() {
 
       server.middlewares.use("/api/chat", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        groqProxy(req, res, "llama3-8b-8192", { max_tokens: 512, temperature: 0.7 });
+        groqProxy(req, res, "llama-3.1-8b-instant", { max_tokens: 512, temperature: 0.7 });
       });
     },
   };
