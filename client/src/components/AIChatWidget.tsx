@@ -261,135 +261,132 @@ export default function AIChatWidget() {
     }
   };
 
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] lg:hidden"
+  const chatPanel = (
+    <div className="flex flex-col overflow-hidden bg-white dark:bg-gray-900
+      fixed inset-0 z-50 h-screen
+      sm:inset-auto sm:h-[480px] sm:bottom-[5.5rem] sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-2xl sm:shadow-2xl sm:border sm:border-border
+      lg:bottom-6 lg:right-6"
+    >
+      <div
+        className="flex items-center justify-between px-4 py-3 text-white flex-shrink-0
+          sm:rounded-t-2xl"
+        style={{ background: "hsl(168 58% 32%)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <Bot size={16} className="text-white" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm leading-tight">PakBot</p>
+            <p className="text-xs text-white/70">PakCart Assistant</p>
+          </div>
+        </div>
+        <button
+          data-testid="button-close-chat"
           onClick={() => setIsOpen(false)}
-        />
-      )}
+          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+        >
+          <ChevronDown size={18} />
+        </button>
+      </div>
 
-      <div className="fixed bottom-20 right-4 z-50 lg:bottom-6 lg:right-6 flex flex-col items-end gap-3">
-        {isOpen && (
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scroll-smooth min-h-0">
+        {messages.map((msg, i) => (
           <div
-            className="w-[calc(100vw-2rem)] max-w-sm bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
-            style={{ height: "480px" }}
+            key={i}
+            className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div
-              className="flex items-center justify-between px-4 py-3 text-white"
-              style={{ background: "hsl(168 58% 32%)" }}
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <Bot size={16} className="text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm leading-tight">PakBot</p>
-                  <p className="text-xs text-white/70">PakCart Assistant</p>
-                </div>
-              </div>
-              <button
-                data-testid="button-close-chat"
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+            {msg.role === "assistant" && (
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                style={{ background: "hsl(168 58% 32%)" }}
               >
-                <ChevronDown size={18} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scroll-smooth">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {msg.role === "assistant" && (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{ background: "hsl(168 58% 32%)" }}
-                    >
-                      <Bot size={13} className="text-white" />
-                    </div>
-                  )}
-                  <div
-                    data-testid={`message-${msg.role}-${i}`}
-                    className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                      msg.role === "user"
-                        ? "text-white rounded-tr-sm"
-                        : "bg-muted text-foreground rounded-tl-sm"
-                    }`}
-                    style={
-                      msg.role === "user"
-                        ? { background: "hsl(168 58% 32%)" }
-                        : {}
-                    }
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-
-              {isLoading && (
-                <div className="flex gap-2 justify-start">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: "hsl(168 58% 32%)" }}
-                  >
-                    <Bot size={13} className="text-white" />
-                  </div>
-                  <div className="bg-muted px-3 py-2 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
-                    <Loader2 size={13} className="animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Thinking…</span>
-                  </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {messages.length === 1 && (
-              <div className="px-4 pb-2 flex flex-wrap gap-1.5">
-                {QUICK_REPLIES.map((reply) => (
-                  <button
-                    key={reply}
-                    data-testid={`button-quick-reply-${reply}`}
-                    onClick={() => sendMessage(reply)}
-                    className="text-xs px-2.5 py-1.5 rounded-full border border-border hover:border-primary hover:text-primary transition-colors bg-white dark:bg-gray-800 text-muted-foreground"
-                  >
-                    {reply}
-                  </button>
-                ))}
+                <Bot size={13} className="text-white" />
               </div>
             )}
+            <div
+              data-testid={`message-${msg.role}-${i}`}
+              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                msg.role === "user"
+                  ? "text-white rounded-tr-sm"
+                  : "bg-muted text-foreground rounded-tl-sm"
+              }`}
+              style={
+                msg.role === "user"
+                  ? { background: "hsl(168 58% 32%)" }
+                  : {}
+              }
+            >
+              {msg.content}
+            </div>
+          </div>
+        ))}
 
-            <div className="px-3 pb-3 pt-2 border-t border-border">
-              <div className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2">
-                <input
-                  ref={inputRef}
-                  data-testid="input-chat-message"
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask me anything…"
-                  disabled={isLoading}
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
-                />
-                <button
-                  data-testid="button-send-message"
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || isLoading}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-40"
-                  style={{ background: "hsl(168 58% 32%)" }}
-                >
-                  <Send size={13} className="text-white" />
-                </button>
-              </div>
+        {isLoading && (
+          <div className="flex gap-2 justify-start">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: "hsl(168 58% 32%)" }}
+            >
+              <Bot size={13} className="text-white" />
+            </div>
+            <div className="bg-muted px-3 py-2 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
+              <Loader2 size={13} className="animate-spin text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Thinking…</span>
             </div>
           </div>
         )}
 
+        <div ref={messagesEndRef} />
+      </div>
+
+      {messages.length === 1 && (
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
+          {QUICK_REPLIES.map((reply) => (
+            <button
+              key={reply}
+              data-testid={`button-quick-reply-${reply}`}
+              onClick={() => sendMessage(reply)}
+              className="text-xs px-2.5 py-1.5 rounded-full border border-border hover:border-primary hover:text-primary transition-colors bg-white dark:bg-gray-800 text-muted-foreground"
+            >
+              {reply}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="px-3 pt-2 border-t border-border flex-shrink-0" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+        <div className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2">
+          <input
+            ref={inputRef}
+            data-testid="input-chat-message"
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask me anything…"
+            disabled={isLoading}
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+          />
+          <button
+            data-testid="button-send-message"
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim() || isLoading}
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-40"
+            style={{ background: "hsl(168 58% 32%)" }}
+          >
+            <Send size={13} className="text-white" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {isOpen && chatPanel}
+
+      <div className="fixed bottom-20 right-4 z-50 lg:bottom-6 lg:right-6">
         <button
           data-testid="button-open-chat"
           onClick={() => setIsOpen((o) => !o)}
