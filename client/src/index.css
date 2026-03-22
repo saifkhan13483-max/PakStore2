@@ -8,96 +8,96 @@
 
   /* PakCart Premium Design System — Light Mode */
 
-  /* Surfaces */
-  --background:          36 20% 98%;
-  --foreground:          170 22% 11%;
+  /* Surfaces — warm ivory, card pure white for contrast */
+  --background:          34 42% 95%;
+  --foreground:          158 45% 8%;
 
-  --card:                36 15% 99%;
-  --card-foreground:     170 22% 11%;
+  --card:                0 0% 100%;
+  --card-foreground:     158 45% 8%;
 
   --popover:             0 0% 100%;
-  --popover-foreground:  170 22% 11%;
+  --popover-foreground:  158 45% 8%;
 
-  /* Brand — Primary Teal */
-  --primary:             168 58% 32%;
-  --primary-hover:       168 58% 27%;
+  /* Brand — Rich Deep Emerald (PakCart signature green) */
+  --primary:             148 70% 25%;
+  --primary-hover:       148 70% 20%;
   --primary-foreground:  0 0% 100%;
 
-  /* Brand — Accent Gold */
-  --secondary:           38 68% 52%;
-  --secondary-hover:     38 68% 46%;
-  --secondary-foreground: 170 22% 10%;
+  /* Brand — Luxurious Amber Gold */
+  --secondary:           39 92% 50%;
+  --secondary-hover:     39 92% 44%;
+  --secondary-foreground: 158 45% 8%;
 
-  /* Neutrals */
-  --muted:               168 18% 95%;
-  --muted-foreground:    168 10% 42%;
+  /* Neutrals — warm green-tinted */
+  --muted:               140 20% 91%;
+  --muted-foreground:    158 16% 38%;
 
-  --accent:              38 68% 52%;
-  --accent-foreground:   170 22% 10%;
+  --accent:              39 92% 50%;
+  --accent-foreground:   158 45% 8%;
 
   /* Utility */
-  --destructive:         5 70% 52%;
-  --destructive-hover:   5 70% 46%;
+  --destructive:         4 74% 52%;
+  --destructive-hover:   4 74% 46%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:              168 16% 90%;
-  --input:               168 16% 90%;
-  --ring:                168 58% 32%;
+  --border:              145 20% 84%;
+  --input:               145 20% 84%;
+  --ring:                148 70% 25%;
 
-  /* Radius — premium geometric, not pill, not sharp */
+  /* Radius — refined */
   --radius: 0.625rem;
 
-  /* Teal-tinted shadows */
-  --shadow-sm:  0 1px 4px hsl(168 30% 15% / 0.06);
-  --shadow-md:  0 2px 12px hsl(168 30% 15% / 0.08);
-  --shadow-lg:  0 8px 28px hsl(168 30% 15% / 0.12);
-  --shadow-xl:  0 16px 48px hsl(168 30% 15% / 0.15);
+  /* Emerald-tinted shadows */
+  --shadow-sm:  0 1px 4px hsl(148 50% 10% / 0.07);
+  --shadow-md:  0 3px 14px hsl(148 50% 10% / 0.09);
+  --shadow-lg:  0 8px 30px hsl(148 50% 10% / 0.13);
+  --shadow-xl:  0 20px 56px hsl(148 50% 10% / 0.17);
 }
 
 .dark {
   /* PakCart Premium Design System — Dark Mode */
 
-  /* Surfaces — layered in 3% steps for depth */
-  --background:          170 24% 6%;
-  --foreground:          36 20% 96%;
+  /* Surfaces — deep rich emerald-dark */
+  --background:          158 35% 6%;
+  --foreground:          34 28% 94%;
 
-  --card:                170 22% 9%;
-  --card-foreground:     36 20% 96%;
+  --card:                158 32% 9%;
+  --card-foreground:     34 28% 94%;
 
-  --popover:             170 22% 11%;
-  --popover-foreground:  36 20% 96%;
+  --popover:             158 32% 11%;
+  --popover-foreground:  34 28% 94%;
 
-  /* Brand — Primary Teal */
-  --primary:             168 52% 40%;
-  --primary-hover:       168 52% 35%;
+  /* Brand — Bright Emerald (more vibrant in dark mode) */
+  --primary:             148 64% 42%;
+  --primary-hover:       148 64% 36%;
   --primary-foreground:  0 0% 100%;
 
-  /* Brand — Accent Gold */
-  --secondary:           38 65% 58%;
-  --secondary-hover:     38 65% 52%;
-  --secondary-foreground: 170 24% 6%;
+  /* Brand — Rich Gold */
+  --secondary:           39 88% 58%;
+  --secondary-hover:     39 88% 52%;
+  --secondary-foreground: 158 35% 6%;
 
   /* Neutrals */
-  --muted:               170 18% 13%;
-  --muted-foreground:    168 10% 62%;
+  --muted:               158 22% 14%;
+  --muted-foreground:    148 14% 60%;
 
-  --accent:              38 65% 58%;
-  --accent-foreground:   170 24% 6%;
+  --accent:              39 88% 58%;
+  --accent-foreground:   158 35% 6%;
 
   /* Utility */
-  --destructive:         5 70% 55%;
-  --destructive-hover:   5 70% 50%;
+  --destructive:         4 72% 58%;
+  --destructive-hover:   4 72% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --border:              170 18% 16%;
-  --input:               170 18% 16%;
-  --ring:                168 52% 40%;
+  --border:              158 22% 16%;
+  --input:               158 22% 16%;
+  --ring:                148 64% 42%;
 
-  /* Teal-tinted shadows for dark mode */
-  --shadow-sm:  0 1px 4px hsl(168 30% 5% / 0.3);
-  --shadow-md:  0 2px 12px hsl(168 30% 5% / 0.4);
-  --shadow-lg:  0 8px 28px hsl(168 30% 5% / 0.5);
-  --shadow-xl:  0 16px 48px hsl(168 30% 5% / 0.6);
+  /* Deep emerald shadows for dark mode */
+  --shadow-sm:  0 1px 4px hsl(158 50% 3% / 0.35);
+  --shadow-md:  0 3px 14px hsl(158 50% 3% / 0.45);
+  --shadow-lg:  0 8px 30px hsl(158 50% 3% / 0.55);
+  --shadow-xl:  0 20px 56px hsl(158 50% 3% / 0.65);
 }
 
 @layer base {
@@ -105,7 +105,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/15 selection:text-primary;
     font-family: var(--font-body);
     font-weight: 400;
     line-height: 1.65;
@@ -140,7 +140,7 @@
     text-wrap: balance;
   }
 
-  /* Teal-tinted shadow utilities */
+  /* Emerald-tinted shadow utilities */
   .shadow-brand-sm {
     box-shadow: var(--shadow-sm);
   }
@@ -156,7 +156,7 @@
 
   /* Glass panel */
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 dark:bg-black/40 dark:border-white/8;
+    @apply bg-white/75 backdrop-blur-md border border-white/30 dark:bg-black/40 dark:border-white/8;
     box-shadow: var(--shadow-lg);
   }
 

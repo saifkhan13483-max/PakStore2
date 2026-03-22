@@ -14,10 +14,10 @@ export default {
                         pill: '999px'
                 },
                 boxShadow: {
-                        'brand-sm': '0 1px 4px hsl(168 30% 15% / 0.06)',
-                        'brand-md': '0 2px 12px hsl(168 30% 15% / 0.08)',
-                        'brand-lg': '0 8px 28px hsl(168 30% 15% / 0.12)',
-                        'brand-xl': '0 16px 48px hsl(168 30% 15% / 0.15)',
+                        'brand-sm': '0 1px 4px hsl(148 50% 10% / 0.07)',
+                        'brand-md': '0 3px 14px hsl(148 50% 10% / 0.09)',
+                        'brand-lg': '0 8px 30px hsl(148 50% 10% / 0.13)',
+                        'brand-xl': '0 20px 56px hsl(148 50% 10% / 0.17)',
                 },
                 colors: {
                         background: 'hsl(var(--background) / <alpha-value>)',
