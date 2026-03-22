@@ -61,6 +61,12 @@ function getCleanCanonical(url: string): string {
   }
 }
 
+function getPriceValidUntil(): string {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toISOString().split("T")[0];
+}
+
 export default function SEO({
   title,
   description,
@@ -75,8 +81,8 @@ export default function SEO({
   robots = "index,follow",
   isHomePage = false,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-  const defaultDescription = "Shop the best artisanal products and daily essentials at PakCart. Quality items delivered to your doorstep in Pakistan.";
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | #1 Online Shopping in Pakistan`;
+  const defaultDescription = "Shop the best artisanal products and daily essentials at PakCart. Quality items delivered to your doorstep across Pakistan.";
   const absoluteImage = getAbsoluteUrl(image);
   const canonicalUrl = getCleanCanonical(url);
 
@@ -113,15 +119,58 @@ export default function SEO({
     "url": canonicalUrl,
     ...(productData.brand ? { "brand": { "@type": "Brand", "name": productData.brand } } : {}),
     ...(productData.sku ? { "sku": productData.sku } : {}),
+    "countryOfOrigin": {
+      "@type": "Country",
+      "name": "Pakistan"
+    },
     "offers": {
       "@type": "Offer",
+      "@id": `${canonicalUrl}#offer`,
       "url": canonicalUrl,
       "priceCurrency": productData.priceCurrency || "PKR",
       "price": productData.price.toString(),
-      "availability": productData.availability || (productData.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"),
+      "priceValidUntil": getPriceValidUntil(),
+      "availability": productData.availability || (productData.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"),
+      "itemCondition": "https://schema.org/NewCondition",
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "PK"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "businessDays": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+          },
+          "cutoffTime": "17:00:00+05:00",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 2,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
+      },
       "seller": {
         "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
         "name": SITE_NAME
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "PK",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 7,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
       }
     },
     ...(productData.rating && productData.reviewCount ? {
@@ -141,6 +190,7 @@ export default function SEO({
         "@id": `${SITE_URL}/#website`,
         "url": SITE_URL,
         "name": SITE_NAME,
+        "inLanguage": "en-PK",
         "description": description || defaultDescription,
         "potentialAction": {
           "@type": "SearchAction",
@@ -158,29 +208,48 @@ export default function SEO({
         "url": SITE_URL,
         "logo": {
           "@type": "ImageObject",
-          "url": `${SITE_URL}/logo.png`
+          "@id": `${SITE_URL}/#logo`,
+          "url": `${SITE_URL}/favicon.png`,
+          "contentUrl": `${SITE_URL}/favicon.png`,
+          "caption": SITE_NAME
         },
         "description": description || defaultDescription,
+        "areaServed": {
+          "@type": "Country",
+          "name": "Pakistan"
+        },
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "PK"
         },
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "Customer Service",
-          "email": "support@pakcart.store",
-          "telephone": "+923188055850"
-        },
-        "sameAs": []
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "email": "support@pakcart.store",
+            "telephone": "+923188055850",
+            "availableLanguage": ["English", "Urdu"],
+            "areaServed": "PK"
+          }
+        ]
       }
     ]
   } : {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
     "name": SITE_NAME,
     "url": SITE_URL,
-    "logo": `${SITE_URL}/logo.png`,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${SITE_URL}/favicon.png`,
+      "caption": SITE_NAME
+    },
     "description": defaultDescription,
+    "areaServed": {
+      "@type": "Country",
+      "name": "Pakistan"
+    },
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "PK"
@@ -188,7 +257,8 @@ export default function SEO({
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Service",
-      "email": "support@pakcart.store"
+      "email": "support@pakcart.store",
+      "telephone": "+923188055850"
     }
   };
 
@@ -196,8 +266,6 @@ export default function SEO({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description || defaultDescription} />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta charSet="utf-8" />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="robots" content={robots} />
 
@@ -208,10 +276,14 @@ export default function SEO({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={absoluteImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={title || SITE_NAME} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_PK" />
 
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@pakcartstore" />
       <meta name="twitter:url" content={canonicalUrl} />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description || defaultDescription} />
