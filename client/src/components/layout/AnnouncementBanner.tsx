@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { announcementService } from "@/services/announcementService";
 import { type Announcement } from "@shared/announcement-schema";
-import { X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
@@ -68,11 +68,6 @@ export default function AnnouncementBanner() {
     goTo((currentIndex + 1) % visible.length, 1);
   }, [visible.length, currentIndex, goTo]);
 
-  const goPrev = useCallback(() => {
-    if (visible.length <= 1) return;
-    goTo((currentIndex - 1 + visible.length) % visible.length, -1);
-  }, [visible.length, currentIndex, goTo]);
-
   useEffect(() => {
     if (visible.length <= 1 || isPaused) return;
     const timer = setInterval(goNext, SLIDE_INTERVAL);
@@ -110,19 +105,8 @@ export default function AnnouncementBanner() {
       data-testid="announcement-banner"
     >
       <div className="relative flex items-center" style={{ minHeight: "2.25rem" }}>
-        {showMultiple && (
-          <button
-            type="button"
-            onClick={goPrev}
-            className="absolute left-2 z-10 p-1 opacity-50 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
-            aria-label="Previous announcement"
-            data-testid="announcement-prev"
-          >
-            <ChevronLeft className="h-3 w-3" />
-          </button>
-        )}
 
-        <div className="flex-1 overflow-hidden px-8 py-2">
+        <div className="flex-1 overflow-hidden pl-4 pr-8 py-2">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={announcement?.id}
@@ -169,17 +153,6 @@ export default function AnnouncementBanner() {
           </AnimatePresence>
         </div>
 
-        {showMultiple && (
-          <button
-            type="button"
-            onClick={goNext}
-            className="absolute right-8 z-10 p-1 opacity-50 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
-            aria-label="Next announcement"
-            data-testid="announcement-next"
-          >
-            <ChevronRight className="h-3 w-3" />
-          </button>
-        )}
 
         <button
           type="button"
