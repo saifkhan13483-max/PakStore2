@@ -34,8 +34,21 @@ Disallow: /admin/
 Disallow: /auth
 Disallow: /auth/
 Disallow: /profile
+Disallow: /profile/
 Disallow: /checkout
+Disallow: /checkout/
 Disallow: /cart
+Disallow: /cart/
 Disallow: /thank-you
+Disallow: /thank-you/
 Disallow: /orders
+Disallow: /orders/
 Disallow: /*?*
+Disallow: /*&*
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /assets/
+
+User-agent: AdsBot-Google
+Allow: /
