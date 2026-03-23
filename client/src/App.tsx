@@ -90,6 +90,7 @@ const CategoryCollection = lazyWithRetry(() => import("@/pages/CategoryCollectio
 const AdminDashboard = lazyWithRetry(() => import("@/pages/admin/Dashboard"));
 const AdminProducts = lazyWithRetry(() => import("@/pages/admin/Products"));
 const AdminProductForm = lazyWithRetry(() => import("@/pages/admin/ProductForm"));
+const AdminBulkAddProducts = lazyWithRetry(() => import("@/pages/admin/BulkAddProducts"));
 const AdminCategories = lazyWithRetry(() => import("@/pages/admin/ManageCategories"));
 const AdminOrders = lazyWithRetry(() => import("@/pages/admin/Orders"));
 const AdminSitemap = lazyWithRetry(() => import("@/pages/admin/Sitemap"));
@@ -178,6 +179,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminProductForm />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/products/bulk-add">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminBulkAddProducts />
           </AdminLayout>
         </AdminRoute>
       </Route>
