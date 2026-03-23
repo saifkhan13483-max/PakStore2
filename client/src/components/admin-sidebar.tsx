@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingBag, Tags, Home, ShoppingCart, Globe, Image as ImageIcon, Megaphone } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Tags, Home, ShoppingCart, Globe, Image as ImageIcon, Megaphone, BarChart2, MessageSquarePlus } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -20,6 +20,8 @@ const adminItems = [
   { title: "Products", url: "/admin/products", icon: ShoppingBag },
   { title: "Categories", url: "/admin/categories", icon: Tags },
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
+  { title: "Search Analytics", url: "/admin/search-analytics", icon: BarChart2 },
+  { title: "Seed Comments", url: "/admin/seed-comments", icon: MessageSquarePlus },
   { title: "Sitemap", url: "/admin/sitemap", icon: Globe },
   { title: "Back to Shop", url: "/", icon: Home },
 ];
