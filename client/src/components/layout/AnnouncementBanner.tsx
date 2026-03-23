@@ -87,8 +87,6 @@ export default function AnnouncementBanner() {
   const hasLink = !!announcement?.link_url;
   const linkText = announcement?.link_text || "Learn more";
   const isExternal = hasLink && isExternalUrl(announcement.link_url!);
-  const showMultiple = visible.length > 1;
-
   function handleDismiss(id: string) {
     addDismissed(id);
     setDismissed((prev) => [...prev, id]);
@@ -168,26 +166,6 @@ export default function AnnouncementBanner() {
         </button>
       </div>
 
-      {/* Dot indicators */}
-      {showMultiple && (
-        <div className="flex justify-center gap-1.5 pb-1.5">
-          {visible.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => goTo(idx, idx > currentIndex ? 1 : -1)}
-              className={cn(
-                "rounded-full transition-all duration-300 focus-visible:outline-none",
-                "touch-manipulation",
-                idx === currentIndex
-                  ? "w-4 h-1.5 bg-white"
-                  : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70 active:bg-white/90"
-              )}
-              aria-label={`Go to announcement ${idx + 1}`}
-              data-testid={`announcement-dot-${idx}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
