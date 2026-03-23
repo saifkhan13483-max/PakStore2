@@ -5,7 +5,7 @@ import { Link } from "wouter";
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t">
+    <footer className="bg-white border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-8 mb-12">
           
