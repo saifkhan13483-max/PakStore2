@@ -1,6 +1,63 @@
+import { useEffect } from "react";
 import SEO from "@/components/SEO";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
+const aboutPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "@id": "https://pakcart.store/about#webpage",
+  "url": "https://pakcart.store/about",
+  "name": "About PakCart - Online Shopping in Pakistan",
+  "description": "Learn about PakCart, Pakistan's premier destination for authentic artisanal products. Connecting local artisans with customers nationwide with fast delivery and quality guaranteed.",
+  "inLanguage": "en-PK",
+  "isPartOf": { "@id": "https://pakcart.store/#website" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pakcart.store/" },
+      { "@type": "ListItem", "position": 2, "name": "Our Story", "item": "https://pakcart.store/about" }
+    ]
+  },
+  "mainEntity": {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://pakcart.store/#organization",
+    "name": "PakCart",
+    "url": "https://pakcart.store",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://pakcart.store/favicon.png",
+      "caption": "PakCart"
+    },
+    "description": "Pakistan's premier destination for authentic artisanal products including women's bags, men's watches, slippers, bedsheets, and fashion accessories.",
+    "foundingDate": "2024",
+    "areaServed": { "@type": "Country", "name": "Pakistan" },
+    "address": { "@type": "PostalAddress", "addressCountry": "PK" },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "email": "support@pakcart.store",
+        "telephone": "+923188055850",
+        "availableLanguage": ["English", "Urdu"],
+        "areaServed": "PK"
+      }
+    ]
+  }
+};
 
 export default function About() {
+  useEffect(() => {
+    (window as any).__SEO_PAGE_READY__ = true;
+  }, []);
+
   return (
     <>
       <SEO
@@ -8,8 +65,25 @@ export default function About() {
         description="Learn about PakCart, Pakistan's premier destination for authentic artisanal products. Connecting local artisans with customers nationwide with fast delivery and quality guaranteed."
         url="https://pakcart.store/about"
         robots="index,follow"
+        schema={aboutPageSchema}
+        breadcrumbs={[
+          { name: "Home", url: "https://pakcart.store/" },
+          { name: "Our Story", url: "https://pakcart.store/about" },
+        ]}
       />
       <div className="container mx-auto px-4 py-12">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Our Story</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="max-w-4xl mx-auto prose prose-emerald dark:prose-invert">
           <h1 className="text-4xl font-serif text-emerald-900 mb-4">About PakCart</h1>
           <p className="text-lg text-muted-foreground mb-8">

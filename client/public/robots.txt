@@ -24,5 +24,6 @@ Disallow: /thank-you/
 Disallow: /orders
 Disallow: /orders/
 Disallow: /*?*
+Disallow: /*&*
 
 Sitemap: https://pakcart.store/sitemap.xml

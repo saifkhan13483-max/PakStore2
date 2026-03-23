@@ -1,7 +1,55 @@
 import SEO from "@/components/SEO";
 import ContactForm from "@/components/contact/ContactForm";
-import { Mail, MapPin } from "lucide-react";
+import { Mail } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
+const contactPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "@id": "https://pakcart.store/contact#webpage",
+  "url": "https://pakcart.store/contact",
+  "name": "Contact Us - PakCart",
+  "description": "Get in touch with PakCart for any inquiries about our authentic Pakistani artisanal products. Email, phone, or use our contact form. We're here to help.",
+  "inLanguage": "en-PK",
+  "isPartOf": { "@id": "https://pakcart.store/#website" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://pakcart.store/" },
+      { "@type": "ListItem", "position": 2, "name": "Contact Us", "item": "https://pakcart.store/contact" }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Organization",
+    "@id": "https://pakcart.store/#organization",
+    "name": "PakCart",
+    "url": "https://pakcart.store",
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "email": "contact@pakcart.store",
+        "telephone": "+923188055850",
+        "availableLanguage": ["English", "Urdu"],
+        "areaServed": "PK",
+        "hoursAvailable": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
+      }
+    ]
+  }
+};
 
 export default function Contact() {
   return (
@@ -11,9 +59,26 @@ export default function Contact() {
         description="Get in touch with PakCart for any inquiries about our authentic Pakistani artisanal products. Email, phone, or use our contact form. We're here to help."
         url="https://pakcart.store/contact"
         robots="index,follow"
+        schema={contactPageSchema}
+        breadcrumbs={[
+          { name: "Home", url: "https://pakcart.store/" },
+          { name: "Contact Us", url: "https://pakcart.store/contact" },
+        ]}
       />
 
       <div className="max-w-7xl mx-auto">
+        <Breadcrumb className="mb-8">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Contact Us</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Get in Touch
@@ -25,7 +90,6 @@ export default function Contact() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Contact Information */}
           <div className="space-y-8">
             <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
               <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
@@ -63,7 +127,6 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Contact Form */}
           <div className="max-w-md mx-auto lg:mx-0 w-full">
             <ContactForm />
           </div>
