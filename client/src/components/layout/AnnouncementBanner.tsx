@@ -37,9 +37,9 @@ function isExternalUrl(url: string): boolean {
 }
 
 const slideVariants = {
-  enter: (dir: number) => ({ y: dir > 0 ? 20 : -20, opacity: 0 }),
+  enter: (dir: number) => ({ y: dir > 0 ? 16 : -16, opacity: 0 }),
   center: { y: 0, opacity: 1 },
-  exit: (dir: number) => ({ y: dir > 0 ? -20 : 20, opacity: 0 }),
+  exit: (dir: number) => ({ y: dir > 0 ? -16 : 16, opacity: 0 }),
 };
 
 export default function AnnouncementBanner() {
@@ -102,11 +102,14 @@ export default function AnnouncementBanner() {
       )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
       data-testid="announcement-banner"
     >
-      <div className="relative flex items-center" style={{ minHeight: "2.25rem" }}>
-
-        <div className="flex-1 overflow-hidden pl-4 pr-8 py-2">
+      {/* Main row */}
+      <div className="relative flex items-center min-h-[2.25rem]">
+        {/* Slide content */}
+        <div className="flex-1 overflow-hidden px-8 py-1.5 sm:py-2">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={announcement?.id}
@@ -116,11 +119,11 @@ export default function AnnouncementBanner() {
               animate="center"
               exit="exit"
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="flex items-center justify-center gap-2 text-sm font-medium text-center"
+              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 text-center w-full"
               data-testid={`announcement-bar-${announcement?.id}`}
             >
               <span
-                className="leading-snug"
+                className="text-[11px] sm:text-sm font-medium leading-snug"
                 data-testid={`announcement-message-${announcement?.id}`}
               >
                 {announcement?.message}
@@ -132,16 +135,16 @@ export default function AnnouncementBanner() {
                     href={announcement.link_url!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 underline underline-offset-2 opacity-90 hover:opacity-100 whitespace-nowrap font-semibold"
+                    className="inline-flex items-center gap-1 underline underline-offset-2 opacity-90 hover:opacity-100 font-semibold text-[11px] sm:text-sm"
                     data-testid={`announcement-link-${announcement.id}`}
                   >
                     {linkText}
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                   </a>
                 ) : (
                   <Link href={announcement.link_url!}>
                     <a
-                      className="inline-flex items-center gap-1 underline underline-offset-2 opacity-90 hover:opacity-100 whitespace-nowrap font-semibold"
+                      className="inline-flex items-center gap-1 underline underline-offset-2 opacity-90 hover:opacity-100 font-semibold text-[11px] sm:text-sm"
                       data-testid={`announcement-link-${announcement.id}`}
                     >
                       {linkText}
@@ -153,11 +156,11 @@ export default function AnnouncementBanner() {
           </AnimatePresence>
         </div>
 
-
+        {/* Dismiss button — large touch target on mobile */}
         <button
           type="button"
           onClick={() => handleDismiss(announcement?.id)}
-          className="absolute right-2 z-10 p-0.5 opacity-60 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full"
+          className="absolute right-0 top-0 h-full w-8 flex items-center justify-center z-10 opacity-60 hover:opacity-100 active:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           aria-label="Dismiss announcement"
           data-testid={`announcement-dismiss-${announcement?.id}`}
         >
@@ -165,17 +168,19 @@ export default function AnnouncementBanner() {
         </button>
       </div>
 
+      {/* Dot indicators */}
       {showMultiple && (
-        <div className="flex justify-center gap-1 pb-1">
+        <div className="flex justify-center gap-1.5 pb-1.5">
           {visible.map((_, idx) => (
             <button
               key={idx}
               onClick={() => goTo(idx, idx > currentIndex ? 1 : -1)}
               className={cn(
                 "rounded-full transition-all duration-300 focus-visible:outline-none",
+                "touch-manipulation",
                 idx === currentIndex
-                  ? "w-4 h-1 bg-white"
-                  : "w-1 h-1 bg-white/40 hover:bg-white/70"
+                  ? "w-4 h-1.5 bg-white"
+                  : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70 active:bg-white/90"
               )}
               aria-label={`Go to announcement ${idx + 1}`}
               data-testid={`announcement-dot-${idx}`}
