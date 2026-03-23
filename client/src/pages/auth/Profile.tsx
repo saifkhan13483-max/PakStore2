@@ -17,7 +17,7 @@ import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { UserAvatar } from "../../components/auth/UserAvatar";
 // @ts-ignore - MediaUpload.jsx doesn't have TypeScript declarations
 import { MediaUpload } from "../../components/MediaUpload";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { LayoutDashboard } from "lucide-react";
 import { Link } from "wouter";
 import { SEED_AVATARS } from "@shared/user-seeds";
@@ -176,6 +176,7 @@ export default function Profile() {
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Update Profile Picture</DialogTitle>
+                      <DialogDescription className="sr-only">Upload a new profile picture or choose from the avatar gallery.</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                       <MediaUpload 
@@ -205,6 +206,7 @@ export default function Profile() {
                         <DialogContent className="sm:max-w-lg">
                           <DialogHeader>
                             <DialogTitle>Select an Avatar</DialogTitle>
+                            <DialogDescription className="sr-only">Choose a pre-made avatar to use as your profile picture.</DialogDescription>
                           </DialogHeader>
                           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 py-4 max-h-[300px] overflow-y-auto pr-2">
                             {SEED_AVATARS.map((avatar, index) => (

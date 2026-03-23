@@ -24,6 +24,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -250,6 +251,8 @@ export function CommentSection({ productId }: CommentSectionProps) {
       {/* Full-size image viewer */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none">
+          <DialogTitle className="sr-only">Review Image</DialogTitle>
+          <DialogDescription className="sr-only">Full-size view of the review image.</DialogDescription>
           {selectedImage && (
             <img
               src={getOptimizedImageUrl(selectedImage, { width: 1200 })}
@@ -481,6 +484,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Edit Review</DialogTitle>
+            <DialogDescription className="sr-only">Update your rating and review text.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="flex gap-2">

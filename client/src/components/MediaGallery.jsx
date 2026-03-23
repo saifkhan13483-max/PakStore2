@@ -29,6 +29,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -270,6 +271,8 @@ export function MediaGallery() {
       {/* Lightbox / Preview Dialog */}
       <Dialog open={!!selectedMedia} onOpenChange={() => setSelectedMedia(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black/95 border-none">
+          <DialogTitle className="sr-only">Media Preview</DialogTitle>
+          <DialogDescription className="sr-only">Full-size preview of the selected media file.</DialogDescription>
           {selectedMedia && (
             <div className="relative flex flex-col items-center justify-center min-h-[50vh]">
               <Button 

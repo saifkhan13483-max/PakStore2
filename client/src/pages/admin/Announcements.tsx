@@ -679,6 +679,7 @@ export default function AdminAnnouncements() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Add New Announcement</DialogTitle>
+            <DialogDescription className="sr-only">Fill in the details to create a new site announcement.</DialogDescription>
           </DialogHeader>
           <AnnouncementForm
             defaultValues={createDefaults}
@@ -694,6 +695,7 @@ export default function AdminAnnouncements() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Announcement</DialogTitle>
+            <DialogDescription className="sr-only">Update the details of this announcement.</DialogDescription>
           </DialogHeader>
           {editTarget && (
             <AnnouncementForm
