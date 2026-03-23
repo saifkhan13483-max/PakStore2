@@ -36,7 +36,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "npx vite --port 5000 --host"
 waitForPort = 5000
 
 [agent]
@@ -64,7 +64,3 @@ VITE_CLOUDINARY_B_UPLOAD_PRESET = "portfolio"
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 3001
