@@ -24,6 +24,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     parts: [{ text: m.content }],
   }));
 
+  while (geminiContents.length > 0 && geminiContents[0].role === "model") {
+    geminiContents.shift();
+  }
+
   try {
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
