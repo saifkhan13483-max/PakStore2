@@ -171,8 +171,21 @@ Requirements:
 - Use Pakistani names (mix of male/female)
 - Ratings between 3 and 5 stars
 - Mix of brief (1-2 sentences) and detailed (3-4 sentences) reviews
-- Some reviews in Roman Urdu, some in English
-- Sound genuine, not promotional
+- Some reviews in Roman Urdu, some in English — sound genuine, not promotional
+
+ROMAN URDU SPELLING RULES (follow strictly for any Roman Urdu review):
+- "kia" (not "kya") for what/did
+- "hai" (singular is) / "hain" (plural/respectful are)
+- "nahi" (not "nahin") for no/not
+- "toh" (not "tou") for then/so
+- "aur" (not "or") for and
+- "woh" (not "wo") for he/she/that
+- "yeh" (not "ye") for this/these
+- "mein" for in, "main" for I
+- "aap" (never "ap") for you (respectful)
+- Full words only: "hai" not "h", "kyun" not "kyu", "par" not "pr", "se" not "sy"
+- Common words: Shukriya (thanks), Acha (good), Behtareen (excellent), Zabardast (great), Bilkul (absolutely), Theek hai (okay), Pasand aaya (liked it), Qeemat (price), Mahenga (expensive), Sasta (affordable)
+- Example correct sentence: "Bohot acha product hai, delivery bhi time pe aayi. Bilkul recommend karunga."
 
 Return ONLY a JSON array (no markdown):
 [{"userName":"name","content":"review text","rating":4}]`,
