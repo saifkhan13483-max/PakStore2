@@ -17,23 +17,52 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         return;
       }
 
-      const geminiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages: parsed.messages,
-          max_tokens: parsed.maxTokens ?? defaults.max_tokens,
+      const messages: { role: string; content: string }[] = parsed.messages ?? [];
+
+      const systemMsg = messages.find((m) => m.role === "system");
+      const conversationMsgs = messages.filter((m) => m.role !== "system");
+
+      const contents = conversationMsgs.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+
+      const requestBody: any = {
+        contents,
+        generationConfig: {
+          maxOutputTokens: parsed.maxTokens ?? parsed.max_tokens ?? defaults.max_tokens,
           temperature: parsed.temperature ?? defaults.temperature,
-        }),
-      });
+        },
+      };
+
+      if (systemMsg) {
+        requestBody.system_instruction = { parts: [{ text: systemMsg.content }] };
+      }
+
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       const data = await geminiRes.json();
-      res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(data));
+
+      if (!geminiRes.ok) {
+        res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: data.error?.message ?? "Gemini API error" }));
+        return;
+      }
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+      const openAiResponse = {
+        choices: [{ message: { role: "assistant", content: text } }],
+      };
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(openAiResponse));
     } catch (err: any) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
@@ -47,48 +76,17 @@ function geminiApiPlugin() {
     configureServer(server: any) {
       server.middlewares.use("/api/ai", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        geminiProxy(req, res, "gemini-2.0-flash", { max_tokens: 512, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.0-flash-lite", { max_tokens: 512, temperature: 0.7 });
       });
 
       server.middlewares.use("/api/chat", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        geminiProxy(req, res, "gemini-2.0-flash", { max_tokens: 512, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.0-flash-lite", { max_tokens: 512, temperature: 0.7 });
       });
 
       server.middlewares.use("/api/groq-proxy", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        let body = "";
-        req.on("data", (chunk: Buffer) => { body += chunk.toString(); });
-        req.on("end", async () => {
-          try {
-            const parsed = JSON.parse(body);
-            const apiKey = process.env.GEMINI_API_KEY;
-            if (!apiKey) {
-              res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ error: "GEMINI_API_KEY not configured" }));
-              return;
-            }
-            const geminiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: parsed.model ?? "gemini-2.0-flash",
-                messages: parsed.messages,
-                max_tokens: parsed.max_tokens ?? 1024,
-                temperature: parsed.temperature ?? 0.7,
-              }),
-            });
-            const data = await geminiRes.json();
-            res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(data));
-          } catch (err: any) {
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: err.message }));
-          }
-        });
+        geminiProxy(req, res, "gemini-2.0-flash-lite", { max_tokens: 1024, temperature: 0.7 });
       });
     },
   };
