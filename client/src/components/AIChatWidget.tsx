@@ -868,7 +868,7 @@ export default function AIChatWidget() {
         ...updatedMessages,
         {
           role: "assistant",
-          content: "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+          content: "Abhi connection mein thori mushkil aa rahi hai — lekin aap seedha Saif Khan sahab ko WhatsApp message kar sakte hain:\n\n📱 03188055850\n(Sirf message — call nahi)\n\nThori der baad dobara try karna bhi ho sakta hai.",
         },
       ]);
     } finally {
