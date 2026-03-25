@@ -842,9 +842,11 @@ export default function AIChatWidget() {
     setIsLoading(true);
 
     try {
+      // Skip the first message (hardcoded welcome) — only send real conversation to the AI
+      const conversationHistory = updatedMessages.slice(1);
       const apiMessages = [
         { role: "system", content: SYSTEM_PROMPT },
-        ...updatedMessages,
+        ...conversationHistory,
       ];
 
       const res = await fetch("/api/chat", {
