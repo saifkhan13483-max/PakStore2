@@ -3,21 +3,21 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-async function groqProxy(req: any, res: any, model: string, defaults: { max_tokens: number; temperature: number }) {
+async function geminiProxy(req: any, res: any, model: string, defaults: { max_tokens: number; temperature: number }) {
   let body = "";
   req.on("data", (chunk: Buffer) => { body += chunk.toString(); });
   req.on("end", async () => {
     try {
       const parsed = JSON.parse(body);
-      const apiKey = process.env.GROQ_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY;
 
       if (!apiKey) {
         res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "GROQ_API_KEY not configured" }));
+        res.end(JSON.stringify({ error: "GEMINI_API_KEY not configured" }));
         return;
       }
 
-      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const geminiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
@@ -31,8 +31,8 @@ async function groqProxy(req: any, res: any, model: string, defaults: { max_toke
         }),
       });
 
-      const data = await groqRes.json();
-      res.writeHead(groqRes.status, { "Content-Type": "application/json" });
+      const data = await geminiRes.json();
+      res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
       res.end(JSON.stringify(data));
     } catch (err: any) {
       res.writeHead(500, { "Content-Type": "application/json" });
@@ -41,18 +41,18 @@ async function groqProxy(req: any, res: any, model: string, defaults: { max_toke
   });
 }
 
-function groqApiPlugin() {
+function geminiApiPlugin() {
   return {
-    name: "groq-api-middleware",
+    name: "gemini-api-middleware",
     configureServer(server: any) {
       server.middlewares.use("/api/ai", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        groqProxy(req, res, "llama-3.3-70b-versatile", { max_tokens: 512, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.0-flash", { max_tokens: 512, temperature: 0.7 });
       });
 
       server.middlewares.use("/api/chat", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        groqProxy(req, res, "llama-3.1-8b-instant", { max_tokens: 512, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.0-flash", { max_tokens: 512, temperature: 0.7 });
       });
 
       server.middlewares.use("/api/groq-proxy", (req: any, res: any) => {
@@ -62,27 +62,27 @@ function groqApiPlugin() {
         req.on("end", async () => {
           try {
             const parsed = JSON.parse(body);
-            const apiKey = process.env.GROQ_API_KEY;
+            const apiKey = process.env.GEMINI_API_KEY;
             if (!apiKey) {
               res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ error: "GROQ_API_KEY not configured" }));
+              res.end(JSON.stringify({ error: "GEMINI_API_KEY not configured" }));
               return;
             }
-            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            const geminiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
               method: "POST",
               headers: {
                 "Authorization": `Bearer ${apiKey}`,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                model: parsed.model ?? "llama-3.3-70b-versatile",
+                model: parsed.model ?? "gemini-2.0-flash",
                 messages: parsed.messages,
                 max_tokens: parsed.max_tokens ?? 1024,
                 temperature: parsed.temperature ?? 0.7,
               }),
             });
-            const data = await groqRes.json();
-            res.writeHead(groqRes.status, { "Content-Type": "application/json" });
+            const data = await geminiRes.json();
+            res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
             res.end(JSON.stringify(data));
           } catch (err: any) {
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -98,7 +98,7 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    groqApiPlugin(),
+    geminiApiPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
