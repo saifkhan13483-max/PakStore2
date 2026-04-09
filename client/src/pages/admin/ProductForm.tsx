@@ -37,6 +37,7 @@ import { VideoUpload } from "@/components/VideoUpload";
 import { useEffect, Fragment } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
+import { settingsFirestoreService } from "@/services/settingsFirestoreService";
 import { useAIDescription, useAISEO, useAIReviews } from "@/hooks/use-ai";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -59,6 +60,11 @@ export default function AdminProductForm() {
     queryFn: () => categoryFirestoreService.getAllCategories(),
   });
 
+  const { data: profitRulesSettings } = useQuery({
+    queryKey: ["settings", "profitRules"],
+    queryFn: () => settingsFirestoreService.getProfitRules(),
+  });
+
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
@@ -68,6 +74,7 @@ export default function AdminProductForm() {
       longDescription: "",
       price: 0,
       profit: 0,
+      wholesalePrice: 0,
       originalPrice: 0,
       images: [],
       videoUrl: "",
@@ -96,11 +103,24 @@ export default function AdminProductForm() {
     name: "variants" as any,
   });
 
+  const wholesalePrice = form.watch("wholesalePrice");
+  useEffect(() => {
+    if (wholesalePrice && wholesalePrice > 0 && profitRulesSettings?.rules?.length) {
+      const { sellingPrice, profit } = settingsFirestoreService.calculateSellingPrice(
+        wholesalePrice,
+        profitRulesSettings.rules
+      );
+      form.setValue("price", wholesalePrice, { shouldValidate: true });
+      form.setValue("profit", profit, { shouldValidate: true });
+    }
+  }, [wholesalePrice, profitRulesSettings, form]);
+
   useEffect(() => {
     if (product) {
       form.reset({
         ...product,
         profit: product.profit || 0,
+        wholesalePrice: product.wholesalePrice || 0,
         images: product.images || [],
         videoUrl: product.videoUrl || "",
         categoryId: product.categoryId ? String(product.categoryId) : "",
@@ -662,6 +682,55 @@ export default function AdminProductForm() {
 
                     <FormField
                       control={form.control}
+                      name="wholesalePrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            Wholesale Price (₨)
+                            <span className="text-xs font-normal text-emerald-600 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">Auto-calculates profit</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              className="bg-background/50 font-bold text-lg border-emerald-300 focus-visible:ring-emerald-400"
+                              {...field}
+                              value={field.value || ""}
+                              onChange={e => field.onChange(parseInt(e.target.value) || 0)}
+                              data-testid="input-wholesale-price"
+                              placeholder="Enter wholesale / purchase price"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Enter the price you pay. Profit will be set automatically based on your{" "}
+                            <a href="/admin/profit-rules" className="text-emerald-600 underline underline-offset-2" target="_blank" rel="noopener noreferrer">Profit Rules</a>.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {wholesalePrice > 0 && profitRulesSettings?.rules?.length ? (
+                      <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-sm">
+                        <p className="text-xs font-semibold text-emerald-900 uppercase tracking-wider mb-2">Auto-calculated from Profit Rules</p>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Wholesale</p>
+                            <p className="font-bold text-emerald-800">₨ {wholesalePrice.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">+ Profit</p>
+                            <p className="font-bold text-emerald-600">₨ {(form.watch("profit") || 0).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">= Selling Price</p>
+                            <p className="font-bold text-emerald-700 text-base">₨ {((form.watch("price") || 0) + (form.watch("profit") || 0)).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <FormField
+                      control={form.control}
                       name="price"
                       render={({ field }) => (
                         <FormItem>
@@ -674,6 +743,7 @@ export default function AdminProductForm() {
                               onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                             />
                           </FormControl>
+                          <FormDescription className="text-[10px]">Auto-filled from wholesale price, or set manually</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -692,7 +762,7 @@ export default function AdminProductForm() {
                               onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                             />
                           </FormControl>
-                          <FormDescription className="text-[10px]">Your profit margin for dropshipping</FormDescription>
+                          <FormDescription className="text-[10px]">Auto-filled from profit rules, or override manually</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}

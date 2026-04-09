@@ -13,6 +13,7 @@ import {
   MessageSquare,
   BarChart3,
   Zap,
+  TrendingUp,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ const menuItems = [
   { icon: Megaphone, label: "Announcements", href: "/admin/announcements" },
   { icon: MessageSquare, label: "Seed Comments", href: "/admin/seed-comments" },
   { icon: BarChart3, label: "Search Analytics", href: "/admin/search-analytics" },
+  { icon: TrendingUp, label: "Profit Rules", href: "/admin/profit-rules" },
   { icon: FileSearch, label: "Sitemap", href: "/admin/sitemap" },
 ];
 

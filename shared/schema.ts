@@ -46,6 +46,7 @@ export const productSchema = baseDocumentSchema.extend({
   longDescription: z.string().optional(),
   price: z.number().positive(),
   profit: z.number().nonnegative().optional().default(0),
+  wholesalePrice: z.number().nonnegative().optional(),
   originalPrice: z.number().nullable().optional(),
   images: z.array(z.string()),
   videoUrl: z.string().optional().nullable(),

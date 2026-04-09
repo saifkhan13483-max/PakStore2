@@ -98,6 +98,7 @@ const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSl
 const AdminAnnouncements = lazyWithRetry(() => import("@/pages/admin/Announcements"));
 const AdminSeedComments = lazyWithRetry(() => import("@/pages/admin/SeedComments"));
 const AdminSearchAnalytics = lazyWithRetry(() => import("@/pages/admin/SearchAnalytics"));
+const AdminProfitRules = lazyWithRetry(() => import("@/pages/admin/ProfitRules"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 
 import { trackEvent } from "@/lib/firebase";
@@ -242,6 +243,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminSearchAnalytics />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/profit-rules">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminProfitRules />
           </AdminLayout>
         </AdminRoute>
       </Route>
