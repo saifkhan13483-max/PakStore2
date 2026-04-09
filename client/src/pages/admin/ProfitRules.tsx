@@ -26,6 +26,7 @@ export default function AdminProfitRules() {
     mutationFn: (newRules: ProfitRule[]) => settingsFirestoreService.saveProfitRules(newRules),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings", "profitRules"] });
+      setRules(null);
       toast({ title: "Profit rules saved!", description: "Your pricing rules have been updated successfully." });
     },
     onError: (error: any) => {
@@ -41,10 +42,10 @@ export default function AdminProfitRules() {
   };
 
   const handleAddRule = () => {
-    const sorted = [...effectiveRules].sort((a, b) => a.maxWholesalePrice - b.maxWholesalePrice);
-    const lastMax = sorted[sorted.length - 1]?.maxWholesalePrice ?? 0;
+    const sorted = [...effectiveRules].sort((a, b) => a.maxCostPrice - b.maxCostPrice);
+    const lastMax = sorted[sorted.length - 1]?.maxCostPrice ?? 0;
     const lastProfit = sorted[sorted.length - 1]?.profit ?? 0;
-    setRules([...effectiveRules, { maxWholesalePrice: lastMax + 1000, profit: lastProfit + 100 }]);
+    setRules([...effectiveRules, { maxCostPrice: lastMax + 1000, profit: lastProfit + 100 }]);
   };
 
   const handleRemoveRule = (index: number) => {
@@ -52,26 +53,24 @@ export default function AdminProfitRules() {
   };
 
   const handleSave = () => {
-    const sorted = [...effectiveRules].sort((a, b) => a.maxWholesalePrice - b.maxWholesalePrice);
+    const sorted = [...effectiveRules].sort((a, b) => a.maxCostPrice - b.maxCostPrice);
     saveMutation.mutate(sorted);
   };
 
-  const sortedRules = [...effectiveRules].sort((a, b) => a.maxWholesalePrice - b.maxWholesalePrice);
+  const sortedRules = [...effectiveRules].sort((a, b) => a.maxCostPrice - b.maxCostPrice);
 
   return (
     <>
       <SEO title="Profit Rules - Admin" />
       <div className="p-6 max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              Profit Rules
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Set profit amounts based on wholesale price ranges. When you enter a wholesale price on a product, the selling price is calculated automatically.
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 text-primary" />
+            Profit Rules
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Define how much profit to add based on a product's cost price range.
+          </p>
         </div>
 
         <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
@@ -79,7 +78,7 @@ export default function AdminProfitRules() {
             <div className="flex gap-3">
               <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
               <div className="text-sm text-blue-800 dark:text-blue-300">
-                <strong>How it works:</strong> When adding or editing a product, enter the wholesale price. The system will look up the matching rule and automatically set the selling price and profit. For example, if wholesale price is Rs. 850 and you have a rule "Up to Rs. 1000 → Rs. 100 profit", the selling price will be set to Rs. 950.
+                <strong>How it works:</strong> When you enter a cost price for a product, the system finds the matching rule and fills in the profit automatically. For example, if cost price is Rs. 850 and the rule says "Up to Rs. 1000 → Rs. 100 profit", the selling price becomes Rs. 950.
               </div>
             </div>
           </CardContent>
@@ -87,9 +86,9 @@ export default function AdminProfitRules() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Price Range Rules</CardTitle>
+            <CardTitle>Cost Price Range Rules</CardTitle>
             <CardDescription>
-              Each rule defines a maximum wholesale price and the profit to add. Rules are applied from lowest to highest — the first rule where the wholesale price fits is used.
+              Each rule sets a maximum cost price and the profit to add. The lowest matching rule is applied first.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -100,7 +99,7 @@ export default function AdminProfitRules() {
             ) : (
               <>
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-3 items-center text-sm font-medium text-muted-foreground px-1">
-                  <span>Max Wholesale Price (Rs.)</span>
+                  <span>Cost Price up to (Rs.)</span>
                   <span>Profit to Add (Rs.)</span>
                   <span></span>
                 </div>
@@ -111,23 +110,23 @@ export default function AdminProfitRules() {
                     data-testid={`profit-rule-row-${index}`}
                     className="grid grid-cols-[1fr_1fr_auto] gap-3 items-center"
                   >
-                    <div className="space-y-1">
-                      <Label htmlFor={`max-price-${index}`} className="sr-only">Max Wholesale Price</Label>
+                    <div>
+                      <Label htmlFor={`max-price-${index}`} className="sr-only">Cost Price up to</Label>
                       <Input
                         id={`max-price-${index}`}
                         type="number"
                         min={0}
-                        value={rule.maxWholesalePrice}
+                        value={rule.maxCostPrice}
                         onChange={(e) => handleRuleChange(
-                          effectiveRules.indexOf(rule),
-                          "maxWholesalePrice",
+                          effectiveRules.findIndex(r => r === rule),
+                          "maxCostPrice",
                           e.target.value
                         )}
                         data-testid={`input-max-price-${index}`}
                         placeholder="e.g. 1000"
                       />
                     </div>
-                    <div className="space-y-1">
+                    <div>
                       <Label htmlFor={`profit-${index}`} className="sr-only">Profit</Label>
                       <Input
                         id={`profit-${index}`}
@@ -135,7 +134,7 @@ export default function AdminProfitRules() {
                         min={0}
                         value={rule.profit}
                         onChange={(e) => handleRuleChange(
-                          effectiveRules.indexOf(rule),
+                          effectiveRules.findIndex(r => r === rule),
                           "profit",
                           e.target.value
                         )}
@@ -146,7 +145,7 @@ export default function AdminProfitRules() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleRemoveRule(effectiveRules.indexOf(rule))}
+                      onClick={() => handleRemoveRule(effectiveRules.findIndex(r => r === rule))}
                       data-testid={`button-remove-rule-${index}`}
                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       disabled={effectiveRules.length <= 1}
@@ -158,10 +157,10 @@ export default function AdminProfitRules() {
 
                 <div className="pt-2 border-t">
                   <p className="text-xs text-muted-foreground mb-3">
-                    <strong>Preview:</strong>{" "}
+                    <strong>Summary:</strong>{" "}
                     {sortedRules.map((rule, i) => (
                       <span key={i}>
-                        Wholesale ≤ Rs.{rule.maxWholesalePrice.toLocaleString()} → +Rs.{rule.profit} profit
+                        Cost ≤ Rs.{rule.maxCostPrice.toLocaleString()} → +Rs.{rule.profit} profit
                         {i < sortedRules.length - 1 ? " · " : ""}
                       </span>
                     ))}
@@ -200,21 +199,24 @@ export default function AdminProfitRules() {
         <Card>
           <CardHeader>
             <CardTitle>Example Calculation</CardTitle>
+            <CardDescription>How these rules will calculate selling prices</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-0">
               {sortedRules.map((rule, i) => {
-                const exampleWholesale = i === 0 ? Math.min(rule.maxWholesalePrice, 800) : Math.floor((sortedRules[i - 1].maxWholesalePrice + rule.maxWholesalePrice) / 2);
+                const exampleCost = i === 0
+                  ? Math.min(rule.maxCostPrice, Math.floor(rule.maxCostPrice * 0.8))
+                  : Math.floor((sortedRules[i - 1].maxCostPrice + rule.maxCostPrice) / 2);
                 return (
-                  <div key={i} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                  <div key={i} className="flex items-center justify-between text-sm py-3 border-b last:border-0">
                     <span className="text-muted-foreground">
-                      Wholesale: <strong className="text-foreground">Rs. {exampleWholesale.toLocaleString()}</strong>
+                      Cost: <strong className="text-foreground">Rs. {exampleCost.toLocaleString()}</strong>
                     </span>
                     <span className="text-muted-foreground">
                       + Profit: <strong className="text-green-600">Rs. {rule.profit}</strong>
                     </span>
                     <span className="font-semibold text-primary">
-                      Selling: Rs. {(exampleWholesale + rule.profit).toLocaleString()}
+                      Selling: Rs. {(exampleCost + rule.profit).toLocaleString()}
                     </span>
                   </div>
                 );
