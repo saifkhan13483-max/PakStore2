@@ -304,12 +304,12 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="relative max-w-7xl mx-auto px-8">
-              {/* Left Arrow */}
+            <div className="relative max-w-7xl mx-auto sm:px-8">
+              {/* Left Arrow — desktop only */}
               <button
                 onClick={() => scrollCategories("left")}
                 data-testid="button-categories-scroll-left"
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
                 aria-label="Scroll categories left"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -318,12 +318,12 @@ export default function Home() {
               {/* Scrollable row */}
               <div
                 ref={categoriesScrollRef}
-                className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth pb-2"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                className="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth pb-2"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
               >
                 {isCategoriesLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex-none w-44 sm:w-48">
+                    <div key={i} className="flex-none w-36 sm:w-44 md:w-48">
                       <Skeleton className="aspect-[4/3] rounded-2xl" />
                     </div>
                   ))
@@ -347,11 +347,11 @@ export default function Home() {
                     return (
                       <motion.div
                         key={category.id}
-                        className="flex-none w-44 sm:w-48"
+                        className="flex-none w-36 sm:w-44 md:w-48"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: (index + 1) * 0.08 }}
+                        transition={{ duration: 0.5, delay: (index + 1) * 0.06 }}
                       >
                         <CategoryCard 
                           name={category.name} 
@@ -366,15 +366,20 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Right Arrow */}
+              {/* Right Arrow — desktop only */}
               <button
                 onClick={() => scrollCategories("right")}
                 data-testid="button-categories-scroll-right"
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
                 aria-label="Scroll categories right"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
+
+              {/* Mobile swipe hint */}
+              <p className="sm:hidden text-center text-xs text-muted-foreground mt-3">
+                Swipe to explore more categories
+              </p>
             </div>
           </div>
           
