@@ -304,60 +304,87 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="relative max-w-7xl mx-auto sm:px-8">
-              {/* Left Arrow — desktop only */}
+            {/* Mobile: 2-column grid */}
+            <div className="sm:hidden grid grid-cols-2 gap-3 max-w-7xl mx-auto">
+              {isCategoriesLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
+                ))
+              ) : (
+                categories.map((category, index) => {
+                  let categoryImage = category.image || categoriesListImage;
+                  if (category.name.toLowerCase() === "bags") categoryImage = bagsCategoryImage;
+                  else if (category.name.toLowerCase() === "slippers") categoryImage = slippersCategoryImage;
+                  else if (category.name.toLowerCase() === "bedsheets") categoryImage = bedsheetsCategoryImage;
+                  else if (category.name.toLowerCase() === "shoes") categoryImage = shoesCategoryImage;
+                  else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
+                  else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;
+                  return (
+                    <motion.div
+                      key={category.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                    >
+                      <CategoryCard
+                        name={category.name}
+                        slug={category.slug || String(category.id)}
+                        href={`/collections/${category.slug || String(category.id)}`}
+                        count={0}
+                        image={categoryImage}
+                      />
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop: horizontal scroll with arrows */}
+            <div className="hidden sm:block relative max-w-7xl mx-auto sm:px-8">
               <button
                 onClick={() => scrollCategories("left")}
                 data-testid="button-categories-scroll-left"
-                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
                 aria-label="Scroll categories left"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
 
-              {/* Scrollable row */}
               <div
                 ref={categoriesScrollRef}
-                className="flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth pb-2"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+                className="flex gap-5 overflow-x-auto scroll-smooth pb-2"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
               >
                 {isCategoriesLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex-none w-36 sm:w-44 md:w-48">
+                    <div key={i} className="flex-none w-44 md:w-48">
                       <Skeleton className="aspect-[4/3] rounded-2xl" />
                     </div>
                   ))
                 ) : (
                   categories.map((category, index) => {
                     let categoryImage = category.image || categoriesListImage;
-                    if (category.name.toLowerCase() === "bags") {
-                      categoryImage = bagsCategoryImage;
-                    } else if (category.name.toLowerCase() === "slippers") {
-                      categoryImage = slippersCategoryImage;
-                    } else if (category.name.toLowerCase() === "bedsheets") {
-                      categoryImage = bedsheetsCategoryImage;
-                    } else if (category.name.toLowerCase() === "shoes") {
-                      categoryImage = shoesCategoryImage;
-                    } else if (category.name.toLowerCase().includes("eid special")) {
-                      categoryImage = eidSpecialImage;
-                    } else if (category.name.toLowerCase().includes("watches")) {
-                      categoryImage = watchesImage;
-                    }
-                    
+                    if (category.name.toLowerCase() === "bags") categoryImage = bagsCategoryImage;
+                    else if (category.name.toLowerCase() === "slippers") categoryImage = slippersCategoryImage;
+                    else if (category.name.toLowerCase() === "bedsheets") categoryImage = bedsheetsCategoryImage;
+                    else if (category.name.toLowerCase() === "shoes") categoryImage = shoesCategoryImage;
+                    else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
+                    else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;
                     return (
                       <motion.div
                         key={category.id}
-                        className="flex-none w-36 sm:w-44 md:w-48"
+                        className="flex-none w-44 md:w-48"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: (index + 1) * 0.06 }}
                       >
-                        <CategoryCard 
-                          name={category.name} 
-                          slug={category.slug || String(category.id)} 
+                        <CategoryCard
+                          name={category.name}
+                          slug={category.slug || String(category.id)}
                           href={`/collections/${category.slug || String(category.id)}`}
-                          count={0} 
+                          count={0}
                           image={categoryImage}
                         />
                       </motion.div>
@@ -366,20 +393,14 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Right Arrow — desktop only */}
               <button
                 onClick={() => scrollCategories("right")}
                 data-testid="button-categories-scroll-right"
-                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
                 aria-label="Scroll categories right"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
-
-              {/* Mobile swipe hint */}
-              <p className="sm:hidden text-center text-xs text-muted-foreground mt-3">
-                Swipe to explore more categories
-              </p>
             </div>
           </div>
           
