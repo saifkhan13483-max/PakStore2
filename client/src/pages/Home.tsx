@@ -35,6 +35,14 @@ export default function Home() {
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const categoriesScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollCategories = (direction: "left" | "right") => {
+    const container = categoriesScrollRef.current;
+    if (!container) return;
+    const scrollAmount = 320;
+    container.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
 
   const [showMoreNewArrivals, setShowMoreNewArrivals] = useState(false);
   const [showMoreFeatured, setShowMoreFeatured] = useState(false);
@@ -296,47 +304,77 @@ export default function Home() {
               </motion.div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 max-w-7xl mx-auto">
-              {isCategoriesLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
-                ))
-              ) : (
-                categories.slice(0, 6).map((category, index) => {
-                  let categoryImage = category.image || categoriesListImage;
-                  if (category.name.toLowerCase() === "bags") {
-                    categoryImage = bagsCategoryImage;
-                  } else if (category.name.toLowerCase() === "slippers") {
-                    categoryImage = slippersCategoryImage;
-                  } else if (category.name.toLowerCase() === "bedsheets") {
-                    categoryImage = bedsheetsCategoryImage;
-                  } else if (category.name.toLowerCase() === "shoes") {
-                    categoryImage = shoesCategoryImage;
-                  } else if (category.name.toLowerCase().includes("eid special")) {
-                    categoryImage = eidSpecialImage;
-                  } else if (category.name.toLowerCase().includes("watches")) {
-                    categoryImage = watchesImage;
-                  }
-                  
-                  return (
-                    <motion.div
-                      key={category.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: (index + 1) * 0.1 }}
-                    >
-                      <CategoryCard 
-                        name={category.name} 
-                        slug={category.slug || String(category.id)} 
-                        href={`/collections/${category.slug || String(category.id)}`}
-                        count={0} 
-                        image={categoryImage}
-                      />
-                    </motion.div>
-                  );
-                })
-              )}
+            <div className="relative max-w-7xl mx-auto px-8">
+              {/* Left Arrow */}
+              <button
+                onClick={() => scrollCategories("left")}
+                data-testid="button-categories-scroll-left"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                aria-label="Scroll categories left"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Scrollable row */}
+              <div
+                ref={categoriesScrollRef}
+                className="flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth pb-2"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {isCategoriesLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="flex-none w-44 sm:w-48">
+                      <Skeleton className="aspect-[4/3] rounded-2xl" />
+                    </div>
+                  ))
+                ) : (
+                  categories.map((category, index) => {
+                    let categoryImage = category.image || categoriesListImage;
+                    if (category.name.toLowerCase() === "bags") {
+                      categoryImage = bagsCategoryImage;
+                    } else if (category.name.toLowerCase() === "slippers") {
+                      categoryImage = slippersCategoryImage;
+                    } else if (category.name.toLowerCase() === "bedsheets") {
+                      categoryImage = bedsheetsCategoryImage;
+                    } else if (category.name.toLowerCase() === "shoes") {
+                      categoryImage = shoesCategoryImage;
+                    } else if (category.name.toLowerCase().includes("eid special")) {
+                      categoryImage = eidSpecialImage;
+                    } else if (category.name.toLowerCase().includes("watches")) {
+                      categoryImage = watchesImage;
+                    }
+                    
+                    return (
+                      <motion.div
+                        key={category.id}
+                        className="flex-none w-44 sm:w-48"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: (index + 1) * 0.08 }}
+                      >
+                        <CategoryCard 
+                          name={category.name} 
+                          slug={category.slug || String(category.id)} 
+                          href={`/collections/${category.slug || String(category.id)}`}
+                          count={0} 
+                          image={categoryImage}
+                        />
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Right Arrow */}
+              <button
+                onClick={() => scrollCategories("right")}
+                data-testid="button-categories-scroll-right"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white dark:bg-zinc-800 shadow-lg border border-border rounded-full w-10 h-10 flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                aria-label="Scroll categories right"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
           
