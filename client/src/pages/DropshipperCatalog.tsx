@@ -17,12 +17,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { MediaDownloadDialog } from "@/components/product/MediaDownloadDialog";
 import {
   Download,
   Search,
   Package,
   ExternalLink,
   FileDown,
+  Images,
 } from "lucide-react";
 
 const BRAND = "PAKCART";
@@ -172,6 +174,7 @@ function downloadTxt(content: string, filename: string) {
 
 function ProductCatalogCard({ product }: { product: Product }) {
   const [imgError, setImgError] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
 
   const imageUrl = product.images?.[0]
     ? getOptimizedImageUrl(product.images[0], { width: 400, height: 400, crop: "fill" })
@@ -183,7 +186,17 @@ function ProductCatalogCard({ product }: { product: Product }) {
     downloadTxt(content, `pakcart-${slug}.txt`);
   };
 
+  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl;
+
   return (
+    <>
+    {hasMedia && (
+      <MediaDownloadDialog
+        product={product}
+        open={mediaOpen}
+        onClose={() => setMediaOpen(false)}
+      />
+    )}
     <div
       className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col"
       data-testid={`catalog-card-${product.id}`}
@@ -246,6 +259,18 @@ function ProductCatalogCard({ product }: { product: Product }) {
             <Download className="h-3.5 w-3.5" />
             Export .txt
           </Button>
+          {hasMedia && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 w-8 p-0 shrink-0 border-green-200 text-green-700 hover:bg-green-50"
+              title="Download product images & video"
+              onClick={() => setMediaOpen(true)}
+              data-testid={`btn-media-${product.id}`}
+            >
+              <Images className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Link href={`/products/${product.slug}`} target="_blank">
             <Button
               size="sm"
@@ -259,6 +284,7 @@ function ProductCatalogCard({ product }: { product: Product }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -407,7 +433,8 @@ export default function DropshipperCatalog() {
       <div className="bg-green-50 border-t border-green-100 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-green-800 max-w-2xl">
           <strong>How to use:</strong> Click <strong>"Export .txt"</strong> on any product to
-          download its full details as a formatted text file. Use{" "}
+          download its full details as a formatted text file. Click the{" "}
+          <strong>image icon</strong> to download product photos and videos. Use{" "}
           <strong>"Export All"</strong> in the toolbar to download your entire catalog in one
           file.
         </div>

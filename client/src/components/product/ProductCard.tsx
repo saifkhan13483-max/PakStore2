@@ -1,6 +1,6 @@
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
-import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2, Download } from "lucide-react";
+import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2, Download, Images } from "lucide-react";
 import { type Product, commentSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
@@ -11,6 +11,7 @@ import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { where } from "firebase/firestore";
 import { buildSingleTxt, downloadTxt } from "@/lib/exportProduct";
 import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
+import { MediaDownloadDialog } from "@/components/product/MediaDownloadDialog";
 
 interface ProductCardProps {
   product: Product;
@@ -20,6 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(false);
   const { isApprovedDropshipper } = useDropshipperStatus();
 
   // Real-time rating/reviews from Firestore
@@ -71,8 +73,17 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500, crop: 'fill' }) : null;
+  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl;
 
   return (
+    <>
+    {isApprovedDropshipper && hasMedia && (
+      <MediaDownloadDialog
+        product={product}
+        open={mediaOpen}
+        onClose={() => setMediaOpen(false)}
+      />
+    )}
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -130,6 +141,18 @@ export function ProductCard({ product }: ProductCardProps) {
                 data-testid={`btn-export-${product.id}`}
               >
                 <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              </Button>
+            )}
+            {isApprovedDropshipper && hasMedia && (
+              <Button
+                onClick={(e) => { e.preventDefault(); setMediaOpen(true); }}
+                variant="secondary"
+                size="icon"
+                className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-green-600 hover:text-white transition-all shadow-xl hover:scale-110"
+                title="Download product images & video"
+                data-testid={`btn-media-${product.id}`}
+              >
+                <Images className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </Button>
             )}
           </div>
@@ -200,5 +223,6 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
