@@ -10,6 +10,7 @@ import { useState, useMemo } from "react";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { where } from "firebase/firestore";
 import { buildSingleTxt, downloadTxt } from "@/lib/exportProduct";
+import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
 
 interface ProductCardProps {
   product: Product;
@@ -19,6 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
+  const { isApprovedDropshipper } = useDropshipperStatus();
 
   // Real-time rating/reviews from Firestore
   const constraints = useMemo(() => [where("productId", "==", product.id)], [product.id]);
@@ -118,16 +120,18 @@ export function ProductCard({ product }: ProductCardProps) {
             >
               <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
-            <Button
-              onClick={handleExport}
-              variant="secondary"
-              size="icon"
-              className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-green-600 hover:text-white transition-all shadow-xl hover:scale-110"
-              title="Export product details as .txt"
-              data-testid={`btn-export-${product.id}`}
-            >
-              <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
-            </Button>
+            {isApprovedDropshipper && (
+              <Button
+                onClick={handleExport}
+                variant="secondary"
+                size="icon"
+                className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-green-600 hover:text-white transition-all shadow-xl hover:scale-110"
+                title="Export product details as .txt"
+                data-testid={`btn-export-${product.id}`}
+              >
+                <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              </Button>
+            )}
           </div>
         </div>
 

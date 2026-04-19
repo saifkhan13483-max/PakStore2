@@ -31,12 +31,14 @@ import { Filters, type FilterState } from "@/components/products/Filters";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { buildCatalogTxt, downloadTxt } from "@/lib/exportProduct";
+import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
 
 type SortOption = "featured" | "price-low" | "price-high" | "newest";
 
 export default function Products() {
   const [location] = useLocation();
   const search = useSearch();
+  const { isApprovedDropshipper } = useDropshipperStatus();
   const [visibleCount, setVisibleCount] = useState(10);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const [filterState, setFilterState] = useState<FilterState>(() => {
@@ -252,30 +254,34 @@ export default function Products() {
                   <SelectItem value="newest">Latest Releases</SelectItem>
                 </SelectContent>
               </Select>
+              {isApprovedDropshipper && (
+                <Button
+                  onClick={handleExportAll}
+                  disabled={isLoading || filteredAndSortedProducts.length === 0}
+                  variant="outline"
+                  className="h-10 rounded-xl gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors shrink-0"
+                  data-testid="btn-export-all-products"
+                >
+                  <FileDown className="h-4 w-4" />
+                  Export All (.txt)
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile export all */}
+            {isApprovedDropshipper && (
               <Button
                 onClick={handleExportAll}
                 disabled={isLoading || filteredAndSortedProducts.length === 0}
                 variant="outline"
-                className="h-10 rounded-xl gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors shrink-0"
-                data-testid="btn-export-all-products"
+                size="sm"
+                className="lg:hidden gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors rounded-xl"
+                data-testid="btn-export-all-products-mobile"
               >
                 <FileDown className="h-4 w-4" />
                 Export All (.txt)
               </Button>
-            </div>
-
-            {/* Mobile export all */}
-            <Button
-              onClick={handleExportAll}
-              disabled={isLoading || filteredAndSortedProducts.length === 0}
-              variant="outline"
-              size="sm"
-              className="lg:hidden gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors rounded-xl"
-              data-testid="btn-export-all-products-mobile"
-            >
-              <FileDown className="h-4 w-4" />
-              Export All (.txt)
-            </Button>
+            )}
           </div>
 
           {/* Product Grid */}
@@ -342,19 +348,18 @@ export default function Products() {
                 </div>
               )}
 
-              {/* Dropshipper hint */}
-              <div className="mt-10 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <FileDown className="h-5 w-5 text-green-700 shrink-0 mt-0.5 sm:mt-0" />
-                <p className="text-sm text-green-800">
-                  <strong>Dropshipper tip:</strong> Hover over any product card and click the{" "}
-                  <Download className="inline h-3.5 w-3.5" /> download icon to export that product's full
-                  details as a professional .txt file. Use <strong>"Export All (.txt)"</strong> above to
-                  download the entire catalog at once.{" "}
-                  <a href="/dropshipper" className="underline font-semibold hover:text-green-900">
-                    Join our Dropshipper Program →
-                  </a>
-                </p>
-              </div>
+              {/* Dropshipper hint — approved only */}
+              {isApprovedDropshipper && (
+                <div className="mt-10 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <FileDown className="h-5 w-5 text-green-700 shrink-0 mt-0.5 sm:mt-0" />
+                  <p className="text-sm text-green-800">
+                    <strong>Dropshipper tip:</strong> Hover over any product card and click the{" "}
+                    <Download className="inline h-3.5 w-3.5" /> download icon to export that product's
+                    full details as a .txt file. Use <strong>"Export All (.txt)"</strong> above to
+                    download the entire catalog at once.
+                  </p>
+                </div>
+              )}
             </>
           )}
         </main>
