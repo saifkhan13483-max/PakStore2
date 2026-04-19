@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, SlidersHorizontal, FileDown } from "lucide-react";
+import { Filter, SlidersHorizontal, FileDown, Download } from "lucide-react";
 import { Filters, type FilterState } from "@/components/products/Filters";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
