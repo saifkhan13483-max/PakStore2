@@ -533,6 +533,31 @@ export default function Dropshipper() {
         </div>
       </section>
 
+      {/* Product Catalog CTA */}
+      <section className="py-12 bg-gray-50 border-y border-gray-200">
+        <div className="container mx-auto px-4 text-center max-w-2xl">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 mb-5">
+            <Package className="h-7 w-7 text-green-700" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">See What You'll Be Selling</h2>
+          <p className="text-muted-foreground mb-6">
+            Browse our full product catalog. Click any product to instantly copy its name,
+            description, price, and images — ready to paste into your store listing,
+            WhatsApp message, or social post.
+          </p>
+          <Link href="/dropshipper/catalog">
+            <Button
+              size="lg"
+              className="bg-green-700 hover:bg-green-800 text-white rounded-full px-10 font-semibold gap-2"
+              data-testid="btn-browse-catalog"
+            >
+              <Package className="h-5 w-5" />
+              Browse Product Catalog
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* Profit Calculator Teaser */}
       <section className="py-12 bg-green-700 text-white">
         <div className="container mx-auto px-4 text-center max-w-2xl">
