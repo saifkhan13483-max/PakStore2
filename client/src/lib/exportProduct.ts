@@ -17,20 +17,8 @@ export function formatProductBlock(product: Product, index?: number): string {
   lines.push(separator("-"));
   lines.push("");
 
-  lines.push(`  Price          : Rs. ${product.price.toLocaleString()}`);
-  if (product.originalPrice) {
-    const saving = product.originalPrice - product.price;
-    const pct = Math.round((saving / product.originalPrice) * 100);
-    lines.push(`  Original Price : Rs. ${product.originalPrice.toLocaleString()} (${pct}% off)`);
-  }
-  if (typeof product.wholesalePrice === "number" && product.wholesalePrice > 0) {
-    lines.push(`  Wholesale Price: Rs. ${product.wholesalePrice.toLocaleString()}`);
-  }
-  lines.push(`  In Stock       : ${product.inStock ? "Yes" : "No"}`);
-  lines.push("");
-
   if (product.description) {
-    lines.push("  DESCRIPTION");
+    lines.push("  SHORT DESCRIPTION");
     lines.push("  " + separator("-", 40));
     lines.push(`  ${product.description}`);
     lines.push("");
@@ -44,32 +32,20 @@ export function formatProductBlock(product: Product, index?: number): string {
   }
 
   if (product.features && product.features.length > 0) {
-    lines.push("  KEY FEATURES");
+    lines.push("  FEATURES");
     lines.push("  " + separator("-", 40));
     product.features.forEach((f) => lines.push(`    • ${f}`));
     lines.push("");
   }
 
   if (product.specifications && Object.keys(product.specifications).length > 0) {
-    lines.push("  SPECIFICATIONS");
+    lines.push("  VARIANTS");
     lines.push("  " + separator("-", 40));
     Object.entries(product.specifications).forEach(([k, v]) =>
       lines.push(`    ${k}: ${v}`)
     );
     lines.push("");
   }
-
-  if (product.images && product.images.length > 0) {
-    lines.push("  PRODUCT IMAGES");
-    lines.push("  " + separator("-", 40));
-    product.images.forEach((img, i) => lines.push(`    ${i + 1}. ${img}`));
-    lines.push("");
-  }
-
-  lines.push("  PRODUCT PAGE");
-  lines.push("  " + separator("-", 40));
-  lines.push(`    ${SITE_URL}/products/${product.slug}`);
-  lines.push("");
 
   return lines.join("\n");
 }
@@ -88,8 +64,6 @@ export function buildCatalogTxt(products: Product[]): string {
     "",
     `  Generated  : ${now}`,
     `  Products   : ${products.length}`,
-    `  Note       : All prices are in Pakistani Rupees (PKR).`,
-    `               Wholesale prices are available on request.`,
     "",
   ].join("\n");
 
