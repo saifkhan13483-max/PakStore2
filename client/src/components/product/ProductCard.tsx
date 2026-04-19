@@ -1,6 +1,6 @@
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Link } from "wouter";
-import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2, Download } from "lucide-react";
 import { type Product, commentSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { where } from "firebase/firestore";
+import { buildSingleTxt, downloadTxt } from "@/lib/exportProduct";
 
 interface ProductCardProps {
   product: Product;
@@ -40,11 +41,22 @@ export function ProductCard({ product }: ProductCardProps) {
   }, [comments]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
+    e.preventDefault();
     addToCart(product);
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
+    });
+  };
+
+  const handleExport = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const content = buildSingleTxt(product);
+    const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
+    downloadTxt(content, `pakcart-${slug}.txt`);
+    toast({
+      title: "Product details exported",
+      description: `${product.name} details saved as .txt file.`,
     });
   };
 
@@ -91,9 +103,9 @@ export function ProductCard({ product }: ProductCardProps) {
         
         {/* Modern Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-2 md:p-3">
-          <div className="flex items-center justify-center gap-2 transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out">
+          <div className="flex items-center justify-center gap-1.5 transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 ease-out">
             <Link href={`/products/${product.slug}`}>
-              <Button variant="secondary" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-white hover:text-black transition-all shadow-xl hover:scale-110">
+              <Button variant="secondary" size="icon" className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-white hover:text-black transition-all shadow-xl hover:scale-110" data-testid={`btn-view-${product.id}`}>
                 <Eye className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </Button>
             </Link>
@@ -102,8 +114,19 @@ export function ProductCard({ product }: ProductCardProps) {
               variant="default" 
               size="icon" 
               className="rounded-full h-8 w-8 md:h-9 md:w-9 bg-primary text-primary-foreground hover:scale-110 transition-all shadow-xl border-2 border-primary-foreground/20"
+              data-testid={`btn-cart-${product.id}`}
             >
               <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
+            </Button>
+            <Button
+              onClick={handleExport}
+              variant="secondary"
+              size="icon"
+              className="rounded-full h-8 w-8 md:h-9 md:w-9 hover:bg-green-600 hover:text-white transition-all shadow-xl hover:scale-110"
+              title="Export product details as .txt"
+              data-testid={`btn-export-${product.id}`}
+            >
+              <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
           </div>
         </div>

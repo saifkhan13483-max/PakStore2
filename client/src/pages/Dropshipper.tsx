@@ -541,18 +541,18 @@ export default function Dropshipper() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">See What You'll Be Selling</h2>
           <p className="text-muted-foreground mb-6">
-            Browse our full product catalog. Click any product to instantly copy its name,
-            description, price, and images — ready to paste into your store listing,
-            WhatsApp message, or social post.
+            Browse our full product listing. Hover over any product and click the download icon to
+            export its complete details — name, description, price, images and more — as a
+            professionally formatted .txt file. Or export the entire catalog in one click.
           </p>
-          <Link href="/dropshipper/catalog">
+          <Link href="/products">
             <Button
               size="lg"
               className="bg-green-700 hover:bg-green-800 text-white rounded-full px-10 font-semibold gap-2"
               data-testid="btn-browse-catalog"
             >
               <Package className="h-5 w-5" />
-              Browse Product Catalog
+              Browse &amp; Export Products
             </Button>
           </Link>
         </div>

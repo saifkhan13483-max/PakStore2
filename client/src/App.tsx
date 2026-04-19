@@ -101,7 +101,6 @@ const AdminSearchAnalytics = lazyWithRetry(() => import("@/pages/admin/SearchAna
 const AdminProfitRules = lazyWithRetry(() => import("@/pages/admin/ProfitRules"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
 const Dropshipper = lazyWithRetry(() => import("@/pages/Dropshipper"));
-const DropshipperCatalog = lazyWithRetry(() => import("@/pages/DropshipperCatalog"));
 const DropshipperDashboard = lazyWithRetry(() => import("@/pages/DropshipperDashboard"));
 const AdminDropshippers = lazyWithRetry(() => import("@/pages/admin/Dropshippers"));
 
@@ -165,7 +164,9 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/dropshipper" component={Dropshipper} />
-      <Route path="/dropshipper/catalog" component={DropshipperCatalog} />
+      <Route path="/dropshipper/catalog">
+        {() => { window.location.replace("/products"); return null; }}
+      </Route>
       <Route path="/dropshipper/dashboard" component={DropshipperDashboard} />
 
       {/* Admin Routes */}

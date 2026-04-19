@@ -26,10 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter, SlidersHorizontal, FileDown } from "lucide-react";
 import { Filters, type FilterState } from "@/components/products/Filters";
 import { useQuery } from "@tanstack/react-query";
 import { productFirestoreService } from "@/services/productFirestoreService";
+import { buildCatalogTxt, downloadTxt } from "@/lib/exportProduct";
 
 type SortOption = "featured" | "price-low" | "price-high" | "newest";
 
@@ -76,8 +77,6 @@ export default function Products() {
     queryFn: () => {
       const params = new URLSearchParams(search);
       return productFirestoreService.getAllProducts({
-        // If multiple categories are selected, don't filter at the database level by a single category
-        // to allow client-side filtering of all selected categories.
         category: filterState.categories.length === 1 ? filterState.categories[0] : undefined,
         parentCategoryId: params.get("parentCategoryId") || undefined,
         search: queryParam,
@@ -92,7 +91,6 @@ export default function Products() {
     if (!productsData) return [];
     let result = [...productsData];
 
-    // Handle sorting client-side when filtering to avoid Firestore index requirements
     if (filterState.categories.length > 0 || new URLSearchParams(search).get("parentCategoryId")) {
       if (sortBy === "price-low") {
         result.sort((a, b) => a.price - b.price);
@@ -107,7 +105,6 @@ export default function Products() {
       }
     }
 
-    // Client-side additional filters
     if (filterState.categories.length > 0) {
       result = result.filter(p => {
         const productCatId = String(p.categoryId);
@@ -115,7 +112,6 @@ export default function Products() {
       });
     }
 
-    // Filter by price range
     if (filterState.priceRange) {
       const ranges: Record<string, { min: number; max: number }> = {
         "Under Rs. 1,000": { min: 0, max: 1000 },
@@ -130,7 +126,6 @@ export default function Products() {
       }
     }
 
-    // Filter by availability
     if (filterState.inStockOnly) {
       result = result.filter((p) => p.inStock);
     }
@@ -154,7 +149,13 @@ export default function Products() {
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilterState(newFilters);
-    setVisibleCount(10); // Reset visibility when filters change
+    setVisibleCount(10);
+  };
+
+  const handleExportAll = () => {
+    const content = buildCatalogTxt(filteredAndSortedProducts);
+    const date = new Date().toISOString().slice(0, 10);
+    downloadTxt(content, `pakcart-catalog-${date}.txt`);
   };
 
   return (
@@ -225,7 +226,7 @@ export default function Products() {
               <h1 className="text-xl md:text-2xl font-bold tracking-tight">
                 {queryParam ? `Search Results for "${queryParam}"` : "Our Collections"}
               </h1>
-                <p className="text-muted-foreground font-medium flex items-center gap-2">
+                <div className="text-muted-foreground font-medium flex items-center gap-2">
                 {isLoading ? (
                   <Skeleton className="h-4 w-32" />
                 ) : (
@@ -234,26 +235,47 @@ export default function Products() {
                     Showing {displayedProducts.length} of {filteredAndSortedProducts.length} unique items
                   </>
                 )}
-              </p>
-            </div>
-            
-            <div className="hidden lg:block">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-muted-foreground">Sort:</span>
-                <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
-                  <SelectTrigger className="w-[220px] h-10 rounded-xl bg-card border shadow-sm hover:bg-accent transition-colors">
-                    <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Featured" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="featured">Most Popular</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="newest">Latest Releases</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
+            
+            <div className="hidden lg:flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Sort:</span>
+              <Select value={sortBy} onValueChange={(val) => setSortBy(val as SortOption)}>
+                <SelectTrigger className="w-[200px] h-10 rounded-xl bg-card border shadow-sm hover:bg-accent transition-colors">
+                  <SlidersHorizontal className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="Featured" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="featured">Most Popular</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="newest">Latest Releases</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleExportAll}
+                disabled={isLoading || filteredAndSortedProducts.length === 0}
+                variant="outline"
+                className="h-10 rounded-xl gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors shrink-0"
+                data-testid="btn-export-all-products"
+              >
+                <FileDown className="h-4 w-4" />
+                Export All (.txt)
+              </Button>
+            </div>
+
+            {/* Mobile export all */}
+            <Button
+              onClick={handleExportAll}
+              disabled={isLoading || filteredAndSortedProducts.length === 0}
+              variant="outline"
+              size="sm"
+              className="lg:hidden gap-2 border-green-600 text-green-700 hover:bg-green-700 hover:text-white transition-colors rounded-xl"
+              data-testid="btn-export-all-products-mobile"
+            >
+              <FileDown className="h-4 w-4" />
+              Export All (.txt)
+            </Button>
           </div>
 
           {/* Product Grid */}
@@ -319,6 +341,20 @@ export default function Products() {
                   </Button>
                 </div>
               )}
+
+              {/* Dropshipper hint */}
+              <div className="mt-10 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <FileDown className="h-5 w-5 text-green-700 shrink-0 mt-0.5 sm:mt-0" />
+                <p className="text-sm text-green-800">
+                  <strong>Dropshipper tip:</strong> Hover over any product card and click the{" "}
+                  <Download className="inline h-3.5 w-3.5" /> download icon to export that product's full
+                  details as a professional .txt file. Use <strong>"Export All (.txt)"</strong> above to
+                  download the entire catalog at once.{" "}
+                  <a href="/dropshipper" className="underline font-semibold hover:text-green-900">
+                    Join our Dropshipper Program →
+                  </a>
+                </p>
+              </div>
             </>
           )}
         </main>
