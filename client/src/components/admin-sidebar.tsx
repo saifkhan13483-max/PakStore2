@@ -27,6 +27,12 @@ import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { orderSchema, type Order } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { where } from "firebase/firestore";
+import { z } from "zod";
+
+const dropshipperAppSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+});
 
 const overviewItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
@@ -62,11 +68,13 @@ function NavGroup({
   items,
   location,
   pendingCount,
+  secondaryCount,
 }: {
   label: string;
   items: { title: string; url: string; icon: React.ElementType }[];
   location: string;
   pendingCount?: number;
+  secondaryCount?: number;
 }) {
   return (
     <SidebarGroup>
@@ -97,6 +105,14 @@ function NavGroup({
                       {pendingCount}
                     </Badge>
                   )}
+                  {item.title === "Dropshippers" && (secondaryCount ?? 0) > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="h-5 w-5 flex items-center justify-center p-0 text-[10px] rounded-full"
+                    >
+                      {secondaryCount}
+                    </Badge>
+                  )}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -118,13 +134,21 @@ export function AdminSidebar() {
 
   const pendingCount = pendingOrders?.length || 0;
 
+  const { data: pendingDropshippers } = useRealtimeCollection(
+    "dropshipper_applications",
+    dropshipperAppSchema,
+    ["/admin/dropshippers/pending"],
+    [where("status", "==", "pending")]
+  );
+  const pendingDropshipperCount = pendingDropshippers?.length || 0;
+
   return (
     <Sidebar>
       <SidebarContent>
         <NavGroup label="Overview" items={overviewItems} location={location} />
         <NavGroup label="Product Management" items={productItems} location={location} />
         <NavGroup label="Orders" items={orderItems} location={location} pendingCount={pendingCount} />
-        <NavGroup label="Partners" items={partnerItems} location={location} />
+        <NavGroup label="Partners" items={partnerItems} location={location} secondaryCount={pendingDropshipperCount} />
         <NavGroup label="Content" items={contentItems} location={location} />
         <NavGroup label="Tools & Analytics" items={toolItems} location={location} />
 

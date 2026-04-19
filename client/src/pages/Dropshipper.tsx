@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Link } from "wouter";
+import { useAuthStore } from "@/store/authStore";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +35,10 @@ import {
   Wallet,
   HeadphonesIcon,
   CheckCircle2,
+  Search,
+  Clock,
+  XCircle,
+  LayoutDashboard,
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -113,8 +119,39 @@ const steps = [
 
 export default function Dropshipper() {
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuthStore();
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Status checker state
+  const [statusEmail, setStatusEmail] = useState("");
+  const [statusResult, setStatusResult] = useState<null | { status: string; fullName: string }>(null);
+  const [statusChecking, setStatusChecking] = useState(false);
+
+  async function checkStatus() {
+    if (!statusEmail) return;
+    setStatusChecking(true);
+    setStatusResult(null);
+    try {
+      const q = query(
+        collection(db, "dropshipper_applications"),
+        where("email", "==", statusEmail.toLowerCase().trim()),
+        limit(1)
+      );
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        setStatusResult(null);
+        toast({ title: "No application found", description: "No application found for this email address.", variant: "destructive" });
+      } else {
+        const data = snap.docs[0].data();
+        setStatusResult({ status: data.status, fullName: data.fullName });
+      }
+    } catch {
+      toast({ title: "Error checking status", variant: "destructive" });
+    } finally {
+      setStatusChecking(false);
+    }
+  }
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -157,6 +194,23 @@ export default function Dropshipper() {
         url="https://pakcart.store/dropshipper"
         robots="index,follow"
       />
+
+      {/* Already approved banner */}
+      {isAuthenticated && (
+        <div className="bg-green-800 text-white py-3 px-4">
+          <div className="container mx-auto flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-sm text-green-100">
+              <CheckCircle2 className="inline h-4 w-4 mr-1.5 text-green-300" />
+              Already an approved dropshipper? Access your dashboard.
+            </p>
+            <Link href="/dropshipper/dashboard">
+              <Button size="sm" className="bg-white text-green-800 hover:bg-green-50 rounded-full h-8 px-4 text-xs font-semibold" data-testid="btn-go-dashboard">
+                <LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Go to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-green-700 to-green-900 text-white">
@@ -218,6 +272,71 @@ export default function Dropshipper() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Status Checker */}
+      <section className="py-10 bg-white border-b">
+        <div className="container mx-auto px-4 max-w-lg text-center">
+          <h3 className="text-lg font-bold text-gray-900 mb-1">Already Applied?</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Enter your email address to check the status of your application.
+          </p>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="email"
+                placeholder="your@email.com"
+                className="pl-9"
+                value={statusEmail}
+                onChange={(e) => setStatusEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && checkStatus()}
+                data-testid="input-status-email"
+              />
+            </div>
+            <Button
+              onClick={checkStatus}
+              disabled={statusChecking || !statusEmail}
+              className="bg-green-700 hover:bg-green-800 text-white rounded-full px-5"
+              data-testid="button-check-status"
+            >
+              {statusChecking ? "Checking..." : "Check"}
+            </Button>
+          </div>
+
+          {statusResult && (
+            <div
+              className={`mt-4 rounded-xl p-4 border text-sm ${
+                statusResult.status === "approved"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : statusResult.status === "rejected"
+                  ? "bg-red-50 border-red-200 text-red-800"
+                  : "bg-yellow-50 border-yellow-200 text-yellow-800"
+              }`}
+              data-testid="status-result"
+            >
+              <div className="flex items-center justify-center gap-2 font-semibold mb-1">
+                {statusResult.status === "approved" && <CheckCircle2 className="h-4 w-4" />}
+                {statusResult.status === "pending" && <Clock className="h-4 w-4" />}
+                {statusResult.status === "rejected" && <XCircle className="h-4 w-4" />}
+                {statusResult.fullName} — {statusResult.status.charAt(0).toUpperCase() + statusResult.status.slice(1)}
+              </div>
+              {statusResult.status === "approved" && (
+                <Link href="/dropshipper/dashboard">
+                  <Button size="sm" className="mt-2 bg-green-700 hover:bg-green-800 text-white rounded-full px-5 h-8 text-xs" data-testid="btn-go-to-dashboard">
+                    <LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Go to Dashboard
+                  </Button>
+                </Link>
+              )}
+              {statusResult.status === "pending" && (
+                <p className="text-xs mt-1 opacity-80">We will contact you within 24 hours.</p>
+              )}
+              {statusResult.status === "rejected" && (
+                <p className="text-xs mt-1 opacity-80">Contact us at contact@pakcart.store for more info.</p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
