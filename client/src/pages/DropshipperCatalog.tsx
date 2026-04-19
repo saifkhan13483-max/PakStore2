@@ -24,7 +24,6 @@ import {
   Package,
   ExternalLink,
   FileDown,
-  Images,
 } from "lucide-react";
 
 const BRAND = "PAKCART";
@@ -134,31 +133,6 @@ function buildCatalogTxt(products: Product[]): string {
   return `${header}\n${body}\n${footer}`;
 }
 
-function buildSingleTxt(product: Product): string {
-  const now = new Date().toLocaleString("en-PK", {
-    dateStyle: "full",
-    timeStyle: "short",
-  });
-
-  const header = [
-    separator(),
-    `${" ".repeat(20)}${BRAND} — PRODUCT DETAILS`,
-    `${" ".repeat(20)}${SITE_URL}  |  ${SUPPORT_EMAIL}`,
-    separator(),
-    "",
-    `  Generated : ${now}`,
-    "",
-  ].join("\n");
-
-  const footer = [
-    separator(),
-    `  © ${new Date().getFullYear()} ${BRAND}. For dropshipper use only.`,
-    `  Contact: ${SUPPORT_EMAIL}`,
-    separator(),
-  ].join("\n");
-
-  return `${header}\n${formatProductBlock(product)}\n${footer}`;
-}
 
 function downloadTxt(content: string, filename: string) {
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -180,24 +154,13 @@ function ProductCatalogCard({ product }: { product: Product }) {
     ? getOptimizedImageUrl(product.images[0], { width: 400, height: 400, crop: "fill" })
     : null;
 
-  const handleExport = () => {
-    const content = buildSingleTxt(product);
-    const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
-    downloadTxt(content, `pakcart-${slug}.txt`);
-  };
-
-  const hasVariantImages = product.variants?.some((v) => v.options.some((o) => !!o.image)) ?? false;
-  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl || hasVariantImages;
-
   return (
     <>
-    {hasMedia && (
-      <MediaDownloadDialog
-        product={product}
-        open={mediaOpen}
-        onClose={() => setMediaOpen(false)}
-      />
-    )}
+    <MediaDownloadDialog
+      product={product}
+      open={mediaOpen}
+      onClose={() => setMediaOpen(false)}
+    />
     <div
       className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col"
       data-testid={`catalog-card-${product.id}`}
@@ -254,24 +217,12 @@ function ProductCatalogCard({ product }: { product: Product }) {
           <Button
             size="sm"
             className="flex-1 gap-1.5 text-xs h-8 bg-green-700 hover:bg-green-800 text-white"
-            onClick={handleExport}
+            onClick={() => setMediaOpen(true)}
             data-testid={`export-product-${product.id}`}
           >
             <Download className="h-3.5 w-3.5" />
-            Export .txt
+            Download
           </Button>
-          {hasMedia && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0 shrink-0 border-green-200 text-green-700 hover:bg-green-50"
-              title="Download product images & video"
-              onClick={() => setMediaOpen(true)}
-              data-testid={`btn-media-${product.id}`}
-            >
-              <Images className="h-3.5 w-3.5" />
-            </Button>
-          )}
           <Link href={`/products/${product.slug}`} target="_blank">
             <Button
               size="sm"
@@ -433,11 +384,10 @@ export default function DropshipperCatalog() {
       {/* Info banner */}
       <div className="bg-green-50 border-t border-green-100 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-green-800 max-w-2xl">
-          <strong>How to use:</strong> Click <strong>"Export .txt"</strong> on any product to
-          download its full details as a formatted text file. Click the{" "}
-          <strong>image icon</strong> to download product photos and videos. Use{" "}
-          <strong>"Export All"</strong> in the toolbar to download your entire catalog in one
-          file.
+          <strong>How to use:</strong> Click <strong>"Download"</strong> on any product to
+          export its details as a .txt file and download product photos, variant images, and
+          videos. Use <strong>"Export All"</strong> in the toolbar to download your entire
+          catalog details in one file.
         </div>
       </div>
     </>

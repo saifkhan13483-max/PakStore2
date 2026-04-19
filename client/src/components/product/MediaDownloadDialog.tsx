@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Images, Video, Loader2, CheckCircle2, Layers } from "lucide-react";
+import { Download, Images, Video, Loader2, CheckCircle2, Layers, FileText } from "lucide-react";
+import { buildSingleTxt, downloadTxt } from "@/lib/exportProduct";
 
 async function downloadMediaFile(url: string, filename: string) {
   try {
@@ -42,6 +43,7 @@ interface MediaDownloadDialogProps {
 export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDialogProps) {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [done, setDone] = useState<Set<string>>(new Set());
+  const [txtDone, setTxtDone] = useState(false);
   const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
 
   const variantImages = useMemo<VariantImage[]>(() => {
@@ -50,11 +52,7 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
     for (const variant of product.variants) {
       for (const option of variant.options) {
         if (option.image) {
-          result.push({
-            url: option.image,
-            variantName: variant.name,
-            optionValue: option.value,
-          });
+          result.push({ url: option.image, variantName: variant.name, optionValue: option.value });
         }
       }
     }
@@ -78,7 +76,14 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
     setDone((prev) => new Set(prev).add(url));
   };
 
+  const handleExportTxt = () => {
+    const content = buildSingleTxt(product);
+    downloadTxt(content, `pakcart-${slug}.txt`);
+    setTxtDone(true);
+  };
+
   const handleDownloadAll = async () => {
+    handleExportTxt();
     const allImages = product.images || [];
     for (let i = 0; i < allImages.length; i++) {
       await handleDownload(allImages[i], `pakcart-${slug}-image-${i + 1}.jpg`);
@@ -94,6 +99,7 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
   };
 
   const totalMedia =
+    1 +
     (product.images?.length || 0) +
     variantImages.length +
     (product.videoUrl ? 1 : 0);
@@ -148,7 +154,7 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base font-semibold leading-tight pr-4">
-            Download Media — {product.name}
+            Download — {product.name}
           </DialogTitle>
         </DialogHeader>
 
@@ -172,6 +178,37 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
               Download All
             </Button>
           )}
+        </div>
+
+        {/* Product Details Export */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <FileText className="h-4 w-4 text-green-700" />
+            <span className="text-sm font-medium">Product Details</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-800">
+                {product.name}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Full details, description, features & specs as .txt
+              </p>
+            </div>
+            <Button
+              size="sm"
+              className="gap-1.5 text-xs h-8 bg-green-700 hover:bg-green-800 text-white shrink-0 ml-3"
+              onClick={handleExportTxt}
+              data-testid={`btn-export-txt-${product.id}`}
+            >
+              {txtDone ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              {txtDone ? "Saved" : "Export .txt"}
+            </Button>
+          </div>
         </div>
 
         {product.images && product.images.length > 0 && (
@@ -262,12 +299,6 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
                 </Button>
               </div>
             </div>
-          </div>
-        )}
-
-        {totalMedia === 0 && (
-          <div className="text-center py-10 text-muted-foreground text-sm">
-            No media available for this product.
           </div>
         )}
       </DialogContent>
