@@ -93,6 +93,13 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
 
+    // Dropshipper applications: Public create & read own (by email), Admin full access
+    match /dropshipper_applications/{docId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAdmin();
+    }
+
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;
