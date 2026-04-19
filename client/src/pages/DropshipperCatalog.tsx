@@ -186,7 +186,8 @@ function ProductCatalogCard({ product }: { product: Product }) {
     downloadTxt(content, `pakcart-${slug}.txt`);
   };
 
-  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl;
+  const hasVariantImages = product.variants?.some((v) => v.options.some((o) => !!o.image)) ?? false;
+  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl || hasVariantImages;
 
   return (
     <>

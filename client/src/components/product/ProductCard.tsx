@@ -73,7 +73,8 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500, crop: 'fill' }) : null;
-  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl;
+  const hasVariantImages = product.variants?.some((v) => v.options.some((o) => !!o.image)) ?? false;
+  const hasMedia = (product.images && product.images.length > 0) || !!product.videoUrl || hasVariantImages;
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { type Product } from "@shared/schema";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Images, Video, Loader2, CheckCircle2 } from "lucide-react";
+import { Download, Images, Video, Loader2, CheckCircle2, Layers } from "lucide-react";
 
 async function downloadMediaFile(url: string, filename: string) {
   try {
@@ -27,6 +27,12 @@ async function downloadMediaFile(url: string, filename: string) {
   }
 }
 
+interface VariantImage {
+  url: string;
+  variantName: string;
+  optionValue: string;
+}
+
 interface MediaDownloadDialogProps {
   product: Product;
   open: boolean;
@@ -38,9 +44,34 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
   const [done, setDone] = useState<Set<string>>(new Set());
   const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
 
-  const handleDownload = async (url: string, index: number, type: "image" | "video") => {
-    const ext = type === "video" ? "mp4" : "jpg";
-    const filename = `pakcart-${slug}-${type}-${index + 1}.${ext}`;
+  const variantImages = useMemo<VariantImage[]>(() => {
+    if (!product.variants) return [];
+    const result: VariantImage[] = [];
+    for (const variant of product.variants) {
+      for (const option of variant.options) {
+        if (option.image) {
+          result.push({
+            url: option.image,
+            variantName: variant.name,
+            optionValue: option.value,
+          });
+        }
+      }
+    }
+    return result;
+  }, [product.variants]);
+
+  const variantsByName = useMemo(() => {
+    const map = new Map<string, VariantImage[]>();
+    for (const vi of variantImages) {
+      const existing = map.get(vi.variantName) || [];
+      existing.push(vi);
+      map.set(vi.variantName, existing);
+    }
+    return map;
+  }, [variantImages]);
+
+  const handleDownload = async (url: string, filename: string) => {
     setDownloading(url);
     await downloadMediaFile(url, filename);
     setDownloading(null);
@@ -50,14 +81,67 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
   const handleDownloadAll = async () => {
     const allImages = product.images || [];
     for (let i = 0; i < allImages.length; i++) {
-      await handleDownload(allImages[i], i, "image");
+      await handleDownload(allImages[i], `pakcart-${slug}-image-${i + 1}.jpg`);
+    }
+    for (let i = 0; i < variantImages.length; i++) {
+      const vi = variantImages[i];
+      const safeName = vi.optionValue.toLowerCase().replace(/\s+/g, "-");
+      await handleDownload(vi.url, `pakcart-${slug}-variant-${vi.variantName.toLowerCase()}-${safeName}.jpg`);
     }
     if (product.videoUrl) {
-      await handleDownload(product.videoUrl, 0, "video");
+      await handleDownload(product.videoUrl, `pakcart-${slug}-video.mp4`);
     }
   };
 
-  const totalMedia = (product.images?.length || 0) + (product.videoUrl ? 1 : 0);
+  const totalMedia =
+    (product.images?.length || 0) +
+    variantImages.length +
+    (product.videoUrl ? 1 : 0);
+
+  const ImageTile = ({
+    url,
+    label,
+    filename,
+    testId,
+  }: {
+    url: string;
+    label: string;
+    filename: string;
+    testId: string;
+  }) => (
+    <div
+      className="relative rounded-lg border border-gray-200 overflow-hidden group bg-gray-50"
+      data-testid={testId}
+    >
+      <div className="aspect-square">
+        <img
+          src={getOptimizedImageUrl(url, { width: 200, height: 200, crop: "fill" })}
+          alt={label}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <Button
+          size="sm"
+          className="gap-1.5 text-xs h-7 bg-white text-gray-900 hover:bg-gray-100"
+          onClick={() => handleDownload(url, filename)}
+          disabled={downloading === url}
+        >
+          {downloading === url ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : done.has(url) ? (
+            <CheckCircle2 className="h-3 w-3 text-green-600" />
+          ) : (
+            <Download className="h-3 w-3" />
+          )}
+          {done.has(url) ? "Saved" : "Download"}
+        </Button>
+      </div>
+      <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] rounded px-1.5 py-0.5 max-w-[80%] truncate">
+        {label}
+      </div>
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -91,47 +175,54 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
         </div>
 
         {product.images && product.images.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-5">
             <div className="flex items-center gap-2 mb-2">
               <Images className="h-4 w-4 text-green-700" />
               <span className="text-sm font-medium">
-                Images ({product.images.length})
+                Product Images ({product.images.length})
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {product.images.map((img, i) => (
-                <div
+                <ImageTile
                   key={i}
-                  className="relative rounded-lg border border-gray-200 overflow-hidden group bg-gray-50"
-                  data-testid={`media-image-${product.id}-${i}`}
-                >
-                  <div className="aspect-square">
-                    <img
-                      src={getOptimizedImageUrl(img, { width: 200, height: 200, crop: "fill" })}
-                      alt={`${product.name} image ${i + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button
-                      size="sm"
-                      className="gap-1.5 text-xs h-7 bg-white text-gray-900 hover:bg-gray-100"
-                      onClick={() => handleDownload(img, i, "image")}
-                      disabled={downloading === img}
-                      data-testid={`btn-download-image-${product.id}-${i}`}
-                    >
-                      {downloading === img ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : done.has(img) ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-600" />
-                      ) : (
-                        <Download className="h-3 w-3" />
-                      )}
-                      {done.has(img) ? "Saved" : "Download"}
-                    </Button>
-                  </div>
-                  <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] rounded px-1.5 py-0.5">
-                    {i + 1}
+                  url={img}
+                  label={`Photo ${i + 1}`}
+                  filename={`pakcart-${slug}-image-${i + 1}.jpg`}
+                  testId={`media-image-${product.id}-${i}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {variantsByName.size > 0 && (
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Layers className="h-4 w-4 text-green-700" />
+              <span className="text-sm font-medium">
+                Variant Images ({variantImages.length})
+              </span>
+            </div>
+            <div className="space-y-4">
+              {Array.from(variantsByName.entries()).map(([variantName, items]) => (
+                <div key={variantName}>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    {variantName}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {items.map((vi, i) => {
+                      const safeName = vi.optionValue.toLowerCase().replace(/\s+/g, "-");
+                      return (
+                        <ImageTile
+                          key={i}
+                          url={vi.url}
+                          label={vi.optionValue}
+                          filename={`pakcart-${slug}-variant-${variantName.toLowerCase()}-${safeName}.jpg`}
+                          testId={`media-variant-${product.id}-${variantName}-${i}`}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -156,7 +247,7 @@ export function MediaDownloadDialog({ product, open, onClose }: MediaDownloadDia
                 <Button
                   size="sm"
                   className="gap-1.5 text-xs h-7 bg-green-700 hover:bg-green-800 text-white"
-                  onClick={() => handleDownload(product.videoUrl!, 0, "video")}
+                  onClick={() => handleDownload(product.videoUrl!, `pakcart-${slug}-video.mp4`)}
                   disabled={downloading === product.videoUrl}
                   data-testid={`btn-download-video-${product.id}`}
                 >
