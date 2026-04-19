@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   collection,
   getDocs,
@@ -12,6 +12,7 @@ import { db } from "@/lib/firebase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -36,15 +37,23 @@ import {
   ShoppingCart,
   TrendingUp,
   Package,
+  Search,
+  Download,
+  MapPin,
+  MessageCircle,
+  CheckSquare,
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 
 interface DropshipperApplication {
   id: string;
   fullName: string;
   email: string;
   phone: string;
+  city?: string;
   storeUrl?: string;
   platform: string;
+  monthlyOrders?: string;
   message?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: any;
@@ -57,12 +66,14 @@ interface DropshipperOrder {
   productName: string;
   customerName: string;
   customerPhone: string;
+  customerCity?: string;
   customerAddress: string;
   quantity: number;
   salePrice: number;
   wholesalePrice: number;
   profit: number;
   notes?: string;
+  trackingNumber?: string;
   status: string;
   createdAt: any;
 }
@@ -83,15 +94,66 @@ const orderStatusColors: Record<string, string> = {
 };
 
 async function fetchApplications(): Promise<DropshipperApplication[]> {
-  const q = query(collection(db, "dropshipper_applications"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "dropshipper_applications"),
+    orderBy("createdAt", "desc")
+  );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DropshipperApplication));
 }
 
 async function fetchDropshipperOrders(): Promise<DropshipperOrder[]> {
-  const q = query(collection(db, "dropshipper_orders"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "dropshipper_orders"),
+    orderBy("createdAt", "desc")
+  );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DropshipperOrder));
+}
+
+function exportCSV(orders: DropshipperOrder[]) {
+  const headers = [
+    "Date",
+    "Dropshipper",
+    "Dropshipper Email",
+    "Product",
+    "Customer",
+    "Customer Phone",
+    "Customer City",
+    "Address",
+    "Qty",
+    "Sale Price",
+    "Wholesale",
+    "Profit",
+    "Status",
+    "Tracking",
+    "Notes",
+  ];
+  const rows = orders.map((o) => [
+    o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString("en-PK") : "",
+    o.dropshipperName,
+    o.dropshipperEmail,
+    o.productName,
+    o.customerName,
+    o.customerPhone,
+    o.customerCity || "",
+    `"${(o.customerAddress || "").replace(/"/g, '""')}"`,
+    o.quantity,
+    o.salePrice * o.quantity,
+    o.wholesalePrice * o.quantity,
+    o.profit,
+    o.status,
+    o.trackingNumber || "",
+    `"${(o.notes || "").replace(/"/g, '""')}"`,
+  ]);
+  const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `dropshipper-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 type ActiveTab = "applications" | "orders";
@@ -101,8 +163,15 @@ export default function AdminDropshippers() {
   const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<ActiveTab>("applications");
+  const [appSearch, setAppSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [selectedApps, setSelectedApps] = useState<Set<string>>(new Set());
+  const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
 
-  const { data: applications = [], isLoading: appsLoading } = useQuery<DropshipperApplication[]>({
+  const { data: applications = [], isLoading: appsLoading } = useQuery<
+    DropshipperApplication[]
+  >({
     queryKey: ["/admin/dropshippers"],
     queryFn: fetchApplications,
   });
@@ -138,10 +207,77 @@ export default function AdminDropshippers() {
     },
   });
 
-  const filtered =
-    filterStatus === "all"
-      ? applications
-      : applications.filter((a) => a.status === filterStatus);
+  const updateTracking = useMutation({
+    mutationFn: async ({ id, trackingNumber }: { id: string; trackingNumber: string }) => {
+      await updateDoc(doc(db, "dropshipper_orders", id), { trackingNumber });
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["/admin/dropshipper-orders"] });
+      setTrackingInputs((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      toast({ title: "Tracking number saved" });
+    },
+    onError: () => {
+      toast({ title: "Failed to save tracking number", variant: "destructive" });
+    },
+  });
+
+  async function bulkUpdateStatus(status: string) {
+    if (selectedApps.size === 0) return;
+    const ids = Array.from(selectedApps);
+    await Promise.all(
+      ids.map((id) =>
+        updateDoc(doc(db, "dropshipper_applications", id), { status })
+      )
+    );
+    queryClient.invalidateQueries({ queryKey: ["/admin/dropshippers"] });
+    setSelectedApps(new Set());
+    toast({
+      title: `${ids.length} application${ids.length > 1 ? "s" : ""} ${status}`,
+    });
+  }
+
+  const toggleSelectApp = (id: string) => {
+    setSelectedApps((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (ids: string[]) => {
+    if (ids.every((id) => selectedApps.has(id))) {
+      setSelectedApps(new Set());
+    } else {
+      setSelectedApps(new Set(ids));
+    }
+  };
+
+  const filteredApplications = applications
+    .filter((a) => filterStatus === "all" || a.status === filterStatus)
+    .filter(
+      (a) =>
+        appSearch === "" ||
+        a.fullName.toLowerCase().includes(appSearch.toLowerCase()) ||
+        a.email.toLowerCase().includes(appSearch.toLowerCase()) ||
+        a.phone.includes(appSearch) ||
+        (a.city || "").toLowerCase().includes(appSearch.toLowerCase())
+    );
+
+  const filteredOrders = orders
+    .filter((o) => orderStatusFilter === "all" || o.status === orderStatusFilter)
+    .filter(
+      (o) =>
+        orderSearch === "" ||
+        o.dropshipperName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        o.dropshipperEmail.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        o.productName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        o.customerName.toLowerCase().includes(orderSearch.toLowerCase())
+    );
 
   const counts = {
     all: applications.length,
@@ -163,6 +299,10 @@ export default function AdminDropshippers() {
     { id: "orders" as ActiveTab, label: "Dropshipper Orders", badge: orderCounts.pending },
   ];
 
+  const allFilteredIds = filteredApplications.map((a) => a.id);
+  const allSelected =
+    allFilteredIds.length > 0 && allFilteredIds.every((id) => selectedApps.has(id));
+
   return (
     <div className="space-y-6">
       <div>
@@ -175,10 +315,30 @@ export default function AdminDropshippers() {
       {/* Top-level Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Dropshippers", value: counts.approved, color: "bg-green-50 text-green-700 border-green-100", icon: Users },
-          { label: "Pending Applications", value: counts.pending, color: "bg-yellow-50 text-yellow-700 border-yellow-100", icon: Clock },
-          { label: "Total Orders", value: orderCounts.total, color: "bg-blue-50 text-blue-700 border-blue-100", icon: ShoppingCart },
-          { label: "Total Profit Sent", value: `Rs. ${orderCounts.totalProfit.toLocaleString()}`, color: "bg-purple-50 text-purple-700 border-purple-100", icon: TrendingUp },
+          {
+            label: "Total Dropshippers",
+            value: counts.approved,
+            color: "bg-green-50 text-green-700 border-green-100",
+            icon: Users,
+          },
+          {
+            label: "Pending Applications",
+            value: counts.pending,
+            color: "bg-yellow-50 text-yellow-700 border-yellow-100",
+            icon: Clock,
+          },
+          {
+            label: "Total Orders",
+            value: orderCounts.total,
+            color: "bg-blue-50 text-blue-700 border-blue-100",
+            icon: ShoppingCart,
+          },
+          {
+            label: "Total Profit Paid",
+            value: `Rs. ${orderCounts.totalProfit.toLocaleString()}`,
+            color: "bg-purple-50 text-purple-700 border-purple-100",
+            icon: TrendingUp,
+          },
         ].map((s) => (
           <div key={s.label} className={`rounded-xl border p-4 ${s.color}`}>
             <div className="flex items-center justify-between mb-1">
@@ -206,7 +366,10 @@ export default function AdminDropshippers() {
             >
               {tab.label}
               {tab.badge > 0 && (
-                <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-[10px] rounded-full">
+                <Badge
+                  variant="destructive"
+                  className="h-5 w-5 p-0 flex items-center justify-center text-[10px] rounded-full"
+                >
                   {tab.badge}
                 </Badge>
               )}
@@ -218,10 +381,20 @@ export default function AdminDropshippers() {
       {/* ── APPLICATIONS TAB ── */}
       {activeTab === "applications" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Filter by status:</span>
+          {/* Filters row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search name, email, city..."
+                className="pl-9 h-9"
+                value={appSearch}
+                onChange={(e) => setAppSearch(e.target.value)}
+                data-testid="input-app-search"
+              />
+            </div>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-40" data-testid="select-filter-status">
+              <SelectTrigger className="w-40 h-9" data-testid="select-filter-status">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -231,6 +404,32 @@ export default function AdminDropshippers() {
                 <SelectItem value="rejected">Rejected ({counts.rejected})</SelectItem>
               </SelectContent>
             </Select>
+
+            {selectedApps.size > 0 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-xs text-muted-foreground">
+                  {selectedApps.size} selected
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 text-xs text-green-700 border-green-300 hover:bg-green-50"
+                  onClick={() => bulkUpdateStatus("approved")}
+                  data-testid="button-bulk-approve"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Approve All
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => bulkUpdateStatus("rejected")}
+                  data-testid="button-bulk-reject"
+                >
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" /> Reject All
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="bg-card border rounded-xl overflow-hidden">
@@ -238,7 +437,7 @@ export default function AdminDropshippers() {
               <div className="flex items-center justify-center py-20 text-muted-foreground">
                 Loading applications...
               </div>
-            ) : filtered.length === 0 ? (
+            ) : filteredApplications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
                 <Users className="h-10 w-10 opacity-30" />
                 <p className="text-sm">No applications found.</p>
@@ -247,10 +446,21 @@ export default function AdminDropshippers() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={() => toggleSelectAll(allFilteredIds)}
+                        className="rounded border-gray-300 h-4 w-4 cursor-pointer"
+                        data-testid="checkbox-select-all"
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Contact</TableHead>
+                    <TableHead>City</TableHead>
                     <TableHead>Platform</TableHead>
-                    <TableHead>Store Link</TableHead>
+                    <TableHead>Exp. Orders</TableHead>
+                    <TableHead>Store</TableHead>
                     <TableHead>Message</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
@@ -258,23 +468,59 @@ export default function AdminDropshippers() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((app) => {
+                  {filteredApplications.map((app) => {
                     const cfg = statusConfig[app.status] ?? statusConfig.pending;
+                    const isSelected = selectedApps.has(app.id);
                     return (
-                      <TableRow key={app.id} data-testid={`row-dropshipper-${app.id}`}>
+                      <TableRow
+                        key={app.id}
+                        className={isSelected ? "bg-green-50/50" : ""}
+                        data-testid={`row-dropshipper-${app.id}`}
+                      >
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelectApp(app.id)}
+                            className="rounded border-gray-300 h-4 w-4 cursor-pointer"
+                            data-testid={`checkbox-app-${app.id}`}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">{app.fullName}</TableCell>
                         <TableCell>
                           <div className="text-sm">{app.email}</div>
                           <div className="text-xs text-muted-foreground">{app.phone}</div>
+                          <a
+                            href={`https://wa.me/${app.phone.replace(/[^0-9]/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] text-green-700 hover:underline mt-0.5"
+                            data-testid={`btn-whatsapp-${app.id}`}
+                          >
+                            <SiWhatsapp className="h-3 w-3" /> WhatsApp
+                          </a>
+                        </TableCell>
+                        <TableCell>
+                          {app.city ? (
+                            <div className="flex items-center gap-1 text-sm">
+                              <MapPin className="h-3 w-3 text-gray-400" />
+                              {app.city}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm">{app.platform}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {app.monthlyOrders || "—"}
+                        </TableCell>
                         <TableCell>
                           {app.storeUrl ? (
                             <a
                               href={app.storeUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline truncate max-w-[120px] block"
+                              className="text-xs text-primary hover:underline truncate max-w-[100px] block"
                             >
                               {app.storeUrl}
                             </a>
@@ -282,7 +528,7 @@ export default function AdminDropshippers() {
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
+                        <TableCell className="text-xs text-muted-foreground max-w-[140px] truncate">
                           {app.message || "—"}
                         </TableCell>
                         <TableCell>
@@ -302,7 +548,9 @@ export default function AdminDropshippers() {
                                 size="sm"
                                 variant="outline"
                                 className="h-7 px-2 text-xs text-green-700 border-green-300 hover:bg-green-50"
-                                onClick={() => updateStatus.mutate({ id: app.id, status: "approved" })}
+                                onClick={() =>
+                                  updateStatus.mutate({ id: app.id, status: "approved" })
+                                }
                                 disabled={updateStatus.isPending}
                                 data-testid={`button-approve-${app.id}`}
                               >
@@ -314,7 +562,9 @@ export default function AdminDropshippers() {
                                 size="sm"
                                 variant="outline"
                                 className="h-7 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                                onClick={() => updateStatus.mutate({ id: app.id, status: "rejected" })}
+                                onClick={() =>
+                                  updateStatus.mutate({ id: app.id, status: "rejected" })
+                                }
                                 disabled={updateStatus.isPending}
                                 data-testid={`button-reject-${app.id}`}
                               >
@@ -326,7 +576,9 @@ export default function AdminDropshippers() {
                                 size="sm"
                                 variant="ghost"
                                 className="h-7 px-2 text-xs text-muted-foreground"
-                                onClick={() => updateStatus.mutate({ id: app.id, status: "pending" })}
+                                onClick={() =>
+                                  updateStatus.mutate({ id: app.id, status: "pending" })
+                                }
                                 disabled={updateStatus.isPending}
                                 data-testid={`button-reset-${app.id}`}
                               >
@@ -348,15 +600,51 @@ export default function AdminDropshippers() {
       {/* ── ORDERS TAB ── */}
       {activeTab === "orders" && (
         <div className="space-y-4">
+          {/* Filters row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search dropshipper, product..."
+                className="pl-9 h-9"
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                data-testid="input-order-search"
+              />
+            </div>
+            <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+              <SelectTrigger className="w-40 h-9" data-testid="select-order-status-filter">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {orderStatusOptions.map((s) => (
+                  <SelectItem key={s} value={s} className="capitalize">
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 gap-2 ml-auto"
+              onClick={() => exportCSV(filteredOrders)}
+              data-testid="button-export-csv"
+            >
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+          </div>
+
           <div className="bg-card border rounded-xl overflow-hidden">
             {ordersLoading ? (
               <div className="flex items-center justify-center py-20 text-muted-foreground">
                 Loading orders...
               </div>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
                 <Package className="h-10 w-10 opacity-30" />
-                <p className="text-sm">No dropshipper orders yet.</p>
+                <p className="text-sm">No orders found.</p>
               </div>
             ) : (
               <Table>
@@ -365,39 +653,95 @@ export default function AdminDropshippers() {
                     <TableHead>Dropshipper</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead>Customer</TableHead>
-                    <TableHead>Address</TableHead>
+                    <TableHead>City</TableHead>
                     <TableHead>Qty</TableHead>
                     <TableHead>Wholesale</TableHead>
                     <TableHead>Their Profit</TableHead>
+                    <TableHead>Tracking #</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order) => {
-                    const colorClass = orderStatusColors[order.status] ?? orderStatusColors.pending;
+                  {filteredOrders.map((order) => {
+                    const colorClass =
+                      orderStatusColors[order.status] ?? orderStatusColors.pending;
+                    const trackingVal =
+                      trackingInputs[order.id] !== undefined
+                        ? trackingInputs[order.id]
+                        : order.trackingNumber || "";
+                    const isDirty =
+                      trackingInputs[order.id] !== undefined &&
+                      trackingInputs[order.id] !== (order.trackingNumber || "");
                     return (
                       <TableRow key={order.id} data-testid={`row-order-${order.id}`}>
                         <TableCell>
-                          <div className="text-sm font-medium">{order.dropshipperName}</div>
-                          <div className="text-xs text-muted-foreground">{order.dropshipperEmail}</div>
+                          <div className="text-sm font-medium">
+                            {order.dropshipperName}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {order.dropshipperEmail}
+                          </div>
+                          <a
+                            href={`https://wa.me/${order.customerPhone?.replace(/[^0-9]/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] text-green-700 hover:underline mt-0.5"
+                          >
+                            <SiWhatsapp className="h-3 w-3" /> Customer
+                          </a>
                         </TableCell>
-                        <TableCell className="text-sm max-w-[140px] truncate font-medium">
+                        <TableCell className="text-sm max-w-[120px] truncate font-medium">
                           {order.productName}
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">{order.customerName}</div>
-                          <div className="text-xs text-muted-foreground">{order.customerPhone}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {order.customerPhone}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate">
-                          {order.customerAddress}
+                        <TableCell className="text-xs text-muted-foreground">
+                          {order.customerCity || "—"}
                         </TableCell>
                         <TableCell className="text-sm">{order.quantity}</TableCell>
                         <TableCell className="text-sm">
-                          Rs. {(order.wholesalePrice * order.quantity).toLocaleString()}
+                          Rs.{" "}
+                          {(order.wholesalePrice * order.quantity).toLocaleString()}
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-green-700">
                           Rs. {order.profit.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Input
+                              className="h-7 text-xs w-28 font-mono"
+                              placeholder="Enter tracking"
+                              value={trackingVal}
+                              onChange={(e) =>
+                                setTrackingInputs((prev) => ({
+                                  ...prev,
+                                  [order.id]: e.target.value,
+                                }))
+                              }
+                              data-testid={`input-tracking-${order.id}`}
+                            />
+                            {isDirty && (
+                              <Button
+                                size="sm"
+                                className="h-7 px-2 text-xs bg-green-700 hover:bg-green-800 text-white"
+                                onClick={() =>
+                                  updateTracking.mutate({
+                                    id: order.id,
+                                    trackingNumber: trackingInputs[order.id],
+                                  })
+                                }
+                                disabled={updateTracking.isPending}
+                                data-testid={`button-save-tracking-${order.id}`}
+                              >
+                                Save
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Select
@@ -433,6 +777,20 @@ export default function AdminDropshippers() {
               </Table>
             )}
           </div>
+
+          {filteredOrders.length > 0 && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground px-1">
+              <span>{filteredOrders.length} orders shown</span>
+              <span className="font-medium text-green-700">
+                Total Profit:{" "}
+                Rs.{" "}
+                {filteredOrders
+                  .filter((o) => o.status !== "cancelled")
+                  .reduce((sum, o) => sum + (o.profit || 0), 0)
+                  .toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

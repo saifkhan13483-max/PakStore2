@@ -19,6 +19,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -26,6 +33,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import {
   Package,
@@ -39,14 +52,36 @@ import {
   Clock,
   XCircle,
   LayoutDashboard,
+  MapPin,
+  AlertCircle,
 } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
+
+const PLATFORMS = [
+  "Facebook Page",
+  "Instagram",
+  "WhatsApp Business",
+  "OLX",
+  "Daraz",
+  "TikTok Shop",
+  "Personal Website",
+  "Other",
+];
+
+const CITIES = [
+  "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad",
+  "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala",
+  "Hyderabad", "Bahawalpur", "Sargodha", "Sukkur", "Other",
+];
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().min(10, "Please enter a valid phone number"),
+  city: z.string().min(1, "Please select your city"),
   storeUrl: z.string().optional(),
   platform: z.string().min(1, "Please select your selling platform"),
+  monthlyOrders: z.string().min(1, "Please select your expected monthly orders"),
   message: z.string().optional(),
 });
 
@@ -117,13 +152,39 @@ const steps = [
   },
 ];
 
+const faqs = [
+  {
+    q: "Is there any joining fee?",
+    a: "No. The PakCart Dropshipper Program is completely free to join. There are no hidden charges.",
+  },
+  {
+    q: "How much profit can I make?",
+    a: "Profit margins vary by product, typically between Rs. 200 – Rs. 800 per item. You set your own selling price.",
+  },
+  {
+    q: "When and how do I get paid?",
+    a: "You collect payment from your customer first, then place the order with us at the wholesale price. The difference is your profit — you keep it immediately.",
+  },
+  {
+    q: "Do I need a registered business?",
+    a: "No. You can join as an individual. All you need is a platform to sell on — a Facebook page, Instagram, or WhatsApp group works.",
+  },
+  {
+    q: "How fast do you ship?",
+    a: "We dispatch within 1–2 business days after you place the order. Delivery takes 2–5 days depending on the city.",
+  },
+  {
+    q: "What if a customer wants to return a product?",
+    a: "We handle returns and replacements directly. Contact our support team with the order details and we'll resolve it.",
+  },
+];
+
 export default function Dropshipper() {
   const { toast } = useToast();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Status checker state
   const [statusEmail, setStatusEmail] = useState("");
   const [statusResult, setStatusResult] = useState<null | { status: string; fullName: string }>(null);
   const [statusChecking, setStatusChecking] = useState(false);
@@ -140,8 +201,11 @@ export default function Dropshipper() {
       );
       const snap = await getDocs(q);
       if (snap.empty) {
-        setStatusResult(null);
-        toast({ title: "No application found", description: "No application found for this email address.", variant: "destructive" });
+        toast({
+          title: "No application found",
+          description: "No application found for this email address.",
+          variant: "destructive",
+        });
       } else {
         const data = snap.docs[0].data();
         setStatusResult({ status: data.status, fullName: data.fullName });
@@ -159,8 +223,10 @@ export default function Dropshipper() {
       fullName: "",
       email: "",
       phone: "",
+      city: "",
       storeUrl: "",
       platform: "",
+      monthlyOrders: "",
       message: "",
     },
   });
@@ -168,14 +234,38 @@ export default function Dropshipper() {
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
+      const emailLower = values.email.toLowerCase().trim();
+      const existing = await getDocs(
+        query(
+          collection(db, "dropshipper_applications"),
+          where("email", "==", emailLower),
+          limit(1)
+        )
+      );
+      if (!existing.empty) {
+        const existingStatus = existing.docs[0].data().status;
+        toast({
+          title: "Already Applied",
+          description:
+            existingStatus === "approved"
+              ? "This email is already approved. Please log in to access your dashboard."
+              : existingStatus === "pending"
+              ? "Your application is already under review. We will contact you within 24 hours."
+              : "An application with this email already exists. Please contact us for more info.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       await addDoc(collection(db, "dropshipper_applications"), {
         ...values,
+        email: emailLower,
         status: "pending",
         createdAt: serverTimestamp(),
       });
       setSubmitted(true);
       form.reset();
-    } catch (error) {
+    } catch {
       toast({
         title: "Something went wrong",
         description: "Could not submit your application. Please try again.",
@@ -204,7 +294,11 @@ export default function Dropshipper() {
               Already an approved dropshipper? Access your dashboard.
             </p>
             <Link href="/dropshipper/dashboard">
-              <Button size="sm" className="bg-white text-green-800 hover:bg-green-50 rounded-full h-8 px-4 text-xs font-semibold" data-testid="btn-go-dashboard">
+              <Button
+                size="sm"
+                className="bg-white text-green-800 hover:bg-green-50 rounded-full h-8 px-4 text-xs font-semibold"
+                data-testid="btn-go-dashboard"
+              >
                 <LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Go to Dashboard
               </Button>
             </Link>
@@ -229,42 +323,75 @@ export default function Dropshipper() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="max-w-3xl">
-            <span className="inline-block bg-green-600 text-green-100 text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
-              Now Open — Limited Spots
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-              Sell PakCart Products.
-              <br />
-              We Handle Everything Else.
-            </h1>
-            <p className="text-lg text-green-100 mb-8 max-w-2xl">
-              Join Pakistan's fastest-growing dropshipper program. List our proven products on
-              your store, bring the customer — and we take care of stock, packaging, and
-              delivery. Zero risk. Real profit.
-            </p>
-            <a href="#register">
-              <Button
-                size="lg"
-                className="bg-white text-green-800 hover:bg-green-50 font-bold px-8 rounded-full"
-                data-testid="hero-register-btn"
-              >
-                Register Now — It's Free
-              </Button>
-            </a>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+                <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+                NOW OPEN — LIMITED SPOTS
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                Sell PakCart Products.{" "}
+                <span className="text-green-300">We Handle Everything Else.</span>
+              </h1>
+              <p className="text-lg text-green-100 mb-8">
+                Join Pakistan's fastest-growing dropshipper program. List our proven products
+                on your store, bring the customer — and we take care of stock, packaging, and
+                delivery. Zero risk. Real profit.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a href="#register">
+                  <Button
+                    size="lg"
+                    className="bg-white text-green-800 hover:bg-green-50 rounded-full px-8 font-semibold"
+                    data-testid="btn-register-hero"
+                  >
+                    Register Now — It's Free
+                  </Button>
+                </a>
+                <a
+                  href="https://wa.me/923188055850"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-green-300 text-white hover:bg-green-800 rounded-full px-8"
+                    data-testid="btn-whatsapp-hero"
+                  >
+                    <SiWhatsapp className="h-4 w-4 mr-2" /> WhatsApp Us
+                  </Button>
+                </a>
+              </div>
+            </div>
+
+            <div className="hidden lg:grid grid-cols-2 gap-4">
+              {[
+                { label: "Happy Customers", value: "50,000+" },
+                { label: "Active Dropshippers", value: "200+" },
+                { label: "Products Available", value: "100+" },
+                { label: "Avg. Profit/Order", value: "Rs. 400+" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="bg-green-800/50 border border-green-600/40 rounded-xl p-5 text-center"
+                >
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <p className="text-sm text-green-300 mt-1">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Bar */}
-      <section className="bg-green-800 text-white">
-        <div className="container mx-auto px-4 py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        {/* Stats bar (mobile) */}
+        <div className="border-t border-green-600/40 bg-green-900/50">
+          <div className="container mx-auto px-4 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center lg:hidden">
             {[
               { value: "50,000+", label: "Happy Customers" },
+              { value: "200+", label: "Active Dropshippers" },
               { value: "100+", label: "Products Available" },
               { value: "PKR 0", label: "Upfront Cost" },
-              { value: "24hrs", label: "Application Review" },
             ].map((stat) => (
               <div key={stat.label}>
                 <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -320,20 +447,29 @@ export default function Dropshipper() {
                 {statusResult.status === "approved" && <CheckCircle2 className="h-4 w-4" />}
                 {statusResult.status === "pending" && <Clock className="h-4 w-4" />}
                 {statusResult.status === "rejected" && <XCircle className="h-4 w-4" />}
-                {statusResult.fullName} — {statusResult.status.charAt(0).toUpperCase() + statusResult.status.slice(1)}
+                {statusResult.fullName} —{" "}
+                {statusResult.status.charAt(0).toUpperCase() + statusResult.status.slice(1)}
               </div>
               {statusResult.status === "approved" && (
                 <Link href="/dropshipper/dashboard">
-                  <Button size="sm" className="mt-2 bg-green-700 hover:bg-green-800 text-white rounded-full px-5 h-8 text-xs" data-testid="btn-go-to-dashboard">
+                  <Button
+                    size="sm"
+                    className="mt-2 bg-green-700 hover:bg-green-800 text-white rounded-full px-5 h-8 text-xs"
+                    data-testid="btn-go-to-dashboard"
+                  >
                     <LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Go to Dashboard
                   </Button>
                 </Link>
               )}
               {statusResult.status === "pending" && (
-                <p className="text-xs mt-1 opacity-80">We will contact you within 24 hours.</p>
+                <p className="text-xs mt-1 opacity-80">
+                  We will contact you within 24 hours.
+                </p>
               )}
               {statusResult.status === "rejected" && (
-                <p className="text-xs mt-1 opacity-80">Contact us at contact@pakcart.store for more info.</p>
+                <p className="text-xs mt-1 opacity-80">
+                  Contact us at contact@pakcart.store for more info.
+                </p>
               )}
             </div>
           )}
@@ -358,7 +494,7 @@ export default function Dropshipper() {
                 key={benefit.title}
                 className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <benefit.icon className="h-5 w-5 text-green-700" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
@@ -370,281 +506,322 @@ export default function Dropshipper() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">How It Works</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Getting started takes less than 5 minutes.
+              From registration to your first sale in as little as 48 hours.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {steps.map((step, index) => (
-              <div key={step.number} className="relative text-center">
-                <div className="w-14 h-14 rounded-full bg-green-700 text-white flex items-center justify-center text-lg font-bold mx-auto mb-4">
-                  {step.number}
-                </div>
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-7 left-[calc(50%+28px)] right-0 h-px bg-green-200" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step, i) => (
+              <div key={step.number} className="relative">
+                {i < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-6 left-[calc(100%-12px)] w-1/2 h-px bg-green-200 z-0" />
                 )}
-                <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-lg mb-4">
+                    {step.number}
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Products Preview */}
-      <section className="py-16 bg-green-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            Products You Can Sell
-          </h2>
-          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            All categories are available for dropshipping. High-demand products with proven
-            sales records.
+      {/* Profit Calculator Teaser */}
+      <section className="py-12 bg-green-700 text-white">
+        <div className="container mx-auto px-4 text-center max-w-2xl">
+          <TrendingUp className="h-10 w-10 mx-auto mb-4 text-green-300" />
+          <h2 className="text-2xl font-bold mb-2">What Could You Earn?</h2>
+          <p className="text-green-200 mb-6">
+            If you sell just 10 orders a month with an average profit of Rs. 400 per item —
+            that's <strong className="text-white">Rs. 4,000/month</strong> in pure profit. Scale
+            to 50 orders and you're at <strong className="text-white">Rs. 20,000/month</strong>.
+            All from your phone.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              "Premium Watches",
-              "Luxury Bags",
-              "Crystal Cotton Bedsheets",
-              "Eid Special Collections",
-              "Women's Slippers",
-              "Kids Bags",
-              "Jewelry Sets",
-              "Fashion Accessories",
-            ].map((cat) => (
-              <span
-                key={cat}
-                className="bg-white border border-green-200 text-green-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm"
-              >
-                {cat}
-              </span>
-            ))}
-          </div>
+          <a href="#register">
+            <Button
+              size="lg"
+              className="bg-white text-green-800 hover:bg-green-50 rounded-full px-10 font-semibold"
+            >
+              Start Earning Today
+            </Button>
+          </a>
         </div>
       </section>
 
       {/* Registration Form */}
-      <section id="register" className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                Apply to Join the Program
-              </h2>
-              <p className="text-muted-foreground">
-                Fill out the form below and our team will contact you within 24 hours.
+      <section id="register" className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4 max-w-xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Apply to Join</h2>
+            <p className="text-muted-foreground">
+              Free to join. Takes less than 2 minutes. We'll review and respond within 24
+              hours.
+            </p>
+          </div>
+
+          {submitted ? (
+            <div
+              className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center"
+              data-testid="success-message"
+            >
+              <CheckCircle2 className="h-14 w-14 text-green-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-green-900 mb-2">
+                Application Submitted!
+              </h3>
+              <p className="text-green-700 mb-2">
+                Thank you for applying. Our team will review your application and contact you
+                within 24 hours on WhatsApp.
+              </p>
+              <p className="text-sm text-green-600">
+                In the meantime, use the status checker above to track your application.
               </p>
             </div>
-
-            {submitted ? (
-              <div
-                className="bg-green-50 border border-green-200 rounded-2xl p-10 text-center"
-                data-testid="success-message"
-              >
-                <CheckCircle2 className="h-14 w-14 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-green-800 mb-2">
-                  Application Received!
-                </h3>
-                <p className="text-green-700">
-                  Thank you for applying. Our team will review your application and contact
-                  you within 24 hours on the phone number or email you provided.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-5"
-                    data-testid="dropshipper-form"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name *</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Your full name"
-                                data-testid="input-fullname"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone / WhatsApp *</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="+92 3XX XXXXXXX"
-                                data-testid="input-phone"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
+          ) : (
+            <div className="bg-white rounded-2xl border shadow-sm p-6 md:p-8">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                  data-testid="form-dropshipper-apply"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="fullName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email Address *</FormLabel>
+                          <FormLabel>Full Name *</FormLabel>
                           <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="you@example.com"
-                              data-testid="input-email"
-                              {...field}
-                            />
+                            <Input placeholder="Your full name" data-testid="input-full-name" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone / WhatsApp *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+92 3XX XXXXXXX" data-testid="input-phone" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Address *</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="your@email.com" data-testid="input-email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-city">
+                                <SelectValue placeholder="Select city" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {CITIES.map((c) => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="platform"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Where do you sell? *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g. Facebook Shop, Instagram, WhatsApp, Own Website, Daraz"
-                              data-testid="input-platform"
-                              {...field}
-                            />
-                          </FormControl>
+                          <FormLabel>Selling Platform *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-platform">
+                                <SelectValue placeholder="Select platform" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PLATFORMS.map((p) => (
+                                <SelectItem key={p} value={p}>{p}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                  </div>
 
-                    <FormField
-                      control={form.control}
-                      name="storeUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Store / Page Link (Optional)</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name="monthlyOrders"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Expected Monthly Orders *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
-                            <Input
-                              placeholder="https://yourstore.com or Facebook page link"
-                              data-testid="input-storeurl"
-                              {...field}
-                            />
+                            <SelectTrigger data-testid="select-monthly-orders">
+                              <SelectValue placeholder="How many orders per month?" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          <SelectContent>
+                            <SelectItem value="1-10">1–10 orders</SelectItem>
+                            <SelectItem value="11-30">11–30 orders</SelectItem>
+                            <SelectItem value="31-50">31–50 orders</SelectItem>
+                            <SelectItem value="50+">50+ orders</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Anything you want to tell us? (Optional)</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Tell us about your business, how many sales you currently do, etc."
-                              className="resize-none"
-                              rows={3}
-                              data-testid="input-message"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="storeUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Store/Page Link (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://facebook.com/yourpage"
+                            data-testid="input-store-url"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <Button
-                      type="submit"
-                      className="w-full h-12 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full"
-                      disabled={isSubmitting}
-                      data-testid="button-submit-application"
-                    >
-                      {isSubmitting ? "Submitting..." : "Submit Application"}
-                    </Button>
-                  </form>
-                </Form>
-              </div>
-            )}
-          </div>
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Anything to add? (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Tell us about your experience or why you want to join..."
+                            rows={3}
+                            className="resize-none"
+                            data-testid="input-message"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-800">
+                    <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                    One application per email address. Use the status checker above if you've already applied.
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-green-700 hover:bg-green-800 text-white text-base font-semibold rounded-full"
+                    disabled={isSubmitting}
+                    data-testid="button-submit-apply"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Application — Free"}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          )}
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            {[
-              {
-                q: "Do I need to buy stock first?",
-                a: "No. You only pay for a product after your customer has placed an order and paid you. There is zero upfront investment.",
-              },
-              {
-                q: "How much profit can I make?",
-                a: "You set your own selling price. We provide you the wholesale price and you keep everything above it. Margins vary by product.",
-              },
-              {
-                q: "How fast do you ship orders?",
-                a: "We process and dispatch orders within 1–2 business days. Delivery across Pakistan typically takes 3–5 working days.",
-              },
-              {
-                q: "What if my customer returns a product?",
-                a: "We handle returns according to our standard policy. Our team will guide you through the return process on a case-by-case basis.",
-              },
-              {
-                q: "Can I dropship on Facebook, Instagram, or WhatsApp?",
-                a: "Yes, absolutely. Most of our dropshippers sell through Facebook Shops, Instagram pages, WhatsApp groups, and their own websites.",
-              },
-            ].map((faq) => (
-              <div key={faq.q} className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-2">{faq.q}</h3>
-                <p className="text-sm text-muted-foreground">{faq.a}</p>
-              </div>
-            ))}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              Frequently Asked Questions
+            </h2>
           </div>
+          <Accordion type="single" collapsible className="space-y-2">
+            {faqs.map((faq, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="border rounded-xl px-5 shadow-sm"
+              >
+                <AccordionTrigger className="text-left font-semibold text-gray-900 text-sm py-4 hover:no-underline">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-4">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="bg-green-700 text-white py-14">
+      {/* Footer CTA */}
+      <section className="py-12 bg-green-700">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Earning?</h2>
-          <p className="text-green-100 mb-8 max-w-lg mx-auto">
-            Join hundreds of dropshippers already selling PakCart products across Pakistan.
-            Register today — it's completely free.
+          <h2 className="text-2xl font-bold text-white mb-3">
+            Ready to Start Earning?
+          </h2>
+          <p className="text-green-200 mb-6 max-w-md mx-auto">
+            Join hundreds of Pakistani entrepreneurs already earning with PakCart.
           </p>
-          <a href="#register">
-            <Button
-              size="lg"
-              className="bg-white text-green-800 hover:bg-green-50 font-bold px-10 rounded-full"
-              data-testid="bottom-register-btn"
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="#register">
+              <Button
+                size="lg"
+                className="bg-white text-green-800 hover:bg-green-50 rounded-full px-8 font-semibold"
+              >
+                Apply Now — It's Free
+              </Button>
+            </a>
+            <a
+              href="https://wa.me/923188055850"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Apply Now — Free
-            </Button>
-          </a>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-green-300 text-white hover:bg-green-800 rounded-full px-8"
+              >
+                <SiWhatsapp className="h-4 w-4 mr-2" /> Chat on WhatsApp
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
     </>
