@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,88 +18,170 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
-  Copy,
-  Check,
+  Download,
   Search,
   Package,
-  ImageIcon,
-  FileText,
-  Tag,
-  Layers,
   ExternalLink,
+  FileDown,
 } from "lucide-react";
 
-function useCopyState() {
-  const [copied, setCopied] = useState<string | null>(null);
-  const { toast } = useToast();
+const BRAND = "PAKCART";
+const SITE_URL = "https://pakcart.store";
+const SUPPORT_EMAIL = "support@pakcart.store";
 
-  const copy = (text: string, key: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(key);
-      toast({ title: `${label} copied!`, description: "Pasted to your clipboard." });
-      setTimeout(() => setCopied(null), 2000);
-    });
-  };
-
-  return { copied, copy };
+function separator(char = "=", len = 80) {
+  return char.repeat(len);
 }
 
-interface CopyButtonProps {
-  label: string;
-  icon: React.ReactNode;
-  text: string;
-  copyKey: string;
-  copied: string | null;
-  onCopy: (text: string, key: string, label: string) => void;
-  variant?: "outline" | "secondary";
+function formatProductBlock(product: Product, index?: number): string {
+  const lines: string[] = [];
+  const label = index !== undefined ? `[${index}] ` : "";
+
+  lines.push(separator());
+  lines.push(`${label}${product.name.toUpperCase()}`);
+  lines.push(separator("-"));
+  lines.push("");
+
+  lines.push(`  Price          : Rs. ${product.price.toLocaleString()}`);
+  if (product.originalPrice) {
+    const saving = product.originalPrice - product.price;
+    const pct = Math.round((saving / product.originalPrice) * 100);
+    lines.push(`  Original Price : Rs. ${product.originalPrice.toLocaleString()} (${pct}% off)`);
+  }
+  if (typeof product.wholesalePrice === "number" && product.wholesalePrice > 0) {
+    lines.push(`  Wholesale Price: Rs. ${product.wholesalePrice.toLocaleString()}`);
+  }
+  lines.push(`  In Stock       : ${product.inStock ? "Yes" : "No"}`);
+  lines.push("");
+
+  if (product.description) {
+    lines.push("  DESCRIPTION");
+    lines.push("  " + separator("-", 40));
+    lines.push(`  ${product.description}`);
+    lines.push("");
+  }
+
+  if (product.longDescription) {
+    lines.push("  FULL DESCRIPTION");
+    lines.push("  " + separator("-", 40));
+    product.longDescription.split("\n").forEach((l) => lines.push(`  ${l}`));
+    lines.push("");
+  }
+
+  if (product.features && product.features.length > 0) {
+    lines.push("  KEY FEATURES");
+    lines.push("  " + separator("-", 40));
+    product.features.forEach((f) => lines.push(`    • ${f}`));
+    lines.push("");
+  }
+
+  if (product.specifications && Object.keys(product.specifications).length > 0) {
+    lines.push("  SPECIFICATIONS");
+    lines.push("  " + separator("-", 40));
+    Object.entries(product.specifications).forEach(([k, v]) =>
+      lines.push(`    ${k}: ${v}`)
+    );
+    lines.push("");
+  }
+
+  if (product.images && product.images.length > 0) {
+    lines.push("  PRODUCT IMAGES");
+    lines.push("  " + separator("-", 40));
+    product.images.forEach((img, i) => lines.push(`    ${i + 1}. ${img}`));
+    lines.push("");
+  }
+
+  lines.push("  PRODUCT PAGE");
+  lines.push("  " + separator("-", 40));
+  lines.push(`    ${SITE_URL}/products/${product.slug}`);
+  lines.push("");
+
+  return lines.join("\n");
 }
 
-function CopyButton({ label, icon, text, copyKey, copied, onCopy, variant = "outline" }: CopyButtonProps) {
-  const isCopied = copied === copyKey;
-  return (
-    <Button
-      size="sm"
-      variant={isCopied ? "secondary" : variant}
-      className={`gap-1.5 text-xs h-7 px-2.5 ${isCopied ? "text-green-700 border-green-300 bg-green-50" : ""}`}
-      onClick={() => onCopy(text, copyKey, label)}
-      data-testid={`copy-${copyKey}`}
-    >
-      {isCopied ? <Check className="h-3 w-3 text-green-600" /> : icon}
-      {isCopied ? "Copied!" : label}
-    </Button>
-  );
+function buildCatalogTxt(products: Product[]): string {
+  const now = new Date().toLocaleString("en-PK", {
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+
+  const header = [
+    separator(),
+    `${" ".repeat(20)}${BRAND} — DROPSHIPPER PRODUCT CATALOG`,
+    `${" ".repeat(20)}${SITE_URL}  |  ${SUPPORT_EMAIL}`,
+    separator(),
+    "",
+    `  Generated  : ${now}`,
+    `  Products   : ${products.length}`,
+    `  Note       : All prices are in Pakistani Rupees (PKR).`,
+    `               Wholesale prices are available on request.`,
+    "",
+  ].join("\n");
+
+  const body = products
+    .map((p, i) => formatProductBlock(p, i + 1))
+    .join("\n");
+
+  const footer = [
+    separator(),
+    `  © ${new Date().getFullYear()} ${BRAND}. For dropshipper use only.`,
+    `  Contact us at ${SUPPORT_EMAIL} for wholesale pricing and support.`,
+    separator(),
+  ].join("\n");
+
+  return `${header}\n${body}\n${footer}`;
+}
+
+function buildSingleTxt(product: Product): string {
+  const now = new Date().toLocaleString("en-PK", {
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+
+  const header = [
+    separator(),
+    `${" ".repeat(20)}${BRAND} — PRODUCT DETAILS`,
+    `${" ".repeat(20)}${SITE_URL}  |  ${SUPPORT_EMAIL}`,
+    separator(),
+    "",
+    `  Generated : ${now}`,
+    "",
+  ].join("\n");
+
+  const footer = [
+    separator(),
+    `  © ${new Date().getFullYear()} ${BRAND}. For dropshipper use only.`,
+    `  Contact: ${SUPPORT_EMAIL}`,
+    separator(),
+  ].join("\n");
+
+  return `${header}\n${formatProductBlock(product)}\n${footer}`;
+}
+
+function downloadTxt(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function ProductCatalogCard({ product }: { product: Product }) {
-  const { copied, copy } = useCopyState();
   const [imgError, setImgError] = useState(false);
 
   const imageUrl = product.images?.[0]
     ? getOptimizedImageUrl(product.images[0], { width: 400, height: 400, crop: "fill" })
     : null;
 
-  const allDetails = [
-    `Product Name: ${product.name}`,
-    `Price: Rs. ${product.price.toLocaleString()}`,
-    product.originalPrice ? `Original Price: Rs. ${product.originalPrice.toLocaleString()}` : null,
-    `\nDescription:\n${product.description}`,
-    product.longDescription ? `\nFull Description:\n${product.longDescription}` : null,
-    product.features?.length
-      ? `\nKey Features:\n${product.features.map((f) => `• ${f}`).join("\n")}`
-      : null,
-    product.images?.length
-      ? `\nProduct Images:\n${product.images.join("\n")}`
-      : null,
-    `\nProduct Page: https://pakcart.store/products/${product.slug}`,
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const featuresText = product.features?.length
-    ? product.features.map((f) => `• ${f}`).join("\n")
-    : "";
-
-  const imagesText = product.images?.join("\n") ?? "";
+  const handleExport = () => {
+    const content = buildSingleTxt(product);
+    const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, "-");
+    downloadTxt(content, `pakcart-${slug}.txt`);
+  };
 
   return (
     <div
@@ -123,7 +204,7 @@ function ProductCatalogCard({ product }: { product: Product }) {
         )}
         {product.images && product.images.length > 1 && (
           <div className="absolute bottom-2 right-2">
-            <Badge variant="secondary" className="text-xs bg-black/60 text-white border-0">
+            <Badge className="text-xs bg-black/60 text-white border-0 hover:bg-black/60">
               {product.images.length} photos
             </Badge>
           </div>
@@ -154,78 +235,22 @@ function ProductCatalogCard({ product }: { product: Product }) {
           </p>
         )}
 
-        {/* Copy Buttons */}
-        <div className="flex flex-wrap gap-1.5 mt-auto pt-2 border-t border-gray-100">
-          <CopyButton
-            label="Name"
-            icon={<Tag className="h-3 w-3" />}
-            text={product.name}
-            copyKey={`${product.id}-name`}
-            copied={copied}
-            onCopy={copy}
-          />
-          <CopyButton
-            label="Description"
-            icon={<FileText className="h-3 w-3" />}
-            text={product.description}
-            copyKey={`${product.id}-desc`}
-            copied={copied}
-            onCopy={copy}
-          />
-          <CopyButton
-            label="Price"
-            icon={<Tag className="h-3 w-3" />}
-            text={`Rs. ${product.price.toLocaleString()}`}
-            copyKey={`${product.id}-price`}
-            copied={copied}
-            onCopy={copy}
-          />
-          {product.images?.length ? (
-            <CopyButton
-              label="Images"
-              icon={<ImageIcon className="h-3 w-3" />}
-              text={imagesText}
-              copyKey={`${product.id}-images`}
-              copied={copied}
-              onCopy={copy}
-            />
-          ) : null}
-          {featuresText && (
-            <CopyButton
-              label="Features"
-              icon={<Layers className="h-3 w-3" />}
-              text={featuresText}
-              copyKey={`${product.id}-features`}
-              copied={copied}
-              onCopy={copy}
-            />
-          )}
-        </div>
-
-        {/* Copy All + View */}
-        <div className="flex gap-2">
+        {/* Actions */}
+        <div className="flex gap-2 mt-auto pt-2 border-t border-gray-100">
           <Button
             size="sm"
-            className={`flex-1 gap-1.5 text-xs h-8 ${
-              copied === `${product.id}-all`
-                ? "bg-green-700 hover:bg-green-800"
-                : "bg-green-700 hover:bg-green-800"
-            } text-white`}
-            onClick={() => copy(allDetails, `${product.id}-all`, "All product details")}
-            data-testid={`copy-all-${product.id}`}
+            className="flex-1 gap-1.5 text-xs h-8 bg-green-700 hover:bg-green-800 text-white"
+            onClick={handleExport}
+            data-testid={`export-product-${product.id}`}
           >
-            {copied === `${product.id}-all` ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-            {copied === `${product.id}-all` ? "Copied!" : "Copy All Details"}
+            <Download className="h-3.5 w-3.5" />
+            Export .txt
           </Button>
           <Link href={`/products/${product.slug}`} target="_blank">
             <Button
               size="sm"
               variant="outline"
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 shrink-0"
               data-testid={`view-product-${product.id}`}
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -246,12 +271,7 @@ function SkeletonCard() {
         <Skeleton className="h-4 w-1/3" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-2/3" />
-        <div className="flex gap-1.5 pt-2">
-          <Skeleton className="h-7 w-16" />
-          <Skeleton className="h-7 w-24" />
-          <Skeleton className="h-7 w-14" />
-        </div>
-        <Skeleton className="h-8 w-full mt-1" />
+        <Skeleton className="h-8 w-full mt-2" />
       </div>
     </div>
   );
@@ -277,11 +297,17 @@ export default function DropshipperCatalog() {
     );
   }, [products, search]);
 
+  const handleExportAll = () => {
+    const content = buildCatalogTxt(filtered);
+    const date = new Date().toISOString().slice(0, 10);
+    downloadTxt(content, `pakcart-catalog-${date}.txt`);
+  };
+
   return (
     <>
       <SEO
         title="Product Catalog for Dropshippers | PakCart"
-        description="Browse PakCart products and copy product details to list on your own store. Name, description, price, and images — all in one click."
+        description="Browse PakCart products and export their details as a professional text file to list on your own store."
         url="https://pakcart.store/dropshipper/catalog"
         robots="noindex,follow"
       />
@@ -311,16 +337,17 @@ export default function DropshipperCatalog() {
 
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Product Catalog</h1>
           <p className="text-green-200 max-w-xl">
-            Browse all available products and copy their details — name, description, price,
-            and images — to list on your own store or social page.
+            Browse all available products. Download any product's details as a professionally
+            formatted text file — ready to use for your store listings, social posts, or
+            WhatsApp messages.
           </p>
         </div>
       </div>
 
-      {/* Search + Count */}
+      {/* Search + Export All toolbar */}
       <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="relative flex-1 max-w-md">
+        <div className="container mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[180px] max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search products..."
@@ -330,11 +357,22 @@ export default function DropshipperCatalog() {
               data-testid="input-catalog-search"
             />
           </div>
+
           {!isLoading && (
             <span className="text-sm text-muted-foreground shrink-0">
               {filtered.length} product{filtered.length !== 1 ? "s" : ""}
             </span>
           )}
+
+          <Button
+            onClick={handleExportAll}
+            disabled={isLoading || filtered.length === 0}
+            className="bg-green-700 hover:bg-green-800 text-white gap-2 shrink-0 ml-auto"
+            data-testid="btn-export-all"
+          >
+            <FileDown className="h-4 w-4" />
+            Export All ({filtered.length})
+          </Button>
         </div>
       </div>
 
@@ -365,12 +403,13 @@ export default function DropshipperCatalog() {
         )}
       </div>
 
-      {/* Tip banner */}
+      {/* Info banner */}
       <div className="bg-green-50 border-t border-green-100 py-6">
         <div className="container mx-auto px-4 text-center text-sm text-green-800 max-w-2xl">
-          <strong>How to use:</strong> Click any copy button to copy individual details, or use{" "}
-          <strong>"Copy All Details"</strong> to get everything formatted and ready to paste into
-          your store listing, WhatsApp message, or Facebook post.
+          <strong>How to use:</strong> Click <strong>"Export .txt"</strong> on any product to
+          download its full details as a formatted text file. Use{" "}
+          <strong>"Export All"</strong> in the toolbar to download your entire catalog in one
+          file.
         </div>
       </div>
     </>
