@@ -1,5 +1,22 @@
 import { type Product } from "@shared/schema";
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<li>/gi, "• ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 const BRAND = "PAKCART";
 const SITE_URL = "https://pakcart.store";
 const SUPPORT_EMAIL = "support@pakcart.store";
@@ -20,14 +37,14 @@ export function formatProductBlock(product: Product, index?: number): string {
   if (product.description) {
     lines.push("  SHORT DESCRIPTION");
     lines.push("  " + separator("-", 40));
-    lines.push(`  ${product.description}`);
+    lines.push(`  ${stripHtml(product.description)}`);
     lines.push("");
   }
 
   if (product.longDescription) {
     lines.push("  FULL DESCRIPTION");
     lines.push("  " + separator("-", 40));
-    product.longDescription.split("\n").forEach((l) => lines.push(`  ${l}`));
+    stripHtml(product.longDescription).split("\n").forEach((l) => lines.push(`  ${l}`));
     lines.push("");
   }
 
