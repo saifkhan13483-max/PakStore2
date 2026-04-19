@@ -40,6 +40,9 @@ const productItems = [
 
 const orderItems = [
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
+];
+
+const partnerItems = [
   { title: "Dropshippers", url: "/admin/dropshippers", icon: Users },
 ];
 
@@ -121,6 +124,7 @@ export function AdminSidebar() {
         <NavGroup label="Overview" items={overviewItems} location={location} />
         <NavGroup label="Product Management" items={productItems} location={location} />
         <NavGroup label="Orders" items={orderItems} location={location} pendingCount={pendingCount} />
+        <NavGroup label="Partners" items={partnerItems} location={location} />
         <NavGroup label="Content" items={contentItems} location={location} />
         <NavGroup label="Tools & Analytics" items={toolItems} location={location} />
 
