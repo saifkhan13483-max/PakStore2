@@ -34,6 +34,7 @@ const NAV_LINKS_LEFT = [
 
 const NAV_LINKS_RIGHT = [
   { href: "/about", label: "Our Story" },
+  { href: "/dropshipper", label: "Dropship" },
   { href: "/contact", label: "Contact" },
 ];
 

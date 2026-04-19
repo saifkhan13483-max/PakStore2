@@ -29,6 +29,7 @@ const PLAIN_NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/categories", label: "Collections" },
   { href: "/about", label: "Our Story" },
+  { href: "/dropshipper", label: "Dropshipper Program" },
   { href: "/contact", label: "Contact" },
 ];
 

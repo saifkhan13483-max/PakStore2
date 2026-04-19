@@ -100,6 +100,8 @@ const AdminSeedComments = lazyWithRetry(() => import("@/pages/admin/SeedComments
 const AdminSearchAnalytics = lazyWithRetry(() => import("@/pages/admin/SearchAnalytics"));
 const AdminProfitRules = lazyWithRetry(() => import("@/pages/admin/ProfitRules"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
+const Dropshipper = lazyWithRetry(() => import("@/pages/Dropshipper"));
+const AdminDropshippers = lazyWithRetry(() => import("@/pages/admin/Dropshippers"));
 
 import { trackEvent } from "@/lib/firebase";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -160,6 +162,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/dropshipper" component={Dropshipper} />
 
       {/* Admin Routes */}
       <Route path="/admin">
@@ -250,6 +253,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminProfitRules />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/dropshippers">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminDropshippers />
           </AdminLayout>
         </AdminRoute>
       </Route>

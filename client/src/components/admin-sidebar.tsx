@@ -10,6 +10,7 @@ import {
   BarChart2,
   MessageSquarePlus,
   PackagePlus,
+  Users,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
@@ -39,6 +40,7 @@ const productItems = [
 
 const orderItems = [
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
+  { title: "Dropshippers", url: "/admin/dropshippers", icon: Users },
 ];
 
 const contentItems = [
