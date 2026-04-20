@@ -47,6 +47,9 @@ import {
   Star,
   PlusCircle,
   Search,
+  Banknote,
+  ImageIcon,
+  ExternalLink,
 } from "lucide-react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import type { Product } from "@shared/schema";
@@ -78,6 +81,17 @@ interface DropshipperOrder {
   createdAt: any;
 }
 
+interface PaymentRecord {
+  id: string;
+  dropshipperEmail: string;
+  dropshipperName: string;
+  amount: number;
+  period: string;
+  proofUrl: string;
+  notes: string;
+  createdAt: any;
+}
+
 async function fetchApplication(email: string): Promise<DropshipperApplication | null> {
   const q = query(
     collection(db, "dropshipper_applications"),
@@ -99,6 +113,16 @@ async function fetchMyOrders(email: string): Promise<DropshipperOrder[]> {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DropshipperOrder));
 }
 
+async function fetchMyPayments(email: string): Promise<PaymentRecord[]> {
+  const q = query(
+    collection(db, "dropshipper_payments"),
+    where("dropshipperEmail", "==", email),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord));
+}
+
 const orderStatusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "bg-yellow-100 text-yellow-700" },
   processing: { label: "Processing", color: "bg-blue-100 text-blue-700" },
@@ -107,7 +131,7 @@ const orderStatusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
 };
 
-type Tab = "overview" | "place-order" | "my-orders" | "earnings";
+type Tab = "overview" | "place-order" | "my-orders" | "earnings" | "payments";
 
 function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -241,6 +265,12 @@ export default function DropshipperDashboard() {
   const { data: myOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["my-dropshipper-orders", user?.email],
     queryFn: () => fetchMyOrders(user!.email!),
+    enabled: application?.status === "approved" && !!user?.email,
+  });
+
+  const { data: myPayments = [], isLoading: paymentsLoading } = useQuery<PaymentRecord[]>({
+    queryKey: ["my-dropshipper-payments", user?.email],
+    queryFn: () => fetchMyPayments(user!.email!),
     enabled: application?.status === "approved" && !!user?.email,
   });
 
@@ -402,6 +432,7 @@ export default function DropshipperDashboard() {
     { id: "place-order", label: "Place Order", icon: PlusCircle },
     { id: "my-orders", label: "My Orders", icon: Truck },
     { id: "earnings", label: "Earnings", icon: BarChart3 },
+    { id: "payments", label: "Payment History", icon: Banknote },
   ];
 
   return (
@@ -1014,6 +1045,98 @@ export default function DropshipperDashboard() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* ── PAYMENT HISTORY TAB ── */}
+        {activeTab === "payments" && (
+          <div className="space-y-5 max-w-3xl">
+            <div className="bg-green-700 rounded-xl p-5 text-white flex items-center justify-between">
+              <div>
+                <p className="text-green-200 text-sm">Total Received</p>
+                <p className="text-3xl font-bold mt-1">
+                  Rs.{" "}
+                  {myPayments.reduce((s, p) => s + (p.amount || 0), 0).toLocaleString()}
+                </p>
+              </div>
+              <Banknote className="h-10 w-10 text-green-300 opacity-60" />
+            </div>
+
+            <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
+              <div className="p-4 border-b">
+                <h3 className="font-bold text-gray-900">Payments from PakCart</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Your profit payments sent by PakCart admin with proof screenshots.
+                </p>
+              </div>
+
+              {paymentsLoading ? (
+                <div className="flex items-center justify-center py-16 text-muted-foreground">
+                  Loading payments...
+                </div>
+              ) : myPayments.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
+                  <Banknote className="h-12 w-12 opacity-30" />
+                  <p className="text-sm">No payments received yet.</p>
+                  <p className="text-xs">Payments from PakCart will appear here with proof.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Notes</TableHead>
+                      <TableHead>Proof</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {myPayments.map((payment) => (
+                      <TableRow key={payment.id} data-testid={`row-payment-${payment.id}`}>
+                        <TableCell className="font-bold text-green-700 text-base">
+                          Rs. {payment.amount.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {payment.period || "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate">
+                          {payment.notes || "—"}
+                        </TableCell>
+                        <TableCell>
+                          {payment.proofUrl ? (
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={payment.proofUrl}
+                                alt="Payment proof"
+                                className="h-10 w-14 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => window.open(payment.proofUrl, "_blank")}
+                              />
+                              <a
+                                href={payment.proofUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                data-testid={`link-proof-${payment.id}`}
+                              >
+                                <ExternalLink className="h-3 w-3" /> View
+                              </a>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                          {payment.createdAt?.toDate
+                            ? payment.createdAt.toDate().toLocaleDateString("en-PK")
+                            : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
           </div>
         )}
 

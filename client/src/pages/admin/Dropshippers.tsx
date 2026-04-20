@@ -7,6 +7,8 @@ import {
   orderBy,
   query,
   where,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -42,8 +44,13 @@ import {
   MapPin,
   MessageCircle,
   CheckSquare,
+  Banknote,
+  ImageIcon,
+  ExternalLink,
+  Upload,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
+import { uploadImage } from "@/lib/uploadImage";
 
 interface DropshipperApplication {
   id: string;
@@ -78,6 +85,17 @@ interface DropshipperOrder {
   createdAt: any;
 }
 
+interface PaymentRecord {
+  id: string;
+  dropshipperEmail: string;
+  dropshipperName: string;
+  amount: number;
+  period: string;
+  proofUrl: string;
+  notes: string;
+  createdAt: any;
+}
+
 const statusConfig = {
   pending: { label: "Pending", variant: "secondary" as const, icon: Clock },
   approved: { label: "Approved", variant: "default" as const, icon: CheckCircle2 },
@@ -109,6 +127,15 @@ async function fetchDropshipperOrders(): Promise<DropshipperOrder[]> {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DropshipperOrder));
+}
+
+async function fetchPayments(): Promise<PaymentRecord[]> {
+  const q = query(
+    collection(db, "dropshipper_payments"),
+    orderBy("createdAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord));
 }
 
 function exportCSV(orders: DropshipperOrder[]) {
@@ -156,7 +183,7 @@ function exportCSV(orders: DropshipperOrder[]) {
   URL.revokeObjectURL(url);
 }
 
-type ActiveTab = "applications" | "orders";
+type ActiveTab = "applications" | "orders" | "payments";
 
 export default function AdminDropshippers() {
   const { toast } = useToast();
@@ -169,6 +196,18 @@ export default function AdminDropshippers() {
   const [selectedApps, setSelectedApps] = useState<Set<string>>(new Set());
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
 
+  const [paymentForm, setPaymentForm] = useState({
+    dropshipperEmail: "",
+    dropshipperName: "",
+    amount: "",
+    period: "",
+    notes: "",
+  });
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const [paymentProofPreview, setPaymentProofPreview] = useState<string>("");
+  const [isUploadingPayment, setIsUploadingPayment] = useState(false);
+  const paymentProofInputRef = useRef<HTMLInputElement>(null);
+
   const { data: applications = [], isLoading: appsLoading } = useQuery<
     DropshipperApplication[]
   >({
@@ -179,6 +218,11 @@ export default function AdminDropshippers() {
   const { data: orders = [], isLoading: ordersLoading } = useQuery<DropshipperOrder[]>({
     queryKey: ["/admin/dropshipper-orders"],
     queryFn: fetchDropshipperOrders,
+  });
+
+  const { data: payments = [], isLoading: paymentsLoading } = useQuery<PaymentRecord[]>({
+    queryKey: ["/admin/dropshipper-payments"],
+    queryFn: fetchPayments,
   });
 
   const updateStatus = useMutation({
@@ -294,9 +338,41 @@ export default function AdminDropshippers() {
       .reduce((sum, o) => sum + (o.profit || 0), 0),
   };
 
+  async function handleSubmitPayment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!paymentForm.dropshipperEmail || !paymentForm.amount || !paymentProofFile) {
+      toast({ title: "Please fill all required fields and upload proof screenshot", variant: "destructive" });
+      return;
+    }
+    setIsUploadingPayment(true);
+    try {
+      const uploaded = await uploadImage(paymentProofFile);
+      await addDoc(collection(db, "dropshipper_payments"), {
+        dropshipperEmail: paymentForm.dropshipperEmail,
+        dropshipperName: paymentForm.dropshipperName,
+        amount: Number(paymentForm.amount),
+        period: paymentForm.period,
+        proofUrl: uploaded.url,
+        notes: paymentForm.notes,
+        createdAt: serverTimestamp(),
+      });
+      queryClient.invalidateQueries({ queryKey: ["/admin/dropshipper-payments"] });
+      setPaymentForm({ dropshipperEmail: "", dropshipperName: "", amount: "", period: "", notes: "" });
+      setPaymentProofFile(null);
+      setPaymentProofPreview("");
+      if (paymentProofInputRef.current) paymentProofInputRef.current.value = "";
+      toast({ title: "Payment record saved successfully" });
+    } catch {
+      toast({ title: "Failed to save payment", variant: "destructive" });
+    } finally {
+      setIsUploadingPayment(false);
+    }
+  }
+
   const tabs = [
     { id: "applications" as ActiveTab, label: "Applications", badge: counts.pending },
     { id: "orders" as ActiveTab, label: "Dropshipper Orders", badge: orderCounts.pending },
+    { id: "payments" as ActiveTab, label: "Payments", badge: 0 },
   ];
 
   const allFilteredIds = filteredApplications.map((a) => a.id);
@@ -791,6 +867,201 @@ export default function AdminDropshippers() {
               </span>
             </div>
           )}
+        </div>
+      )}
+      {/* ── PAYMENTS TAB ── */}
+      {activeTab === "payments" && (
+        <div className="space-y-6">
+          {/* Send Payment Form */}
+          <div className="bg-card border rounded-xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-5">
+              <Banknote className="h-5 w-5 text-green-700" />
+              <h3 className="font-bold text-gray-900">Send Payment to Dropshipper</h3>
+            </div>
+            <form onSubmit={handleSubmitPayment} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 block mb-1">
+                    Dropshipper Email <span className="text-red-500">*</span>
+                  </label>
+                  <Select
+                    value={paymentForm.dropshipperEmail}
+                    onValueChange={(val) => {
+                      const app = applications.find((a) => a.email === val);
+                      setPaymentForm((p) => ({
+                        ...p,
+                        dropshipperEmail: val,
+                        dropshipperName: app?.fullName ?? "",
+                      }));
+                    }}
+                  >
+                    <SelectTrigger data-testid="select-payment-dropshipper">
+                      <SelectValue placeholder="Select dropshipper..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {applications
+                        .filter((a) => a.status === "approved")
+                        .map((a) => (
+                          <SelectItem key={a.id} value={a.email}>
+                            {a.fullName} — {a.email}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 block mb-1">
+                    Payment Period (e.g. April 2026)
+                  </label>
+                  <Input
+                    placeholder="e.g. April 2026"
+                    value={paymentForm.period}
+                    onChange={(e) => setPaymentForm((p) => ({ ...p, period: e.target.value }))}
+                    data-testid="input-payment-period"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 block mb-1">
+                    Amount Paid (Rs.) <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="e.g. 5000"
+                    value={paymentForm.amount}
+                    onChange={(e) => setPaymentForm((p) => ({ ...p, amount: e.target.value }))}
+                    data-testid="input-payment-amount"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 block mb-1">Notes</label>
+                  <Input
+                    placeholder="Optional note to dropshipper"
+                    value={paymentForm.notes}
+                    onChange={(e) => setPaymentForm((p) => ({ ...p, notes: e.target.value }))}
+                    data-testid="input-payment-notes"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-600 block mb-1">
+                  Proof Screenshot <span className="text-red-500">*</span>
+                </label>
+                <div
+                  className="border-2 border-dashed border-gray-200 rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-green-400 transition-colors"
+                  onClick={() => paymentProofInputRef.current?.click()}
+                >
+                  {paymentProofPreview ? (
+                    <img
+                      src={paymentProofPreview}
+                      alt="Proof preview"
+                      className="max-h-40 rounded-lg object-contain"
+                    />
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 text-gray-300" />
+                      <p className="text-sm text-muted-foreground">
+                        Click to upload payment proof screenshot
+                      </p>
+                    </>
+                  )}
+                </div>
+                <input
+                  ref={paymentProofInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setPaymentProofFile(file);
+                      setPaymentProofPreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  data-testid="input-payment-proof"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="bg-green-700 hover:bg-green-800 text-white"
+                disabled={isUploadingPayment}
+                data-testid="button-submit-payment"
+              >
+                {isUploadingPayment ? "Uploading & Saving..." : "Send Payment"}
+              </Button>
+            </form>
+          </div>
+
+          {/* Payment Records Table */}
+          <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">Payment History</h3>
+              <span className="text-xs text-muted-foreground">{payments.length} records</span>
+            </div>
+            {paymentsLoading ? (
+              <div className="flex items-center justify-center py-16 text-muted-foreground">
+                Loading payments...
+              </div>
+            ) : payments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
+                <Banknote className="h-10 w-10 opacity-30" />
+                <p className="text-sm">No payments sent yet.</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Dropshipper</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead>Proof</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((p) => (
+                    <TableRow key={p.id} data-testid={`row-payment-${p.id}`}>
+                      <TableCell>
+                        <div className="text-sm font-medium">{p.dropshipperName}</div>
+                        <div className="text-xs text-muted-foreground">{p.dropshipperEmail}</div>
+                      </TableCell>
+                      <TableCell className="font-bold text-green-700">
+                        Rs. {p.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-sm">{p.period || "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">
+                        {p.notes || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {p.proofUrl ? (
+                          <a
+                            href={p.proofUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            data-testid={`link-proof-${p.id}`}
+                          >
+                            <ImageIcon className="h-3.5 w-3.5" /> View
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {p.createdAt?.toDate
+                          ? p.createdAt.toDate().toLocaleDateString("en-PK")
+                          : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
         </div>
       )}
     </div>
