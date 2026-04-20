@@ -329,7 +329,7 @@ export default function Dropshipper() {
                 <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
                 NOW OPEN — LIMITED SPOTS
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-white">
                 Sell PakCart Products.{" "}
                 <span className="text-green-300">We Handle Everything Else.</span>
               </h1>
@@ -562,7 +562,7 @@ export default function Dropshipper() {
       <section className="py-12 bg-green-700 text-white">
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <TrendingUp className="h-10 w-10 mx-auto mb-4 text-green-300" />
-          <h2 className="text-2xl font-bold mb-2">What Could You Earn?</h2>
+          <h2 className="text-2xl font-bold mb-2 text-white">What Could You Earn?</h2>
           <p className="text-green-200 mb-6">
             If you sell just 10 orders a month with an average profit of Rs. 400 per item —
             that's <strong className="text-white">Rs. 4,000/month</strong> in pure profit. Scale
