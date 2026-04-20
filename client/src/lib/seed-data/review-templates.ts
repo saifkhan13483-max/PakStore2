@@ -360,8 +360,30 @@ const TEMPLATES: TemplatePool = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Replaces {productName} placeholders with natural generic references.
+ * Handles plural (slippers/shoes/bedsheets), possessive, and sentence-start
+ * patterns so the resulting text reads naturally without the product name.
+ */
+function replaceWithGeneric(template: string): string {
+  return template
+    .replace(/these \{productName\}/g, "them")
+    .replace(/The \{productName\} are/g, "They are")
+    .replace(/the \{productName\} are/g, "they are")
+    .replace(/The \{productName\} is/g, "It is")
+    .replace(/the \{productName\} is/g, "it is")
+    .replace(/my \{productName\}/g, "it")
+    .replace(/The \{productName\}/g, "It")
+    .replace(/the \{productName\}/g, "it")
+    .replace(/This \{productName\}/g, "It")
+    .replace(/this \{productName\}/g, "it")
+    .replace(/^\{productName\}/, "This product")
+    .replace(/\{productName\}/g, "this product");
+}
+
+/**
  * Picks a review template matching the given category and rating,
- * then substitutes {productName} with the actual product name.
+ * then substitutes {productName}. Only ~10% of reviews include the
+ * full product name; the rest use natural generic references.
  */
 export function generateReviewContent(
   productName: string,
@@ -375,5 +397,10 @@ export function generateReviewContent(
     TEMPLATES["general"][5]!;
 
   const template = ratingPool[Math.floor(Math.random() * ratingPool.length)];
-  return template.replace(/\{productName\}/g, productName);
+
+  if (Math.random() < 0.10) {
+    return template.replace(/\{productName\}/g, productName);
+  }
+
+  return replaceWithGeneric(template);
 }
