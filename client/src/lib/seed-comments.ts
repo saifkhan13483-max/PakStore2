@@ -51,7 +51,7 @@ export interface SeedOptions {
 
 export const DEFAULT_SEED_OPTIONS: SeedOptions = {
   commentsPerProduct: "random",
-  ratingBias: "realistic",
+  ratingBias: "positive",
   includeReplies: true,
   includeVerified: true,
   dateRangeDays: 90,
@@ -119,9 +119,8 @@ function getRatingByBias(bias: SeedOptions["ratingBias"]): number {
   }
   if (bias === "positive") {
     if (roll < 60) return 5;
-    if (roll < 90) return 4;
-    if (roll < 98) return 3;
-    return 2;
+    if (roll < 85) return 4;
+    return 3;
   }
   // very_positive
   if (roll < 80) return 5;

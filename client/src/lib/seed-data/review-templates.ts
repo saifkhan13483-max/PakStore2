@@ -50,13 +50,14 @@ export function detectCategory(product: SeedProduct): ProductCategory {
 // ---------------------------------------------------------------------------
 
 /**
- * Picks a star rating using a very positive weighted distribution:
- * 5★ 75% | 4★ 25%
+ * Picks a star rating using the target positive distribution:
+ * 5★ 60% | 4★ 25% | 3★ 15%
  */
 export function getRealisticRating(): number {
   const roll = Math.random() * 100;
-  if (roll < 75) return 5;
-  return 4;
+  if (roll < 60) return 5;
+  if (roll < 85) return 4;
+  return 3;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,17 +180,10 @@ const TEMPLATES: TemplatePool = {
       "Solid purchase. The {productName} is exactly what I needed for daily use — not too big, not too small. Great value for the price.",
     ],
     3: [
-      "The {productName} is decent but I expected slightly thicker leather at this price. It looks nice and serves its purpose, so it is fine overall.",
-      "Mixed feelings on the {productName}. The design is lovely but one of the inner pockets is smaller than shown. Functional enough but not perfect.",
-      "The {productName} looks good but packaging was a bit rough on arrival — there was a small scratch on the clasp. Customer service helped resolve it quickly though.",
-      "Average quality for the price. The {productName} works fine for casual use. Would not call it premium but it does the job.",
-    ],
-    2: [
-      "Disappointed with the {productName}. The stitching on one side started coming loose after just two weeks of light use. Expected better quality at this price.",
-      "The {productName} looks different from the product photos — much shinier material in person. Not what I was expecting. Quality feels cheap.",
-    ],
-    1: [
-      "The {productName} arrived with a broken zipper. Very poor quality control. Contacted support but still waiting for a response.",
+      "Really like the design — it looks great and the material feels solid. The zipper could be a touch smoother but overall a good purchase for the price.",
+      "Lovely looking bag and it gets compliments too. The interior pockets are slightly smaller than I expected but it holds all my daily essentials just fine.",
+      "Good bag for everyday use. The colour is exactly as shown and it has a nice shape. Shoulder strap could be a little longer but still comfortable to carry.",
+      "Nice bag overall — stylish and functional. Packaging was secure and delivery was on time. A small improvement in hardware finish would easily make it five stars.",
     ],
   },
 
@@ -209,16 +203,10 @@ const TEMPLATES: TemplatePool = {
       "Good value. The {productName} functions perfectly and the dial is very easy to read. Packaging was secure. Would buy again.",
     ],
     3: [
-      "The {productName} looks fine but the back case scratches very easily. Keeping it in the original box when not in use. Design is lovely though.",
-      "Decent watch for the price. The {productName} keeps accurate time but the luminous hands are barely visible in the dark. Expected slightly brighter.",
-      "Average build quality on the {productName}. The crown feels wobbly and the strap is a bit stiff. Works fine but not quite premium.",
-    ],
-    2: [
-      "Disappointed with the {productName}. The glass developed a hairline crack within a month of careful use. Expected far better build quality.",
-      "The {productName} stopped working after 6 weeks. The battery died early and replacing it was a hassle. Not worth the price.",
-    ],
-    1: [
-      "The {productName} I received is clearly not what was shown in the listing. Colour and dial design are completely different. Very misleading.",
+      "Nice looking watch and it keeps accurate time. The strap is a little stiff initially but softens up with wear. Good value for casual daily use.",
+      "Pretty watch — the dial looks smart and clean. Crown is a bit tight but setting the time is still easy. Happy with the overall look and feel.",
+      "Good watch for the price — looks more premium in person than in the photos. The finishing on the case is nice. Just keep it away from heavy activity and it will last well.",
+      "Solid timepiece for everyday use. Design is eye-catching and the fit on the wrist is comfortable. A slightly more polished buckle would make it perfect.",
     ],
   },
 
@@ -236,14 +224,9 @@ const TEMPLATES: TemplatePool = {
       "Good daily slippers. The {productName} are comfortable and well-made. Strap loosened slightly after a month but still functional.",
     ],
     3: [
-      "The {productName} are comfortable but the sole is thinner than I expected. Fine for indoor use but I would not wear them outdoors.",
-      "Decent slippers overall. The {productName} look good but the cushioning flattened out after about 3 weeks of regular use.",
-    ],
-    2: [
-      "The {productName} started peeling at the toe area after just 2 weeks. Not the durability I was hoping for at this price.",
-    ],
-    1: [
-      "Wrong size delivered. The {productName} I received were 2 sizes smaller than ordered. Still sorting out the return.",
+      "Very comfortable slippers for indoor use — soft base and nice design. The colour was slightly different from what I ordered but still looks good.",
+      "Good slippers for home use. Cushioning is decent and they fit true to size. A touch more arch support would be ideal but for the price they are absolutely fine.",
+      "Comfy enough for daily indoor wear. Good stitching and the sole holds up well. Happy with the purchase overall — good value for what you pay.",
     ],
   },
 
@@ -262,14 +245,9 @@ const TEMPLATES: TemplatePool = {
       "The {productName} are nice and soft. Good stitch quality along the borders. One colour variant was out of stock so I had to pick second choice.",
     ],
     3: [
-      "The {productName} are decent but the fabric feels slightly thin. Comfortable enough in summer but I would want something thicker for winter.",
-      "Okay product. The {productName} look nice but one corner of the fitted sheet does not stay tucked properly on our deep mattress.",
-    ],
-    2: [
-      "The {productName} started pilling after just 2 washes. The colour also faded significantly. Expected much better quality.",
-    ],
-    1: [
-      "The {productName} arrived with a visible tear along one seam. Very poor packaging and quality control. Returning the order.",
+      "Pretty bedsheets — the design is lovely and the fabric feels comfortable. Light material which is great for summer. Would prefer slightly heavier for winter but overall satisfied.",
+      "Nice bedsheets and the colour is vibrant and exactly as shown. Fits our bed well. The fitted sheet corners are a touch loose on a deep mattress but manageable.",
+      "Good quality for the price. The embroidery detail is attractive and the fabric washes well. A small loose thread on one pillowcase but easily fixed — still happy with the purchase.",
     ],
   },
 
@@ -286,14 +264,9 @@ const TEMPLATES: TemplatePool = {
       "Good value shoes. The {productName} look exactly like the photos and have held up well over two months of regular use.",
     ],
     3: [
-      "The {productName} look good but the sole felt a bit slippery on smooth floors initially. Got better after a week of use. Decent overall.",
-      "Average experience with the {productName}. Design is attractive but the lining inside rubbed a blister on my heel for the first week.",
-    ],
-    2: [
-      "The {productName} stitching separated on the side after just 3 weeks of use. Disappointing quality for the price paid.",
-    ],
-    1: [
-      "Both shoes in the {productName} pair were the same foot — both rights. Complete quality control failure. Still waiting for a replacement.",
+      "Good looking shoes that match the photos well. Took a few days to fully break in but now comfortable and supportive. Sole grip is solid.",
+      "Nice shoes for the price — leather looks good and the finishing is clean. Added a gel insole for extra cushioning and now very comfortable.",
+      "Decent shoes overall. The design is sharp and they look great with formal outfits. The toe box was a touch snug initially but eased out within a week.",
     ],
   },
 
@@ -309,14 +282,9 @@ const TEMPLATES: TemplatePool = {
       "Happy with the {productName}. Material is comfortable and the design is elegant. Delivery was prompt and packaging was neat.",
     ],
     3: [
-      "The {productName} is decent. Fabric feels a bit synthetic compared to the description but the design is attractive and it fits well.",
-      "Okay purchase. The {productName} looks nice but the embroidery lost a couple of threads after the first wash. Still wearable.",
-    ],
-    2: [
-      "The {productName} fabric is much thinner than expected and the colour faded significantly after just one wash. Not worth the price.",
-    ],
-    1: [
-      "The {productName} sizing is completely off — a large fits like a small. No quality control at all. Very disappointed.",
+      "Good quality fabric and a lovely design. The fit is comfortable and the colour is as shown. Sizing runs a little small so I would suggest going one size up.",
+      "Nice clothing item overall — the style is attractive and the stitching is clean. The dupatta is slightly less embroidered than in the photo but the overall look is still very presentable.",
+      "Comfortable fabric and a beautiful design. Washes well without losing shape. A small embroidery detail came slightly loose after the first wash but easily fixed and still a great outfit.",
     ],
   },
 
@@ -337,17 +305,10 @@ const TEMPLATES: TemplatePool = {
       "Solid value. The {productName} is well-made and functional. One minor gripe about the colour being slightly off from the listing but overall satisfied.",
     ],
     3: [
-      "Decent product. The {productName} works fine for everyday use but I feel the quality could be better at this price point.",
-      "The {productName} is okay — not great, not bad. It does the job. Delivery was a day late but customer support was helpful.",
-      "Mixed experience with the {productName}. The product itself is fine but the packaging was damaged on arrival. Quality of the item is acceptable.",
-    ],
-    2: [
-      "Expected better quality for the price of the {productName}. It works but does not feel as premium as the listing suggested. A bit misleading.",
-      "The {productName} did not match the product description. Material feels cheap and it looks different from the photos. Disappointed.",
-    ],
-    1: [
-      "The {productName} stopped working within a week. Very poor quality. Contacted support with no resolution so far.",
-      "Product description of the {productName} is completely inaccurate. Sent back immediately. Would not recommend this seller.",
+      "Good product overall and it works well for daily use. Packaging was simple but secure. Very satisfied with the quality for the price paid.",
+      "Decent product that does exactly what it promises. Delivery was on time and the item matches the photos. A small quality improvement would make it a 5-star purchase.",
+      "Happy with this purchase overall. Product is functional and looks good in person. Customer service was also very responsive when I had a question.",
+      "Good value for money. The product is well-made and practical for everyday use. Arrived on time and well-packed. Would recommend to friends.",
     ],
   },
 };
