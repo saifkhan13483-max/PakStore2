@@ -846,6 +846,23 @@ export default function Dropshipper() {
         </div>
       </section>
 
+      {/* E-commerce Platform Promo */}
+      <section className="py-10 bg-amber-50 border-y border-amber-200">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <p className="text-amber-900 text-base leading-relaxed">
+            Interested in launching your own professional e-commerce platform like this one?{" "}
+            Get in touch with us at{" "}
+            <a
+              href="tel:+923188055850"
+              className="font-bold text-amber-700 hover:text-amber-900 underline underline-offset-2"
+            >
+              +92 318 8055850
+            </a>{" "}
+            to start your digital journey today.
+          </p>
+        </div>
+      </section>
+
       {/* Footer CTA */}
       <section className="py-12 bg-green-700">
         <div className="container mx-auto px-4 text-center">
