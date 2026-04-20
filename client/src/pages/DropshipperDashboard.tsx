@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   collection,
   getDocs,
@@ -6,6 +6,8 @@ import {
   where,
   orderBy,
   limit,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuthStore } from "@/store/authStore";
@@ -13,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -42,7 +45,12 @@ import {
   Calculator,
   BarChart3,
   Star,
+  PlusCircle,
+  Search,
 } from "lucide-react";
+import { productFirestoreService } from "@/services/productFirestoreService";
+import type { Product } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 import { SiWhatsapp } from "react-icons/si";
 
 interface DropshipperApplication {
@@ -99,7 +107,7 @@ const orderStatusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
 };
 
-type Tab = "overview" | "my-orders" | "earnings";
+type Tab = "overview" | "place-order" | "my-orders" | "earnings";
 
 function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -115,6 +123,7 @@ function getMonthLabel(key: string) {
 
 export default function DropshipperDashboard() {
   const { user, isAuthenticated } = useAuthStore();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
 
@@ -122,6 +131,108 @@ export default function DropshipperDashboard() {
   const [calcWholesale, setCalcWholesale] = useState(500);
   const [calcSalePrice, setCalcSalePrice] = useState(800);
   const [calcQty, setCalcQty] = useState(10);
+
+  // Place Order state
+  const [productSearch, setProductSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductList, setShowProductList] = useState(false);
+  const [orderForm, setOrderForm] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerCity: "",
+    customerAddress: "",
+    quantity: 1,
+    salePrice: 0,
+    notes: "",
+  });
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ["products-for-order"],
+    queryFn: () => productFirestoreService.getAllProducts({ limit: 200 }),
+    enabled: activeTab === "place-order",
+  });
+
+  const filteredProducts = allProducts.filter((p) =>
+    p.name.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
+  function handleSelectProduct(product: Product) {
+    setSelectedProduct(product);
+    setProductSearch(product.name);
+    setShowProductList(false);
+    setOrderForm((prev) => ({
+      ...prev,
+      salePrice: product.wholesalePrice
+        ? Math.round(product.wholesalePrice * 1.3)
+        : product.price,
+    }));
+  }
+
+  async function handleSubmitOrder(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedProduct || !user?.email) return;
+    if (
+      !orderForm.customerName ||
+      !orderForm.customerPhone ||
+      !orderForm.customerCity
+    ) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all required customer fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const wholesalePrice = selectedProduct.wholesalePrice ?? selectedProduct.price;
+    const profit = (orderForm.salePrice - wholesalePrice) * orderForm.quantity;
+
+    setIsSubmittingOrder(true);
+    try {
+      await addDoc(collection(db, "dropshipper_orders"), {
+        dropshipperEmail: user.email,
+        dropshipperName: application?.fullName ?? "",
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        productImage: selectedProduct.images?.[0] ?? "",
+        customerName: orderForm.customerName,
+        customerPhone: orderForm.customerPhone,
+        customerCity: orderForm.customerCity,
+        customerAddress: orderForm.customerAddress,
+        quantity: orderForm.quantity,
+        wholesalePrice,
+        salePrice: orderForm.salePrice,
+        profit,
+        status: "pending",
+        notes: orderForm.notes,
+        createdAt: serverTimestamp(),
+      });
+      toast({
+        title: "Order placed!",
+        description: `Your order for ${selectedProduct.name} has been submitted. We'll process it shortly.`,
+      });
+      setSelectedProduct(null);
+      setProductSearch("");
+      setOrderForm({
+        customerName: "",
+        customerPhone: "",
+        customerCity: "",
+        customerAddress: "",
+        quantity: 1,
+        salePrice: 0,
+        notes: "",
+      });
+      setActiveTab("my-orders");
+    } catch (err: any) {
+      toast({
+        title: "Error placing order",
+        description: err.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  }
 
   const { data: application, isLoading: appLoading } = useQuery({
     queryKey: ["dropshipper-application", user?.email],
@@ -290,6 +401,7 @@ export default function DropshipperDashboard() {
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "place-order", label: "Place Order", icon: PlusCircle },
     { id: "my-orders", label: "My Orders", icon: Truck },
     { id: "earnings", label: "Earnings", icon: BarChart3 },
   ];
@@ -398,12 +510,22 @@ export default function DropshipperDashboard() {
                 <p className="text-green-200 text-sm">Total Profit Earned (All Time)</p>
                 <p className="text-3xl font-bold mt-1">Rs. {totalProfit.toLocaleString()}</p>
               </div>
-              <Button
-                className="bg-white text-green-800 hover:bg-green-50 rounded-full px-6"
-                onClick={() => setActiveTab("earnings")}
-              >
-                <BarChart3 className="h-4 w-4 mr-2" /> View Earnings
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  className="bg-white text-green-800 hover:bg-green-50 rounded-full px-5"
+                  onClick={() => setActiveTab("place-order")}
+                  data-testid="button-go-place-order"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" /> Place Order
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-white hover:bg-green-600 rounded-full px-5"
+                  onClick={() => setActiveTab("earnings")}
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" /> Earnings
+                </Button>
+              </div>
             </div>
 
             {/* Profit Calculator */}
@@ -514,6 +636,270 @@ export default function DropshipperDashboard() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── PLACE ORDER TAB ── */}
+        {activeTab === "place-order" && (
+          <div className="max-w-2xl space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Place a New Order</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Forward a customer order to PakCart. We'll pack and ship directly to your customer.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmitOrder} className="space-y-5">
+              {/* Product Selection */}
+              <div className="bg-white border rounded-xl p-5 shadow-sm space-y-3">
+                <h3 className="font-semibold text-gray-900 text-sm">Step 1 — Select Product</h3>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search product by name..."
+                    value={productSearch}
+                    onChange={(e) => {
+                      setProductSearch(e.target.value);
+                      setShowProductList(true);
+                      if (!e.target.value) setSelectedProduct(null);
+                    }}
+                    onFocus={() => setShowProductList(true)}
+                    className="pl-9"
+                    data-testid="input-product-search"
+                  />
+                  {showProductList && productSearch && (
+                    <div className="absolute z-20 mt-1 w-full bg-white border rounded-xl shadow-lg max-h-56 overflow-y-auto">
+                      {filteredProducts.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No products found
+                        </p>
+                      ) : (
+                        filteredProducts.slice(0, 20).map((product) => (
+                          <button
+                            key={product.id}
+                            type="button"
+                            onClick={() => handleSelectProduct(product)}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-left transition-colors"
+                            data-testid={`item-product-${product.id}`}
+                          >
+                            {product.images?.[0] && (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="w-9 h-9 rounded-lg object-cover shrink-0"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {product.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Wholesale: Rs.{" "}
+                                {(product.wholesalePrice ?? product.price).toLocaleString()}
+                              </p>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {selectedProduct && (
+                  <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                    {selectedProduct.images?.[0] && (
+                      <img
+                        src={selectedProduct.images[0]}
+                        alt={selectedProduct.name}
+                        className="w-12 h-12 rounded-lg object-cover shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate">
+                        {selectedProduct.name}
+                      </p>
+                      <p className="text-xs text-green-700 mt-0.5">
+                        Wholesale Price: Rs.{" "}
+                        {(
+                          selectedProduct.wholesalePrice ?? selectedProduct.price
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                    <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                  </div>
+                )}
+              </div>
+
+              {/* Customer Details */}
+              <div className="bg-white border rounded-xl p-5 shadow-sm space-y-4">
+                <h3 className="font-semibold text-gray-900 text-sm">
+                  Step 2 — Customer Details
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Customer Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="e.g. Ahmed Ali"
+                      value={orderForm.customerName}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({ ...p, customerName: e.target.value }))
+                      }
+                      required
+                      data-testid="input-customer-name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Customer Phone (WhatsApp) <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="e.g. 03001234567"
+                      value={orderForm.customerPhone}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({ ...p, customerPhone: e.target.value }))
+                      }
+                      required
+                      data-testid="input-customer-phone"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="e.g. Lahore"
+                      value={orderForm.customerCity}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({ ...p, customerCity: e.target.value }))
+                      }
+                      required
+                      data-testid="input-customer-city"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Full Address
+                    </label>
+                    <Input
+                      placeholder="Street, area, landmark..."
+                      value={orderForm.customerAddress}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({ ...p, customerAddress: e.target.value }))
+                      }
+                      data-testid="input-customer-address"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing & Quantity */}
+              <div className="bg-white border rounded-xl p-5 shadow-sm space-y-4">
+                <h3 className="font-semibold text-gray-900 text-sm">
+                  Step 3 — Pricing & Quantity
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Wholesale Price (Rs.)
+                    </label>
+                    <Input
+                      value={
+                        selectedProduct
+                          ? (selectedProduct.wholesalePrice ?? selectedProduct.price)
+                          : "—"
+                      }
+                      readOnly
+                      className="bg-gray-50 text-gray-500"
+                      data-testid="input-wholesale-price"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Your Sale Price (Rs.) <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={orderForm.salePrice}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({
+                          ...p,
+                          salePrice: Number(e.target.value),
+                        }))
+                      }
+                      required
+                      data-testid="input-sale-price"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">
+                      Quantity <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={orderForm.quantity}
+                      onChange={(e) =>
+                        setOrderForm((p) => ({
+                          ...p,
+                          quantity: Math.max(1, Number(e.target.value)),
+                        }))
+                      }
+                      required
+                      data-testid="input-quantity"
+                    />
+                  </div>
+                </div>
+
+                {selectedProduct && orderForm.salePrice > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                    <span className="text-sm text-green-700 font-medium">Your Profit</span>
+                    <span className="text-lg font-bold text-green-700">
+                      Rs.{" "}
+                      {Math.max(
+                        0,
+                        (orderForm.salePrice -
+                          (selectedProduct.wholesalePrice ?? selectedProduct.price)) *
+                          orderForm.quantity
+                      ).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              <div className="bg-white border rounded-xl p-5 shadow-sm space-y-3">
+                <h3 className="font-semibold text-gray-900 text-sm">
+                  Step 4 — Notes (Optional)
+                </h3>
+                <Textarea
+                  placeholder="Any special instructions, variant preferences, color, size, etc."
+                  value={orderForm.notes}
+                  onChange={(e) =>
+                    setOrderForm((p) => ({ ...p, notes: e.target.value }))
+                  }
+                  rows={3}
+                  data-testid="input-notes"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={!selectedProduct || isSubmittingOrder}
+                className="w-full bg-green-700 hover:bg-green-800 text-white rounded-full h-11 text-base font-semibold"
+                data-testid="button-submit-order"
+              >
+                {isSubmittingOrder ? (
+                  "Placing Order..."
+                ) : (
+                  <>
+                    <PlusCircle className="h-4 w-4 mr-2" /> Place Order
+                  </>
+                )}
+              </Button>
+            </form>
           </div>
         )}
 
