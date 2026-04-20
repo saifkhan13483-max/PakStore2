@@ -14,6 +14,7 @@
  */
 
 import { initializeApp } from "firebase/app";
+import { getAuth, signInAnonymously } from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -60,6 +61,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ---------------------------------------------------------------------------
@@ -104,6 +106,10 @@ function buildReviewContent(
 // ---------------------------------------------------------------------------
 
 async function seedRandomComments(): Promise<void> {
+  console.log("Signing in anonymously to satisfy Firestore security rules...");
+  await signInAnonymously(auth);
+  console.log("Anonymous sign-in successful.");
+
   console.log("Starting to seed realistic comments (Phase 4)...");
 
   const productsSnapshot = await getDocs(collection(db, "products"));
