@@ -802,17 +802,17 @@ export default function DropshipperDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="text-xs font-medium text-gray-600 block mb-1">
-                      Wholesale Price (Rs.)
+                      Product Price (Rs.)
                     </label>
                     <Input
                       value={
                         selectedProduct
-                          ? (selectedProduct.wholesalePrice ?? selectedProduct.price)
+                          ? selectedProduct.price
                           : "—"
                       }
                       readOnly
                       className="bg-gray-50 text-gray-500"
-                      data-testid="input-wholesale-price"
+                      data-testid="input-product-price"
                     />
                   </div>
                   <div>
@@ -860,8 +860,7 @@ export default function DropshipperDashboard() {
                       Rs.{" "}
                       {Math.max(
                         0,
-                        (orderForm.salePrice -
-                          (selectedProduct.wholesalePrice ?? selectedProduct.price)) *
+                        (orderForm.salePrice - selectedProduct.price) *
                           orderForm.quantity
                       ).toLocaleString()}
                     </span>
