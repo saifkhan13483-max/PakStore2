@@ -263,7 +263,7 @@ export default function Products() {
                   data-testid="btn-export-all-products"
                 >
                   <FileDown className="h-4 w-4" />
-                  Export All (.txt)
+                  Download All
                 </Button>
               )}
             </div>
@@ -279,7 +279,7 @@ export default function Products() {
                 data-testid="btn-export-all-products-mobile"
               >
                 <FileDown className="h-4 w-4" />
-                Export All (.txt)
+                Download All
               </Button>
             )}
           </div>
@@ -356,7 +356,7 @@ export default function Products() {
                     <strong>Dropshipper tip:</strong> Hover over any product card and click the{" "}
                     <Download className="inline h-3.5 w-3.5" /> download icon to export the product's
                     full details as a .txt file and download its photos, variant images, and video.
-                    Use <strong>"Export All (.txt)"</strong> above to download the entire catalog at once.
+                    Use <strong>"Download All"</strong> above to download the entire catalog at once.
                   </p>
                 </div>
               )}
