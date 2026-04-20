@@ -184,7 +184,7 @@ export default function DropshipperDashboard() {
       });
       return;
     }
-    const wholesalePrice = selectedProduct.wholesalePrice ?? selectedProduct.price;
+    const wholesalePrice = selectedProduct.price;
     const profit = (orderForm.salePrice - wholesalePrice) * orderForm.quantity;
 
     setIsSubmittingOrder(true);
@@ -719,10 +719,8 @@ export default function DropshipperDashboard() {
                         {selectedProduct.name}
                       </p>
                       <p className="text-xs text-green-700 mt-0.5">
-                        Wholesale Price: Rs.{" "}
-                        {(
-                          selectedProduct.wholesalePrice ?? selectedProduct.price
-                        ).toLocaleString()}
+                        Product Price: Rs.{" "}
+                        {selectedProduct.price.toLocaleString()}
                       </p>
                     </div>
                     <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
