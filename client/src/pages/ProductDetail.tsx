@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap, Download, Package, ExternalLink } from "lucide-react";
+import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
+import { MediaDownloadDialog } from "@/components/product/MediaDownloadDialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -89,10 +91,12 @@ export default function ProductDetail() {
   const [, setLocation] = useLocation();
   const addToCart = useCartStore(state => state.addToCart);
   const { toast } = useToast();
+  const { isApprovedDropshipper } = useDropshipperStatus();
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({}); 
+  const [mediaOpen, setMediaOpen] = useState(false);
 
   useEffect(() => {
     if (product) {
@@ -557,6 +561,88 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Dropshipper Tools */}
+      {isApprovedDropshipper && (
+        <>
+          <MediaDownloadDialog
+            product={product}
+            open={mediaOpen}
+            onClose={() => setMediaOpen(false)}
+          />
+          <div className="mb-10 rounded-2xl border border-green-200 bg-green-50 overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-3 bg-green-700 text-white">
+              <Package className="h-4 w-4 shrink-0" />
+              <span className="font-semibold text-sm tracking-wide">Dropshipper Tools</span>
+              <Badge className="ml-auto bg-white/20 text-white border-0 text-xs hover:bg-white/20">
+                Approved
+              </Badge>
+            </div>
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Wholesale Price */}
+              {typeof product.wholesalePrice === "number" && product.wholesalePrice > 0 && (
+                <div className="bg-white rounded-xl border border-green-100 p-4">
+                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+                    Wholesale Price
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    Rs. {product.wholesalePrice.toLocaleString()}
+                  </p>
+                  {product.price > product.wholesalePrice && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Your margin: Rs. {(product.price - product.wholesalePrice).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Download Button */}
+              <div className="bg-white rounded-xl border border-green-100 p-4 flex flex-col gap-2 justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+                    Download
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Export product details, photos, variant images &amp; video
+                  </p>
+                </div>
+                <Button
+                  className="bg-green-700 hover:bg-green-800 text-white gap-2 w-full mt-1"
+                  size="sm"
+                  onClick={() => setMediaOpen(true)}
+                  data-testid="btn-dropshipper-download"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Product
+                </Button>
+              </div>
+
+              {/* Catalog Link */}
+              <div className="bg-white rounded-xl border border-green-100 p-4 flex flex-col gap-2 justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+                    Full Catalog
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Browse all products and download in bulk from your catalog
+                  </p>
+                </div>
+                <Link href="/dropshipper/catalog">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-600 text-green-700 hover:bg-green-700 hover:text-white gap-2 w-full mt-1"
+                    data-testid="btn-dropshipper-catalog"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View Catalog
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <section className="mb-16">
         <Tabs defaultValue="description" className="w-full">
