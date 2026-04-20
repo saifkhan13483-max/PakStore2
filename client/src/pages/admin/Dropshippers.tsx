@@ -365,8 +365,10 @@ export default function AdminDropshippers() {
       setPaymentProofPreview("");
       if (paymentProofInputRef.current) paymentProofInputRef.current.value = "";
       toast({ title: "Payment record saved successfully" });
-    } catch {
-      toast({ title: "Failed to save payment", variant: "destructive" });
+    } catch (err: any) {
+      console.error("[Payment] Save failed:", err);
+      const msg = err?.message || String(err) || "Unknown error";
+      toast({ title: `Failed to save payment: ${msg}`, variant: "destructive" });
     } finally {
       setIsUploadingPayment(false);
     }
