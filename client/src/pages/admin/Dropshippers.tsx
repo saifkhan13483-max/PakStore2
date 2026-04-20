@@ -196,11 +196,14 @@ export default function AdminDropshippers() {
   const [selectedApps, setSelectedApps] = useState<Set<string>>(new Set());
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
 
+  const getCurrentPeriod = () =>
+    new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
+
   const [paymentForm, setPaymentForm] = useState({
     dropshipperEmail: "",
     dropshipperName: "",
     amount: "",
-    period: "",
+    period: getCurrentPeriod(),
     notes: "",
   });
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
@@ -357,7 +360,7 @@ export default function AdminDropshippers() {
         createdAt: serverTimestamp(),
       });
       queryClient.invalidateQueries({ queryKey: ["/admin/dropshipper-payments"] });
-      setPaymentForm({ dropshipperEmail: "", dropshipperName: "", amount: "", period: "", notes: "" });
+      setPaymentForm({ dropshipperEmail: "", dropshipperName: "", amount: "", period: getCurrentPeriod(), notes: "" });
       setPaymentProofFile(null);
       setPaymentProofPreview("");
       if (paymentProofInputRef.current) paymentProofInputRef.current.value = "";
