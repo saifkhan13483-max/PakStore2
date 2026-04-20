@@ -354,9 +354,9 @@ export default function Products() {
                   <FileDown className="h-5 w-5 text-green-700 shrink-0 mt-0.5 sm:mt-0" />
                   <p className="text-sm text-green-800">
                     <strong>Dropshipper tip:</strong> Hover over any product card and click the{" "}
-                    <Download className="inline h-3.5 w-3.5" /> download icon to export that product's
-                    full details as a .txt file. Use <strong>"Export All (.txt)"</strong> above to
-                    download the entire catalog at once.
+                    <Download className="inline h-3.5 w-3.5" /> download icon to export the product's
+                    full details as a .txt file and download its photos, variant images, and video.
+                    Use <strong>"Export All (.txt)"</strong> above to download the entire catalog at once.
                   </p>
                 </div>
               )}
