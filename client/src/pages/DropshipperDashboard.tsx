@@ -163,9 +163,7 @@ export default function DropshipperDashboard() {
     setShowProductList(false);
     setOrderForm((prev) => ({
       ...prev,
-      salePrice: product.wholesalePrice
-        ? Math.round(product.wholesalePrice * 1.3)
-        : product.price,
+      salePrice: product.price + (product.profit || 0),
     }));
   }
 
@@ -184,7 +182,7 @@ export default function DropshipperDashboard() {
       });
       return;
     }
-    const wholesalePrice = selectedProduct.price;
+    const wholesalePrice = selectedProduct.price + (selectedProduct.profit || 0);
     const profit = (orderForm.salePrice - wholesalePrice) * orderForm.quantity;
 
     setIsSubmittingOrder(true);
@@ -720,7 +718,7 @@ export default function DropshipperDashboard() {
                       </p>
                       <p className="text-xs text-green-700 mt-0.5">
                         Product Price: Rs.{" "}
-                        {selectedProduct.price.toLocaleString()}
+                        {(selectedProduct.price + (selectedProduct.profit || 0)).toLocaleString()}
                       </p>
                     </div>
                     <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
@@ -805,7 +803,7 @@ export default function DropshipperDashboard() {
                     <Input
                       value={
                         selectedProduct
-                          ? selectedProduct.price
+                          ? selectedProduct.price + (selectedProduct.profit || 0)
                           : "—"
                       }
                       readOnly
@@ -858,7 +856,7 @@ export default function DropshipperDashboard() {
                       Rs.{" "}
                       {Math.max(
                         0,
-                        (orderForm.salePrice - selectedProduct.price) *
+                        (orderForm.salePrice - (selectedProduct.price + (selectedProduct.profit || 0))) *
                           orderForm.quantity
                       ).toLocaleString()}
                     </span>
