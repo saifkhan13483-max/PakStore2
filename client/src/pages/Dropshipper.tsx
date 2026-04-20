@@ -54,6 +54,10 @@ import {
   LayoutDashboard,
   MapPin,
   AlertCircle,
+  Rocket,
+  Phone,
+  Globe,
+  ShieldCheck,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 
@@ -847,19 +851,73 @@ export default function Dropshipper() {
       </section>
 
       {/* E-commerce Platform Promo */}
-      <section className="py-10 bg-amber-50 border-y border-amber-200">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <p className="text-amber-900 text-base leading-relaxed">
-            Interested in launching your own professional e-commerce platform like this one?{" "}
-            Get in touch with us at{" "}
-            <a
-              href="tel:+923188055850"
-              className="font-bold text-amber-700 hover:text-amber-900 underline underline-offset-2"
-            >
-              +92 318 8055850
-            </a>{" "}
-            to start your digital journey today.
-          </p>
+      <section className="py-14 bg-gradient-to-br from-amber-50 to-orange-50 border-y border-amber-200">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 mb-4">
+              <Rocket className="h-7 w-7 text-amber-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Want Your Own Online Store Like This?
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              We build complete, professional e-commerce websites for businesses in Pakistan —
+              fully set up and ready to sell from day one.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {[
+              {
+                icon: Globe,
+                title: "Your Own Website",
+                desc: "A professional online store with your brand name, logo, and products.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Fully Managed",
+                desc: "We handle design, setup, and technical work — you just focus on sales.",
+              },
+              {
+                icon: Phone,
+                title: "Full Support",
+                desc: "We guide you every step of the way, even if you have zero tech experience.",
+              },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-xl p-5 border border-amber-100 shadow-sm text-center">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-50 mb-3">
+                  <item.icon className="h-5 w-5 text-amber-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-4">
+              Ready to start? Just call or WhatsApp us — no technical knowledge needed.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="tel:+923188055850">
+                <Button
+                  size="lg"
+                  className="bg-amber-500 hover:bg-amber-600 text-white rounded-full px-8 font-semibold gap-2"
+                >
+                  <Phone className="h-4 w-4" /> Call +92 318 8055850
+                </Button>
+              </a>
+              <a href="https://wa.me/923188055850" target="_blank" rel="noopener noreferrer">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-amber-400 text-amber-700 hover:bg-amber-50 rounded-full px-8 gap-2"
+                >
+                  <SiWhatsapp className="h-4 w-4" /> WhatsApp Us
+                </Button>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
