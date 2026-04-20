@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap, Download, Package, ExternalLink } from "lucide-react";
+import { Minus, Plus, ShoppingCart, ChevronLeft, Star, Check, Loader2, Zap, Download, Package } from "lucide-react";
 import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
 import { MediaDownloadDialog } from "@/components/product/MediaDownloadDialog";
 import {
@@ -617,28 +617,6 @@ export default function ProductDetail() {
                 </Button>
               </div>
 
-              {/* Catalog Link */}
-              <div className="bg-white rounded-xl border border-green-100 p-4 flex flex-col gap-2 justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
-                    Full Catalog
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Browse all products and download in bulk from your catalog
-                  </p>
-                </div>
-                <Link href="/dropshipper/catalog">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-green-600 text-green-700 hover:bg-green-700 hover:text-white gap-2 w-full mt-1"
-                    data-testid="btn-dropshipper-catalog"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    View Catalog
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         </>
