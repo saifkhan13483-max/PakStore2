@@ -14,7 +14,7 @@
  */
 
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import {
   getFirestore,
   collection,
@@ -105,20 +105,31 @@ function buildReviewContent(
 // Main seeding routine
 // ---------------------------------------------------------------------------
 
-async function seedRandomComments(): Promise<void> {
-  console.log("Signing in anonymously to satisfy Firestore security rules...");
-  await signInAnonymously(auth);
-  console.log("Anonymous sign-in successful.");
+async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void> {
+  const SEED_EMAIL = "seedbot.pakstore@temp-seed.com";
+  const SEED_PASSWORD = "SeedBot#2026!";
 
-  console.log("Starting to seed realistic comments (Phase 4)...");
+  console.log("Authenticating seed bot account...");
+  try {
+    await signInWithEmailAndPassword(auth, SEED_EMAIL, SEED_PASSWORD);
+    console.log("Signed in to existing seed account.");
+  } catch {
+    await createUserWithEmailAndPassword(auth, SEED_EMAIL, SEED_PASSWORD);
+    console.log("Created and signed in to new seed account.");
+  }
+
+  console.log(`Starting to seed realistic comments (batch offset=${startOffset}, size=${batchSize})...`);
 
   const productsSnapshot = await getDocs(collection(db, "products"));
-  console.log(`Found ${productsSnapshot.size} products.`);
+  console.log(`Found ${productsSnapshot.size} products total.`);
+
+  const allDocs = productsSnapshot.docs.slice(startOffset, startOffset + batchSize);
+  console.log(`Processing ${allDocs.length} products (${startOffset + 1}–${startOffset + allDocs.length})...`);
 
   // Phase 4: one shared detector across the entire run
   const detector = new DuplicateDetector(3);
 
-  for (const productDoc of productsSnapshot.docs) {
+  for (const productDoc of allDocs) {
     const productId = productDoc.id;
     const data = productDoc.data();
     const productName: string = data.name ?? "this product";
@@ -280,7 +291,10 @@ async function seedRandomComments(): Promise<void> {
   console.log("\nSeeding complete (Phase 4 — smart intelligence active)!");
 }
 
-seedRandomComments().catch((err) => {
+const offset = parseInt(process.argv[2] ?? "0", 10) || 0;
+const batchSize = parseInt(process.argv[3] ?? "15", 10) || 15;
+
+seedRandomComments(offset, batchSize).catch((err) => {
   console.error("Fatal error:", err);
   process.exit(1);
 });
