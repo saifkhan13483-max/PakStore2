@@ -896,27 +896,16 @@ export default function Dropshipper() {
 
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-4">
-              Ready to start? Just call or WhatsApp us — no technical knowledge needed.
+              Ready to start? WhatsApp us — no technical knowledge needed.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="tel:+923188055850">
-                <Button
-                  size="lg"
-                  className="bg-amber-500 hover:bg-amber-600 text-white rounded-full px-8 font-semibold gap-2"
-                >
-                  <Phone className="h-4 w-4" /> Call +92 318 8055850
-                </Button>
-              </a>
-              <a href="https://wa.me/923188055850" target="_blank" rel="noopener noreferrer">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-amber-400 text-amber-700 hover:bg-amber-50 rounded-full px-8 gap-2"
-                >
-                  <SiWhatsapp className="h-4 w-4" /> WhatsApp Us
-                </Button>
-              </a>
-            </div>
+            <a href="https://wa.me/923188055850" target="_blank" rel="noopener noreferrer">
+              <Button
+                size="lg"
+                className="bg-amber-500 hover:bg-amber-600 text-white rounded-full px-8 font-semibold gap-2"
+              >
+                <SiWhatsapp className="h-4 w-4" /> WhatsApp Us — +92 318 8055850
+              </Button>
+            </a>
           </div>
         </div>
       </section>
