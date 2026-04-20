@@ -1,33 +1,19 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   collection,
   getDocs,
-  addDoc,
   query,
   where,
   orderBy,
-  serverTimestamp,
   limit,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuthStore } from "@/store/authStore";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   Table,
   TableBody,
@@ -43,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import SEO from "@/components/SEO";
 import {
   Package,
@@ -54,11 +39,9 @@ import {
   Truck,
   LogIn,
   LayoutDashboard,
-  ChevronRight,
   Calculator,
   BarChart3,
   Star,
-  Info,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 
@@ -70,18 +53,6 @@ interface DropshipperApplication {
   city?: string;
   platform: string;
   status: "pending" | "approved" | "rejected";
-}
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  wholesalePrice?: number;
-  images: string[];
-  inStock: boolean;
-  description: string;
-  slug: string;
-  category?: string;
 }
 
 interface DropshipperOrder {
@@ -99,21 +70,6 @@ interface DropshipperOrder {
   createdAt: any;
 }
 
-const orderSchema = z.object({
-  productId: z.string().min(1, "Please select a product"),
-  productName: z.string().min(1),
-  wholesalePrice: z.number(),
-  salePrice: z.number().min(1, "Enter the price you charged the customer"),
-  quantity: z.number().min(1, "Minimum 1").max(100),
-  customerName: z.string().min(2, "Enter customer name"),
-  customerPhone: z.string().min(10, "Enter customer phone number"),
-  customerCity: z.string().min(2, "Enter customer city"),
-  customerAddress: z.string().min(10, "Enter full delivery address"),
-  notes: z.string().optional(),
-});
-
-type OrderFormValues = z.infer<typeof orderSchema>;
-
 async function fetchApplication(email: string): Promise<DropshipperApplication | null> {
   const q = query(
     collection(db, "dropshipper_applications"),
@@ -123,16 +79,6 @@ async function fetchApplication(email: string): Promise<DropshipperApplication |
   const snap = await getDocs(q);
   if (snap.empty) return null;
   return { id: snap.docs[0].id, ...snap.docs[0].data() } as DropshipperApplication;
-}
-
-async function fetchProducts(): Promise<Product[]> {
-  const q = query(
-    collection(db, "products"),
-    where("active", "==", true),
-    where("inStock", "==", true)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
 }
 
 async function fetchMyOrders(email: string): Promise<DropshipperOrder[]> {
@@ -153,7 +99,7 @@ const orderStatusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
 };
 
-type Tab = "overview" | "place-order" | "my-orders" | "earnings";
+type Tab = "overview" | "my-orders" | "earnings";
 
 function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -169,10 +115,7 @@ function getMonthLabel(key: string) {
 
 export default function DropshipperDashboard() {
   const { user, isAuthenticated } = useAuthStore();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
 
   // Profit calculator state
@@ -186,69 +129,11 @@ export default function DropshipperDashboard() {
     enabled: !!user?.email,
   });
 
-  const { data: products = [] } = useQuery({
-    queryKey: ["dropshipper-products"],
-    queryFn: fetchProducts,
-    enabled: application?.status === "approved",
-  });
-
   const { data: myOrders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["my-dropshipper-orders", user?.email],
     queryFn: () => fetchMyOrders(user!.email!),
     enabled: application?.status === "approved" && !!user?.email,
   });
-
-  const form = useForm<OrderFormValues>({
-    resolver: zodResolver(orderSchema),
-    defaultValues: {
-      productId: "",
-      productName: "",
-      wholesalePrice: 0,
-      salePrice: 0,
-      quantity: 1,
-      customerName: "",
-      customerPhone: "",
-      customerCity: "",
-      customerAddress: "",
-      notes: "",
-    },
-  });
-
-  const placeOrder = useMutation({
-    mutationFn: async (values: OrderFormValues) => {
-      const profit = (values.salePrice - values.wholesalePrice) * values.quantity;
-      await addDoc(collection(db, "dropshipper_orders"), {
-        ...values,
-        profit,
-        dropshipperEmail: user?.email,
-        dropshipperName: application?.fullName || user?.displayName,
-        status: "pending",
-        createdAt: serverTimestamp(),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-dropshipper-orders"] });
-      form.reset();
-      setSelectedProduct(null);
-      setActiveTab("my-orders");
-      toast({
-        title: "Order placed successfully!",
-        description: "We will process and ship it soon.",
-      });
-    },
-    onError: () => {
-      toast({ title: "Failed to place order", variant: "destructive" });
-    },
-  });
-
-  const handleSelectProduct = (product: Product) => {
-    setSelectedProduct(product);
-    form.setValue("productId", product.id);
-    form.setValue("productName", product.name);
-    form.setValue("wholesalePrice", product.wholesalePrice ?? Math.round(product.price * 0.75));
-    form.setValue("salePrice", product.price);
-    setActiveTab("place-order");
-  };
 
   const filteredOrders =
     orderStatusFilter === "all"
@@ -405,7 +290,6 @@ export default function DropshipperDashboard() {
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "place-order", label: "Place Order", icon: ShoppingCart },
     { id: "my-orders", label: "My Orders", icon: Truck },
     { id: "earnings", label: "Earnings", icon: BarChart3 },
   ];
@@ -609,23 +493,6 @@ export default function DropshipperDashboard() {
               </ol>
             </div>
 
-            {/* Quick actions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => setActiveTab("place-order")}
-                className="flex items-center justify-between bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow text-left"
-                data-testid="btn-go-place-order"
-              >
-                <div>
-                  <p className="font-semibold text-gray-900">Place a New Order</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Got a customer? Submit their order here.
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
-
             {/* Contact */}
             <div className="bg-white border rounded-xl p-5 shadow-sm flex items-start gap-4">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
@@ -650,246 +517,6 @@ export default function DropshipperDashboard() {
           </div>
         )}
 
-        {/* ── PLACE ORDER TAB ── */}
-        {activeTab === "place-order" && (
-          <div className="max-w-xl">
-            <div className="bg-white border rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">
-                Place a Customer Order
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Fill in your customer's details. We will ship the product directly to them.
-              </p>
-
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit((values) => placeOrder.mutate(values))}
-                  className="space-y-4"
-                  data-testid="form-place-order"
-                >
-                  {/* Product selector */}
-                  <div className="bg-green-50 border border-green-100 rounded-lg p-3 mb-2">
-                    <p className="text-xs text-green-700 font-medium mb-2">
-                      Selected Product
-                    </p>
-                    {selectedProduct ? (
-                      <div className="flex items-center gap-3">
-                        {selectedProduct.images?.[0] && (
-                          <img
-                            src={selectedProduct.images[0]}
-                            className="w-10 h-10 rounded object-cover"
-                            alt={selectedProduct.name}
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {selectedProduct.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Wholesale: Rs.{" "}
-                            {(
-                              selectedProduct.wholesalePrice ??
-                              Math.round(selectedProduct.price * 0.75)
-                            ).toLocaleString()}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className="text-xs text-green-700 hover:underline"
-                          onClick={() => setActiveTab("catalog")}
-                        >
-                          Change
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        className="text-sm text-green-700 hover:underline"
-                        onClick={() => setActiveTab("catalog")}
-                      >
-                        ← Go to Product Catalog to select a product
-                      </button>
-                    )}
-                  </div>
-
-                  {selectedProduct && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="salePrice"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Your Sale Price (Rs.) *</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  placeholder="Price you charged customer"
-                                  data-testid="input-sale-price"
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="quantity"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Quantity *</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  data-testid="input-quantity"
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      {/* Profit preview */}
-                      {form.watch("salePrice") > 0 && (
-                        <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="text-green-700">Your estimated profit:</span>
-                            <span className="font-bold text-green-800">
-                              Rs.{" "}
-                              {Math.max(
-                                0,
-                                (form.watch("salePrice") -
-                                  (selectedProduct.wholesalePrice ??
-                                    Math.round(selectedProduct.price * 0.75))) *
-                                  form.watch("quantity")
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="border-t pt-4">
-                        <p className="text-sm font-semibold text-gray-700 mb-3">
-                          Customer Details
-                        </p>
-                        <div className="space-y-3">
-                          <FormField
-                            control={form.control}
-                            name="customerName"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Customer Full Name *</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Muhammad Ali"
-                                    data-testid="input-customer-name"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="customerPhone"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Customer Phone *</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="+92 3XX XXXXXXX"
-                                    data-testid="input-customer-phone"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="customerCity"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Customer City *</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Karachi, Lahore, Islamabad..."
-                                    data-testid="input-customer-city"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="customerAddress"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Delivery Address *</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="House #, Street, Area"
-                                    rows={2}
-                                    className="resize-none"
-                                    data-testid="input-customer-address"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="notes"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Order Notes (Optional)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Any special instructions..."
-                                    data-testid="input-notes"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-xs text-blue-800">
-                        <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                        Once placed, we will process and ship within 1-2 business days.
-                      </div>
-
-                      <Button
-                        type="submit"
-                        className="w-full h-11 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full"
-                        disabled={placeOrder.isPending}
-                        data-testid="button-submit-order"
-                      >
-                        {placeOrder.isPending ? "Placing Order..." : "Place Order"}
-                      </Button>
-                    </>
-                  )}
-                </form>
-              </Form>
-            </div>
-          </div>
-        )}
-
         {/* ── MY ORDERS TAB ── */}
         {activeTab === "my-orders" && (
           <div className="space-y-4">
@@ -910,14 +537,6 @@ export default function DropshipperDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button
-                size="sm"
-                className="bg-green-700 hover:bg-green-800 text-white rounded-full"
-                onClick={() => setActiveTab("place-order")}
-                data-testid="button-new-order"
-              >
-                + New Order
-              </Button>
             </div>
 
             {ordersLoading ? (
@@ -928,12 +547,6 @@ export default function DropshipperDashboard() {
               <div className="flex flex-col items-center justify-center py-16 gap-4">
                 <ShoppingCart className="h-12 w-12 text-gray-300" />
                 <p className="text-muted-foreground">No orders yet.</p>
-                <Button
-                  className="bg-green-700 hover:bg-green-800 text-white rounded-full"
-                  onClick={() => setActiveTab("place-order")}
-                >
-                  Place Your First Order
-                </Button>
               </div>
             ) : (
               <>
