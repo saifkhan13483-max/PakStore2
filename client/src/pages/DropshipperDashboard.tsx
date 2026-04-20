@@ -536,7 +536,7 @@ export default function DropshipperDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
                 <div>
                   <label className="text-xs font-medium text-gray-600 block mb-1">
-                    Wholesale Price (Rs.)
+                    Product Price (Rs.)
                   </label>
                   <Input
                     type="number"
@@ -692,8 +692,8 @@ export default function DropshipperDashboard() {
                                 {product.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                Wholesale: Rs.{" "}
-                                {(product.wholesalePrice ?? product.price).toLocaleString()}
+                                Product Price: Rs.{" "}
+                                {(product.price + (product.profit || 0)).toLocaleString()}
                               </p>
                             </div>
                           </button>
