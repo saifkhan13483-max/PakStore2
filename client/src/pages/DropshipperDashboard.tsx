@@ -49,18 +49,15 @@ import {
   Package,
   ShoppingCart,
   TrendingUp,
-  Copy,
   CheckCircle2,
   Clock,
   Truck,
   LogIn,
   LayoutDashboard,
-  Search,
   ChevronRight,
   Calculator,
   BarChart3,
   Star,
-  ExternalLink,
   Info,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
@@ -156,7 +153,7 @@ const orderStatusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
 };
 
-type Tab = "overview" | "catalog" | "place-order" | "my-orders" | "earnings";
+type Tab = "overview" | "place-order" | "my-orders" | "earnings";
 
 function getMonthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -175,10 +172,7 @@ export default function DropshipperDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
 
   // Profit calculator state
@@ -192,7 +186,7 @@ export default function DropshipperDashboard() {
     enabled: !!user?.email,
   });
 
-  const { data: products = [], isLoading: productsLoading } = useQuery({
+  const { data: products = [] } = useQuery({
     queryKey: ["dropshipper-products"],
     queryFn: fetchProducts,
     enabled: application?.status === "approved",
@@ -255,20 +249,6 @@ export default function DropshipperDashboard() {
     form.setValue("salePrice", product.price);
     setActiveTab("place-order");
   };
-
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const categories = ["all", ...Array.from(new Set(products.map((p) => p.category).filter(Boolean))) as string[]];
-
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
 
   const filteredOrders =
     orderStatusFilter === "all"
@@ -425,7 +405,6 @@ export default function DropshipperDashboard() {
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "catalog", label: "Product Catalog", icon: Package },
     { id: "place-order", label: "Place Order", icon: ShoppingCart },
     { id: "my-orders", label: "My Orders", icon: Truck },
     { id: "earnings", label: "Earnings", icon: BarChart3 },
@@ -633,19 +612,6 @@ export default function DropshipperDashboard() {
             {/* Quick actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
-                onClick={() => setActiveTab("catalog")}
-                className="flex items-center justify-between bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow text-left"
-                data-testid="btn-go-catalog"
-              >
-                <div>
-                  <p className="font-semibold text-gray-900">Browse Product Catalog</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {products.length} products available to dropship
-                  </p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-              <button
                 onClick={() => setActiveTab("place-order")}
                 className="flex items-center justify-between bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow text-left"
                 data-testid="btn-go-place-order"
@@ -681,159 +647,6 @@ export default function DropshipperDashboard() {
                 </p>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* ── PRODUCT CATALOG TAB ── */}
-        {activeTab === "catalog" && (
-          <div className="space-y-5">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[200px] max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search products..."
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  data-testid="input-catalog-search"
-                />
-              </div>
-              {categories.length > 1 && (
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-40" data-testid="select-category-filter">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c} value={c} className="capitalize">
-                        {c === "all" ? "All Categories" : c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              <span className="text-sm text-muted-foreground">
-                {filteredProducts.length} products
-              </span>
-            </div>
-
-            {productsLoading ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Loading products...
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No products found.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredProducts.map((product) => {
-                  const wholesale =
-                    product.wholesalePrice ?? Math.round(product.price * 0.75);
-                  const profit = product.price - wholesale;
-                  const marginPct = Math.round((profit / product.price) * 100);
-                  return (
-                    <div
-                      key={product.id}
-                      className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-                      data-testid={`card-product-${product.id}`}
-                    >
-                      <div className="relative">
-                        {product.images?.[0] && (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="w-full h-48 object-cover"
-                          />
-                        )}
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            {marginPct}% margin
-                          </span>
-                        </div>
-                        {product.images?.[0] && (
-                          <a
-                            href={product.images[0]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="absolute bottom-2 right-2 bg-white/80 hover:bg-white text-gray-700 rounded-md p-1.5 shadow-sm"
-                            title="View Full Image"
-                            data-testid={`btn-view-image-${product.id}`}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
-                        )}
-                      </div>
-                      <div className="p-4 space-y-3">
-                        {product.category && (
-                          <span className="text-[10px] uppercase tracking-wide font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
-                            {product.category}
-                          </span>
-                        )}
-                        <h3 className="font-semibold text-gray-900 text-sm leading-snug">
-                          {product.name}
-                        </h3>
-
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-gray-50 rounded-lg p-2">
-                            <p className="text-xs text-muted-foreground">Wholesale</p>
-                            <p className="font-bold text-gray-900 text-sm">
-                              Rs. {wholesale.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-2">
-                            <p className="text-xs text-muted-foreground">Retail</p>
-                            <p className="font-bold text-gray-900 text-sm">
-                              Rs. {product.price.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-2">
-                            <p className="text-xs text-green-700">Profit</p>
-                            <p className="font-bold text-green-700 text-sm">
-                              Rs. {profit.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 text-xs h-8"
-                            onClick={() =>
-                              handleCopy(
-                                `${product.name}\n\nPrice: Rs. ${product.price.toLocaleString()}\n\n${product.description}`,
-                                product.id
-                              )
-                            }
-                            data-testid={`button-copy-${product.id}`}
-                          >
-                            {copiedId === product.id ? (
-                              <>
-                                <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-green-600" />{" "}
-                                Copied!
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="h-3.5 w-3.5 mr-1" /> Copy Details
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="flex-1 text-xs h-8 bg-green-700 hover:bg-green-800 text-white"
-                            onClick={() => handleSelectProduct(product)}
-                            data-testid={`button-order-${product.id}`}
-                          >
-                            <ShoppingCart className="h-3.5 w-3.5 mr-1" /> Order
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         )}
 
