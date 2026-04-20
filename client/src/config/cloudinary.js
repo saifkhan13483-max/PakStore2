@@ -27,6 +27,20 @@ if (!uploadPresetA && !legacyUploadPreset) {
   console.warn('Cloudinary Upload Preset (Account A or legacy) is not configured. Media uploads will fail.');
 }
 
+// Named exports matching cloudinary.ts for compatibility with uploadImage.ts
+export const CLOUDINARY_A = {
+  cloudName: cloudNameA || legacyCloudName,
+  uploadPreset: uploadPresetA || legacyUploadPreset,
+};
+
+export const CLOUDINARY_B = {
+  cloudName: cloudNameB,
+  uploadPreset: uploadPresetB,
+};
+
+export const getUploadUrl = (cloudName) =>
+  `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
 // Export primary and fallback accounts
 export const cloudinaryConfig = {
   // Primary account (A) or fallback to legacy
