@@ -50,6 +50,7 @@ import {
   Banknote,
   ImageIcon,
   ExternalLink,
+  Gift,
 } from "lucide-react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import type { Product } from "@shared/schema";
@@ -558,6 +559,17 @@ export default function DropshipperDashboard() {
                 >
                   <BarChart3 className="h-4 w-4 mr-2" /> Earnings
                 </Button>
+              </div>
+            </div>
+
+            {/* Profit sharing notice */}
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <Gift className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Bonus Profit Sharing</p>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  In addition to your own earnings, PakCart also shares a portion of our profit with you. You earn not just from your sales — we give you a share of our profit too!
+                </p>
               </div>
             </div>
 
