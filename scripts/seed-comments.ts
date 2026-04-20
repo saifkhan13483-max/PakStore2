@@ -68,13 +68,8 @@ const db = getFirestore(app);
 // Phase 4: nudge rating toward real average (graceful coexistence)
 // ---------------------------------------------------------------------------
 
-function nudgeRating(raw: number, realAvg: number): number {
-  if (realAvg < 3.5 && raw === 5 && Math.random() < 0.6) {
-    return Math.max(2, Math.round(realAvg) + (Math.random() < 0.5 ? 0 : 1));
-  }
-  if (realAvg > 4.2 && raw <= 2 && Math.random() < 0.7) {
-    return 3;
-  }
+function nudgeRating(raw: number, _realAvg: number): number {
+  // Keep all seeded ratings positive — no downward nudging
   return raw;
 }
 

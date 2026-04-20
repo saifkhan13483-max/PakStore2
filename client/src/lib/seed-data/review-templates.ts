@@ -50,16 +50,13 @@ export function detectCategory(product: SeedProduct): ProductCategory {
 // ---------------------------------------------------------------------------
 
 /**
- * Picks a star rating using a realistic weighted distribution:
- * 5★ 45% | 4★ 30% | 3★ 15% | 2★ 8% | 1★ 2%
+ * Picks a star rating using a very positive weighted distribution:
+ * 5★ 75% | 4★ 25%
  */
 export function getRealisticRating(): number {
   const roll = Math.random() * 100;
-  if (roll < 45) return 5;
-  if (roll < 75) return 4;
-  if (roll < 90) return 3;
-  if (roll < 98) return 2;
-  return 1;
+  if (roll < 75) return 5;
+  return 4;
 }
 
 // ---------------------------------------------------------------------------
