@@ -31,11 +31,40 @@ const checkoutInfoSchema = z.object({
 type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
 
 const PAKISTANI_CITIES = [
-  "Karachi", "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", 
-  "Peshawar", "Multan", "Hyderabad", "Islamabad", "Quetta",
-  "Sargodha", "Sialkot", "Bahawalpur", "Sukkur", "Jhang",
-  "Sheikhupura", "Larkana", "Gujrat", "Mardan", "Kasur",
-  "Rahim Yar Khan", "Sahiwal", "Okara", "Wah Cantonment", "Dera Ghazi Khan"
+  // Punjab
+  "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", "Multan",
+  "Sialkot", "Bahawalpur", "Sargodha", "Sheikhupura", "Jhang",
+  "Rahim Yar Khan", "Gujrat", "Kasur", "Okara", "Sahiwal",
+  "Wazirabad", "Mandi Bahauddin", "Narowal", "Pakpattan", "Mianwali",
+  "Bahawalnagar", "Toba Tek Singh", "Khanewal", "Muzaffargarh", "Vehari",
+  "Lodhran", "Layyah", "Dera Ghazi Khan", "Bhakkar", "Hafizabad",
+  "Attock", "Chakwal", "Jhelum", "Khushab", "Chiniot",
+  "Nankana Sahib", "Rajanpur", "Wah Cantonment",
+  // Sindh
+  "Karachi", "Hyderabad", "Sukkur", "Larkana", "Mirpur Khas",
+  "Nawabshah", "Jacobabad", "Shikarpur", "Khairpur", "Dadu",
+  "Thatta", "Badin", "Tando Adam", "Tando Allahyar", "Umerkot",
+  "Kashmore", "Kandhkot", "Sanghar", "Matiari", "Jamshoro",
+  "Ghotki", "Qambar Shahdadkot",
+  // Khyber Pakhtunkhwa
+  "Peshawar", "Mardan", "Mingora", "Abbottabad", "Mansehra",
+  "Kohat", "Nowshera", "Charsadda", "Dera Ismail Khan", "Bannu",
+  "Haripur", "Swabi", "Hangu", "Karak", "Lakki Marwat",
+  "Tank", "Chitral", "Malakand", "Timergara", "Saidu Sharif",
+  "Batkhela", "Buner",
+  // Balochistan
+  "Quetta", "Turbat", "Khuzdar", "Chaman", "Gwadar",
+  "Hub", "Sibi", "Zhob", "Loralai", "Dalbandin",
+  "Dera Allah Yar", "Kharan", "Mastung", "Kalat", "Panjgur",
+  "Nushki", "Bela", "Dera Murad Jamali",
+  // Islamabad Capital Territory
+  "Islamabad",
+  // Azad Kashmir
+  "Muzaffarabad", "Mirpur", "Rawalakot", "Bagh", "Kotli",
+  "Pallandri", "Bhimber",
+  // Gilgit-Baltistan
+  "Gilgit", "Skardu", "Hunza", "Chilas", "Ghanche",
+  "Other",
 ].sort();
 
 export default function Checkout() {
