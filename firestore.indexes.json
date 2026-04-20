@@ -33,6 +33,20 @@
   ],
   "indexes": [
     {
+      "collectionGroup": "dropshipper_payments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "dropshipperEmail",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "hero_slides",
       "queryScope": "COLLECTION",
       "fields": [

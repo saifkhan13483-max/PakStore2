@@ -116,11 +116,15 @@ async function fetchMyOrders(email: string): Promise<DropshipperOrder[]> {
 async function fetchMyPayments(email: string): Promise<PaymentRecord[]> {
   const q = query(
     collection(db, "dropshipper_payments"),
-    where("dropshipperEmail", "==", email),
-    orderBy("createdAt", "desc")
+    where("dropshipperEmail", "==", email)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord));
+  const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PaymentRecord));
+  return docs.sort((a, b) => {
+    const aTime = (a.createdAt as any)?.seconds ?? 0;
+    const bTime = (b.createdAt as any)?.seconds ?? 0;
+    return bTime - aTime;
+  });
 }
 
 const orderStatusConfig: Record<string, { label: string; color: string }> = {
