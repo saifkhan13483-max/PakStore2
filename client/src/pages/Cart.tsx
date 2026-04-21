@@ -162,40 +162,33 @@ export default function Cart() {
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2 gap-2">
+                        <div className="flex items-center justify-between mt-2">
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center border rounded-lg h-9 sm:h-8 bg-background">
+                            <div className="flex items-center border rounded h-7 px-1 bg-background">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-9 w-9 sm:h-8 sm:w-8 rounded-r-none no-default-hover-elevate active:bg-muted"
+                                className="h-5 w-5 no-default-hover-elevate"
                                 onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                                 disabled={item.quantity <= 1}
-                                aria-label="Decrease quantity"
                                 data-testid={`button-decrease-qty-${item.productId}`}
                               >
-                                <Minus className="w-4 h-4 sm:w-3 sm:h-3" />
+                                <Minus className="w-2.5 h-2.5" />
                               </Button>
-                              <span
-                                className="w-9 sm:w-8 text-center font-semibold text-sm sm:text-xs select-none"
-                                data-testid={`text-qty-${item.productId}`}
-                              >
-                                {item.quantity}
-                              </span>
+                              <span className="w-8 text-center font-medium text-xs" data-testid={`text-qty-${item.productId}`}>{item.quantity}</span>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-9 w-9 sm:h-8 sm:w-8 rounded-l-none no-default-hover-elevate active:bg-muted"
+                                className="h-5 w-5 no-default-hover-elevate"
                                 onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-                                aria-label="Increase quantity"
                                 data-testid={`button-increase-qty-${item.productId}`}
                               >
-                                <Plus className="w-4 h-4 sm:w-3 sm:h-3" />
+                                <Plus className="w-2.5 h-2.5" />
                               </Button>
                             </div>
                             {item.quantity >= 10 && (
-                              <p className="text-[10px] sm:text-[9px] text-destructive flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" />
+                              <p className="text-[9px] text-destructive flex items-center gap-1">
+                                <AlertCircle className="w-2.5 h-2.5" />
                                 Max stock
                               </p>
                             )}
@@ -204,12 +197,11 @@ export default function Cart() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive active:bg-red-50 active:text-destructive no-default-hover-elevate shrink-0"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive no-default-hover-elevate"
                             onClick={() => setItemToRemove(item.productId)}
-                            aria-label="Remove item from cart"
                             data-testid={`button-remove-item-${item.productId}`}
                           >
-                            <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       </div>
