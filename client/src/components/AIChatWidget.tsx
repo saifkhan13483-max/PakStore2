@@ -16,13 +16,6 @@ const WELCOME_MESSAGE: Message = {
     "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez chahiye ho, batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
 };
 
-const QUICK_REPLIES = [
-  "Naya kia aaya hai?",
-  "Gift suggest karein",
-  "Order kaise track karoon?",
-  "Khussa size guide",
-];
-
 function renderMessageContent(text: string) {
   const pattern =
     /(https?:\/\/[^\s)]+|(?:^|\s)pakcart\.store(?:\/[^\s)]*)?|(?:^|\s)\/[a-z][a-z0-9\-/]*|\b0\d{10}\b)/gi;
@@ -1017,10 +1010,6 @@ export default function AIChatWidget() {
     }
   };
 
-  const showQuickReplies = useMemo(
-    () => messages.length === 1 && messages[0].role === "assistant" && !isLoading,
-    [messages, isLoading]
-  );
 
   const chatPanel = (
     <div
@@ -1130,21 +1119,6 @@ export default function AIChatWidget() {
             </div>
           </div>
         ))}
-
-        {showQuickReplies && (
-          <div className="flex flex-wrap gap-2 pt-1 pl-9">
-            {QUICK_REPLIES.map((q) => (
-              <button
-                key={q}
-                data-testid={`button-quick-reply-${q}`}
-                onClick={() => sendMessage(q)}
-                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-foreground hover:border-[hsl(168,58%,32%)] hover:text-[hsl(168,58%,32%)] transition-colors shadow-sm"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        )}
 
         {isLoading && (
           <div className="flex gap-2 justify-start">
