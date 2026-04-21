@@ -44,6 +44,8 @@ export default function Home() {
   };
 
   const [showMoreNewArrivals, setShowMoreNewArrivals] = useState(false);
+  const [showMoreFeatured, setShowMoreFeatured] = useState(false);
+  const [showMoreLiked, setShowMoreLiked] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const toggleCategoryExpansion = (categoryId: string) => {
