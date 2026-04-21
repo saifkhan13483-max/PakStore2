@@ -487,7 +487,14 @@ export default function Home() {
         </section>
 
         {/* Per-Category Sections */}
-        {categories.map((category, catIndex) => {
+        {(() => {
+          const preferredOrder = ["watches", "bags & wallets", "bags and wallets", "bags", "jewelry", "stitched dresses"];
+          const orderIndex = (name: string) => {
+            const idx = preferredOrder.indexOf(name.toLowerCase().trim());
+            return idx === -1 ? preferredOrder.length : idx;
+          };
+          return [...categories].sort((a, b) => orderIndex(a.name) - orderIndex(b.name));
+        })().map((category, catIndex) => {
           const categoryProducts = allProducts?.filter(p => p.categoryId === category.id) || [];
           if (categoryProducts.length === 0 && !isAllProductsLoading) return null;
           const visibleProducts = categoryProducts.slice(0, 10);
