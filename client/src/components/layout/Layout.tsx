@@ -3,6 +3,7 @@ import Header from './Header';
 import Footer from './Footer';
 import AnnouncementBanner from './AnnouncementBanner';
 import AnnouncementPopup from './AnnouncementPopup';
+import AdvertPopup from './AdvertPopup';
 import MobileBottomNav from './MobileBottomNav';
 import AIChatWidget from '@/components/AIChatWidget';
 
@@ -20,6 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Footer />
       </div>
       <AnnouncementPopup />
+      <AdvertPopup />
       <MobileBottomNav />
       <AIChatWidget />
     </div>
