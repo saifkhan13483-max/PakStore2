@@ -1,9 +1,68 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, Loader2, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { MessageCircle, X, Send, Bot, ChevronDown, RotateCcw, AlertCircle } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  error?: boolean;
+}
+
+const STORAGE_KEY = "pakbot_chat_history_v1";
+const MAX_STORED_MESSAGES = 40;
+
+const WELCOME_MESSAGE: Message = {
+  role: "assistant",
+  content:
+    "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez chahiye ho, batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
+};
+
+const QUICK_REPLIES = [
+  "Naya kia aaya hai?",
+  "Gift suggest karein",
+  "Order kaise track karoon?",
+  "Khussa size guide",
+];
+
+function renderMessageContent(text: string) {
+  const pattern =
+    /(https?:\/\/[^\s)]+|(?:^|\s)pakcart\.store(?:\/[^\s)]*)?|(?:^|\s)\/[a-z][a-z0-9\-/]*|\b0\d{10}\b)/gi;
+  const parts: Array<string | { kind: "link"; text: string; href: string }> = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    const raw = match[0];
+    const leadingWs = raw.match(/^\s+/)?.[0] ?? "";
+    const token = raw.slice(leadingWs.length);
+    const start = match.index + leadingWs.length;
+    if (start > lastIndex) parts.push(text.slice(lastIndex, start));
+
+    let href = "";
+    if (/^https?:\/\//i.test(token)) href = token;
+    else if (/^pakcart\.store/i.test(token)) href = "https://" + token;
+    else if (token.startsWith("/")) href = token;
+    else if (/^0\d{10}$/.test(token)) href = "https://wa.me/92" + token.slice(1);
+
+    if (href) parts.push({ kind: "link", text: token, href });
+    else parts.push(token);
+    lastIndex = start + token.length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+
+  return parts.map((p, i) => {
+    if (typeof p === "string") return <span key={i}>{p}</span>;
+    const isInternal = p.href.startsWith("/");
+    return (
+      <a
+        key={i}
+        href={p.href}
+        target={isInternal ? undefined : "_blank"}
+        rel={isInternal ? undefined : "noopener noreferrer"}
+        className="underline underline-offset-2 font-medium hover:opacity-80"
+      >
+        {p.text}
+      </a>
+    );
+  });
 }
 
 const SYSTEM_PROMPT = `You are PakBot — the personal shopping guide for PakCart, a premium Pakistani e-commerce store. You're not a bot reading from a script. You're that one person in someone's contact list who actually knows Pakistani craftsmanship, can tell real Pashmina from a fake in two sentences, and gives a straight answer without a sales pitch attached.
@@ -811,17 +870,23 @@ Stay warm. Stay specific. Stay real. Sound like a person.`;
 
 export default function AIChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez chahiye ho, batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [WELCOME_MESSAGE];
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [WELCOME_MESSAGE];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -829,21 +894,65 @@ export default function AIChatWidget() {
       inputRef.current?.focus();
       setHasUnread(false);
     }
-  }, [isOpen, messages]);
+  }, [isOpen, messages, isLoading]);
+
+  // Persist chat history (capped)
+  useEffect(() => {
+    try {
+      const toStore = messages.slice(-MAX_STORED_MESSAGES);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    } catch {}
+  }, [messages]);
+
+  // Lock body scroll on mobile when chat is open (full-screen panel)
+  useEffect(() => {
+    if (!isOpen) return;
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    if (!isMobile) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
+  // Auto-grow textarea
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }, [input]);
+
+  // Escape closes chat
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
     const userMessage: Message = { role: "user", content: trimmed };
-    const updatedMessages = [...messages, userMessage];
+    // Drop any prior error placeholder before sending again
+    const baseMessages = messages.filter((m) => !m.error);
+    const updatedMessages = [...baseMessages, userMessage];
     setMessages(updatedMessages);
     setInput("");
     setIsLoading(true);
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      // Skip the first message (hardcoded welcome) — only send real conversation to the AI
-      const conversationHistory = updatedMessages.slice(1);
+      const conversationHistory = updatedMessages
+        .slice(1)
+        .map(({ role, content }) => ({ role, content }));
       const apiMessages = [
         { role: "system", content: SYSTEM_PROMPT },
         ...conversationHistory,
@@ -853,37 +962,65 @@ export default function AIChatWidget() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages }),
+        signal: controller.signal,
       });
 
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
+      const reply = data?.choices?.[0]?.message?.content;
+      if (!reply) throw new Error("Invalid response");
 
-      if (data.choices?.[0]?.message?.content) {
-        setMessages([
-          ...updatedMessages,
-          { role: "assistant", content: data.choices[0].message.content },
-        ]);
-      } else {
-        throw new Error("Invalid response");
+      setMessages([...updatedMessages, { role: "assistant", content: reply }]);
+    } catch (err: any) {
+      if (err?.name === "AbortError") {
+        setIsLoading(false);
+        return;
       }
-    } catch {
       setMessages([
         ...updatedMessages,
         {
           role: "assistant",
-          content: "Abhi connection mein thori mushkil aa rahi hai — lekin aap seedha Saif Khan sahab ko WhatsApp message kar sakte hain:\n\n📱 03188055850\n(Sirf message — call nahi)\n\nThori der baad dobara try karna bhi ho sakta hai.",
+          error: true,
+          content:
+            "Abhi connection mein thori mushkil aa rahi hai. Niche 'Try again' dabaiye — ya seedha Saif Khan sahab ko WhatsApp message karein: 03188055850 (sirf message, call nahi).",
         },
       ]);
     } finally {
+      abortRef.current = null;
       setIsLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const retryLastMessage = () => {
+    // Find the last user message and resend it
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUser) {
+      // Remove the error message, then resend
+      setMessages((m) => m.filter((x) => !x.error));
+      sendMessage(lastUser.content);
+    }
+  };
+
+  const resetChat = () => {
+    if (isLoading) abortRef.current?.abort();
+    setMessages([WELCOME_MESSAGE]);
+    setInput("");
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
     }
   };
+
+  const showQuickReplies = useMemo(
+    () => messages.length === 1 && messages[0].role === "assistant" && !isLoading,
+    [messages, isLoading]
+  );
 
   const chatPanel = (
     <div
@@ -916,18 +1053,32 @@ export default function AIChatWidget() {
             </p>
           </div>
         </div>
-        <button
-          data-testid="button-close-chat"
-          onClick={() => setIsOpen(false)}
-          aria-label="Close chat"
-          className="p-2 -mr-2 rounded-full hover:bg-white/20 active:bg-white/30 transition-colors shrink-0"
-        >
-          <ChevronDown size={20} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            data-testid="button-reset-chat"
+            onClick={resetChat}
+            aria-label="Start a new chat"
+            title="Start a new chat"
+            className="p-2 rounded-full hover:bg-white/20 active:bg-white/30 transition-colors"
+          >
+            <RotateCcw size={16} />
+          </button>
+          <button
+            data-testid="button-close-chat"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close chat"
+            className="p-2 -mr-2 rounded-full hover:bg-white/20 active:bg-white/30 transition-colors"
+          >
+            <ChevronDown size={20} />
+          </button>
+        </div>
       </div>
 
       <div
         className="flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 py-3 space-y-3 scroll-smooth min-h-0 bg-gray-50/50 dark:bg-gray-900"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
       >
         {messages.map((msg, i) => (
           <div
@@ -936,29 +1087,64 @@ export default function AIChatWidget() {
           >
             {msg.role === "assistant" && (
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"
-                style={{ background: "hsl(168 58% 32%)" }}
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm ${
+                  msg.error ? "bg-red-500" : ""
+                }`}
+                style={!msg.error ? { background: "hsl(168 58% 32%)" } : undefined}
               >
-                <Bot size={13} className="text-white" />
+                {msg.error ? (
+                  <AlertCircle size={14} className="text-white" />
+                ) : (
+                  <Bot size={13} className="text-white" />
+                )}
               </div>
             )}
-            <div
-              data-testid={`message-${msg.role}-${i}`}
-              className={`max-w-[85%] sm:max-w-[80%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm ${
-                msg.role === "user"
-                  ? "text-white rounded-tr-sm"
-                  : "bg-white dark:bg-gray-800 text-foreground rounded-tl-sm border border-gray-100 dark:border-gray-700"
-              }`}
-              style={
-                msg.role === "user"
-                  ? { background: "hsl(168 58% 32%)" }
-                  : {}
-              }
-            >
-              {msg.content}
+            <div className="flex flex-col gap-1.5 max-w-[85%] sm:max-w-[80%]">
+              <div
+                data-testid={`message-${msg.role}-${i}`}
+                className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm break-words ${
+                  msg.role === "user"
+                    ? "text-white rounded-tr-sm"
+                    : msg.error
+                      ? "bg-red-50 dark:bg-red-950/30 text-red-900 dark:text-red-100 rounded-tl-sm border border-red-200 dark:border-red-900"
+                      : "bg-white dark:bg-gray-800 text-foreground rounded-tl-sm border border-gray-100 dark:border-gray-700"
+                }`}
+                style={
+                  msg.role === "user"
+                    ? { background: "hsl(168 58% 32%)" }
+                    : {}
+                }
+              >
+                {renderMessageContent(msg.content)}
+              </div>
+              {msg.error && (
+                <button
+                  data-testid="button-retry-message"
+                  onClick={retryLastMessage}
+                  disabled={isLoading}
+                  className="self-start text-xs font-medium text-[hsl(168,58%,32%)] hover:underline disabled:opacity-50"
+                >
+                  ↻ Try again
+                </button>
+              )}
             </div>
           </div>
         ))}
+
+        {showQuickReplies && (
+          <div className="flex flex-wrap gap-2 pt-1 pl-9">
+            {QUICK_REPLIES.map((q) => (
+              <button
+                key={q}
+                data-testid={`button-quick-reply-${q}`}
+                onClick={() => sendMessage(q)}
+                className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-foreground hover:border-[hsl(168,58%,32%)] hover:text-[hsl(168,58%,32%)] transition-colors shadow-sm"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
 
         {isLoading && (
           <div className="flex gap-2 justify-start">
@@ -984,28 +1170,28 @@ export default function AIChatWidget() {
         className="px-3 pt-2 border-t border-border flex-shrink-0 bg-white dark:bg-gray-900"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="flex items-center gap-2 bg-muted rounded-2xl pl-4 pr-1.5 py-1.5 focus-within:ring-2 focus-within:ring-[hsl(168,58%,32%)]/30 transition-shadow">
-          <input
+        <div className="flex items-end gap-2 bg-muted rounded-2xl pl-4 pr-1.5 py-1.5 focus-within:ring-2 focus-within:ring-[hsl(168,58%,32%)]/30 transition-shadow">
+          <textarea
             ref={inputRef}
             data-testid="input-chat-message"
-            type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything…"
             disabled={isLoading}
+            rows={1}
             enterKeyHint="send"
             autoComplete="off"
             autoCorrect="on"
             /* text-base (16px) prevents iOS auto-zoom on focus */
-            className="flex-1 min-w-0 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50 py-1.5"
+            className="flex-1 min-w-0 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50 py-1.5 resize-none max-h-[120px] leading-snug"
           />
           <button
             data-testid="button-send-message"
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
             aria-label="Send message"
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-90 shrink-0"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-90 shrink-0 self-end"
             style={{ background: "hsl(168 58% 32%)" }}
           >
             <Send size={15} className="text-white -translate-x-px" />
