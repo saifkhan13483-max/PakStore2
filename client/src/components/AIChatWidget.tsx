@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { MessageCircle, X, Send, Bot, ChevronDown, RotateCcw, AlertCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send, Bot, ChevronDown, RotateCcw, AlertCircle, Square } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -876,18 +876,46 @@ export default function AIChatWidget() {
   });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [hasUnread, setHasUnread] = useState(true);
+  const [hasUnread, setHasUnread] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      return window.localStorage.getItem("pakbot_opened_v1") !== "1";
+    } catch {
+      return true;
+    }
+  });
+  const hasOpenedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      inputRef.current?.focus();
-      setHasUnread(false);
+      const behavior: ScrollBehavior = hasOpenedRef.current ? "smooth" : "auto";
+      messagesEndRef.current?.scrollIntoView({ behavior });
+      // Avoid auto-focusing on mobile to prevent the keyboard from
+      // immediately covering the welcome message.
+      const isMobile =
+        typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 639px)").matches;
+      if (!isMobile) inputRef.current?.focus();
+      hasOpenedRef.current = true;
+      if (hasUnread) {
+        setHasUnread(false);
+        try {
+          window.localStorage.setItem("pakbot_opened_v1", "1");
+        } catch {}
+      }
     }
-  }, [isOpen, messages, isLoading]);
+  }, [isOpen, messages, isLoading, hasUnread]);
+
+  // Abort any in-flight request when the chat is closed
+  useEffect(() => {
+    if (!isOpen && abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+  }, [isOpen]);
 
   // Persist chat history (capped)
   useEffect(() => {
@@ -927,8 +955,16 @@ export default function AIChatWidget() {
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
+  const stopGenerating = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsLoading(false);
+  };
+
+  const MAX_INPUT_LENGTH = 1000;
+
   const sendMessage = async (text: string) => {
-    const trimmed = text.trim();
+    const trimmed = text.trim().slice(0, MAX_INPUT_LENGTH);
     if (!trimmed || isLoading) return;
 
     const userMessage: Message = { role: "user", content: trimmed };
@@ -1149,27 +1185,42 @@ export default function AIChatWidget() {
             ref={inputRef}
             data-testid="input-chat-message"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value.slice(0, MAX_INPUT_LENGTH))}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything…"
             disabled={isLoading}
             rows={1}
+            maxLength={MAX_INPUT_LENGTH}
             enterKeyHint="send"
             autoComplete="off"
             autoCorrect="on"
+            aria-label="Type your message"
             /* text-base (16px) prevents iOS auto-zoom on focus */
             className="flex-1 min-w-0 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50 py-1.5 resize-none max-h-[120px] leading-snug"
           />
-          <button
-            data-testid="button-send-message"
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isLoading}
-            aria-label="Send message"
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-90 shrink-0 self-end"
-            style={{ background: "hsl(168 58% 32%)" }}
-          >
-            <Send size={15} className="text-white -translate-x-px" />
-          </button>
+          {isLoading ? (
+            <button
+              data-testid="button-stop-message"
+              onClick={stopGenerating}
+              aria-label="Stop generating"
+              title="Stop"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 shrink-0 self-end"
+              style={{ background: "hsl(168 58% 32%)" }}
+            >
+              <Square size={13} className="text-white fill-white" />
+            </button>
+          ) : (
+            <button
+              data-testid="button-send-message"
+              onClick={() => sendMessage(input)}
+              disabled={!input.trim()}
+              aria-label="Send message"
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-90 shrink-0 self-end"
+              style={{ background: "hsl(168 58% 32%)" }}
+            >
+              <Send size={15} className="text-white -translate-x-px" />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1180,10 +1231,13 @@ export default function AIChatWidget() {
       {isOpen && chatPanel}
 
       <div
-        className={`fixed z-50 bottom-20 right-3 sm:bottom-20 sm:right-4 lg:bottom-6 lg:right-6 ${
+        className={`fixed z-50 right-3 sm:right-4 lg:right-6 ${
           isOpen ? "hidden" : "block"
         }`}
-        style={{ bottom: "max(5rem, calc(env(safe-area-inset-bottom) + 4.5rem))" }}
+        style={{
+          bottom:
+            "max(1.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
+        }}
       >
         <button
           data-testid="button-open-chat"
