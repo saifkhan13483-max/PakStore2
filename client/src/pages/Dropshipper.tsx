@@ -323,15 +323,15 @@ export default function Dropshipper() {
       {/* Already approved banner */}
       {isAuthenticated && (
         <div className="bg-green-800 text-white py-3 px-4">
-          <div className="container mx-auto flex items-center justify-between gap-3 flex-wrap">
-            <p className="text-sm text-green-100">
+          <div className="container mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
+            <p className="text-xs sm:text-sm text-green-100">
               <CheckCircle2 className="inline h-4 w-4 mr-1.5 text-green-300" />
               Already an approved dropshipper? Access your dashboard.
             </p>
             <Link href="/dropshipper/dashboard">
               <Button
                 size="sm"
-                className="bg-white text-green-800 hover:bg-green-50 rounded-full h-8 px-4 text-xs font-semibold"
+                className="bg-white text-green-800 hover:bg-green-50 rounded-full h-8 px-4 text-xs font-semibold shrink-0"
                 data-testid="btn-go-dashboard"
               >
                 <LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Go to Dashboard
@@ -343,41 +343,41 @@ export default function Dropshipper() {
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-green-700 to-green-900 text-white">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <Breadcrumb className="mb-6">
+        <div className="container mx-auto px-4 py-10 sm:py-14 md:py-20 lg:py-24">
+          <Breadcrumb className="mb-5 sm:mb-6">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="text-green-200 hover:text-white">
+                <BreadcrumbLink href="/" className="text-green-200 hover:text-white text-xs sm:text-sm">
                   Home
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="text-green-400" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-white">Dropshipper Program</BreadcrumbPage>
+                <BreadcrumbPage className="text-white text-xs sm:text-sm">Dropshipper Program</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 bg-green-600 text-white text-[10px] sm:text-xs font-semibold px-3 py-1.5 rounded-full mb-4 sm:mb-6">
                 <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
                 NOW OPEN — LIMITED SPOTS
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 sm:mb-6 text-white">
                 Sell PakCart Products.{" "}
                 <span className="text-green-300">We Handle Everything Else.</span>
               </h1>
-              <p className="text-lg text-green-100 mb-8">
+              <p className="text-sm sm:text-base lg:text-lg text-green-100 mb-6 sm:mb-8">
                 Join Pakistan's fastest-growing dropshipper program. List our proven products
                 on your store, bring the customer — and we take care of stock, packaging, and
                 delivery. Zero risk. Real profit.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <a href="#register">
+                <a href="#register" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="bg-white text-green-800 hover:bg-green-50 rounded-full px-8 font-semibold"
+                    className="w-full sm:w-auto bg-white text-green-800 hover:bg-green-50 active:bg-green-100 rounded-full px-6 sm:px-8 font-semibold text-sm sm:text-base"
                     data-testid="btn-register-hero"
                   >
                     Register Now — It's Free
@@ -387,11 +387,12 @@ export default function Dropshipper() {
                   href="https://wa.me/923188055850"
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="w-full sm:w-auto"
                 >
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-green-300 text-white hover:bg-green-800 rounded-full px-8"
+                    className="w-full sm:w-auto border-green-300 text-white hover:bg-green-800 active:bg-green-800 rounded-full px-6 sm:px-8 text-sm sm:text-base"
                     data-testid="btn-whatsapp-hero"
                   >
                     <SiWhatsapp className="h-4 w-4 mr-2" /> WhatsApp Us
@@ -419,9 +420,9 @@ export default function Dropshipper() {
           </div>
         </div>
 
-        {/* Stats bar (mobile) */}
+        {/* Stats bar (mobile + tablet) */}
         <div className="border-t border-green-600/40 bg-green-900/50">
-          <div className="container mx-auto px-4 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center lg:hidden">
+          <div className="container mx-auto px-4 py-4 sm:py-5 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center lg:hidden">
             {[
               { value: "50,000+", label: "Happy Customers" },
               { value: "200+", label: "Active Dropshippers" },
@@ -429,8 +430,8 @@ export default function Dropshipper() {
               { value: "PKR 0", label: "Upfront Cost" },
             ].map((stat) => (
               <div key={stat.label}>
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-sm text-green-300">{stat.label}</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-green-300">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -438,19 +439,19 @@ export default function Dropshipper() {
       </section>
 
       {/* Status Checker */}
-      <section className="py-10 bg-white border-b">
+      <section className="py-8 sm:py-10 bg-white border-b">
         <div className="container mx-auto px-4 max-w-lg text-center">
-          <h3 className="text-lg font-bold text-gray-900 mb-1">Already Applied?</h3>
-          <p className="text-sm text-muted-foreground mb-4">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">Already Applied?</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-4">
             Enter your email address to check the status of your application.
           </p>
           <div className="flex gap-2">
-            <div className="relative flex-1">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="email"
                 placeholder="your@email.com"
-                className="pl-9"
+                className="pl-9 text-sm"
                 value={statusEmail}
                 onChange={(e) => setStatusEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && checkStatus()}
@@ -460,16 +461,16 @@ export default function Dropshipper() {
             <Button
               onClick={checkStatus}
               disabled={statusChecking || !statusEmail}
-              className="bg-green-700 hover:bg-green-800 text-white rounded-full px-5"
+              className="bg-green-700 hover:bg-green-800 text-white rounded-full px-4 sm:px-5 text-sm shrink-0"
               data-testid="button-check-status"
             >
-              {statusChecking ? "Checking..." : "Check"}
+              {statusChecking ? "..." : "Check"}
             </Button>
           </div>
 
           {statusResult && (
             <div
-              className={`mt-4 rounded-xl p-4 border text-sm ${
+              className={`mt-4 rounded-xl p-3 sm:p-4 border text-sm ${
                 statusResult.status === "approved"
                   ? "bg-green-50 border-green-200 text-green-800"
                   : statusResult.status === "rejected"
@@ -478,11 +479,11 @@ export default function Dropshipper() {
               }`}
               data-testid="status-result"
             >
-              <div className="flex items-center justify-center gap-2 font-semibold mb-1">
-                {statusResult.status === "approved" && <CheckCircle2 className="h-4 w-4" />}
-                {statusResult.status === "pending" && <Clock className="h-4 w-4" />}
-                {statusResult.status === "rejected" && <XCircle className="h-4 w-4" />}
-                {statusResult.fullName} —{" "}
+              <div className="flex items-center justify-center gap-2 font-semibold mb-1 text-sm">
+                {statusResult.status === "approved" && <CheckCircle2 className="h-4 w-4 shrink-0" />}
+                {statusResult.status === "pending" && <Clock className="h-4 w-4 shrink-0" />}
+                {statusResult.status === "rejected" && <XCircle className="h-4 w-4 shrink-0" />}
+                <span className="truncate">{statusResult.fullName}</span> —{" "}
                 {statusResult.status.charAt(0).toUpperCase() + statusResult.status.slice(1)}
               </div>
               {statusResult.status === "approved" && (
@@ -512,28 +513,28 @@ export default function Dropshipper() {
       </section>
 
       {/* Benefits */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-10 sm:py-14 lg:py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
               Why Dropship with PakCart?
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               We've built the infrastructure so you can focus only on what matters — making
               sales.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {benefits.map((benefit) => (
               <div
                 key={benefit.title}
-                className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl p-4 sm:p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <benefit.icon className="h-5 w-5 text-green-700" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+                  <benefit.icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-700" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-1.5 sm:mb-2 text-sm sm:text-base">{benefit.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{benefit.description}</p>
               </div>
             ))}
           </div>
@@ -541,26 +542,28 @@ export default function Dropshipper() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-white">
+      <section className="py-10 sm:py-14 lg:py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">How It Works</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">How It Works</h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               From registration to your first sale in as little as 48 hours.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {steps.map((step, i) => (
               <div key={step.number} className="relative">
                 {i < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-6 left-[calc(100%-12px)] w-1/2 h-px bg-green-200 z-0" />
                 )}
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-lg mb-4">
+                <div className="relative z-10 flex items-start gap-4 sm:block">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-green-700 text-white flex items-center justify-center font-bold text-base sm:text-lg shrink-0 sm:mb-4">
                     {step.number}
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">{step.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{step.description}</p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -569,13 +572,13 @@ export default function Dropshipper() {
       </section>
 
       {/* Product Catalog CTA */}
-      <section className="py-12 bg-gray-50 border-y border-gray-200">
+      <section className="py-10 sm:py-12 bg-gray-50 border-y border-gray-200">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 mb-5">
-            <Package className="h-7 w-7 text-green-700" />
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-100 mb-4 sm:mb-5">
+            <Package className="h-6 w-6 sm:h-7 sm:w-7 text-green-700" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">See What You'll Be Selling</h2>
-          <p className="text-muted-foreground mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">See What You'll Be Selling</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-5 sm:mb-6 px-2">
             Browse our full product listing. Hover over any product and click the download icon to
             export its complete details — name, description, price, images and more — as a
             professionally formatted .txt file. Or export the entire catalog in one click.
@@ -583,10 +586,10 @@ export default function Dropshipper() {
           <Link href="/products">
             <Button
               size="lg"
-              className="bg-green-700 hover:bg-green-800 text-white rounded-full px-10 font-semibold gap-2"
+              className="bg-green-700 hover:bg-green-800 active:bg-green-900 text-white rounded-full px-7 sm:px-10 font-semibold gap-2 text-sm sm:text-base w-full sm:w-auto"
               data-testid="btn-browse-catalog"
             >
-              <Package className="h-5 w-5" />
+              <Package className="h-4 w-4 sm:h-5 sm:w-5" />
               Browse &amp; Export Products
             </Button>
           </Link>
@@ -594,20 +597,20 @@ export default function Dropshipper() {
       </section>
 
       {/* Profit Calculator Teaser */}
-      <section className="py-12 bg-green-700 text-white">
+      <section className="py-10 sm:py-12 bg-green-700 text-white">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <TrendingUp className="h-10 w-10 mx-auto mb-4 text-green-300" />
-          <h2 className="text-2xl font-bold mb-2 text-white">What Could You Earn?</h2>
-          <p className="text-green-200 mb-6">
+          <TrendingUp className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-3 sm:mb-4 text-green-300" />
+          <h2 className="text-xl sm:text-2xl font-bold mb-2 text-white">What Could You Earn?</h2>
+          <p className="text-xs sm:text-sm text-green-200 mb-5 sm:mb-6 leading-relaxed">
             If you sell just 10 orders a month with an average profit of Rs. 400 per item —
             that's <strong className="text-white">Rs. 4,000/month</strong> in pure profit. Scale
             to 50 orders and you're at <strong className="text-white">Rs. 20,000/month</strong>.
             All from your phone.
           </p>
-          <a href="#register">
+          <a href="#register" className="block sm:inline-block">
             <Button
               size="lg"
-              className="bg-white text-green-800 hover:bg-green-50 rounded-full px-10 font-semibold"
+              className="w-full sm:w-auto bg-white text-green-800 hover:bg-green-50 active:bg-green-100 rounded-full px-8 sm:px-10 font-semibold text-sm sm:text-base"
             >
               Start Earning Today
             </Button>
@@ -616,11 +619,11 @@ export default function Dropshipper() {
       </section>
 
       {/* Registration Form */}
-      <section id="register" className="py-16 bg-gray-50">
+      <section id="register" className="py-10 sm:py-14 lg:py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-xl">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Apply to Join</h2>
-            <p className="text-muted-foreground">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Apply to Join</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Free to join. Takes less than 2 minutes. We'll review and respond within 24
               hours.
             </p>
@@ -628,23 +631,23 @@ export default function Dropshipper() {
 
           {submitted ? (
             <div
-              className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center"
+              className="bg-green-50 border border-green-200 rounded-2xl p-6 sm:p-8 text-center"
               data-testid="success-message"
             >
-              <CheckCircle2 className="h-14 w-14 text-green-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-green-900 mb-2">
+              <CheckCircle2 className="h-12 w-12 sm:h-14 sm:w-14 text-green-600 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-lg sm:text-xl font-bold text-green-900 mb-2">
                 Application Submitted!
               </h3>
-              <p className="text-green-700 mb-2">
+              <p className="text-sm text-green-700 mb-2">
                 Thank you for applying. Our team will review your application and contact you
                 within 24 hours on WhatsApp.
               </p>
-              <p className="text-sm text-green-600">
+              <p className="text-xs text-green-600">
                 In the meantime, use the status checker above to track your application.
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border shadow-sm p-6 md:p-8">
+            <div className="bg-white rounded-2xl border shadow-sm p-4 sm:p-6 md:p-8">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -657,7 +660,7 @@ export default function Dropshipper() {
                       name="fullName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name *</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Full Name *</FormLabel>
                           <FormControl>
                             <Input placeholder="Your full name" data-testid="input-full-name" {...field} />
                           </FormControl>
@@ -670,7 +673,7 @@ export default function Dropshipper() {
                       name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone / WhatsApp *</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Phone / WhatsApp *</FormLabel>
                           <FormControl>
                             <Input placeholder="+92 3XX XXXXXXX" data-testid="input-phone" {...field} />
                           </FormControl>
@@ -685,7 +688,7 @@ export default function Dropshipper() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email Address *</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Email Address *</FormLabel>
                         <FormControl>
                           <Input type="email" placeholder="your@email.com" data-testid="input-email" {...field} />
                         </FormControl>
@@ -700,7 +703,7 @@ export default function Dropshipper() {
                       name="city"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>City *</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">City *</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-city">
@@ -722,7 +725,7 @@ export default function Dropshipper() {
                       name="platform"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Selling Platform *</FormLabel>
+                          <FormLabel className="text-xs sm:text-sm">Selling Platform *</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-platform">
@@ -746,7 +749,7 @@ export default function Dropshipper() {
                     name="monthlyOrders"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Expected Monthly Orders *</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Expected Monthly Orders *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-monthly-orders">
@@ -770,7 +773,7 @@ export default function Dropshipper() {
                     name="storeUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Store/Page Link (Optional)</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Store/Page Link (Optional)</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="https://facebook.com/yourpage"
@@ -788,12 +791,12 @@ export default function Dropshipper() {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Anything to add? (Optional)</FormLabel>
+                        <FormLabel className="text-xs sm:text-sm">Anything to add? (Optional)</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Tell us about your experience or why you want to join..."
                             rows={3}
-                            className="resize-none"
+                            className="resize-none text-sm"
                             data-testid="input-message"
                             {...field}
                           />
@@ -810,7 +813,7 @@ export default function Dropshipper() {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-green-700 hover:bg-green-800 text-white text-base font-semibold rounded-full"
+                    className="w-full h-11 sm:h-12 bg-green-700 hover:bg-green-800 active:bg-green-900 text-white text-sm sm:text-base font-semibold rounded-full"
                     disabled={isSubmitting}
                     data-testid="button-submit-apply"
                   >
@@ -824,10 +827,10 @@ export default function Dropshipper() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-white">
+      <section className="py-10 sm:py-14 lg:py-16 bg-white">
         <div className="container mx-auto px-4 max-w-2xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          <div className="text-center mb-7 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
               Frequently Asked Questions
             </h2>
           </div>
@@ -836,12 +839,12 @@ export default function Dropshipper() {
               <AccordionItem
                 key={i}
                 value={`faq-${i}`}
-                className="border rounded-xl px-5 shadow-sm"
+                className="border rounded-xl px-4 sm:px-5 shadow-sm"
               >
-                <AccordionTrigger className="text-left font-semibold text-gray-900 text-sm py-4 hover:no-underline">
+                <AccordionTrigger className="text-left font-semibold text-gray-900 text-xs sm:text-sm py-3 sm:py-4 hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground pb-4">
+                <AccordionContent className="text-xs sm:text-sm text-muted-foreground pb-3 sm:pb-4">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -851,22 +854,22 @@ export default function Dropshipper() {
       </section>
 
       {/* E-commerce Platform Promo */}
-      <section className="py-14 bg-gradient-to-br from-amber-50 to-orange-50 border-y border-amber-200">
+      <section className="py-10 sm:py-14 bg-gradient-to-br from-amber-50 to-orange-50 border-y border-amber-200">
         <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-100 mb-4">
-              <Rocket className="h-7 w-7 text-amber-600" />
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-100 mb-3 sm:mb-4">
+              <Rocket className="h-6 w-6 sm:h-7 sm:w-7 text-amber-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               Want Your Own Online Store Like This?
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
               We build complete, professional e-commerce websites for businesses in Pakistan —
               fully set up and ready to sell from day one.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {[
               {
                 icon: Globe,
@@ -884,24 +887,29 @@ export default function Dropshipper() {
                 desc: "We guide you every step of the way, even if you have zero tech experience.",
               },
             ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl p-5 border border-amber-100 shadow-sm text-center">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-50 mb-3">
-                  <item.icon className="h-5 w-5 text-amber-600" />
+              <div key={item.title} className="bg-white rounded-xl p-4 sm:p-5 border border-amber-100 shadow-sm text-center">
+                <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-50 mb-2 sm:mb-3">
+                  <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-muted-foreground">{item.desc}</p>
+                <h3 className="font-semibold text-gray-900 text-xs sm:text-sm mb-1">{item.title}</h3>
+                <p className="text-[11px] sm:text-xs text-muted-foreground">{item.desc}</p>
               </div>
             ))}
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-xs sm:text-sm text-gray-600 mb-4">
               Ready to start? WhatsApp us — no technical knowledge needed.
             </p>
-            <a href="https://wa.me/923188055850" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://wa.me/923188055850"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block sm:inline-block"
+            >
               <Button
                 size="lg"
-                className="bg-amber-500 hover:bg-amber-600 text-white rounded-full px-8 font-semibold gap-2"
+                className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-full px-6 sm:px-8 font-semibold gap-2 text-sm sm:text-base"
               >
                 <SiWhatsapp className="h-4 w-4" /> WhatsApp Us — +92 318 8055850
               </Button>
@@ -911,19 +919,19 @@ export default function Dropshipper() {
       </section>
 
       {/* Footer CTA */}
-      <section className="py-12 bg-green-700">
+      <section className="py-10 sm:py-12 bg-green-700">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
             Ready to Start Earning?
           </h2>
-          <p className="text-green-200 mb-6 max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-green-200 mb-5 sm:mb-6 max-w-md mx-auto">
             Join hundreds of Pakistani entrepreneurs already earning with PakCart.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="#register">
+            <a href="#register" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="bg-white text-green-800 hover:bg-green-50 rounded-full px-8 font-semibold"
+                className="w-full sm:w-auto bg-white text-green-800 hover:bg-green-50 active:bg-green-100 rounded-full px-7 sm:px-8 font-semibold text-sm sm:text-base"
               >
                 Apply Now — It's Free
               </Button>
@@ -932,11 +940,12 @@ export default function Dropshipper() {
               href="https://wa.me/923188055850"
               target="_blank"
               rel="noopener noreferrer"
+              className="w-full sm:w-auto"
             >
               <Button
                 size="lg"
                 variant="outline"
-                className="border-green-300 text-white hover:bg-green-800 rounded-full px-8"
+                className="w-full sm:w-auto border-green-300 text-white hover:bg-green-800 active:bg-green-800 rounded-full px-7 sm:px-8 text-sm sm:text-base"
               >
                 <SiWhatsapp className="h-4 w-4 mr-2" /> Chat on WhatsApp
               </Button>
