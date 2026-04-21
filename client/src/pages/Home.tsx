@@ -44,8 +44,16 @@ export default function Home() {
   };
 
   const [showMoreNewArrivals, setShowMoreNewArrivals] = useState(false);
-  const [showMoreFeatured, setShowMoreFeatured] = useState(false);
-  const [showMoreLiked, setShowMoreLiked] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  const toggleCategoryExpansion = (categoryId: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  };
 
   const { data: slides, isLoading: isHeroLoading } = useQuery<HomepageSlide[]>({
     queryKey: ["/api/homepage-slides", "active"],
@@ -497,13 +505,13 @@ export default function Home() {
         })().map((category, catIndex) => {
           const categoryProducts = allProducts?.filter(p => p.categoryId === category.id) || [];
           if (categoryProducts.length === 0 && !isAllProductsLoading) return null;
-          const visibleProducts = categoryProducts.slice(0, 10);
           const categorySlug = category.slug || String(category.id);
-          const isAlt = catIndex % 2 === 1;
+          const isExpanded = expandedCategories.has(category.id);
+          const visibleProducts = isExpanded ? categoryProducts : categoryProducts.slice(0, 5);
           return (
             <section
               key={category.id}
-              className={`py-10 ${isAlt ? "bg-muted/30" : ""}`}
+              className="py-10 bg-muted/30"
               data-testid={`section-category-${categorySlug}`}
             >
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -517,13 +525,8 @@ export default function Home() {
                     <h2 className="font-display text-4xl font-bold text-foreground mb-2" data-testid={`heading-category-${categorySlug}`}>
                       {category.name}
                     </h2>
-                    <div className="h-1.5 w-16 bg-primary rounded-full" />
+                    <div className="h-1.5 w-16 bg-secondary rounded-full" />
                   </motion.div>
-                  <Link href={`/collections/${categorySlug}`}>
-                    <Button variant="ghost" className="gap-2 group" data-testid={`link-view-all-${categorySlug}`}>
-                      View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
@@ -550,18 +553,17 @@ export default function Home() {
                   )}
                 </div>
 
-                {categoryProducts.length > 10 && (
+                {categoryProducts.length > 5 && (
                   <div className="mt-6 text-center">
-                    <Link href={`/collections/${categorySlug}`}>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="rounded-full min-w-[200px]"
-                        data-testid={`button-view-all-${categorySlug}`}
-                      >
-                        View All {category.name}
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => toggleCategoryExpansion(category.id)}
+                      className="rounded-full min-w-[200px]"
+                      data-testid={`button-show-more-${categorySlug}`}
+                    >
+                      {isExpanded ? "Show Less" : "Show More"}
+                    </Button>
                   </div>
                 )}
               </div>
