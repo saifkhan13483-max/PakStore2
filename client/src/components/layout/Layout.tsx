@@ -16,7 +16,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBanner />
       <Header />
-      <main className="flex-1 pb-16 lg:pb-0">{children}</main>
+      <main className="flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+        {children}
+      </main>
       <div className="hidden lg:block">
         <Footer />
       </div>
