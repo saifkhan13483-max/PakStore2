@@ -1233,11 +1233,8 @@ export default function AIChatWidget() {
       <div
         className={`fixed z-50 right-3 sm:right-4 lg:right-6 ${
           isOpen ? "hidden" : "block"
-        }`}
-        style={{
-          bottom:
-            "max(1.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
-        }}
+        } [--chat-bottom:calc(4rem+env(safe-area-inset-bottom)+0.75rem)] lg:[--chat-bottom:1.5rem]`}
+        style={{ bottom: "var(--chat-bottom)" }}
       >
         <button
           data-testid="button-open-chat"
