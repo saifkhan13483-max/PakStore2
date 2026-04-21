@@ -3,7 +3,7 @@ interface AIMessage {
   content: string;
 }
 
-const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert and SEO specialist for PakCart, a premium Pakistani e-commerce store selling Women's Bags, Men's Watches, Khussas/Slippers, and Kashmiri Pashminas. Help increase sales by writing persuasive product content, recommending relevant products, and improving the shopping experience. Keep responses concise, persuasive, human-like, and conversion-focused.`;
+const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert and SEO specialist for PakCart, a Pakistani e-commerce store selling Bags & Wallets, Jewelry, Shoes, Slippers, Stitched Dresses, Watches, and Tech Gadgets. Help increase sales by writing persuasive product content, recommending relevant products, and improving the shopping experience. Keep responses concise, persuasive, human-like, and conversion-focused.`;
 
 async function callAI(
   messages: AIMessage[],
@@ -70,7 +70,7 @@ export async function generateSmartSearchQuery(naturalQuery: string): Promise<{
 
 Query: "${naturalQuery}"
 
-Available categories: Women's Bags, Men's Watches, Khussas/Slippers, Kashmiri Pashminas, Kids Bags
+Available categories: Bags & Wallets, Jewelry, Shoes, Slippers, Stitched Dresses, Watches, Tech Gadgets
 
 Return exactly:
 {"keywords":["word1","word2"],"suggestedCategory":"category name or null","priceHint":"budget description or null"}`,

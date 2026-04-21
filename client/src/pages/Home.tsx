@@ -132,9 +132,9 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
       <SEO 
-        title="PakCart — Online Shopping in Pakistan | Handbags, Watches, Khussas & Pashminas"
-        description="Shop premium women's handbags, men's watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags at PakCart. Cash on Delivery, 7-day easy returns and free shipping on orders over Rs. 10,000 nationwide."
-        keywords="online shopping pakistan, ladies handbags pakistan, mens watches pakistan, multani khussa, kashmiri pashmina, kids school bags, cash on delivery pakistan, pakcart store"
+        title="PakCart — Online Shopping in Pakistan | Bags, Jewelry, Shoes, Watches, Stitched Dresses & Tech Gadgets"
+        description="Shop women's bags & wallets, jewelry, shoes, slippers, stitched dresses, watches and tech gadgets at PakCart. Cash on Delivery, 7-day easy returns and free shipping on orders over Rs. 10,000 nationwide."
+        keywords="online shopping pakistan, bags and wallets pakistan, jewelry pakistan, womens shoes pakistan, slippers pakistan, stitched dresses pakistan, mens watches pakistan, tech gadgets pakistan, cash on delivery pakistan, pakcart store"
         url="https://pakcart.store/"
         robots="index,follow"
         isHomePage={true}
@@ -157,7 +157,7 @@ export default function Home() {
           },
           {
             question: "What products does PakCart sell?",
-            answer: "PakCart sells premium women's handbags, men's and ladies' watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags — all sourced from trusted Pakistani artisans and brands."
+            answer: "PakCart sells women's bags & wallets, jewelry, shoes, slippers, stitched dresses, watches and tech gadgets — all sourced from trusted Pakistani brands and suppliers."
           },
           {
             question: "How can I contact PakCart customer support?",

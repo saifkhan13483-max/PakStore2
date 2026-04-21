@@ -311,9 +311,9 @@ function App() {
           <HelmetProvider>
             <TooltipProvider>
               <Helmet>
-                <title>Online Shopping in Pakistan | Bags, Watches, Slippers & Pashminas - PakCart</title>
-                <meta name="description" content="Shop affordable women's handbags, men's watches, slippers, Kashmiri Pashminas and kids bags online in Pakistan. Free delivery on orders over Rs. 10,000. Fast delivery across Pakistan." />
-                <meta name="keywords" content="online shopping Pakistan, women bags, men watches, slippers, kashmiri pashmina, kids bags, fashion accessories, footwear" />
+                <title>Online Shopping in Pakistan | Bags, Jewelry, Shoes, Watches, Stitched Dresses & Tech Gadgets - PakCart</title>
+                <meta name="description" content="Shop affordable women's bags & wallets, jewelry, shoes, slippers, stitched dresses, watches and tech gadgets online in Pakistan. Free delivery on orders over Rs. 10,000." />
+                <meta name="keywords" content="online shopping Pakistan, bags & wallets, jewelry, shoes, slippers, stitched dresses, watches, tech gadgets, fashion accessories" />
                 <meta property="og:type" content="website" />
               </Helmet>
               <Router />

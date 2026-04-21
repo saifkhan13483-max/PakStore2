@@ -111,9 +111,9 @@ export default function NewArrivals() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title="New Arrivals — Fresh Handbags, Watches, Khussas & Pashminas"
-        description="Discover the freshest drops at PakCart — newly arrived women's handbags, men's & ladies' watches, Multani khussas and Kashmiri Pashmina shawls. Cash on Delivery and fast nationwide shipping across Pakistan."
-        keywords="new arrivals pakistan, latest handbags, new watches pakistan, new khussa designs, pashmina new collection, pakcart"
+        title="New Arrivals — Fresh Bags, Jewelry, Shoes, Watches & Tech Gadgets"
+        description="Discover the freshest drops at PakCart — newly arrived bags & wallets, jewelry, shoes, slippers, stitched dresses, watches and tech gadgets. Cash on Delivery and fast nationwide shipping across Pakistan."
+        keywords="new arrivals pakistan, latest bags, new jewelry pakistan, new shoes, new watches pakistan, new stitched dresses, new tech gadgets, pakcart"
         url="https://pakcart.store/new-arrivals"
         robots="index,follow"
         breadcrumbs={[
