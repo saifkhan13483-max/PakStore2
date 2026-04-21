@@ -36,7 +36,7 @@ const aboutPageSchema = {
       "url": "https://pakcart.store/favicon.png",
       "caption": "PakCart"
     },
-    "description": "Pakistan's premier destination for authentic artisanal products including women's bags, men's watches, slippers, bedsheets, and fashion accessories.",
+    "description": "Pakistan's premier destination for authentic artisanal products including women's bags, men's watches, slippers, Kashmiri Pashminas and fashion accessories.",
     "foundingDate": "2024",
     "areaServed": { "@type": "Country", "name": "Pakistan" },
     "address": { "@type": "PostalAddress", "addressCountry": "PK" },
@@ -62,7 +62,7 @@ export default function About() {
     <>
       <SEO
         title="About PakCart — Pakistan's Trusted Online Store for Artisanal Goods"
-        description="Learn how PakCart connects Pakistani artisans and trusted brands with shoppers nationwide — handpicked handbags, watches, Multani khussas, Kashmiri Pashmina shawls and bedsheets, with Cash on Delivery and quality guaranteed."
+        description="Learn how PakCart connects Pakistani artisans and trusted brands with shoppers nationwide — handpicked handbags, watches, Multani khussas and Kashmiri Pashmina shawls, with Cash on Delivery and quality guaranteed."
         keywords="about pakcart, pakistani online store, artisanal shopping pakistan, trusted ecommerce pakistan"
         url="https://pakcart.store/about"
         robots="index,follow"

@@ -40,9 +40,9 @@ export default function Categories() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO
-        title="Shop by Category — Handbags, Watches, Khussas, Pashminas & Bedsheets"
-        description="Explore PakCart by category — women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and premium cotton bedsheets. Cash on Delivery, easy returns and fast nationwide shipping in Pakistan."
-        keywords="shop by category pakistan, handbag categories, watch collection pakistan, khussa categories, pashmina shawls, bedsheets online"
+        title="Shop by Category — Handbags, Watches, Khussas & Pashminas"
+        description="Explore PakCart by category — women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags. Cash on Delivery, easy returns and fast nationwide shipping in Pakistan."
+        keywords="shop by category pakistan, handbag categories, watch collection pakistan, khussa categories, pashmina shawls"
         url="https://pakcart.store/categories"
         robots="index,follow"
         breadcrumbs={[
@@ -66,7 +66,7 @@ export default function Categories() {
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Shop All Categories</h1>
         <p className="text-muted-foreground mt-2 text-base leading-relaxed max-w-3xl">
-          Discover our complete collection of affordable fashion accessories, footwear, and home essentials available online in Pakistan. Shop women's handbags, men's watches, comfortable slippers, quality bedsheets, flip flops, and kids bags - all with fast delivery across Pakistan.
+          Discover our complete collection of affordable fashion accessories and footwear available online in Pakistan. Shop women's handbags, men's watches, comfortable slippers, Kashmiri Pashminas, flip flops, and kids bags - all with fast delivery across Pakistan.
         </p>
       </div>
 

@@ -16,7 +16,6 @@ import childrenSectionImage from "@/assets/hero-image.jpg";
 import categoriesListImage from "@/assets/hero-image.jpg";
 const bagsCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789701/ChatGPT_Image_Mar_6_2026_02_15_28_PM_1_t8uwak.png";
 const slippersCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789698/ChatGPT_Image_Mar_6_2026_02_15_30_PM_1_glrglb.png";
-const bedsheetsCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789692/ChatGPT_Image_Mar_6_2026_12_57_11_PM_1_e3bw54.png";
 const shoesCategoryImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789706/ChatGPT_Image_Mar_6_2026_12_57_07_PM_1_ghqfjt.png";
 const eidSpecialImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772792215/ChatGPT_Image_Mar_6_2026_03_12_34_PM_1_wdck6p.png";
 const watchesImage = "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789699/ChatGPT_Image_Mar_6_2026_12_57_08_PM_1_r0e1a4.png";
@@ -133,9 +132,9 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
       <SEO 
-        title="PakCart — Online Shopping in Pakistan | Handbags, Watches, Khussas & Bedsheets"
-        description="Shop premium women's handbags, men's watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and quality bedsheets at PakCart. Cash on Delivery, 7-day easy returns and free shipping on orders over Rs. 10,000 nationwide."
-        keywords="online shopping pakistan, ladies handbags pakistan, mens watches pakistan, multani khussa, kashmiri pashmina, cotton bedsheets pakistan, kids school bags, cash on delivery pakistan, pakcart store"
+        title="PakCart — Online Shopping in Pakistan | Handbags, Watches, Khussas & Pashminas"
+        description="Shop premium women's handbags, men's watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags at PakCart. Cash on Delivery, 7-day easy returns and free shipping on orders over Rs. 10,000 nationwide."
+        keywords="online shopping pakistan, ladies handbags pakistan, mens watches pakistan, multani khussa, kashmiri pashmina, kids school bags, cash on delivery pakistan, pakcart store"
         url="https://pakcart.store/"
         robots="index,follow"
         isHomePage={true}
@@ -158,7 +157,7 @@ export default function Home() {
           },
           {
             question: "What products does PakCart sell?",
-            answer: "PakCart sells premium women's handbags, men's and ladies' watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and quality cotton bedsheets — all sourced from trusted Pakistani artisans and brands."
+            answer: "PakCart sells premium women's handbags, men's and ladies' watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags — all sourced from trusted Pakistani artisans and brands."
           },
           {
             question: "How can I contact PakCart customer support?",
@@ -341,7 +340,6 @@ export default function Home() {
                   let categoryImage = category.image || categoriesListImage;
                   if (category.name.toLowerCase() === "bags") categoryImage = bagsCategoryImage;
                   else if (category.name.toLowerCase() === "slippers") categoryImage = slippersCategoryImage;
-                  else if (category.name.toLowerCase() === "bedsheets") categoryImage = bedsheetsCategoryImage;
                   else if (category.name.toLowerCase() === "shoes") categoryImage = shoesCategoryImage;
                   else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
                   else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;
@@ -393,7 +391,6 @@ export default function Home() {
                     let categoryImage = category.image || categoriesListImage;
                     if (category.name.toLowerCase() === "bags") categoryImage = bagsCategoryImage;
                     else if (category.name.toLowerCase() === "slippers") categoryImage = slippersCategoryImage;
-                    else if (category.name.toLowerCase() === "bedsheets") categoryImage = bedsheetsCategoryImage;
                     else if (category.name.toLowerCase() === "shoes") categoryImage = shoesCategoryImage;
                     else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
                     else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;

@@ -163,9 +163,9 @@ export default function Products() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title="Shop All Products — Handbags, Watches, Khussas, Pashminas & Bedsheets"
-        description="Browse PakCart's complete collection — women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and premium cotton bedsheets. Cash on Delivery, easy returns and fast nationwide shipping in Pakistan."
-        keywords="shop online pakistan, ladies handbags, mens watches, multani khussa, kashmiri pashmina, cotton bedsheets, kids bags, cash on delivery"
+        title="Shop All Products — Handbags, Watches, Khussas & Pashminas"
+        description="Browse PakCart's complete collection — women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls and kids' bags. Cash on Delivery, easy returns and fast nationwide shipping in Pakistan."
+        keywords="shop online pakistan, ladies handbags, mens watches, multani khussa, kashmiri pashmina, kids bags, cash on delivery"
         url="https://pakcart.store/products"
         robots="index,follow"
         breadcrumbs={[

@@ -112,7 +112,7 @@ export default function NewArrivals() {
     <div className="container mx-auto px-4 py-8">
       <SEO 
         title="New Arrivals — Fresh Handbags, Watches, Khussas & Pashminas"
-        description="Discover the freshest drops at PakCart — newly arrived women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls and premium bedsheets. Cash on Delivery and fast nationwide shipping across Pakistan."
+        description="Discover the freshest drops at PakCart — newly arrived women's handbags, men's & ladies' watches, Multani khussas and Kashmiri Pashmina shawls. Cash on Delivery and fast nationwide shipping across Pakistan."
         keywords="new arrivals pakistan, latest handbags, new watches pakistan, new khussa designs, pashmina new collection, pakcart"
         url="https://pakcart.store/new-arrivals"
         robots="index,follow"

@@ -54,7 +54,6 @@ const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "bags", label: "Women's Bags" },
   { value: "watches", label: "Men's Watches" },
   { value: "slippers", label: "Slippers" },
-  { value: "bedsheets", label: "Bedsheets" },
   { value: "shoes", label: "Shoes" },
   { value: "clothing", label: "Clothing" },
   { value: "general", label: "General / Other" },
