@@ -886,35 +886,49 @@ export default function AIChatWidget() {
   };
 
   const chatPanel = (
-    <div className="flex flex-col overflow-hidden bg-white dark:bg-gray-900
-      fixed inset-0 z-[60] h-screen
-      sm:z-50 sm:inset-auto sm:h-[480px] sm:bottom-[5.5rem] sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-2xl sm:shadow-2xl sm:border sm:border-border
-      lg:bottom-6 lg:right-6"
+    <div
+      className="flex flex-col overflow-hidden bg-white dark:bg-gray-900
+        fixed inset-0 z-[60] h-[100dvh]
+        sm:z-50 sm:inset-auto sm:h-[480px] sm:bottom-[5.5rem] sm:right-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:rounded-2xl sm:shadow-2xl sm:border sm:border-border
+        lg:bottom-6 lg:right-6
+        animate-in fade-in slide-in-from-bottom-4 duration-200"
     >
       <div
-        className="flex items-center justify-between px-4 py-3 text-white flex-shrink-0
+        className="flex items-center justify-between px-4 text-white flex-shrink-0
           sm:rounded-t-2xl"
-        style={{ background: "hsl(168 58% 32%)" }}
+        style={{
+          background: "hsl(168 58% 32%)",
+          paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+          paddingBottom: "0.75rem",
+        }}
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-            <Bot size={16} className="text-white" />
+          <div className="relative w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <Bot size={17} className="text-white" />
+            {/* Online status dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-[hsl(168,58%,32%)]" />
           </div>
-          <div>
-            <p className="font-semibold text-sm leading-tight">PakBot</p>
-            <p className="text-xs text-white/70">PakCart Assistant</p>
+          <div className="min-w-0">
+            <p className="font-semibold text-sm leading-tight truncate">PakBot</p>
+            <p className="text-[11px] text-white/80 leading-tight mt-0.5 flex items-center gap-1">
+              <span className="w-1 h-1 bg-green-300 rounded-full" />
+              Online · usually replies instantly
+            </p>
           </div>
         </div>
         <button
           data-testid="button-close-chat"
           onClick={() => setIsOpen(false)}
-          className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
+          aria-label="Close chat"
+          className="p-2 -mr-2 rounded-full hover:bg-white/20 active:bg-white/30 transition-colors shrink-0"
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={20} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scroll-smooth min-h-0">
+      <div
+        className="flex-1 overflow-y-auto overscroll-contain px-3 sm:px-4 py-3 space-y-3 scroll-smooth min-h-0 bg-gray-50/50 dark:bg-gray-900"
+      >
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -922,7 +936,7 @@ export default function AIChatWidget() {
           >
             {msg.role === "assistant" && (
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"
                 style={{ background: "hsl(168 58% 32%)" }}
               >
                 <Bot size={13} className="text-white" />
@@ -930,10 +944,10 @@ export default function AIChatWidget() {
             )}
             <div
               data-testid={`message-${msg.role}-${i}`}
-              className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+              className={`max-w-[85%] sm:max-w-[80%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-line shadow-sm ${
                 msg.role === "user"
                   ? "text-white rounded-tr-sm"
-                  : "bg-muted text-foreground rounded-tl-sm"
+                  : "bg-white dark:bg-gray-800 text-foreground rounded-tl-sm border border-gray-100 dark:border-gray-700"
               }`}
               style={
                 msg.role === "user"
@@ -949,14 +963,15 @@ export default function AIChatWidget() {
         {isLoading && (
           <div className="flex gap-2 justify-start">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm"
               style={{ background: "hsl(168 58% 32%)" }}
             >
               <Bot size={13} className="text-white" />
             </div>
-            <div className="bg-muted px-3 py-2 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
-              <Loader2 size={13} className="animate-spin text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Thinking…</span>
+            <div className="bg-white dark:bg-gray-800 px-3.5 py-2.5 rounded-2xl rounded-tl-sm flex items-center gap-1 border border-gray-100 dark:border-gray-700 shadow-sm">
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
             </div>
           </div>
         )}
@@ -965,8 +980,11 @@ export default function AIChatWidget() {
       </div>
 
 
-      <div className="px-3 pt-2 border-t border-border flex-shrink-0" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-        <div className="flex items-center gap-2 bg-muted rounded-xl px-3 py-2">
+      <div
+        className="px-3 pt-2 border-t border-border flex-shrink-0 bg-white dark:bg-gray-900"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="flex items-center gap-2 bg-muted rounded-2xl pl-4 pr-1.5 py-1.5 focus-within:ring-2 focus-within:ring-[hsl(168,58%,32%)]/30 transition-shadow">
           <input
             ref={inputRef}
             data-testid="input-chat-message"
@@ -976,16 +994,21 @@ export default function AIChatWidget() {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything…"
             disabled={isLoading}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+            enterKeyHint="send"
+            autoComplete="off"
+            autoCorrect="on"
+            /* text-base (16px) prevents iOS auto-zoom on focus */
+            className="flex-1 min-w-0 bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50 py-1.5"
           />
           <button
             data-testid="button-send-message"
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-40"
+            aria-label="Send message"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-90 shrink-0"
             style={{ background: "hsl(168 58% 32%)" }}
           >
-            <Send size={13} className="text-white" />
+            <Send size={15} className="text-white -translate-x-px" />
           </button>
         </div>
       </div>
@@ -997,24 +1020,25 @@ export default function AIChatWidget() {
       {isOpen && chatPanel}
 
       <div
-        className={`fixed z-50 bottom-20 right-4 sm:bottom-20 sm:right-4 lg:bottom-6 lg:right-6 ${
+        className={`fixed z-50 bottom-20 right-3 sm:bottom-20 sm:right-4 lg:bottom-6 lg:right-6 ${
           isOpen ? "hidden" : "block"
         }`}
+        style={{ bottom: "max(5rem, calc(env(safe-area-inset-bottom) + 4.5rem))" }}
       >
         <button
           data-testid="button-open-chat"
           onClick={() => setIsOpen((o) => !o)}
-          className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative"
+          className="w-12 h-12 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 relative ring-2 ring-white/30"
           style={{ background: "hsl(168 58% 32%)" }}
           aria-label="Open AI chat assistant"
         >
           {isOpen ? (
-            <X className="text-white w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
+            <X className="text-white w-5 h-5 lg:w-[22px] lg:h-[22px]" />
           ) : (
-            <MessageCircle className="text-white w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
+            <MessageCircle className="text-white w-5 h-5 lg:w-[22px] lg:h-[22px]" />
           )}
           {hasUnread && !isOpen && (
-            <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3.5 lg:h-3.5 bg-orange-500 rounded-full border-2 border-white" />
+            <span className="absolute top-0.5 right-0.5 w-3 h-3 lg:w-3.5 lg:h-3.5 bg-orange-500 rounded-full border-2 border-white animate-pulse" />
           )}
         </button>
       </div>
