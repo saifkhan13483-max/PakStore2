@@ -23,7 +23,9 @@ Disallow: /thank-you
 Disallow: /thank-you/
 Disallow: /orders
 Disallow: /orders/
-Disallow: /*?*
-Disallow: /*&*
+Disallow: /*?utm_*
+Disallow: /*&utm_*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
 
 Sitemap: https://pakcart.store/sitemap.xml

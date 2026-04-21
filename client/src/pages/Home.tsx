@@ -133,12 +133,38 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col font-body overflow-x-hidden">
       <SEO 
-        title="PakCart | #1 Online Shopping in Pakistan - Women's Bags, Watches & Decor"
-        description="Shop the latest collection of premium women's handbags, luxury men's watches, comfortable slippers, and quality bedsheets at PakCart. Enjoy free delivery on orders over Rs. 10,000 across Pakistan."
-        keywords="online shopping pakistan, womens bags pakistan, ladies watches pakistan, slippers online pakistan, bedsheets online pakistan, pakcart store"
+        title="PakCart — Online Shopping in Pakistan | Handbags, Watches, Khussas & Bedsheets"
+        description="Shop premium women's handbags, men's watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and quality bedsheets at PakCart. Cash on Delivery, 7-day easy returns and free shipping on orders over Rs. 10,000 nationwide."
+        keywords="online shopping pakistan, ladies handbags pakistan, mens watches pakistan, multani khussa, kashmiri pashmina, cotton bedsheets pakistan, kids school bags, cash on delivery pakistan, pakcart store"
         url="https://pakcart.store/"
         robots="index,follow"
         isHomePage={true}
+        faqs={[
+          {
+            question: "Does PakCart offer Cash on Delivery (COD) across Pakistan?",
+            answer: "Yes — PakCart offers Cash on Delivery on all orders nationwide. You only pay when your parcel is delivered to your doorstep."
+          },
+          {
+            question: "How long does delivery take?",
+            answer: "Most orders are dispatched within 24 hours and reach you in 2–5 working days, depending on your city. Major cities like Karachi, Lahore, Islamabad, Rawalpindi and Faisalabad usually receive orders within 2–3 days."
+          },
+          {
+            question: "Is shipping free on PakCart?",
+            answer: "Shipping is free on all orders above Rs. 10,000. Below that, a small flat delivery fee applies and is shown at checkout before you confirm your order."
+          },
+          {
+            question: "Can I return or exchange a product?",
+            answer: "Yes — PakCart offers an easy 7-day return and exchange policy on eligible products. If something doesn't fit or arrives damaged, contact us within 7 days of delivery."
+          },
+          {
+            question: "What products does PakCart sell?",
+            answer: "PakCart sells premium women's handbags, men's and ladies' watches, Multani khussas, Kashmiri Pashmina shawls, kids' bags and quality cotton bedsheets — all sourced from trusted Pakistani artisans and brands."
+          },
+          {
+            question: "How can I contact PakCart customer support?",
+            answer: "You can WhatsApp or SMS our owner Saif Khan at 0318-8055850 (messages only, no calls), or email us at support@pakcart.store. We usually reply within a few hours."
+          }
+        ]}
       />
       <main className="flex-1">
         {/* Hero Section with Custom Slider */}

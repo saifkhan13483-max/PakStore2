@@ -61,8 +61,9 @@ export default function About() {
   return (
     <>
       <SEO
-        title="About PakCart - Online Shopping in Pakistan"
-        description="Learn about PakCart, Pakistan's premier destination for authentic artisanal products. Connecting local artisans with customers nationwide with fast delivery and quality guaranteed."
+        title="About PakCart — Pakistan's Trusted Online Store for Artisanal Goods"
+        description="Learn how PakCart connects Pakistani artisans and trusted brands with shoppers nationwide — handpicked handbags, watches, Multani khussas, Kashmiri Pashmina shawls and bedsheets, with Cash on Delivery and quality guaranteed."
+        keywords="about pakcart, pakistani online store, artisanal shopping pakistan, trusted ecommerce pakistan"
         url="https://pakcart.store/about"
         robots="index,follow"
         schema={aboutPageSchema}

@@ -55,8 +55,9 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <SEO
-        title="Contact Us - Get in Touch with PakCart"
-        description="Get in touch with PakCart for any inquiries about our authentic Pakistani artisanal products. Email, phone, or use our contact form. We're here to help."
+        title="Contact PakCart — WhatsApp, Email & Customer Support"
+        description="Reach PakCart customer support for orders, sizing, returns or product questions. WhatsApp/SMS our owner Saif Khan at 0318-8055850 or email support@pakcart.store — we usually reply within a few hours."
+        keywords="contact pakcart, pakcart whatsapp, pakcart support, pakcart customer service, online store contact pakistan"
         url="https://pakcart.store/contact"
         robots="index,follow"
         schema={contactPageSchema}

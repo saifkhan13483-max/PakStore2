@@ -111,10 +111,15 @@ export default function NewArrivals() {
   return (
     <div className="container mx-auto px-4 py-8">
       <SEO 
-        title="New Arrivals - Latest Bags, Watches, Slippers & More"
-        description="Discover our newest collection of women's bags, men's watches, slippers, and bedsheets freshly added to PakCart. Shop the latest arrivals with fast delivery across Pakistan."
+        title="New Arrivals — Fresh Handbags, Watches, Khussas & Pashminas"
+        description="Discover the freshest drops at PakCart — newly arrived women's handbags, men's & ladies' watches, Multani khussas, Kashmiri Pashmina shawls and premium bedsheets. Cash on Delivery and fast nationwide shipping across Pakistan."
+        keywords="new arrivals pakistan, latest handbags, new watches pakistan, new khussa designs, pashmina new collection, pakcart"
         url="https://pakcart.store/new-arrivals"
         robots="index,follow"
+        breadcrumbs={[
+          { name: "Home", url: "https://pakcart.store/" },
+          { name: "New Arrivals", url: "https://pakcart.store/new-arrivals" },
+        ]}
       />
 
       <Breadcrumb className="mb-6">
