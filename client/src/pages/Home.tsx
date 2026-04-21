@@ -486,110 +486,81 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Products */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-end mb-6">
-              <div>
-                <h2 className="font-display text-4xl font-bold text-foreground mb-2">Best Sellers</h2>
-                <p className="text-muted-foreground max-w-xl">
-                  Discover our most coveted pieces, hand-picked for their exceptional quality and popularity.
-                </p>
-              </div>
-              <Link href="/products">
-                <Button variant="ghost" className="hidden md:flex gap-2 group">
-                  View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-            </div>
+        {/* Per-Category Sections */}
+        {categories.map((category, catIndex) => {
+          const categoryProducts = allProducts?.filter(p => p.categoryId === category.id) || [];
+          if (categoryProducts.length === 0 && !isAllProductsLoading) return null;
+          const visibleProducts = categoryProducts.slice(0, 10);
+          const categorySlug = category.slug || String(category.id);
+          const isAlt = catIndex % 2 === 1;
+          return (
+            <section
+              key={category.id}
+              className={`py-10 ${isAlt ? "bg-muted/30" : ""}`}
+              data-testid={`section-category-${categorySlug}`}
+            >
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <h2 className="font-display text-4xl font-bold text-foreground mb-2" data-testid={`heading-category-${categorySlug}`}>
+                      {category.name}
+                    </h2>
+                    <div className="h-1.5 w-16 bg-primary rounded-full" />
+                  </motion.div>
+                  <Link href={`/collections/${categorySlug}`}>
+                    <Button variant="ghost" className="gap-2 group" data-testid={`link-view-all-${categorySlug}`}>
+                      View All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
-              {isFeaturedLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <Skeleton className="h-[300px] w-full rounded-2xl" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-4 w-1/3" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
+                  {isAllProductsLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="space-y-4">
+                        <Skeleton className="h-[300px] w-full rounded-2xl" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-4 w-1/3" />
+                      </div>
+                    ))
+                  ) : (
+                    visibleProducts.map((product, index) => (
+                      <motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
+                      >
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+
+                {categoryProducts.length > 10 && (
+                  <div className="mt-6 text-center">
+                    <Link href={`/collections/${categorySlug}`}>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="rounded-full min-w-[200px]"
+                        data-testid={`button-view-all-${categorySlug}`}
+                      >
+                        View All {category.name}
+                      </Button>
+                    </Link>
                   </div>
-                ))
-              ) : (
-                featuredProducts?.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))
-              )}
-            </div>
-
-            {allProducts?.filter(p => p.labels?.includes("Best Seller")).length! > 5 && (
-              <div className="mt-6 text-center">
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => setShowMoreFeatured(!showMoreFeatured)}
-                  className="rounded-full min-w-[200px]"
-                >
-                  {showMoreFeatured ? "Show Less" : "Show More"}
-                </Button>
-              </div>
-            )}
-
-          </div>
-        </section>
-
-        {/* Liked Products Section */}
-        {likedProducts.length > 0 && (
-          <section className="py-10 bg-muted/20">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <h2 className="font-display text-4xl font-bold text-foreground mb-2">Most Liked</h2>
-                  <div className="h-1.5 w-16 bg-pink-500 rounded-full" />
-                </motion.div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
-                {isLikedLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="space-y-4">
-                      <Skeleton className="h-[300px] w-full rounded-2xl" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-1/3" />
-                    </div>
-                  ))
-                ) : (
-                  likedProducts?.map((product, index) => (
-                    <motion.div
-                      key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  ))
                 )}
               </div>
-
-              {allProducts?.filter(p => p.labels?.includes("Liked")).length! > 5 && (
-                <div className="mt-6 text-center">
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => setShowMoreLiked(!showMoreLiked)}
-                    className="rounded-full min-w-[200px] border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white"
-                  >
-                    {showMoreLiked ? "Show Less" : "Show More"}
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
+            </section>
+          );
+        })}
       </main>
     </div>
   );
