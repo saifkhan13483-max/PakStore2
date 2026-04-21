@@ -1,0 +1,13 @@
+uploads = []
+
+[[generated]]
+id = "MQ2w0Jcbpaf52Fml9vG6_"
+uri = "file://attached_assets/generated_images/pakcart_hero_banner.png"
+type = "image"
+title = "pakcart hero banner"
+
+[[outputs]]
+id = "15XYVYK1b9k1SSUC-mnCK"
+uri = "file://attached_assets/generated_images/pakcart_hero_banner.png"
+type = "image"
+title = "PakCart Hero Banner (updated categories)"
