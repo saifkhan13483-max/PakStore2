@@ -81,12 +81,12 @@ function geminiApiPlugin() {
 
       server.middlewares.use("/api/chat", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        geminiProxy(req, res, "gemini-2.5-flash", { max_tokens: 512, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.5-flash", { max_tokens: 2048, temperature: 0.7 });
       });
 
       server.middlewares.use("/api/groq-proxy", (req: any, res: any) => {
         if (req.method !== "POST") { res.writeHead(405); res.end("Method Not Allowed"); return; }
-        geminiProxy(req, res, "gemini-2.5-flash", { max_tokens: 1024, temperature: 0.7 });
+        geminiProxy(req, res, "gemini-2.5-flash", { max_tokens: 2048, temperature: 0.7 });
       });
     },
   };
