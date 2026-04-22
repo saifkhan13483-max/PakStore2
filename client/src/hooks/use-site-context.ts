@@ -49,41 +49,97 @@ export function useSiteContext() {
     lines.push(`User is currently on page: ${location}`);
 
     lines.push(
-      "\n=== COMPLETE PAGE DIRECTORY (every public page on pakcart.store) ===\n" +
-        "Shopping & browsing:\n" +
-        "  - / → Home page (featured products, hero banner, new arrivals, announcements)\n" +
-        "  - /products → Full product catalog with search, filters, sorting (use this for 'show me everything' or category-less browsing)\n" +
-        "  - /products/<slug> → Individual product detail page (photos, description, price, add to cart, reviews)\n" +
-        "  - /categories → All categories overview page (visual grid of every category)\n" +
-        "  - /collections/<slug> → Products inside one specific category or parent category\n" +
-        "  - /new-arrivals → Latest products added to the store\n" +
+      "\n=== COMPLETE PAGE DIRECTORY (every public page on pakcart.store — what each does, who it's for, and when to send a user there) ===\n" +
         "\n" +
-        "Cart & checkout flow:\n" +
-        "  - /cart → User's shopping cart (review items, update qty, remove, proceed)\n" +
-        "  - /checkout → Place the order (login required — fills shipping info & confirms)\n" +
-        "  - /thank-you → Order confirmation page after successful checkout\n" +
+        "── SHOPPING & BROWSING ──\n" +
+        "• / (Home page)\n" +
+        "    What it does: Landing page with the hero slider/banner, scrolling announcement bar, category quick-grid, featured 'Best Seller' products, new-arrival highlights and curated collections.\n" +
+        "    Send the user here when: they say 'home', 'main page', 'kuch dikhao', or are new to the site and want a quick overview.\n" +
         "\n" +
-        "Account & orders:\n" +
-        "  - /auth/login → Login page (Google sign-in or email/password)\n" +
-        "  - /auth/signup → Create new account\n" +
-        "  - /profile → User profile (saved info, addresses) — login required\n" +
-        "  - /orders → 'My Orders' page — list of all past & current orders, live status — login required\n" +
-        "  - /orders/<id> → Detail page for a single order with tracking info — login required\n" +
+        "• /products (Full catalog)\n" +
+        "    What it does: The complete product listing across every category. Has live search, category filter, price filter, sort by Featured / Price / Newest, and pagination/infinite scroll.\n" +
+        "    Send the user here when: they want to 'browse everything', search by keyword, or you don't have an exact product to link to. Also use this when stock/price needs to be confirmed in real time.\n" +
         "\n" +
-        "Information pages:\n" +
-        "  - /about → About PakCart (story, owner Saif Khan, mission)\n" +
-        "  - /contact → Contact form & owner contact info\n" +
-        "  - /privacy → Privacy policy\n" +
-        "  - /terms → Terms & conditions\n" +
+        "• /products/<slug> (Single product detail)\n" +
+        "    What it does: Big photo gallery, full description, price, In Stock / Out of Stock badge, variant selector (size / color when applicable), quantity picker, Add to Cart button, customer reviews section.\n" +
+        "    Send the user here when: you've identified the exact product they want — give them the direct slug link from the live snapshot below.\n" +
         "\n" +
-        "Dropshipper / partner program:\n" +
-        "  - /dropshipper → Become a dropshipper landing page (info + signup)\n" +
-        "  - /dropshipper/dashboard → Dropshipper's own dashboard (catalog, earnings) — login required\n" +
+        "• /categories (All categories)\n" +
+        "    What it does: A clean visual grid of every parent category and sub-category in the store. Each tile links into /collections/<slug>.\n" +
+        "    Send the user here when: they're not sure what they want and need to browse by category.\n" +
         "\n" +
-        "Rules for sharing links:\n" +
-        "  - Always send users to a real page above. Never invent a path that isn't listed.\n" +
-        "  - Use relative paths like /products or /orders in your replies — the chat will auto-link them.\n" +
-        "  - For specific products or categories use the slugs from the live snapshot below."
+        "• /collections/<slug> (Single category)\n" +
+        "    What it does: All products inside one category (e.g. /collections/bags-wallets, /collections/jewelry). Same filters and sorting as /products but scoped to that category. Has SEO-friendly category breadcrumbs.\n" +
+        "    Send the user here when: they ask for a specific category — bags, jewelry, shoes, slippers, stitched dresses, watches, tech gadgets, etc. Always use the exact slug from the categories list below.\n" +
+        "\n" +
+        "• /new-arrivals (Latest stock)\n" +
+        "    What it does: All recently added products, sorted newest-first, with sort options.\n" +
+        "    Send the user here when: they ask 'what's new', 'naya kya aaya', 'fresh stock', or want to see the latest additions before everyone else.\n" +
+        "\n" +
+        "── CART & CHECKOUT FLOW ──\n" +
+        "• /cart (Shopping cart)\n" +
+        "    What it does: Lists every item the user added — image, name, qty +/− buttons, remove (X), per-item subtotal and grand total. Shows stock-limit warnings if they exceed available qty. Has 'Proceed to Checkout' button.\n" +
+        "    Send the user here when: they ask 'meri cart dikhao', 'kya kya add kiya hai', or want to update quantities before ordering.\n" +
+        "\n" +
+        "• /checkout (Place order — LOGIN REQUIRED)\n" +
+        "    What it does: Multi-step checkout — shipping form (full name, email, phone, full address, city dropdown covering every Pakistani city, area), order summary on the side, then 'Continue to Payment' → 'Complete Order'. Cash on Delivery is supported across Pakistan.\n" +
+        "    Send the user here when: they're ready to buy and have items in the cart. If they aren't logged in, tell them they'll be asked to log in first.\n" +
+        "\n" +
+        "• /thank-you (Order confirmation)\n" +
+        "    What it does: Shown automatically after a successful checkout — confirms the order ID and next steps. Not something the user navigates to manually; only mention it if they ask 'mera order place ho gaya kya'.\n" +
+        "\n" +
+        "── ACCOUNT & ORDERS ──\n" +
+        "• /auth/login (Login)\n" +
+        "    What it does: Sign in with Google (one-tap) OR email + password. Required before checkout, viewing orders, profile, or dropshipper dashboard.\n" +
+        "• /auth/signup (Create account)\n" +
+        "    What it does: New account via Google or email/password. Once created, they stay signed in.\n" +
+        "• /profile (User profile — LOGIN REQUIRED)\n" +
+        "    What it does: Saved name, email, phone and default delivery addresses for faster checkout next time.\n" +
+        "• /orders (My Orders — LOGIN REQUIRED)\n" +
+        "    What it does: Full list of every order the user has placed — date, order total, item count, current status (Pending / Confirmed / Shipped / Delivered / Cancelled). Click any row → /orders/<id>.\n" +
+        "    Send the user here when: they ask 'mera order kahan hai', 'tracking', 'delivery kab tak aaye gi', 'kya status hai'.\n" +
+        "• /orders/<id> (Single order detail — LOGIN REQUIRED)\n" +
+        "    What it does: Detail of one specific order — every item with photo & qty, full shipping address, status timeline, total breakdown.\n" +
+        "    Send the user here only if they share an order ID, otherwise just send them to /orders.\n" +
+        "\n" +
+        "── INFORMATION PAGES ──\n" +
+        "• /about (About PakCart)\n" +
+        "    What it does: Tells the PakCart story — Pakistan's premier destination for authentic artisanal goods, founded 2024, mission to connect local artisans/brands with shoppers nationwide. Highlights nationwide delivery and authentic-quality guarantee. Owner: Saif Khan.\n" +
+        "• /contact (Contact us)\n" +
+        "    What it does: Contact form + direct contact info — Email contact@pakcart.store, WhatsApp/SMS 0318-8055850 (Mon–Fri 9am–6pm PKT, message only — not call).\n" +
+        "    Send the user here when: they want to email/WhatsApp support, raise an issue, or send a custom inquiry.\n" +
+        "• /privacy (Privacy policy)\n" +
+        "    What it does: Explains what personal data is collected (identity, contact, financial, technical), how it's used, security measures, and the privacy contact (privacy@pakcart.store). Last updated Feb 7, 2026.\n" +
+        "• /terms (Terms & Conditions)\n" +
+        "    What it does: Terms of use, license, disclaimer, shipping & returns policy (nationwide delivery 3–5 business days, 7-day return window for unused items in original packaging — perishables non-returnable unless damaged in transit), governing law (Pakistan). Last updated Feb 7, 2026.\n" +
+        "    Send the user here when: they ask about return policy, refund window, delivery time, or legal terms.\n" +
+        "\n" +
+        "── DROPSHIPPER / PARTNER PROGRAM ──\n" +
+        "• /dropshipper (Become a dropshipper)\n" +
+        "    What it does: Landing page explaining the dropshipper program — list PakCart products on your own Daraz / Facebook page / Instagram / website, earn on every sale, no inventory needed. Has signup/application form. Shows count of active dropshippers.\n" +
+        "    Send the user here when: they ask about reselling, becoming a partner, earning from PakCart, or 'mein bhi yeh products bechna chahta hoon'.\n" +
+        "• /dropshipper/dashboard (Dropshipper dashboard — LOGIN REQUIRED for approved dropshippers)\n" +
+        "    What it does: Approved dropshippers' control panel — browse the full catalog with their pricing, see earnings, download product images/details for their own listings.\n" +
+        "\n" +
+        "── KEY CONTACT / SUPPORT INFO (use this when a user needs human help) ──\n" +
+        "• Owner: Saif Khan — WhatsApp / SMS: 03188055850 (message only, no calls)\n" +
+        "• Customer support email: contact@pakcart.store\n" +
+        "• Support hours: Mon–Fri, 9am–6pm PKT\n" +
+        "• Privacy queries: privacy@pakcart.store\n" +
+        "• Build-your-own-store inquiries: saifkhan@pakcart.store\n" +
+        "\n" +
+        "── PAYMENT, DELIVERY & RETURN POLICY (verified facts — safe to quote) ──\n" +
+        "• Payment: Cash on Delivery (COD) available across Pakistan.\n" +
+        "• Delivery area: Nationwide — every city in Pakistan (full city dropdown at checkout).\n" +
+        "• Standard delivery time: 3–5 business days.\n" +
+        "• Returns: 7 days from delivery, unused items in original packaging. Perishables not eligible unless damaged in transit.\n" +
+        "• Live order tracking: /orders (must be logged in).\n" +
+        "\n" +
+        "── RULES FOR SHARING LINKS ──\n" +
+        "• Always send users to a real page listed above. NEVER invent a path that isn't listed.\n" +
+        "• Use relative paths like /products, /collections/<slug>, /orders, /contact in your replies — the chat will auto-link them.\n" +
+        "• For specific products or categories, use the exact slugs from the live snapshot below.\n" +
+        "• If a user needs login first (checkout, orders, profile, dropshipper dashboard), mention it briefly so they aren't surprised by the login screen."
     );
 
     if (cartItems.length > 0) {
