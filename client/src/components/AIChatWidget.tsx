@@ -8,7 +8,7 @@ interface Message {
   error?: boolean;
 }
 
-const STORAGE_KEY = "pakbot_chat_history_v1";
+const STORAGE_KEY = "pakbot_chat_history_v2";
 const MAX_STORED_MESSAGES = 40;
 
 const WELCOME_MESSAGE: Message = {
