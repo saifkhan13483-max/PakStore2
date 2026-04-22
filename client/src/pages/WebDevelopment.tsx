@@ -1,17 +1,68 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
-import { Code2, ShieldCheck, Server, Mail as MailIcon, Search, Wallet, Clock, CheckCircle2, Globe, ExternalLink, Phone } from "lucide-react";
+import {
+  Code2,
+  ShieldCheck,
+  Server,
+  Mail as MailIcon,
+  Search,
+  Wallet,
+  Clock,
+  CheckCircle2,
+  Globe,
+  ExternalLink,
+  Phone,
+  Sparkles,
+  Rocket,
+  LayoutDashboard,
+  Smartphone,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const WebDevelopment = () => {
   const features = [
-    { icon: Code2, title: "Pure Custom Coding", desc: "No Shopify, no WordPress dependency. Fully hand-coded websites built from scratch." },
-    { icon: Wallet, title: "One-Time Payment", desc: "No monthly subscription fees. Pay once and own your website forever." },
-    { icon: Server, title: "Lifetime Free Hosting", desc: "Fast and reliable hosting included for life — no recurring hosting bills." },
-    { icon: MailIcon, title: "Free Business Emails", desc: "Lifetime free professional emails like contact@yourdomain for your business." },
-    { icon: ShieldCheck, title: "Admin Panel Included", desc: "Full admin dashboard to manage products, orders, customers and content." },
-    { icon: Search, title: "SEO Friendly", desc: "Built with SEO best practices so your store ranks well on Google." },
+    {
+      icon: Code2,
+      title: "Pure Custom Coding",
+      desc: "No Shopify, no WordPress dependency. Fully hand-coded websites built from scratch.",
+    },
+    {
+      icon: Wallet,
+      title: "One-Time Payment",
+      desc: "No monthly subscription fees. Pay once and own your website forever.",
+    },
+    {
+      icon: Server,
+      title: "Lifetime Free Hosting",
+      desc: "Fast and reliable hosting included for life — no recurring hosting bills.",
+    },
+    {
+      icon: MailIcon,
+      title: "Free Business Emails",
+      desc: "Lifetime free professional emails like contact@yourdomain for your business.",
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Admin Panel Included",
+      desc: "Full admin dashboard to manage products, orders, customers and content.",
+    },
+    {
+      icon: Search,
+      title: "SEO Friendly",
+      desc: "Built with SEO best practices so your store ranks well on Google.",
+    },
+    {
+      icon: Smartphone,
+      title: "Mobile Responsive",
+      desc: "Looks beautiful on every device — phone, tablet and desktop.",
+    },
+    {
+      icon: Rocket,
+      title: "Fast & Optimized",
+      desc: "Optimized code and assets so your store loads in a flash.",
+    },
   ];
 
   const includes = [
@@ -25,6 +76,24 @@ const WebDevelopment = () => {
     "All essential eCommerce features included",
   ];
 
+  const steps = [
+    {
+      n: "01",
+      title: "Discuss Your Idea",
+      desc: "WhatsApp par baat karein — apne business aur requirements share karein.",
+    },
+    {
+      n: "02",
+      title: "Design & Development",
+      desc: "Main aap ke liye website ko pure code mein design aur develop karta hoon.",
+    },
+    {
+      n: "03",
+      title: "Launch in 1 Month",
+      desc: "Hosting, business emails aur admin panel ke saath website live ho jaati hai.",
+    },
+  ];
+
   return (
     <div className="bg-background">
       <Helmet>
@@ -36,33 +105,50 @@ const WebDevelopment = () => {
       </Helmet>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-[#FFF9E5] to-background border-b">
-        <div className="container mx-auto px-4 py-16 md:py-20">
-          <div className="max-w-3xl mx-auto text-center space-y-5">
-            <p className="text-sm font-medium tracking-wide text-[#D4A017] uppercase">
+      <section className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FFF9E5] via-background to-[#FFF4D6]" />
+        <div
+          aria-hidden
+          className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#D4A017]/10 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#D4A017]/10 blur-3xl"
+        />
+
+        <div className="container relative mx-auto px-4 py-14 sm:py-20 md:py-24">
+          <div className="max-w-3xl mx-auto text-center space-y-5 sm:space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#D4A017]/30 bg-white/70 backdrop-blur px-3 py-1 text-xs font-medium text-[#8a6a0d]">
+              <Sparkles className="h-3.5 w-3.5" />
               Assalam-o-Alaikum
-            </p>
+            </span>
             <h1
-              className="font-display text-3xl md:text-5xl font-bold leading-tight"
+              className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight"
               data-testid="text-webdev-title"
             >
-              Custom eCommerce Websites — Built With Pure Code
+              Custom eCommerce Websites
+              <span className="block text-[#D4A017]">Built With Pure Code</span>
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
               Main ek professional web developer hoon. Specially custom eCommerce
               websites develop karta hoon — Shopify ya WordPress par depend kiye
               baghair, pure coding ke zariye. Iska sab se bara faida yeh hai ke
               aap ko Shopify waghera ki monthly subscription fees nahi deni
               parti.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
               <a
                 href="https://wa.me/923188055850"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="link-whatsapp-webdev"
+                className="w-full sm:w-auto"
               >
-                <Button size="lg" className="bg-[#D4A017] hover:bg-[#b8890f] text-white">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-[#D4A017] hover:bg-[#b8890f] text-white shadow-lg shadow-[#D4A017]/20"
+                >
                   <Phone className="h-4 w-4 mr-2" />
                   WhatsApp — +92 318 8055850
                 </Button>
@@ -72,124 +158,206 @@ const WebDevelopment = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="link-demo-pakcart"
+                className="w-full sm:w-auto"
               >
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  See Live Demo — pakcart.store
+                  See Live Demo
                 </Button>
               </a>
+            </div>
+
+            {/* Trust strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 max-w-2xl mx-auto">
+              {[
+                { k: "1 Month", v: "Delivery" },
+                { k: "One-Time", v: "Payment" },
+                { k: "Lifetime", v: "Free Hosting" },
+                { k: "100%", v: "Custom Code" },
+              ].map((s) => (
+                <div
+                  key={s.v}
+                  className="rounded-lg border bg-white/70 backdrop-blur px-3 py-3 text-center"
+                >
+                  <div className="font-display font-bold text-base sm:text-lg text-foreground">
+                    {s.k}
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground">
+                    {s.v}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pitch */}
-      <section className="container mx-auto px-4 py-14">
-        <div className="max-w-3xl mx-auto space-y-5 text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-bold">
+      {/* Features grid */}
+      <section className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="max-w-2xl mx-auto text-center space-y-3">
+          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
             Aap ko kya milega?
           </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Main aap ko fully functional eCommerce website banake doon ga — jis
-            mein admin panel, lifetime free aur fast hosting, aur tamam zaroori
-            features shamil hon ge. Aur yeh sab sirf{" "}
+          <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+            Fully functional eCommerce website with admin panel, lifetime free
+            hosting and emails — sab kuch ek{" "}
             <span className="font-semibold text-foreground">one-time payment</span>{" "}
-            par hoga.
+            par.
           </p>
         </div>
 
-        {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mt-10">
           {features.map((f) => (
             <Card
               key={f.title}
-              className="hover-elevate"
+              className="hover-elevate h-full"
               data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}
             >
-              <CardContent className="p-6 space-y-3">
+              <CardContent className="p-5 sm:p-6 space-y-3 h-full">
                 <div className="h-11 w-11 rounded-lg bg-[#FFF9E5] text-[#D4A017] flex items-center justify-center">
                   <f.icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-lg">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                <h3 className="font-semibold text-base sm:text-lg leading-snug">
+                  {f.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {f.desc}
+                </p>
               </CardContent>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* What's included */}
+      {/* Process */}
       <section className="bg-muted/30 border-y">
-        <div className="container mx-auto px-4 py-14">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start max-w-5xl mx-auto">
-            <div className="space-y-4">
-              <h2 className="font-display text-2xl md:text-3xl font-bold">
-                Package Mein Kya Shamil Hai?
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Sirf ek mahine mein, main aap ke liye fully professional,
-                ready-to-use, aur SEO-friendly eCommerce website tayar kar doon
-                ga — saath mein lifetime free hosting aur business emails bhi.
-              </p>
-              <div className="flex items-center gap-3 pt-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 text-[#D4A017]" />
-                <span>Delivery time: 1 month</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Globe className="h-4 w-4 text-[#D4A017]" />
-                <span>Live example: pakcart.store</span>
-              </div>
-            </div>
+        <div className="container mx-auto px-4 py-14 sm:py-20">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
+              Kaam kaise hota hai?
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Simple aur transparent process — sirf 3 steps mein aap ki website
+              ready.
+            </p>
+          </div>
 
-            <Card>
-              <CardContent className="p-6">
-                <ul className="space-y-3">
-                  {includes.map((item, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-3 text-sm"
-                      data-testid={`text-include-${idx}`}
-                    >
-                      <CheckCircle2 className="h-5 w-5 text-[#D4A017] shrink-0 mt-0.5" />
-                      <span className="text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-10 max-w-5xl mx-auto">
+            {steps.map((s) => (
+              <Card key={s.n} className="relative h-full">
+                <CardContent className="p-6 space-y-3">
+                  <div className="font-display text-3xl sm:text-4xl font-bold text-[#D4A017]/30">
+                    {s.n}
+                  </div>
+                  <h3 className="font-semibold text-lg">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {s.desc}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* What's included */}
+      <section className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-5xl mx-auto">
+          <div className="space-y-4 order-2 lg:order-1">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E5] px-3 py-1 text-xs font-medium text-[#8a6a0d]">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Complete Package
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
+              Package Mein Kya Shamil Hai?
+            </h2>
+            <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+              Sirf ek mahine mein, main aap ke liye fully professional,
+              ready-to-use, aur SEO-friendly eCommerce website tayar kar doon
+              ga — saath mein lifetime free hosting aur business emails bhi.
+            </p>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 pt-2 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[#D4A017]" />
+                Delivery: 1 month
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Globe className="h-4 w-4 text-[#D4A017]" />
+                Live demo: pakcart.store
+              </span>
+            </div>
+          </div>
+
+          <Card className="order-1 lg:order-2 shadow-sm">
+            <CardContent className="p-5 sm:p-6">
+              <ul className="space-y-3">
+                {includes.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start gap-3 text-sm sm:text-base"
+                    data-testid={`text-include-${idx}`}
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-[#D4A017] shrink-0 mt-0.5" />
+                    <span className="text-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center space-y-5">
-          <h2 className="font-display text-2xl md:text-3xl font-bold">
-            eCommerce website banwana chahte hain?
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Agar aap apne business ke liye ek professional eCommerce website
-            banwana chahte hain, to mujh se rabta karein. Main aap ko ek mahine
-            mein ready-to-use website bana ke doon ga.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <a
-              href="https://wa.me/923188055850"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="link-whatsapp-cta"
-            >
-              <Button size="lg" className="bg-[#D4A017] hover:bg-[#b8890f] text-white">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact on WhatsApp
-              </Button>
-            </a>
-            <Link href="/contact" data-testid="link-contact-page">
-              <Button size="lg" variant="outline">
-                <MailIcon className="h-4 w-4 mr-2" />
-                Contact Form
-              </Button>
-            </Link>
+      <section className="container mx-auto px-4 pb-14 sm:pb-20">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#D4A017] to-[#b8890f] text-white">
+          <div
+            aria-hidden
+            className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
+          />
+          <div
+            aria-hidden
+            className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
+          />
+          <div className="relative px-5 py-10 sm:px-10 sm:py-14 text-center max-w-3xl mx-auto space-y-5">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
+              eCommerce website banwana chahte hain?
+            </h2>
+            <p className="text-white/90 leading-relaxed text-sm sm:text-base max-w-2xl mx-auto">
+              Apne business ke liye ek professional, fast aur SEO-friendly
+              website chahiye? Abhi rabta karein — main ek mahine mein ready-to-use
+              website bana ke doon ga.
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+              <a
+                href="https://wa.me/923188055850"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="link-whatsapp-cta"
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-white text-[#8a6a0d] hover:bg-white/90"
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  Contact on WhatsApp
+                </Button>
+              </a>
+              <Link
+                href="/contact"
+                data-testid="link-contact-page"
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto bg-transparent text-white border-white/60 hover:bg-white/10 hover:text-white"
+                >
+                  Contact Form
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
