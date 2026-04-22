@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   Smartphone,
   ArrowRight,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,6 +92,56 @@ const WebDevelopment = () => {
       n: "03",
       title: "Launch in 1 Month",
       desc: "Hosting, business emails aur admin panel ke saath website live ho jaati hai.",
+    },
+  ];
+
+  const plans = [
+    {
+      name: "Basic",
+      price: "25,000",
+      tagline: "Starter store for small businesses",
+      features: [
+        "Up to 20 products",
+        "Custom-coded responsive design",
+        "Admin panel — manage products & orders",
+        "Lifetime free hosting",
+        "1 free business email",
+        "Basic SEO setup",
+        "Delivery in 1 month",
+      ],
+      popular: false,
+    },
+    {
+      name: "Standard",
+      price: "45,000",
+      tagline: "Most popular for growing brands",
+      features: [
+        "Up to 100 products",
+        "Premium custom design",
+        "Full admin panel + analytics",
+        "Lifetime free fast hosting",
+        "3 free business emails",
+        "Advanced SEO + sitemap",
+        "WhatsApp & order notifications",
+        "Delivery in 1 month",
+      ],
+      popular: true,
+    },
+    {
+      name: "Premium",
+      price: "75,000",
+      tagline: "Full-featured store for serious sellers",
+      features: [
+        "Unlimited products",
+        "Fully customized premium design",
+        "Advanced admin + reports",
+        "Lifetime free premium hosting",
+        "5 free business emails",
+        "Complete SEO optimization",
+        "Online payments integration",
+        "Priority support & free updates",
+      ],
+      popular: false,
     },
   ];
 
@@ -307,8 +358,110 @@ const WebDevelopment = () => {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section className="bg-muted/40 border-y" id="pricing">
+        <div className="container mx-auto px-4 py-14 sm:py-20">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card px-3 py-1 text-xs font-medium text-primary">
+              <Wallet className="h-3.5 w-3.5" />
+              Pricing Plans
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
+              Simple, One-Time Pricing
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Koi monthly fees nahi, koi hidden charges nahi. Apne business ke
+              liye perfect plan choose karein.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mt-10 max-w-6xl mx-auto items-stretch">
+            {plans.map((plan) => (
+              <Card
+                key={plan.name}
+                className={`relative h-full flex flex-col ${
+                  plan.popular
+                    ? "border-primary border-2 shadow-xl md:-translate-y-2"
+                    : ""
+                }`}
+                data-testid={`card-plan-${plan.name.toLowerCase()}`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow">
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                <CardContent className="p-6 sm:p-7 flex flex-col h-full">
+                  <div className="space-y-1">
+                    <h3 className="font-display font-bold text-xl">
+                      {plan.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.tagline}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 pb-5 border-b">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Rs.
+                      </span>
+                      <span
+                        className="font-display text-4xl sm:text-5xl font-bold text-foreground"
+                        data-testid={`text-price-${plan.name.toLowerCase()}`}
+                      >
+                        {plan.price}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      One-time payment
+                    </p>
+                  </div>
+
+                  <ul className="space-y-3 py-5 flex-1">
+                    {plan.features.map((f, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-3 text-sm"
+                      >
+                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <span className="text-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href="https://wa.me/923188055850"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`link-plan-${plan.name.toLowerCase()}`}
+                    className="mt-auto"
+                  >
+                    <Button
+                      className="w-full"
+                      variant={plan.popular ? "default" : "outline"}
+                      size="lg"
+                    >
+                      Get Started
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-8">
+            Custom requirements? <a href="https://wa.me/923188055850" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">WhatsApp karein</a> for a tailored quote.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="container mx-auto px-4 pb-14 sm:pb-20">
+      <section className="container mx-auto px-4 pt-14 sm:pt-20 pb-14 sm:pb-20">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] text-primary-foreground">
           <div
             aria-hidden
