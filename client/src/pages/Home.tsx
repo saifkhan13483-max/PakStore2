@@ -101,17 +101,17 @@ export default function Home() {
 
   const featuredProducts = useMemo(() => {
     const filtered = allProducts?.filter(p => p.labels?.includes("Best Seller")) || [];
-    return showMoreFeatured ? filtered : filtered.slice(0, 5);
+    return showMoreFeatured ? filtered : filtered.slice(0, 6);
   }, [allProducts, showMoreFeatured]);
 
   const likedProducts = useMemo(() => {
     const filtered = allProducts?.filter(p => p.labels?.includes("Liked")) || [];
-    return showMoreLiked ? filtered : filtered.slice(0, 5);
+    return showMoreLiked ? filtered : filtered.slice(0, 6);
   }, [allProducts, showMoreLiked]);
 
   const newArrivals = useMemo(() => {
     const filtered = allProducts?.filter(p => p.labels?.includes("New")) || [];
-    return showMoreNewArrivals ? filtered : filtered.slice(0, 5);
+    return showMoreNewArrivals ? filtered : filtered.slice(0, 6);
   }, [allProducts, showMoreNewArrivals]);
 
   const isFeaturedLoading = isAllProductsLoading;
@@ -457,9 +457,9 @@ export default function Home() {
               </motion.div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
               {isNewArrivalsLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
+                Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="h-[300px] w-full rounded-2xl" />
                     <Skeleton className="h-4 w-2/3" />
@@ -509,7 +509,7 @@ export default function Home() {
           if (categoryProducts.length === 0 && !isAllProductsLoading) return null;
           const categorySlug = category.slug || String(category.id);
           const isExpanded = expandedCategories.has(category.id);
-          const visibleProducts = isExpanded ? categoryProducts : categoryProducts.slice(0, 5);
+          const visibleProducts = isExpanded ? categoryProducts : categoryProducts.slice(0, 6);
           return (
             <section
               key={category.id}
@@ -531,9 +531,9 @@ export default function Home() {
                   </motion.div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
                   {isAllProductsLoading ? (
-                    Array.from({ length: 5 }).map((_, i) => (
+                    Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="space-y-4">
                         <Skeleton className="h-[300px] w-full rounded-2xl" />
                         <Skeleton className="h-4 w-2/3" />
