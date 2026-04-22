@@ -78,6 +78,9 @@ Key pages to direct users to:
 - Fresh stock: /new-arrivals
 - Order tracking: /orders
 - Account login: Google or email/password via the site header
+- Get your own custom eCommerce website built (one-time payment, lifetime free hosting + emails, 1-month delivery, plans Rs 25k / Rs 45k / Rs 75k): /web-development
+- Become a reseller / dropshipper: /dropshipper
+- Contact / WhatsApp / email: /contact
 
 IMPORTANT: The domain is pakcart.store — NEVER say pakcart.com, pakcart.pk, or any other variation. If asked for the website link, say: pakcart.store
 

@@ -118,6 +118,19 @@ export function useSiteContext() {
         "    What's on it: Five sections — (1) Terms of Use, (2) Use License, (3) Disclaimer, (4) Shipping & Returns: nationwide delivery in 3–5 business days, 7-day return window for unused items in original packaging, perishables non-returnable unless damaged in transit, (5) Governing Law: Pakistan. Last updated Feb 7, 2026.\n" +
         "    Send the user here when: they ask about return policy, refund window, delivery time, exchanges, or legal terms.\n" +
         "\n" +
+        "── WEB DEVELOPMENT SERVICE (PakCart builds custom eCommerce sites for other businesses) ──\n" +
+        "• /web-development (Custom eCommerce website service)\n" +
+        "    What's on it: Hero — 'Custom eCommerce Websites Built With Pure Code'. PakCart's team of professional developers builds fully custom-coded eCommerce stores (no Shopify, no WordPress) so the client never pays monthly subscription fees. Trust strip: 1 Month Delivery · One-Time Payment · Lifetime Free Hosting · 100% Custom Code.\n" +
+        "    Features highlighted: Pure custom coding · One-time payment (no subscriptions) · Lifetime free hosting · Lifetime free business emails (e.g. contact@yourdomain) · Admin panel included · SEO friendly · Mobile responsive · Fast & optimized.\n" +
+        "    3-step process: (1) Discuss your idea on WhatsApp, (2) Design & develop the site in pure code, (3) Launch in 1 month with hosting, business emails and admin panel.\n" +
+        "    What's included: Fully functional eCommerce website + admin panel + lifetime free fast hosting + lifetime free business emails + mobile-responsive modern design + SEO-friendly structure + ready in 1 month.\n" +
+        "    Pricing (one-time payment, no monthly fees):\n" +
+        "      - Basic — Rs 25,000: up to 20 products, custom-coded responsive design, admin panel, lifetime free hosting, 1 free business email, basic SEO, 1-month delivery.\n" +
+        "      - Standard (Most Popular) — Rs 45,000: up to 100 products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery.\n" +
+        "      - Premium — Rs 75,000: unlimited products, fully customized premium design, advanced admin + reports, lifetime free premium hosting, 5 free business emails, complete SEO optimization, online payments integration, priority support & free updates.\n" +
+        "    Contact for this service: WhatsApp +92 318 8055850 (Saif Khan) — message only — or use /contact form. The pakcart.store storefront itself is the live demo of what they build.\n" +
+        "    Send the user here when: they ask about getting their own website / online store built, web development, custom eCommerce, 'apni website banwani hai', 'store banao', dropping Shopify/WordPress, hosting + emails, pricing for a website, or anything that's not about shopping on PakCart but rather hiring PakCart to build a store for them.\n" +
+        "\n" +
         "── DROPSHIPPER / PARTNER PROGRAM ──\n" +
         "• /dropshipper (Become a dropshipper)\n" +
         "    What's on it: Hero pitch ('Earn by Selling PakCart Products'), benefits grid (no inventory, no upfront cost, ready-made product catalog, professional images & descriptions, you set your own margin, PakCart handles packing/shipping/COD), 'How It Works' (1. Apply, 2. Get approved, 3. Pick products & list them on your channel, 4. Customer orders → PakCart ships → you earn), live preview of products you'd be selling, an earnings calculator, and the Apply form (full name, phone, email, city, selling platform — Daraz / Facebook page / Instagram / Website / WhatsApp / Other, expected monthly orders, store URL, message). Also has 'Already Applied?' status checker by email.\n" +
