@@ -49,6 +49,7 @@ const Footer = () => {
                 <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">Our Story</Link>
                 <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Support</Link>
                 <Link href="/dropshipper" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium text-green-700">Dropshipper Program</Link>
+                <Link href="/web-development" className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium text-[#D4A017]" data-testid="link-web-development">Web Development</Link>
                 <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
                 <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
               </nav>

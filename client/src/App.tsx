@@ -84,6 +84,7 @@ const About = lazyWithRetry(() => import("@/pages/About"));
 const Contact = lazyWithRetry(() => import("@/pages/Contact"));
 const Privacy = lazyWithRetry(() => import("@/pages/Privacy"));
 const Terms = lazyWithRetry(() => import("@/pages/Terms"));
+const WebDevelopment = lazyWithRetry(() => import("@/pages/WebDevelopment"));
 const Profile = lazyWithRetry(() => import("@/pages/auth/Profile"));
 const MyOrders = lazyWithRetry(() => import("@/pages/MyOrders"));
 const CategoryCollection = lazyWithRetry(() => import("@/pages/CategoryCollection"));
@@ -163,6 +164,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/web-development" component={WebDevelopment} />
       <Route path="/dropshipper" component={Dropshipper} />
       <Route path="/dropshipper/catalog">
         {() => { window.location.replace("/products"); return null; }}
