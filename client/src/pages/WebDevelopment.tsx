@@ -1,5 +1,5 @@
-import { Helmet } from "react-helmet-async";
 import { Link } from "wouter";
+import SEO from "@/components/SEO";
 import {
   Code2,
   ShieldCheck,
@@ -111,15 +111,81 @@ const WebDevelopment = () => {
     ],
   };
 
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://pakcart.store/web-development#service",
+    "name": "Custom eCommerce Web Development",
+    "serviceType": "eCommerce Website Development",
+    "provider": {
+      "@type": "Organization",
+      "@id": "https://pakcart.store/#organization",
+      "name": "PakCart",
+      "url": "https://pakcart.store",
+      "telephone": "+92-318-8055850",
+      "areaServed": { "@type": "Country", "name": "Pakistan" },
+    },
+    "areaServed": { "@type": "Country", "name": "Pakistan" },
+    "url": "https://pakcart.store/web-development",
+    "description":
+      "Custom-coded eCommerce websites for Pakistani businesses — one-time payment, no Shopify or WordPress subscriptions, lifetime free hosting and business emails, full admin panel, SEO-friendly, mobile responsive, ready in 1 month.",
+    "offers": {
+      "@type": "Offer",
+      "price": "45000",
+      "priceCurrency": "PKR",
+      "availability": "https://schema.org/InStock",
+      "url": "https://pakcart.store/web-development",
+      "name": "Standard eCommerce Website Package",
+      "description":
+        "Unlimited products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery.",
+    },
+  };
+
+  const breadcrumbs = [
+    { name: "Home", url: "/" },
+    { name: "Web Development", url: "/web-development" },
+  ];
+
+  const faqs = [
+    {
+      question: "Kitne din mein website ready ho jaati hai?",
+      answer:
+        "Sirf 1 month mein aap ki fully working eCommerce website ready ho jaati hai — admin panel, hosting aur business emails ke saath.",
+    },
+    {
+      question: "Kya yeh one-time payment hai ya monthly?",
+      answer:
+        "100% one-time payment. Koi monthly subscription nahi, koi hidden charges nahi. Hosting aur business emails bhi lifetime free hain.",
+    },
+    {
+      question: "Kya Shopify ya WordPress use hota hai?",
+      answer:
+        "Nahi. Hum pure custom code mein website develop karte hain — isi liye aap ko monthly platform fees nahi deni parti aur website fast & SEO-friendly hoti hai.",
+    },
+    {
+      question: "Maximum kitne products add kar sakte hain?",
+      answer:
+        "Unlimited products. Aap apne admin panel se jitne products chahein add kar sakte hain.",
+    },
+    {
+      question: "Custom requirements ho to?",
+      answer:
+        "WhatsApp +92 318 8055850 par message karein — hum aap ke business ke liye tailored quote dete hain.",
+    },
+  ];
+
   return (
     <div className="bg-background">
-      <Helmet>
-        <title>Custom eCommerce Web Development in Pakistan | PakCart</title>
-        <meta
-          name="description"
-          content="Get a fully custom-coded eCommerce website with admin panel, lifetime free hosting and business emails — one-time payment, no Shopify or WordPress subscriptions."
-        />
-      </Helmet>
+      <SEO
+        title="Custom eCommerce Web Development in Pakistan"
+        description="Get a fully custom-coded eCommerce website with admin panel, lifetime free hosting and business emails — one-time Rs 45,000, no Shopify or WordPress subscriptions, ready in 1 month."
+        keywords="ecommerce website development pakistan, custom website pakistan, online store development, web developer pakistan, ecommerce store builder, no shopify website, no wordpress website, pakcart web development"
+        url="/web-development"
+        type="website"
+        schema={serviceSchema}
+        breadcrumbs={breadcrumbs}
+        faqs={faqs}
+      />
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">

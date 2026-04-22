@@ -38,6 +38,8 @@ const STATIC_PAGES: SitemapUrl[] = [
   { loc: `${DOMAIN}/products`, lastmod: TODAY, changefreq: 'daily', priority: '0.9' },
   { loc: `${DOMAIN}/categories`, lastmod: TODAY, changefreq: 'weekly', priority: '0.8' },
   { loc: `${DOMAIN}/new-arrivals`, lastmod: TODAY, changefreq: 'weekly', priority: '0.8' },
+  { loc: `${DOMAIN}/web-development`, lastmod: TODAY, changefreq: 'monthly', priority: '0.7' },
+  { loc: `${DOMAIN}/dropshipper`, lastmod: TODAY, changefreq: 'monthly', priority: '0.7' },
   { loc: `${DOMAIN}/about`, lastmod: TODAY, changefreq: 'monthly', priority: '0.5' },
   { loc: `${DOMAIN}/contact`, lastmod: TODAY, changefreq: 'monthly', priority: '0.5' },
   { loc: `${DOMAIN}/privacy`, lastmod: TODAY, changefreq: 'yearly', priority: '0.3' },

@@ -16,6 +16,8 @@ export const sitemapService = {
       { loc: `${domain}/products`, changefreq: "daily", priority: 0.9 },
       { loc: `${domain}/categories`, changefreq: "weekly", priority: 0.8 },
       { loc: `${domain}/new-arrivals`, changefreq: "weekly", priority: 0.8 },
+      { loc: `${domain}/web-development`, changefreq: "monthly", priority: 0.7 },
+      { loc: `${domain}/dropshipper`, changefreq: "monthly", priority: 0.7 },
       { loc: `${domain}/about`, changefreq: "monthly", priority: 0.5 },
       { loc: `${domain}/contact`, changefreq: "monthly", priority: 0.5 },
       { loc: `${domain}/privacy`, changefreq: "yearly", priority: 0.3 },
