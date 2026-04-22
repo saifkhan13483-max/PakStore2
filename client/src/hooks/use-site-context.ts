@@ -124,10 +124,8 @@ export function useSiteContext() {
         "    Features highlighted: Pure custom coding · One-time payment (no subscriptions) · Lifetime free hosting · Lifetime free business emails (e.g. contact@yourdomain) · Admin panel included · SEO friendly · Mobile responsive · Fast & optimized.\n" +
         "    3-step process: (1) Discuss your idea on WhatsApp, (2) Design & develop the site in pure code, (3) Launch in 1 month with hosting, business emails and admin panel.\n" +
         "    What's included: Fully functional eCommerce website + admin panel + lifetime free fast hosting + lifetime free business emails + mobile-responsive modern design + SEO-friendly structure + ready in 1 month.\n" +
-        "    Pricing (one-time payment, no monthly fees):\n" +
-        "      - Basic — Rs 25,000: up to 20 products, custom-coded responsive design, admin panel, lifetime free hosting, 1 free business email, basic SEO, 1-month delivery.\n" +
-        "      - Standard (Most Popular) — Rs 45,000: up to 100 products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery.\n" +
-        "      - Premium — Rs 75,000: unlimited products, fully customized premium design, advanced admin + reports, lifetime free premium hosting, 5 free business emails, complete SEO optimization, online payments integration, priority support & free updates.\n" +
+        "    Pricing (single plan, one-time payment, no monthly fees):\n" +
+        "      - Standard — Rs 45,000: up to 100 products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery. Custom requirements / larger scope → WhatsApp +92 318 8055850 for a tailored quote.\n" +
         "    Contact for this service: WhatsApp +92 318 8055850 (Saif Khan) — message only — or use /contact form. The pakcart.store storefront itself is the live demo of what they build.\n" +
         "    Send the user here when: they ask about getting their own website / online store built, web development, custom eCommerce, 'apni website banwani hai', 'store banao', dropping Shopify/WordPress, hosting + emails, pricing for a website, or anything that's not about shopping on PakCart but rather hiring PakCart to build a store for them.\n" +
         "\n" +
