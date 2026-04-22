@@ -45,7 +45,46 @@ export function useSiteContext() {
     const lines: string[] = [];
     lines.push("=== LIVE PAKCART SITE CONTEXT (real-time data — trust this over any earlier guess) ===");
     lines.push(`Today: ${new Date().toISOString().slice(0, 10)}`);
+    lines.push(`Site domain: https://pakcart.store`);
     lines.push(`User is currently on page: ${location}`);
+
+    lines.push(
+      "\n=== COMPLETE PAGE DIRECTORY (every public page on pakcart.store) ===\n" +
+        "Shopping & browsing:\n" +
+        "  - / → Home page (featured products, hero banner, new arrivals, announcements)\n" +
+        "  - /products → Full product catalog with search, filters, sorting (use this for 'show me everything' or category-less browsing)\n" +
+        "  - /products/<slug> → Individual product detail page (photos, description, price, add to cart, reviews)\n" +
+        "  - /categories → All categories overview page (visual grid of every category)\n" +
+        "  - /collections/<slug> → Products inside one specific category or parent category\n" +
+        "  - /new-arrivals → Latest products added to the store\n" +
+        "\n" +
+        "Cart & checkout flow:\n" +
+        "  - /cart → User's shopping cart (review items, update qty, remove, proceed)\n" +
+        "  - /checkout → Place the order (login required — fills shipping info & confirms)\n" +
+        "  - /thank-you → Order confirmation page after successful checkout\n" +
+        "\n" +
+        "Account & orders:\n" +
+        "  - /auth/login → Login page (Google sign-in or email/password)\n" +
+        "  - /auth/signup → Create new account\n" +
+        "  - /profile → User profile (saved info, addresses) — login required\n" +
+        "  - /orders → 'My Orders' page — list of all past & current orders, live status — login required\n" +
+        "  - /orders/<id> → Detail page for a single order with tracking info — login required\n" +
+        "\n" +
+        "Information pages:\n" +
+        "  - /about → About PakCart (story, owner Saif Khan, mission)\n" +
+        "  - /contact → Contact form & owner contact info\n" +
+        "  - /privacy → Privacy policy\n" +
+        "  - /terms → Terms & conditions\n" +
+        "\n" +
+        "Dropshipper / partner program:\n" +
+        "  - /dropshipper → Become a dropshipper landing page (info + signup)\n" +
+        "  - /dropshipper/dashboard → Dropshipper's own dashboard (catalog, earnings) — login required\n" +
+        "\n" +
+        "Rules for sharing links:\n" +
+        "  - Always send users to a real page above. Never invent a path that isn't listed.\n" +
+        "  - Use relative paths like /products or /orders in your replies — the chat will auto-link them.\n" +
+        "  - For specific products or categories use the slugs from the live snapshot below."
+    );
 
     if (cartItems.length > 0) {
       const total = (cartItems as any[]).reduce(
