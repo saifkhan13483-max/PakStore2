@@ -85,7 +85,7 @@ const WebDevelopment = () => {
     {
       n: "02",
       title: "Design & Development",
-      desc: "Main aap ke liye website ko pure code mein design aur develop karta hoon.",
+      desc: "Hum aap ke liye website ko pure code mein design aur develop karte hain.",
     },
     {
       n: "03",
@@ -106,19 +106,19 @@ const WebDevelopment = () => {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FFF9E5] via-background to-[#FFF4D6]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
         <div
           aria-hidden
-          className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#D4A017]/10 blur-3xl"
+          className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl"
         />
         <div
           aria-hidden
-          className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#D4A017]/10 blur-3xl"
+          className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/20 blur-3xl"
         />
 
         <div className="container relative mx-auto px-4 py-14 sm:py-20 md:py-24">
           <div className="max-w-3xl mx-auto text-center space-y-5 sm:space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#D4A017]/30 bg-white/70 backdrop-blur px-3 py-1 text-xs font-medium text-[#8a6a0d]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/70 backdrop-blur px-3 py-1 text-xs font-medium text-primary">
               <Sparkles className="h-3.5 w-3.5" />
               Assalam-o-Alaikum
             </span>
@@ -127,11 +127,11 @@ const WebDevelopment = () => {
               data-testid="text-webdev-title"
             >
               Custom eCommerce Websites
-              <span className="block text-[#D4A017]">Built With Pure Code</span>
+              <span className="block text-secondary">Built With Pure Code</span>
             </h1>
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              Main ek professional web developer hoon. Specially custom eCommerce
-              websites develop karta hoon — Shopify ya WordPress par depend kiye
+              Hum professional web developers hain. Specially custom eCommerce
+              websites develop karte hain — Shopify ya WordPress par depend kiye
               baghair, pure coding ke zariye. Iska sab se bara faida yeh hai ke
               aap ko Shopify waghera ki monthly subscription fees nahi deni
               parti.
@@ -147,7 +147,7 @@ const WebDevelopment = () => {
               >
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-[#D4A017] hover:bg-[#b8890f] text-white shadow-lg shadow-[#D4A017]/20"
+                  className="w-full sm:w-auto shadow-lg shadow-primary/20"
                 >
                   <Phone className="h-4 w-4 mr-2" />
                   WhatsApp — +92 318 8055850
@@ -177,7 +177,7 @@ const WebDevelopment = () => {
               ].map((s) => (
                 <div
                   key={s.v}
-                  className="rounded-lg border bg-white/70 backdrop-blur px-3 py-3 text-center"
+                  className="rounded-lg border bg-card/70 backdrop-blur px-3 py-3 text-center"
                 >
                   <div className="font-display font-bold text-base sm:text-lg text-foreground">
                     {s.k}
@@ -214,7 +214,7 @@ const WebDevelopment = () => {
               data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}
             >
               <CardContent className="p-5 sm:p-6 space-y-3 h-full">
-                <div className="h-11 w-11 rounded-lg bg-[#FFF9E5] text-[#D4A017] flex items-center justify-center">
+                <div className="h-11 w-11 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="font-semibold text-base sm:text-lg leading-snug">
@@ -230,7 +230,7 @@ const WebDevelopment = () => {
       </section>
 
       {/* Process */}
-      <section className="bg-muted/30 border-y">
+      <section className="bg-muted/40 border-y">
         <div className="container mx-auto px-4 py-14 sm:py-20">
           <div className="max-w-2xl mx-auto text-center space-y-3">
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
@@ -246,7 +246,7 @@ const WebDevelopment = () => {
             {steps.map((s) => (
               <Card key={s.n} className="relative h-full">
                 <CardContent className="p-6 space-y-3">
-                  <div className="font-display text-3xl sm:text-4xl font-bold text-[#D4A017]/30">
+                  <div className="font-display text-3xl sm:text-4xl font-bold text-primary/30">
                     {s.n}
                   </div>
                   <h3 className="font-semibold text-lg">{s.title}</h3>
@@ -264,25 +264,25 @@ const WebDevelopment = () => {
       <section className="container mx-auto px-4 py-14 sm:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-5xl mx-auto">
           <div className="space-y-4 order-2 lg:order-1">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E5] px-3 py-1 text-xs font-medium text-[#8a6a0d]">
-              <ShieldCheck className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-secondary" />
               Complete Package
             </span>
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
               Package Mein Kya Shamil Hai?
             </h2>
             <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-              Sirf ek mahine mein, main aap ke liye fully professional,
-              ready-to-use, aur SEO-friendly eCommerce website tayar kar doon
-              ga — saath mein lifetime free hosting aur business emails bhi.
+              Sirf ek mahine mein, hum aap ke liye fully professional,
+              ready-to-use, aur SEO-friendly eCommerce website tayar kar dete
+              hain — saath mein lifetime free hosting aur business emails bhi.
             </p>
             <div className="flex flex-wrap gap-x-5 gap-y-2 pt-2 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2">
-                <Clock className="h-4 w-4 text-[#D4A017]" />
+                <Clock className="h-4 w-4 text-secondary" />
                 Delivery: 1 month
               </span>
               <span className="inline-flex items-center gap-2">
-                <Globe className="h-4 w-4 text-[#D4A017]" />
+                <Globe className="h-4 w-4 text-secondary" />
                 Live demo: pakcart.store
               </span>
             </div>
@@ -297,7 +297,7 @@ const WebDevelopment = () => {
                     className="flex items-start gap-3 text-sm sm:text-base"
                     data-testid={`text-include-${idx}`}
                   >
-                    <CheckCircle2 className="h-5 w-5 text-[#D4A017] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                     <span className="text-foreground">{item}</span>
                   </li>
                 ))}
@@ -309,10 +309,10 @@ const WebDevelopment = () => {
 
       {/* CTA */}
       <section className="container mx-auto px-4 pb-14 sm:pb-20">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#D4A017] to-[#b8890f] text-white">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] text-primary-foreground">
           <div
             aria-hidden
-            className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
+            className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-secondary/30 blur-2xl"
           />
           <div
             aria-hidden
@@ -322,10 +322,10 @@ const WebDevelopment = () => {
             <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
               eCommerce website banwana chahte hain?
             </h2>
-            <p className="text-white/90 leading-relaxed text-sm sm:text-base max-w-2xl mx-auto">
+            <p className="text-primary-foreground/90 leading-relaxed text-sm sm:text-base max-w-2xl mx-auto">
               Apne business ke liye ek professional, fast aur SEO-friendly
-              website chahiye? Abhi rabta karein — main ek mahine mein ready-to-use
-              website bana ke doon ga.
+              website chahiye? Abhi rabta karein — hum ek mahine mein
+              ready-to-use website bana ke dete hain.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
               <a
@@ -337,7 +337,8 @@ const WebDevelopment = () => {
               >
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-white text-[#8a6a0d] hover:bg-white/90"
+                  variant="secondary"
+                  className="w-full sm:w-auto"
                 >
                   <Phone className="h-4 w-4 mr-2" />
                   Contact on WhatsApp
@@ -351,7 +352,7 @@ const WebDevelopment = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto bg-transparent text-white border-white/60 hover:bg-white/10 hover:text-white"
+                  className="w-full sm:w-auto bg-transparent text-primary-foreground border-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground"
                 >
                   Contact Form
                   <ArrowRight className="h-4 w-4 ml-2" />
