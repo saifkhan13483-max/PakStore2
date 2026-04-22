@@ -6,7 +6,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { X, Rocket, Globe, ShieldCheck, Phone, Package, Truck, TrendingUp } from "lucide-react";
-import { SiWhatsapp } from "react-icons/si";
 import { useLocation } from "wouter";
 
 const SESSION_KEY = "pakcart_advert_popup_seen";
@@ -112,27 +111,10 @@ export default function AdvertPopup() {
               <p className="text-[9px] text-gray-400 text-center leading-tight">Har qadam mein aapke saath</p>
             </div>
 
-            <p className="text-center text-[11px] sm:text-xs text-gray-500 mb-3">
-              Shuru karna chahte hain? WhatsApp karein — koi technical knowledge zarori nahi.
-            </p>
-
-            {/* WhatsApp CTA */}
-            <a
-              href="https://wa.me/923188055850"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full rounded-full bg-amber-500 active:bg-amber-600 hover:bg-amber-600 text-white font-semibold py-2.5 text-xs sm:text-sm transition-colors"
-              data-testid="advert-popup-whatsapp"
-              onClick={handleClose}
-            >
-              <SiWhatsapp className="h-4 w-4 shrink-0" />
-              <span>WhatsApp Us — +92 318 8055850</span>
-            </a>
-
             <button
               type="button"
               onClick={() => { handleClose(); navigate("/web-development"); }}
-              className="mt-2 w-full text-center text-[11px] sm:text-xs font-medium text-amber-600 hover:text-amber-700 underline underline-offset-2"
+              className="flex items-center justify-center gap-2 w-full rounded-full bg-amber-500 active:bg-amber-600 hover:bg-amber-600 text-white font-semibold py-2.5 text-xs sm:text-sm transition-colors"
               data-testid="advert-popup-web-development-link"
             >
               More details about our web development services →
