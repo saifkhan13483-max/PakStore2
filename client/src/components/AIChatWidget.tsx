@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, ChevronDown, RotateCcw, AlertCircle, Square } from "lucide-react";
+import { useSiteContext } from "@/hooks/use-site-context";
 
 interface Message {
   role: "user" | "assistant";
@@ -862,6 +863,12 @@ Stay warm. Stay specific. Stay real. Sound like a person.`;
 
 
 export default function AIChatWidget() {
+  const siteContext = useSiteContext();
+  const siteContextRef = useRef(siteContext);
+  useEffect(() => {
+    siteContextRef.current = siteContext;
+  }, [siteContext]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window === "undefined") return [WELCOME_MESSAGE];
@@ -984,6 +991,7 @@ export default function AIChatWidget() {
         .map(({ role, content }) => ({ role, content }));
       const apiMessages = [
         { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: siteContextRef.current },
         ...conversationHistory,
       ];
 

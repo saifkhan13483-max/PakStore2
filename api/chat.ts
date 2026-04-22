@@ -12,7 +12,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "GEMINI_API_KEY not configured" });
   }
 
-  const systemMessage = messages.find((m: any) => m.role === "system");
+  // Merge ALL system messages (base prompt + live site context, etc.) into a
+  // single system_instruction so Gemini sees every directive.
+  const systemParts = messages
+    .filter((m: any) => m.role === "system")
+    .map((m: any) => String(m.content || "").trim())
+    .filter(Boolean);
+  const systemMessage = systemParts.length
+    ? { content: systemParts.join("\n\n") }
+    : null;
   const userMessages = messages.filter((m: any) => m.role !== "system");
 
   const geminiContents = userMessages.map((m: any) => ({
