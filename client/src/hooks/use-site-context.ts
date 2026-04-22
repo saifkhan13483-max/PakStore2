@@ -125,7 +125,7 @@ export function useSiteContext() {
         "    3-step process: (1) Discuss your idea on WhatsApp, (2) Design & develop the site in pure code, (3) Launch in 1 month with hosting, business emails and admin panel.\n" +
         "    What's included: Fully functional eCommerce website + admin panel + lifetime free fast hosting + lifetime free business emails + mobile-responsive modern design + SEO-friendly structure + ready in 1 month.\n" +
         "    Pricing (single plan, one-time payment, no monthly fees):\n" +
-        "      - Standard — Rs 45,000: up to 100 products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery. Custom requirements / larger scope → WhatsApp +92 318 8055850 for a tailored quote.\n" +
+        "      - Standard — Rs 45,000: unlimited products, premium custom design, full admin panel + analytics, lifetime free fast hosting, 3 free business emails, advanced SEO + sitemap, WhatsApp & order notifications, 1-month delivery. Custom requirements / larger scope → WhatsApp +92 318 8055850 for a tailored quote.\n" +
         "    Contact for this service: WhatsApp +92 318 8055850 (Saif Khan) — message only — or use /contact form. The pakcart.store storefront itself is the live demo of what they build.\n" +
         "    Send the user here when: they ask about getting their own website / online store built, web development, custom eCommerce, 'apni website banwani hai', 'store banao', dropping Shopify/WordPress, hosting + emails, pricing for a website, or anything that's not about shopping on PakCart but rather hiring PakCart to build a store for them.\n" +
         "\n" +

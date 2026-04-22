@@ -100,7 +100,7 @@ const WebDevelopment = () => {
     price: "45,000",
     tagline: "Most popular for growing brands",
     features: [
-      "Up to 100 products",
+      "Unlimited products",
       "Premium custom design",
       "Full admin panel + analytics",
       "Lifetime free fast hosting",
