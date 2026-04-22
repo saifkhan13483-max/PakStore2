@@ -128,6 +128,15 @@ export default function AdvertPopup() {
               <SiWhatsapp className="h-4 w-4 shrink-0" />
               <span>WhatsApp Us — +92 318 8055850</span>
             </a>
+
+            <button
+              type="button"
+              onClick={() => { handleClose(); navigate("/web-development"); }}
+              className="mt-2 w-full text-center text-[11px] sm:text-xs font-medium text-amber-600 hover:text-amber-700 underline underline-offset-2"
+              data-testid="advert-popup-web-development-link"
+            >
+              More details about our web development services →
+            </button>
           </div>
 
           {/* Divider */}
