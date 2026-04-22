@@ -14,7 +14,7 @@ const MAX_STORED_MESSAGES = 40;
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
   content:
-    "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez pochni ho, batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
+    "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez pochni he? — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
 };
 
 function renderMessageContent(text: string) {
