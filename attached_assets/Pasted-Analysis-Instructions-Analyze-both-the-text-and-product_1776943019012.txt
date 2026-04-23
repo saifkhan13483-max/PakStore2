@@ -1,0 +1,126 @@
+Analysis Instructions
+Analyze both the text and product images using these guidelines:
+
+Examine visible color, shape, style, material cues, packaging, use case, and positioning from images
+Do not invent hidden specifications that are not visible or not provided
+Make only safe, context-based assumptions when something is unclear
+Base all claims on provided information and image evidence
+Required Output Sections
+Generate exactly these sections in this order:
+
+1. Product Name
+
+Clear and compelling
+SEO-friendly with natural keywords
+Conversion-focused (maximum 5–6 words)
+2. Slug
+
+Short and readable
+Keyword-based for URL optimization
+3. Short Description
+
+Concise and sales-focused
+15–25 words maximum
+Hook-driven opening
+4. Long Description
+
+Persuasive and structured
+70–150 words maximum
+Must include "Product Details" as a subsection heading
+Combine emotional appeal with practical benefits
+Sound premium, clear, and trustworthy
+5. Key Features
+
+3–5 features total
+Each feature: 4–6 words maximum
+Benefit-oriented and punchy
+Bold the most important words
+6. Available Variants
+
+2–3 words per variant
+Only include actual or clearly supported variants
+If none exist, write: "No variants specified"
+Strict Rules & Restrictions
+Prohibited Content:
+
+❌ Do NOT mention price, cost, profit, margin, discount, or currency
+❌ Do NOT invent fake claims or unsubstantiated benefits
+❌ Do NOT add warranty, guarantee, refund, or return policies unless explicitly provided
+❌ Do NOT use generic language or keyword stuffing
+Required Standards:
+
+✓ Write SEO-friendly but natural language
+✓ Use emotional and benefit-led language strategically
+✓ Position product as differentiated, not generic
+✓ For saturated markets: emphasize angle, emotion, use-case, and customer desire
+✓ Bold all key differentiators and important words
+✓ Maintain professional, document-ready formatting
+Long Description Structure
+Follow this recommended flow:
+
+Opening Hook — Grab attention with a benefit or desire
+Problem or Desire — Identify the customer's need
+Why This Product Matters — Explain the solution
+Key Benefits — Lead with results
+Product Details — (Include as a subsection heading) Organize specifications by product type (e.g., Maxi Dress Specifications, Blazer Koti Specifications)
+Why It Stands Out — Highlight differentiation
+Who It's For — Define ideal customer
+Soft CTA — End with engagement (no price mention)
+Product Details Subsection Format
+Within the Long Description, structure Product Details like this:
+
+Copy**Product Details:**
+
+**[Product Type 1] Specifications:**
+- Chest Size: [measurement]
+- Length: [measurement]
+- Fabric: [material and finish]
+- Design: [key design elements]
+
+**[Product Type 2] Specifications:**
+- Chest Size: [measurement]
+- Length: [measurement]
+- Fabric: [material and finish]
+- Details: [key details and construction]
+Output Format Template
+Copy**Product Name:**
+[Your answer here - 5–6 words maximum]
+
+**Slug:**
+[Your answer here]
+
+**Short Description:**
+[15–25 words maximum]
+
+**Long Description:**
+[Opening Hook + Problem + Why It Matters + Key Benefits]
+
+**Product Details:**
+
+**[Product Type 1] Specifications:**
+- Chest Size: [measurement]
+- Length: [measurement]
+- Fabric: [material and finish]
+- Design: [key design elements]
+
+**[Product Type 2] Specifications:**
+- Chest Size: [measurement]
+- Length: [measurement]
+- Fabric: [material and finish]
+- Details: [key details and construction]
+
+[Why It Stands Out + Who It's For + Soft CTA]
+
+**Key Features:**
+- **[Feature 1 - 4–6 words]**
+- **[Feature 2 - 4–6 words]**
+- **[Feature 3 - 4–6 words]**
+- **[Feature 4 - 4–6 words if needed]**
+- **[Feature 5 - 4–6 words if needed]**
+
+**Available Variants:**
+- [Variant 1 - 2–4 words]
+- [Variant 2 - 2–4 words]
+- [Variant 3 - 2–4 words]
+
+
