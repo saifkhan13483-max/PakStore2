@@ -380,11 +380,6 @@ const WebDevelopment = () => {
                 pakcart: "Lifetime free business emails",
               },
               {
-                label: "Code Ownership",
-                others: "Locked inside platform",
-                pakcart: "100% pure custom code — fully yours",
-              },
-              {
                 label: "Customization",
                 others: "Limited to themes & plugins",
                 pakcart: "Unlimited — built to your exact needs",
