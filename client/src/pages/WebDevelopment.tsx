@@ -18,6 +18,8 @@ import {
   Smartphone,
   ArrowRight,
   Star,
+  X,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -340,6 +342,147 @@ const WebDevelopment = () => {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Comparison: Others vs PakCart */}
+      <section className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="max-w-2xl mx-auto text-center space-y-3">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card px-3 py-1 text-xs font-medium text-primary">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Comparison
+          </span>
+          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
+            Others vs PakCart
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Shopify, WordPress aur Wix jaise platforms ke muqable PakCart custom
+            web development kyun behtar hai? Ek nazar dekhein.
+          </p>
+        </div>
+
+        <div className="mt-10 max-w-5xl mx-auto">
+          {(() => {
+            const rows = [
+              {
+                label: "Payment Model",
+                others: "Monthly subscription (forever)",
+                pakcart: "One-time payment, lifetime ownership",
+              },
+              {
+                label: "Hosting Cost",
+                others: "Paid monthly / yearly",
+                pakcart: "Lifetime free fast hosting",
+              },
+              {
+                label: "Business Emails",
+                others: "Extra paid (per mailbox / month)",
+                pakcart: "Lifetime free business emails",
+              },
+              {
+                label: "Code Ownership",
+                others: "Locked inside platform",
+                pakcart: "100% pure custom code — fully yours",
+              },
+              {
+                label: "Customization",
+                others: "Limited to themes & plugins",
+                pakcart: "Unlimited — built to your exact needs",
+              },
+              {
+                label: "Speed & Performance",
+                others: "Slow due to heavy themes & plugins",
+                pakcart: "Fast & optimized hand-coded site",
+              },
+              {
+                label: "SEO Control",
+                others: "Restricted by platform structure",
+                pakcart: "Full SEO control + sitemap built-in",
+              },
+              {
+                label: "Plugin Dependency",
+                others: "Needs many paid plugins",
+                pakcart: "Zero plugins — everything built-in",
+              },
+              {
+                label: "Transaction Fees",
+                others: "Extra fees on each sale",
+                pakcart: "No transaction fees, ever",
+              },
+              {
+                label: "Long-Term Cost",
+                others: "Keeps growing every month",
+                pakcart: "Pay once — save lakhs over the years",
+              },
+            ];
+
+            return (
+              <Card
+                className="overflow-hidden shadow-sm"
+                data-testid="card-comparison"
+              >
+                {/* Header row */}
+                <div className="grid grid-cols-3 bg-muted/60 border-b">
+                  <div className="px-4 sm:px-6 py-4 text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Feature
+                  </div>
+                  <div className="px-3 sm:px-6 py-4 text-center border-l">
+                    <div className="font-display font-semibold text-sm sm:text-base text-foreground">
+                      Others
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                      Shopify · WordPress · Wix
+                    </div>
+                  </div>
+                  <div className="px-3 sm:px-6 py-4 text-center border-l bg-primary/5">
+                    <div className="font-display font-semibold text-sm sm:text-base text-primary">
+                      PakCart
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                      Custom Web Development
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rows */}
+                {rows.map((r, i) => (
+                  <div
+                    key={r.label}
+                    className={`grid grid-cols-3 ${
+                      i !== rows.length - 1 ? "border-b" : ""
+                    }`}
+                    data-testid={`row-comparison-${i}`}
+                  >
+                    <div className="px-4 sm:px-6 py-4 text-xs sm:text-sm font-medium text-foreground flex items-center">
+                      {r.label}
+                    </div>
+                    <div className="px-3 sm:px-6 py-4 border-l flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                      <X className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                      <span>{r.others}</span>
+                    </div>
+                    <div className="px-3 sm:px-6 py-4 border-l bg-primary/5 flex items-start gap-2 text-xs sm:text-sm text-foreground">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span className="font-medium">{r.pakcart}</span>
+                    </div>
+                  </div>
+                ))}
+              </Card>
+            );
+          })()}
+
+          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-6">
+            Saaf farq — kam kharcha, zyada control aur lifetime value.{" "}
+            <a
+              href="https://wa.me/923188055850"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline font-medium"
+              data-testid="link-whatsapp-comparison"
+            >
+              WhatsApp karein
+            </a>
+            .
+          </p>
         </div>
       </section>
 
