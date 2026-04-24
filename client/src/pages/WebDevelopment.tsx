@@ -18,6 +18,8 @@ import {
   Smartphone,
   ArrowRight,
   Star,
+  X,
+  Scale,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -309,6 +311,256 @@ const WebDevelopment = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* Comparison: Others vs Us */}
+      <section className="bg-muted/40 border-y" id="comparison">
+        <div className="container mx-auto px-4 py-14 sm:py-20">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card px-3 py-1 text-xs font-medium text-primary">
+              <Scale className="h-3.5 w-3.5" />
+              Comparison
+            </span>
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold">
+              Others vs <span className="text-secondary">Us</span>
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Shopify, WordPress aur dosre developers ke saath humara fark
+              dekhein — kyun hum aap ke business ke liye behtar hain.
+            </p>
+          </div>
+
+          {/* Mobile / tablet: stacked cards */}
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-5xl mx-auto lg:hidden">
+            {/* Others */}
+            <Card
+              className="border-destructive/30 h-full"
+              data-testid="card-compare-others-mobile"
+            >
+              <CardContent className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center">
+                    <X className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg sm:text-xl">
+                    Others
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Shopify / WordPress / Typical agencies
+                </p>
+                <ul className="space-y-3 pt-1">
+                  {[
+                    "Monthly subscription fees forever",
+                    "Theme & template based design",
+                    "Paid plugins for basic features",
+                    "Limited customization & control",
+                    "Slow, plugin-heavy performance",
+                    "Hosting bills every month",
+                    "Business email separately payable",
+                    "Vendor lock-in — migration mushkil",
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-muted-foreground"
+                    >
+                      <X className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Us */}
+            <Card
+              className="border-primary border-2 shadow-lg shadow-primary/10 h-full relative"
+              data-testid="card-compare-us-mobile"
+            >
+              <div className="absolute -top-3 left-5">
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow">
+                  <Star className="h-3.5 w-3.5 fill-current" />
+                  Recommended
+                </span>
+              </div>
+              <CardContent className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg sm:text-xl">
+                    Us (PakCart)
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Pure custom-coded eCommerce websites
+                </p>
+                <ul className="space-y-3 pt-1">
+                  {[
+                    "One-time payment — koi monthly fee nahi",
+                    "100% custom design tailored to your brand",
+                    "All essential features built-in, no plugins",
+                    "Full control — code aap ka, panel aap ka",
+                    "Lightning fast, optimized pure code",
+                    "Lifetime free fast hosting included",
+                    "Free business emails (contact@yourdomain)",
+                    "Apna code, apni website — no lock-in",
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-foreground"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Desktop: side-by-side comparison table */}
+          <div className="hidden lg:block mt-10 max-w-5xl mx-auto">
+            <Card className="overflow-hidden" data-testid="card-compare-table">
+              <div className="grid grid-cols-3">
+                {/* Header */}
+                <div className="p-5 border-b bg-muted/40">
+                  <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Feature
+                  </div>
+                </div>
+                <div className="p-5 border-b border-l bg-muted/40 text-center">
+                  <div className="inline-flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-md bg-destructive/10 text-destructive flex items-center justify-center">
+                      <X className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-display font-bold text-base">
+                        Others
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        Shopify / WordPress
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 border-b border-l bg-primary/5 text-center relative">
+                  <div className="absolute top-2 right-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-semibold">
+                      <Star className="h-3 w-3 fill-current" />
+                      Best
+                    </span>
+                  </div>
+                  <div className="inline-flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-display font-bold text-base">
+                        Us (PakCart)
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        Pure custom code
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rows */}
+                {[
+                  {
+                    label: "Payment Model",
+                    others: "Monthly subscription forever",
+                    us: "One-time payment only",
+                  },
+                  {
+                    label: "Design",
+                    others: "Theme / template based",
+                    us: "100% custom for your brand",
+                  },
+                  {
+                    label: "Features",
+                    others: "Paid plugins required",
+                    us: "All essentials built-in",
+                  },
+                  {
+                    label: "Performance",
+                    others: "Slow, plugin-heavy",
+                    us: "Lightning fast, optimized",
+                  },
+                  {
+                    label: "Hosting",
+                    others: "Monthly hosting bills",
+                    us: "Lifetime free hosting",
+                  },
+                  {
+                    label: "Business Email",
+                    others: "Paid separately",
+                    us: "Free emails included",
+                  },
+                  {
+                    label: "Customization",
+                    others: "Limited by platform",
+                    us: "Unlimited — full code access",
+                  },
+                  {
+                    label: "Ownership",
+                    others: "Vendor lock-in",
+                    us: "100% yours, no lock-in",
+                  },
+                  {
+                    label: "Delivery Time",
+                    others: "Varies / often delayed",
+                    us: "Ready in 1 month",
+                  },
+                ].map((row, idx) => (
+                  <div key={row.label} className="contents">
+                    <div
+                      className={`p-4 border-b text-sm font-medium text-foreground ${
+                        idx % 2 === 1 ? "bg-muted/20" : ""
+                      }`}
+                    >
+                      {row.label}
+                    </div>
+                    <div
+                      className={`p-4 border-b border-l text-sm text-muted-foreground flex items-start gap-2 ${
+                        idx % 2 === 1 ? "bg-muted/20" : ""
+                      }`}
+                      data-testid={`text-others-${row.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      <X className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                      <span>{row.others}</span>
+                    </div>
+                    <div
+                      className={`p-4 border-b border-l text-sm text-foreground flex items-start gap-2 bg-primary/5 ${
+                        idx % 2 === 1 ? "bg-primary/[0.08]" : ""
+                      }`}
+                      data-testid={`text-us-${row.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span className="font-medium">{row.us}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* CTA below comparison */}
+          <div className="mt-10 text-center">
+            <a
+              href="https://wa.me/923188055850"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="link-whatsapp-comparison"
+            >
+              <Button size="lg" className="shadow-lg shadow-primary/20">
+                <Phone className="h-4 w-4 mr-2" />
+                Get Your Custom Website
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
 
