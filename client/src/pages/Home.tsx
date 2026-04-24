@@ -226,7 +226,7 @@ export default function Home() {
                       alt={`Hero slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
-                      fetchpriority={currentSlide === 0 ? "high" : "low"}
+                      fetchPriority={currentSlide === 0 ? "high" : "low"}
                       width={isMobile ? "768" : "1920"}
                       height={isMobile ? "1024" : "700"}
                     />

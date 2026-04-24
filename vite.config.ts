@@ -126,11 +126,24 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "wouter"],
-          "vendor-query": ["@tanstack/react-query"],
-          "vendor-ui": ["lucide-react", "clsx", "tailwind-merge"],
-          "vendor-firebase": ["firebase/app", "firebase/auth", "firebase/firestore"],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/scheduler/") || id.includes("/wouter/"))
+              return "vendor-react";
+            if (id.includes("@tanstack/react-query")) return "vendor-query";
+            if (id.includes("framer-motion")) return "vendor-motion";
+            if (id.includes("react-helmet-async")) return "vendor-helmet";
+            if (id.includes("@radix-ui/")) return "vendor-radix";
+            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (id.includes("firebase/firestore") || id.includes("firebase-admin")) return "vendor-firestore";
+            if (id.includes("firebase/auth")) return "vendor-firebase-auth";
+            if (id.includes("firebase/")) return "vendor-firebase";
+            if (id.includes("lucide-react") || id.includes("clsx") || id.includes("tailwind-merge") || id.includes("class-variance-authority"))
+              return "vendor-ui";
+            if (id.includes("zod") || id.includes("@hookform") || id.includes("react-hook-form")) return "vendor-forms";
+            if (id.includes("date-fns")) return "vendor-date";
+          }
+          return undefined;
         },
       },
     },

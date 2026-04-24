@@ -399,7 +399,7 @@ export default function ProductDetail() {
                     className="w-full h-full object-cover"
                     width="800"
                     height="800"
-                    fetchpriority="high"
+                    fetchPriority="high"
                   />
                 )}
               </AnimatePresence>
