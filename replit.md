@@ -335,3 +335,19 @@ The primary cause of "Discovered – currently not indexed" in Google Search Con
 2. Use URL Inspection tool to request indexing for: homepage, `/categories`, 2-3 collection pages, 5+ product pages
 3. Validate Product schema at `https://search.google.com/test/rich-results`
 4. Monitor "Page indexing" report for 2-6 weeks
+
+## Phase 7 — GSC Production-Readiness Final Hardening (April 24, 2026)
+
+Final pass to close the last technical gaps before submitting the property for full GSC monitoring. See `SEO_GSC_AUDIT_2026.md` for the full audit document.
+
+### Changes Made
+1. **`api/sitemap.ts`** — Dynamic sitemap now emits `<image:image>` entries for every product (up to 5 images each) and every category hero image. Adds `xmlns:image` namespace, declares `X-Robots-Tag: noindex` on the response so the sitemap URL itself never appears in SERPs.
+2. **`client/public/sitemap.xml` + `public/sitemap.xml`** — Static fallback sitemaps now actually use the `xmlns:image` namespace they declared (homepage OG image included).
+3. **`client/public/site.webmanifest` (new)** — PWA manifest with name, theme color, icons, locale `en-PK`, scope `/`. Improves Lighthouse PWA score and mobile-quality signal.
+4. **`client/index.html`** — Linked the new manifest via `<link rel="manifest" href="/site.webmanifest">`.
+5. **Both `robots.txt` copies** — Added explicit `Allow: /sitemap.xml` and `Allow: /site.webmanifest` for defense-in-depth.
+
+### Verified Build
+- `npm run build` — passes (~22s build, 75 assets emitted)
+- Static + dynamic sitemap both valid XML with image extension
+- All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)

@@ -1,12 +1,23 @@
 # PakCart — Google Search Console Production-Readiness Audit
 
-_Date: April 22, 2026 · Domain: https://pakcart.store_
+_Last updated: April 24, 2026 · Domain: https://pakcart.store_
 
-This audit reviews the live store against Google Search Essentials and the GSC onboarding checklist, lists the changes applied in this pass, and the items the operator (you) must complete inside the GSC UI / DNS panel.
+This audit reviews the live store against Google Search Essentials and the GSC onboarding checklist, lists every change applied, and the items the operator (you) must complete inside the GSC UI / DNS panel.
 
 ---
 
-## 1. Summary Checklist of Changes Made in This Pass
+## 1. Summary Checklist of Changes Made
+
+### April 24, 2026 pass — final hardening
+
+| # | Area | Change |
+|---|------|--------|
+| 1 | Sitemap (dynamic) | `api/sitemap.ts` now emits `<image:image>` entries for every product (up to 5 images per URL) and every category hero image. Adds `xmlns:image` namespace. Sets `X-Robots-Tag: noindex` header on the sitemap response itself (Google still consumes the file; this prevents the sitemap URL from being indexed as a regular result). |
+| 2 | Sitemap (static fallback) | `client/public/sitemap.xml` and `public/sitemap.xml` now use the `xmlns:image` namespace they already declared and include the homepage OG image. |
+| 3 | PWA / Mobile | Added `client/public/site.webmanifest` (name, short_name, theme_color, icons, lang `en-PK`, scope `/`) and linked it from `client/index.html` via `<link rel="manifest">`. Improves mobile PWA signals and Lighthouse PWA score. |
+| 4 | Robots.txt | Both copies now explicitly `Allow: /sitemap.xml` and `Allow: /site.webmanifest` so Google never blocks these critical SEO files even if a future rule overlaps. |
+
+### April 22, 2026 pass
 
 | # | Area | Change |
 |---|------|--------|
@@ -23,6 +34,9 @@ This audit reviews the live store against Google Search Essentials and the GSC o
 
 | Issue | Severity | Resolution |
 |-------|----------|------------|
+| Dynamic sitemap declared `xmlns:image` namespace but never emitted any `<image:image>` entries — every product page was invisible to Google Image Search via the sitemap. | High | Rewrote `api/sitemap.ts` to emit one `<image:image>` block per product image (capped at 5) plus the category hero. Static sitemap also updated to include the homepage OG image. |
+| No web app manifest — Google flags this in Lighthouse PWA and uses it as a small mobile-quality signal. | Low | Added `site.webmanifest` with proper name, theme color, icons, and locale. |
+| Sitemap response had no `X-Robots-Tag` header — sitemap XML files can rarely surface in search if linked-to. | Low | Added `X-Robots-Tag: noindex` to the dynamic sitemap response. |
 | `sitemap.xml` static fallback served an empty `<urlset>` if the dynamic Vercel function failed (cold-start / credential miss). | High | Populated both static copies with the 10 evergreen URLs so the file is always valid. |
 | `robots.txt` had `Disallow: /*?*` which blocks **all** query-string URLs from Google — including the on-site search page (`/products?search=…`) referenced by the `SearchAction` schema. | High | Replaced with surgical disallows targeting only known tracking parameters (`utm_*`, `fbclid`, `gclid`, `ttclid`, `ref`). |
 | `/api/*` endpoints (Groq proxy, chat, sitemap) were crawlable. | Medium | Added `Disallow: /api/`. |
@@ -35,10 +49,11 @@ This audit reviews the live store against Google Search Essentials and the GSC o
 - **Single H1 per page** + breadcrumb component + breadcrumb JSON-LD — see `SEO.tsx`.
 - **Open Graph 1200×630** — `/og-image.png` declared with width/height/secure_url/alt.
 - **Canonical URLs** — `getCleanCanonical()` in `SEO.tsx` strips `?` and `#`, removes trailing slash (except root), enforces `https://pakcart.store`.
-- **Structured data**: Organization, WebSite (with SearchAction), OnlineStore, Product (with offers, shipping, return policy, aggregateRating), BreadcrumbList, FAQPage.
+- **Structured data**: Organization, WebSite (with SearchAction), OnlineStore, Product (with offers, shipping, return policy, aggregateRating), BreadcrumbList, FAQPage, CollectionPage + ItemList.
 - **404 page** is helpful, includes links back to Home / Products / Contact, and is `noindex,follow`.
 - **Favicon** present (`/favicon.png`) — used by Google in SERPs.
 - **Lazy loading + Cloudinary CDN + font `display=swap` + preconnect** already configured for Core Web Vitals.
+- **Pre-rendered HTML** at build time via `scripts/generate-seo-html.mjs` — every public route ships a static head + `<h1>` + body content for crawlers that don't execute JS.
 
 ---
 
@@ -55,9 +70,13 @@ These require account access and cannot be automated from the codebase:
 
 2. **Confirm 301 redirects** to the canonical host (`https://pakcart.store`) for the other three variants. Vercel's "Redirect to Production Domain" toggle handles this — verify in *Project → Settings → Domains* that only `pakcart.store` is marked Production and the others are set to *Redirect (308)*.
 
-3. **Submit the sitemap** in GSC: *Indexing → Sitemaps → Add new sitemap → `sitemap.xml`*. The sitemap is also already declared in `robots.txt`.
+3. **Submit two sitemaps** in GSC: *Indexing → Sitemaps → Add new sitemap*
+   - `sitemap.xml` (dynamic — products, categories, static pages with image entries)
+   - The sitemap is also already declared in `robots.txt`.
 
 4. **Request indexing** for the homepage and top 5 category pages via *URL Inspection → Request Indexing* for the first push.
+
+5. **Validate in Rich Results Test**: paste 1 product URL and 1 collection URL into <https://search.google.com/test/rich-results> and confirm Product, Breadcrumb, and FAQ result types pass with no critical errors.
 
 ---
 
@@ -68,7 +87,8 @@ These require account access and cannot be automated from the codebase:
 | Weekly | **Performance** | CTR drop > 20% week-over-week, queries falling out of top 10, new opportunity queries on page 2. |
 | Weekly | **Page Indexing** | Spike in "Crawled – not indexed", "Discovered – not indexed", or "Duplicate, Google chose different canonical". |
 | Weekly | **Core Web Vitals** (Mobile + Desktop) | Any URL group leaving the *Good* bucket — investigate LCP image, INP scripts, CLS image dimensions. |
-| Bi-weekly | **Sitemaps** | Confirm "Last read" date is recent and discovered URL count matches Firestore active product count. |
+| Bi-weekly | **Sitemaps** | Confirm "Last read" date is recent and discovered URL count matches Firestore active product count. Watch the *Images* sub-report once Google starts crawling the new image entries. |
+| Bi-weekly | **Enhancements → Products / FAQ / Breadcrumb / Merchant listings** | Confirm "Valid items" count stays ≥ live product count. Investigate any *Errors* row immediately. |
 | Monthly | **Manual Actions** & **Security Issues** | Should always be empty. |
 | Monthly | **Mobile Usability** (in PageSpeed Insights, since GSC retired the report) | No tap-target / viewport / font-size flags. |
 | Quarterly | **Links report** | Watch top linking sites and anchor text for spammy / negative SEO. |
@@ -83,3 +103,4 @@ These require account access and cannot be automated from the codebase:
 - Robots blocks are limited to private, transactional, or duplicate-content URLs.
 - All redirects recommended are 301/308 (permanent), no sneaky JS redirects.
 - Structured data follows current Schema.org spec — no deprecated `rel=next/prev`; pagination uses self-referencing canonicals.
+- The pre-rendered `<div id="seo-content">` is hidden via `clip-path` rather than `display:none` — this is the canonical SSR-bridging pattern and is **not** cloaking because the React app renders the same information visibly after hydration.

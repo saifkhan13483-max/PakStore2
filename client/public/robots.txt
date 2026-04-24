@@ -16,6 +16,8 @@ Allow: /*.ico
 Allow: /*.woff
 Allow: /*.woff2
 Allow: /google894b684ad58edc3a.html
+Allow: /sitemap.xml
+Allow: /site.webmanifest
 
 Disallow: /admin
 Disallow: /admin/

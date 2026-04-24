@@ -1,0 +1,28 @@
+{
+  "name": "PakCart — Online Shopping in Pakistan",
+  "short_name": "PakCart",
+  "description": "Pakistan's trusted online store for women's bags, jewelry, shoes, slippers, stitched dresses, watches and tech gadgets.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "lang": "en-PK",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"]
+}

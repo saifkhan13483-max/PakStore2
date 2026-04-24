@@ -26,15 +26,23 @@ const formatDate = (date?: any): string => {
   return TODAY;
 };
 
+interface SitemapImage {
+  loc: string;
+  caption?: string;
+  title?: string;
+}
+
 interface SitemapUrl {
   loc: string;
   lastmod: string;
   changefreq: string;
   priority: string;
+  images?: SitemapImage[];
 }
 
 const STATIC_PAGES: SitemapUrl[] = [
-  { loc: `${DOMAIN}/`, lastmod: TODAY, changefreq: 'daily', priority: '1.0' },
+  { loc: `${DOMAIN}/`, lastmod: TODAY, changefreq: 'daily', priority: '1.0',
+    images: [{ loc: `${DOMAIN}/og-image.png`, title: 'PakCart — Online Shopping in Pakistan' }] },
   { loc: `${DOMAIN}/products`, lastmod: TODAY, changefreq: 'daily', priority: '0.9' },
   { loc: `${DOMAIN}/categories`, lastmod: TODAY, changefreq: 'weekly', priority: '0.8' },
   { loc: `${DOMAIN}/new-arrivals`, lastmod: TODAY, changefreq: 'weekly', priority: '0.8' },
@@ -54,19 +62,46 @@ function buildXml(urls: SitemapUrl[]): string {
     return true;
   });
 
-  const urlsXml = deduped.map(u => `  <url>
+  const urlsXml = deduped.map(u => {
+    const imageBlocks = (u.images || []).map(img => `
+    <image:image>
+      <image:loc>${escapeXml(img.loc)}</image:loc>${img.title ? `
+      <image:title>${escapeXml(img.title)}</image:title>` : ''}${img.caption ? `
+      <image:caption>${escapeXml(img.caption)}</image:caption>` : ''}
+    </image:image>`).join('');
+
+    return `  <url>
     <loc>${escapeXml(u.loc)}</loc>
     <lastmod>${u.lastmod}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`).join('\n');
+    <priority>${u.priority}</priority>${imageBlocks}
+  </url>`;
+  }).join('\n');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlsXml}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${urlsXml}
+</urlset>`;
 }
 
 function parsePrivateKey(raw?: string): string | undefined {
   if (!raw) return undefined;
   return raw.replace(/\\n/g, '\n');
+}
+
+function pickProductImages(data: any): string[] {
+  const arr: string[] = [];
+  if (Array.isArray(data.images)) {
+    for (const img of data.images) {
+      if (typeof img === 'string' && img.trim()) arr.push(img);
+      else if (img && typeof img === 'object' && typeof img.url === 'string') arr.push(img.url);
+    }
+  }
+  if (typeof data.image === 'string' && data.image.trim()) arr.push(data.image);
+  if (typeof data.thumbnail === 'string' && data.thumbnail.trim()) arr.push(data.thumbnail);
+  // dedupe + cap at 5 (Google limit is 1000 but 5 is plenty per URL)
+  return Array.from(new Set(arr.filter(u => /^https?:\/\//i.test(u)))).slice(0, 5);
 }
 
 export default async function handler(req: any, res: any) {
@@ -95,7 +130,6 @@ export default async function handler(req: any, res: any) {
     const db = getFirestore();
 
     // Fetch categories
-    let categoriesErrors = 0;
     try {
       let categoriesSnap = await db.collection('categories').where('active', '==', true).get();
       if (categoriesSnap.empty) {
@@ -105,20 +139,26 @@ export default async function handler(req: any, res: any) {
         const data = doc.data();
         const slug = data.slug;
         if (!slug || typeof slug !== 'string' || slug.trim() === '') continue;
+
+        const heroImage = typeof data.image === 'string' ? data.image
+          : typeof data.heroImage === 'string' ? data.heroImage
+          : null;
+
         urls.push({
           loc: `${DOMAIN}/collections/${encodeURIComponent(slug)}`,
           lastmod: formatDate(data.updatedAt || data.createdAt),
           changefreq: 'weekly',
           priority: '0.8',
+          ...(heroImage && /^https?:\/\//i.test(heroImage) ? {
+            images: [{ loc: heroImage, title: data.name || slug }]
+          } : {}),
         });
       }
     } catch (err: any) {
-      categoriesErrors++;
       console.error('[sitemap] Failed to fetch categories:', err.message);
     }
 
     // Fetch active products
-    let productsErrors = 0;
     try {
       let productsSnap = await db.collection('products').where('active', '==', true).get();
       if (productsSnap.empty) {
@@ -130,20 +170,26 @@ export default async function handler(req: any, res: any) {
         if (!slug || typeof slug !== 'string' || slug.trim() === '') continue;
         if (data.active === false) continue;
         if (data.status === 'draft' || data.published === false) continue;
+
+        const productImages = pickProductImages(data);
+
         urls.push({
           loc: `${DOMAIN}/products/${encodeURIComponent(slug)}`,
           lastmod: formatDate(data.updatedAt || data.createdAt),
           changefreq: 'weekly',
           priority: '0.7',
+          ...(productImages.length ? {
+            images: productImages.map(loc => ({ loc, title: data.name || slug }))
+          } : {}),
         });
       }
     } catch (err: any) {
-      productsErrors++;
       console.error('[sitemap] Failed to fetch products:', err.message);
     }
 
     const xml = buildXml(urls);
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('X-Robots-Tag', 'noindex');
     res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
     return res.status(200).send(xml);
 
@@ -151,6 +197,7 @@ export default async function handler(req: any, res: any) {
     console.error('[sitemap] Fatal error:', error.message);
     const xml = buildXml(urls);
     res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('X-Robots-Tag', 'noindex');
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
     return res.status(200).send(xml);
   }
