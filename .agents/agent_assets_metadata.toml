@@ -12,6 +12,12 @@ uri = "file://attached_assets/generated_images/dark_caped_vigilante_wallpaper.pn
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "YbRM8I0PQppgTNhrorzC1"
+uri = "file://attached_assets/generated_images/photorealistic_vigilante_wallpaper.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "15XYVYK1b9k1SSUC-mnCK"
 uri = "file://attached_assets/generated_images/pakcart_hero_banner.png"
@@ -23,3 +29,9 @@ id = "JaUhEu6QveLMoWpyYwX1e"
 uri = "file://attached_assets/generated_images/dark_caped_vigilante_wallpaper.png"
 type = "image"
 title = "Dark Caped Vigilante - 4K PC Wallpaper"
+
+[[outputs]]
+id = "VR9GCZLwebpdyNO1aoZkg"
+uri = "file://attached_assets/generated_images/photorealistic_vigilante_wallpaper.png"
+type = "image"
+title = "Photorealistic Caped Vigilante - Cinematic 4K Wallpaper"
