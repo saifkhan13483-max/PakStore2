@@ -1,0 +1,12 @@
+🎬 Prompt 1 — MAIN ANIMATION (Recommended, image-to-video)
+Use this when uploading the image as a starting frame:
+
+The caped vigilante stands perfectly still on the rooftop, breathing slowly and deeply — his chest rises and falls subtly. His long black cape ripples and billows continuously in the heavy storm wind, fabric rolling in slow-motion organic waves, edges fluttering, water droplets flicking off the torn ends. Heavy rain falls in sheets across the entire frame, individual droplets streaking past the camera, splashing off his armored shoulders and cowl, water cascading down his chest plate. His head tilts down by a few degrees, then very slowly turns toward the camera. His white eye lenses pulse with a faint, slow glow — brightening once every 3 seconds.
+
+Behind him, the bat-shaped emblem in the clouds slowly intensifies and pulses with light, flickering once like a faulty projector. A single massive bolt of sheet lightning cracks silently across the sky on the left, illuminating the entire scene for half a second — rim-lighting his cape and casting his sharp shadow forward. Storm clouds drift slowly from right to left. The distant helicopter on the right hovers in place, its searchlight beam slowly sweeping across the cityscape. City window lights twinkle gently, a few flickering. Volumetric mist rolls slowly between the skyscrapers below.
+
+Camera: extremely slow, almost imperceptible cinematic dolly push-in toward the vigilante (from medium-wide to medium shot), with very subtle handheld breathing. Shallow depth of field maintained throughout — raindrops in foreground softly out of focus.
+
+Style: photorealistic live-action film, IMAX 70mm cinematography, organic film grain, Roger Deakins lighting, dark moody chiaroscuro, deep blacks, cold teal sky with warm amber city glow. 24fps, seamless loop, 8 seconds.
+
+Negative prompt: cartoon, 3d render, cgi look, jittery motion, morphing face, distorted hands, fast cuts, zoom in fast, jump cuts, flickering, glitch, text, watermark, deformed limbs, melting cape
