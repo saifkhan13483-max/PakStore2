@@ -8,6 +8,15 @@ This audit reviews the live store against Google Search Essentials and the GSC o
 
 ## 1. Summary Checklist of Changes Made
 
+### April 24, 2026 pass — Edge security headers, www→apex redirect, sitemap lastmod
+
+| # | Area | Change | Why it matters |
+|---|------|--------|----------------|
+| I | `vercel.json` — security headers | Added `Strict-Transport-Security` (HSTS, 2 yr, includeSubDomains, preload), `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()` to every HTML response. Asset routes also get `nosniff`. | HSTS is a Google Search-quality signal and prevents downgrade attacks. `nosniff` blocks MIME-confusion. `Permissions-Policy` opts the site out of FLoC/Topics cohort tracking. These also remove the "missing security headers" flags from third-party SEO crawlers (Ahrefs, SEMrush) that some buyers/affiliates use to vet stores. |
+| II | `vercel.json` — `www → apex` 308 redirect | Added an edge-level `308` redirect from `www.pakcart.store/*` → `https://pakcart.store/*`. | Defense-in-depth so even if the Vercel project's "Redirect to Production Domain" toggle is ever changed, the canonical host is enforced in code. Eliminates duplicate-content risk between www and non-www. |
+| III | `vercel.json` — `/robots.txt` headers | Explicit `Content-Type: text/plain; charset=utf-8` and `Cache-Control: public, max-age=3600, must-revalidate`. | Some CDN edges were serving the file with a generic `application/octet-stream` MIME, which Googlebot will fetch but Bing has historically been picky about. |
+| IV | Static sitemap fallbacks | Added `<lastmod>2026-04-24</lastmod>` to every URL in `client/public/sitemap.xml` and `public/sitemap.xml`. | Google explicitly recommends `lastmod` for sitemap freshness signals. The dynamic `/api/sitemap` already had it; the static fallback (used during cold-start) was missing them. |
+
 ### April 24, 2026 pass — Core Web Vitals (Lighthouse Performance)
 
 Live Lighthouse on `https://pakcart.store/` showed Performance = 40, SEO = 100. SEO is now correct; this round closes the largest performance regressions that were also dragging Core Web Vitals (LCP, INP) down — both of which Google uses as a ranking signal.

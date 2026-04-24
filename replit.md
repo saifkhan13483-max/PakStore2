@@ -352,6 +352,26 @@ Final pass to close the last technical gaps before submitting the property for f
 - Static + dynamic sitemap both valid XML with image extension
 - All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)
 
+## Phase 9 — Edge Security Headers + Final GSC Hardening (April 24, 2026)
+
+Last hardening pass before locking in the GSC-ready state. See `SEO_GSC_AUDIT_2026.md` Section 1 (April 24, 2026 — Edge security headers pass) for the full diff.
+
+### Changes Made
+1. **`vercel.json` — Security headers added to every HTML route**
+   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+   - `X-Content-Type-Options: nosniff`
+   - `X-Frame-Options: SAMEORIGIN`
+   - `Referrer-Policy: strict-origin-when-cross-origin`
+   - `Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()` (also opts the site out of Topics/FLoC cohort tracking)
+2. **`vercel.json` — `www.pakcart.store` → `pakcart.store` 308 redirect** declared at the edge as defense-in-depth (in addition to the Vercel dashboard "Redirect to Production Domain" toggle).
+3. **`vercel.json` — `/robots.txt`** now sent with explicit `Content-Type: text/plain; charset=utf-8` and a 1 hour cache.
+4. **Static sitemap fallbacks** (`client/public/sitemap.xml` and `public/sitemap.xml`) — added `<lastmod>` to every URL. The dynamic `/api/sitemap` already emitted `lastmod` from Firestore data; the static fallback (served on cold-start before the function warms up) was missing them.
+
+### Verified
+- `vercel.json` parses as valid JSON (10 routes, www→apex redirect first).
+- Static sitemap: 10 URLs, 10 `<lastmod>` entries, valid XML with `xmlns:image` namespace.
+- Pre-existing TypeScript errors in `productFirestoreService.ts` and `BulkAddProducts.tsx` are unrelated to this pass and were already present.
+
 ## Phase 8 — Core Web Vitals / Lighthouse Performance (April 24, 2026)
 
 Live Lighthouse showed Performance = 40 while SEO = 100. This phase targets the largest JS-execution and LCP regressions, which feed back into Core Web Vitals — a Google ranking factor.
