@@ -135,6 +135,9 @@ export default defineConfig({
             if (id.includes("react-helmet-async")) return "vendor-helmet";
             if (id.includes("@radix-ui/")) return "vendor-radix";
             if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
+            if (id.includes("@tiptap") || id.includes("prosemirror")) return "vendor-tiptap";
+            if (id.includes("embla-carousel")) return "vendor-embla";
+            if (id.includes("@dnd-kit")) return "vendor-dnd";
             if (id.includes("firebase/firestore") || id.includes("firebase-admin")) return "vendor-firestore";
             if (id.includes("firebase/auth")) return "vendor-firebase-auth";
             if (id.includes("firebase/")) return "vendor-firebase";
