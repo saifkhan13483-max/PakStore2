@@ -35,3 +35,9 @@ id = "VR9GCZLwebpdyNO1aoZkg"
 uri = "file://attached_assets/generated_images/photorealistic_vigilante_wallpaper.png"
 type = "image"
 title = "Photorealistic Caped Vigilante - Cinematic 4K Wallpaper"
+
+[[outputs]]
+id = "D-jAwbfQkCSfBIiWsn_2d"
+uri = "file://attached_assets/generated_videos/caped_vigilante_rooftop_animation.mp4"
+type = "video"
+title = "Animated Caped Vigilante Wallpaper - Cinematic 8s Loop"
