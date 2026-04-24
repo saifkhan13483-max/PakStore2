@@ -6,8 +6,20 @@ uri = "file://attached_assets/generated_images/pakcart_hero_banner.png"
 type = "image"
 title = "pakcart hero banner"
 
+[[generated]]
+id = "Wy1mmGwNo-1RwqUSpJ4Sr"
+uri = "file://attached_assets/generated_images/dark_caped_vigilante_wallpaper.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "15XYVYK1b9k1SSUC-mnCK"
 uri = "file://attached_assets/generated_images/pakcart_hero_banner.png"
 type = "image"
 title = "PakCart Hero Banner (updated categories)"
+
+[[outputs]]
+id = "JaUhEu6QveLMoWpyYwX1e"
+uri = "file://attached_assets/generated_images/dark_caped_vigilante_wallpaper.png"
+type = "image"
+title = "Dark Caped Vigilante - 4K PC Wallpaper"
