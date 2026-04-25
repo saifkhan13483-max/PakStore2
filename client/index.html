@@ -133,13 +133,12 @@
          hero/banner boxes BEFORE the JS bundle parses, so the user sees
          something immediately and there is no layout shift when React mounts. -->
     <style>
-      html,body{margin:0;background:#fff;color:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+      html,body{margin:0;background:#f6f0e6;color:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
       #root{min-height:100vh}
       .pc-boot{display:flex;flex-direction:column;min-height:100vh}
       .pc-boot__banner{height:36px;background:#16a34a}
       .pc-boot__header{height:64px;background:#fff;border-bottom:1px solid #e5e7eb}
-      .pc-boot__hero{width:100%;background:#0a0a0a;aspect-ratio:768/1024;min-height:280px}
-      @media (min-width:768px){.pc-boot__header{height:80px}.pc-boot__hero{aspect-ratio:1920/700;min-height:500px}}
+      @media (min-width:768px){.pc-boot__header{height:80px}}
     </style>
 
     <!-- LCP preload bootstrap. On repeat visits we know the hero slide URL
@@ -175,7 +174,6 @@
       <div class="pc-boot" aria-hidden="true">
         <div class="pc-boot__banner"></div>
         <div class="pc-boot__header"></div>
-        <div class="pc-boot__hero"></div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

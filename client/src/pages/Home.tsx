@@ -250,8 +250,11 @@ export default function Home() {
         ]}
       />
       <main className="flex-1">
-        {/* Hero Section with Custom Slider — aspect ratio is CSS-driven so the
-            box reserves the correct space immediately, before any JS work. */}
+        {/* Hero Section with Custom Slider — only rendered while we're loading
+            slide data or actually have slides to show. With zero active slides
+            we render nothing so the page goes straight from the header to the
+            trust-indicators row (no empty black placeholder). */}
+        {(isHeroLoading || HERO_SLIDES.length > 0) && (
         <section
           className="relative w-full overflow-hidden bg-black group aspect-[768/1024] min-h-[280px] md:aspect-[1920/700] md:min-h-[500px]"
           onMouseEnter={() => setIsPaused(true)}
@@ -351,12 +354,9 @@ export default function Home() {
                 </>
               )}
             </>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-white/50">
-              No active slides available
-            </div>
-          )}
+          ) : null}
         </section>
+        )}
 
         {/* Trust Indicators */}
         <section className="py-5 sm:py-7 border-b bg-card">
