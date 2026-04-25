@@ -27,6 +27,14 @@ Live Lighthouse on `https://pakcart.store/` showed Performance = 40, SEO = 100. 
 | B | TikTok Pixel was render-blocking | `client/index.html` — Pixel is now loaded inside `requestIdleCallback` (4 s timeout) instead of synchronously inline. Bots / Lighthouse / WebPageTest user agents are detected and never load it. | Removes ~30–60 ms of main-thread work from the LCP/INP window. Lighthouse runs as a headless Chrome UA so it now skips the pixel entirely, giving a clean Core Web Vitals reading without losing real-user analytics. |
 | C | 540 KB main JS bundle | Rewrote `vite.config.ts` `manualChunks` from a 4-key dictionary to a path-based function. Now splits Framer Motion, Radix UI, react-helmet-async, recharts, react-hook-form/zod, date-fns, and Firebase Auth/Firestore into their own vendor chunks. | Main entry chunk dropped from **540 KB → 213 KB (-61%)**. Heavy admin-only chunks (recharts ~414 KB, react-hook-form ~88 KB) no longer ship on the homepage. Vendor chunks are also independently cacheable across deploys. |
 
+### April 25, 2026 pass — Desktop CLS = 0.472 fix (announcement banner reservation)
+
+Clean PageSpeed Insights desktop run showed Performance = 44, with **CLS = 0.472** (anything > 0.25 is "Poor") as the single biggest contributor. Root cause: `AnnouncementBanner` returned `null` while its Firestore `getActiveAnnouncements()` query was in flight, then suddenly inserted a ~36 px tall banner at the very top of the layout once data arrived — pushing every element below it down by 36 px and registering as one large layout shift across the entire viewport.
+
+| # | Area | Change | Why it matters |
+|---|------|--------|----------------|
+| δ | `client/src/components/layout/AnnouncementBanner.tsx` | Added an `isLoading` early-return that renders a `min-h-[2.25rem]` placeholder with the same `bg-primary` color the populated banner will use. Placed AFTER all `useState` / `useCallback` / `useEffect` hooks to stay compliant with the Rules of Hooks. | The 36 px slot is reserved before the Firestore query resolves, so when the populated banner replaces the placeholder there is no layout shift. The colored placeholder also visually matches the eventual banner background so the swap is invisible to the user. Expected desktop CLS drop: **0.472 → ~0.05** (well inside the "Good" threshold). |
+
 ### April 25, 2026 pass — Build-time LCP hero preload (mobile PSI = 37 fix)
 
 Clean PageSpeed Insights run showed **mobile = 37**. Root cause: the LCP hero image (Cloudinary, admin-managed slides) only began downloading **after** the browser parsed 462 KB React + 213 KB main + 192 KB Firestore + 114 KB framer-motion, then React hydrated, then Firestore returned the active slides list. On mobile that pushed LCP past 4 seconds.

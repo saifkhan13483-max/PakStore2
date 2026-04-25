@@ -352,6 +352,25 @@ Final pass to close the last technical gaps before submitting the property for f
 - Static + dynamic sitemap both valid XML with image extension
 - All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)
 
+## Phase 11 — Desktop CLS Fix (April 25, 2026)
+
+Targeted fix for **PageSpeed Insights desktop CLS = 0.472** (catastrophic — anything > 0.25 is "Poor"). The desktop score was 44 and CLS was the biggest single contributor.
+
+### Root Cause
+`AnnouncementBanner` (rendered above every page through `Layout`) returned `null` while its Firestore `getActiveAnnouncements()` query was in flight, then mounted a ~36 px tall banner at the very top once data arrived — pushing the entire page down 36 px in one shot. PSI captured this as a single massive layout shift across nearly the whole viewport.
+
+### Change Made
+1. **`client/src/components/layout/AnnouncementBanner.tsx`** — added an `isLoading` (and `data === undefined`) early-return that renders a `min-h-[2.25rem]` placeholder using the same `bg-primary` colour the populated banner will use. Placed AFTER all `useState` / `useCallback` / `useEffect` hooks so the Rules of Hooks are respected on every render.
+
+### Why It Wins
+- The 36 px slot is reserved on first paint, so when the populated banner replaces the placeholder there is no shift.
+- The placeholder background matches the banner background, so the swap is visually seamless to the user.
+- Expected desktop CLS drop: **0.472 → ~0.05** (well inside the "Good" threshold), which alone should lift the desktop Performance score from 44 to the 80s.
+
+### Verified
+- `npx vite build` — clean (24.4 s, no TS errors introduced).
+- `node scripts/generate-seo-html.mjs` — clean, hero preload tags from Phase 10 still injected correctly.
+
 ## Phase 10 — Build-Time LCP Hero Preload (April 25, 2026)
 
 Targeted fix for the **PageSpeed Insights mobile = 37** result. Root cause: the LCP hero image (Cloudinary-hosted, admin-managed slides from Firestore) only began downloading after React hydrated and the active-slides query returned — so it sat behind ~1 MB of critical JS on mobile.

@@ -48,7 +48,7 @@ export default function AnnouncementBanner() {
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isPaused, setIsPaused] = useState(false);
 
-  const { data: announcements } = useQuery({
+  const { data: announcements, isLoading } = useQuery({
     queryKey: ["/api/announcements", "active"],
     queryFn: () => announcementService.getActiveAnnouncements(),
     staleTime: 5 * 60 * 1000,
@@ -79,6 +79,21 @@ export default function AnnouncementBanner() {
       setCurrentIndex(visible.length - 1);
     }
   }, [visible.length, currentIndex]);
+
+  // CLS fix: while the announcements query is in flight (or before it has
+  // returned at all on first render), reserve the same vertical space the
+  // banner will occupy. This prevents the page from being pushed down ~36 px
+  // when the data arrives, which was contributing the bulk of the homepage's
+  // Cumulative Layout Shift score.
+  if (isLoading || announcements === undefined) {
+    return (
+      <div
+        className="w-full min-h-[2.25rem] bg-primary"
+        aria-hidden="true"
+        data-testid="announcement-banner-placeholder"
+      />
+    );
+  }
 
   if (visible.length === 0) return null;
 
