@@ -31,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <AnnouncementBanner />
       <Header />
       <main className="flex-1 pb-16 lg:pb-0">{children}</main>
