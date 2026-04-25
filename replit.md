@@ -352,6 +352,25 @@ Final pass to close the last technical gaps before submitting the property for f
 - Static + dynamic sitemap both valid XML with image extension
 - All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)
 
+## Phase 10 — Build-Time LCP Hero Preload (April 25, 2026)
+
+Targeted fix for the **PageSpeed Insights mobile = 37** result. Root cause: the LCP hero image (Cloudinary-hosted, admin-managed slides from Firestore) only began downloading after React hydrated and the active-slides query returned — so it sat behind ~1 MB of critical JS on mobile.
+
+### Change Made
+1. **`scripts/generate-seo-html.mjs`** now also queries the `homepage_slides` Firestore collection at build time, picks the first active slide for both `desktop` and `mobile` `hero_section_type`, runs each URL through `f_auto,q_auto,dpr_auto,w_768` / `w_1920`, and injects two `<link rel="preload" as="image" fetchpriority="high">` tags (gated by `media="(max-width: 767px)"` and `(min-width: 768px)`) into the prerendered `dist/index.html` `<head>`.
+2. **`buildHead()`** gained an `extraLinks` parameter so per-route head injections don't bleed into other pages — only `/` currently uses it.
+
+### Why This Wins
+- The browser starts fetching the correct device-specific hero image **in parallel** with the JS bundle, before React even hydrates.
+- The preload URL exactly matches the eventual `<img src>`, so the cached response is reused — no double download.
+- Only the homepage gets the extra hints; collection / product pages are unaffected.
+- Expected mobile LCP improvement: 1.5–3 seconds, which is the largest single contributor to the 37 score.
+
+### Verified
+- `node scripts/generate-seo-html.mjs` runs cleanly, logs `🚀 Hero preload — desktop: ✓, mobile: ✓`.
+- `dist/index.html` contains both `<link rel="preload" as="image" fetchpriority="high" …>` tags with the correct media gates and Cloudinary transformations.
+- All 7 collection pages and 7 product pages still prerender as before — the change is additive.
+
 ## Phase 9 — Edge Security Headers + Final GSC Hardening (April 24, 2026)
 
 Last hardening pass before locking in the GSC-ready state. See `SEO_GSC_AUDIT_2026.md` Section 1 (April 24, 2026 — Edge security headers pass) for the full diff.

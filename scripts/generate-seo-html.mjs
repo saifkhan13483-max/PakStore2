@@ -28,6 +28,20 @@ const DIST = path.join(__dirname, "../dist");
 const DOMAIN = "https://pakcart.store";
 const TODAY = new Date().toISOString().split("T")[0];
 
+/**
+ * Build a Cloudinary delivery URL with f_auto/q_auto for build-time preloading.
+ * Mirrors client/src/lib/cloudinary.ts (kept inline so this script has no app deps).
+ */
+function cloudinaryOptimized(url, { width } = {}) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("cloudinary.com")) return url;
+  const parts = url.split("/upload/");
+  if (parts.length !== 2) return url;
+  const t = ["f_auto", "q_auto", "dpr_auto"];
+  if (width) t.push(`w_${width}`, "c_fill");
+  return `${parts[0]}/upload/${t.join(",")}/${parts[1]}`;
+}
+
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
   authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -49,7 +63,7 @@ function formatPrice(price) {
   return `Rs. ${Number(price || 0).toLocaleString("en-PK")}`;
 }
 
-function buildHead({ title, description, canonical, robots = "index,follow", image, schema }) {
+function buildHead({ title, description, canonical, robots = "index,follow", image, schema, extraLinks = "" }) {
   const fullTitle = title ? `${title} | PakCart` : "PakCart – Online Shopping Pakistan";
   const img = image || `${DOMAIN}/og-image.png`;
   return {
@@ -58,6 +72,7 @@ function buildHead({ title, description, canonical, robots = "index,follow", ima
   <meta name="description" content="${esc(description)}" />
   <meta name="robots" content="${robots}" />
   <link rel="canonical" href="${esc(canonical)}" />
+  ${extraLinks}
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${esc(canonical)}" />
   <meta property="og:title" content="${esc(fullTitle)}" />
@@ -70,6 +85,59 @@ function buildHead({ title, description, canonical, robots = "index,follow", ima
   <meta name="twitter:image" content="${esc(img)}" />
   ${schema ? `<script type="application/ld+json">${JSON.stringify(schema)}</script>` : ""}`.trim(),
   };
+}
+
+/**
+ * Fetch the first active homepage slide for each device variant
+ * (desktop + mobile) so we can inject <link rel="preload"> for the LCP image.
+ * Returns { desktop?: string, mobile?: string } — Cloudinary-optimized URLs.
+ */
+async function fetchHeroPreloadCandidates(db) {
+  try {
+    const snap = await getDocs(collection(db, "homepage_slides"));
+    const all = snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((s) => s.is_active !== false && s.image_url);
+    const sortByOrder = (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0);
+
+    const desktopRaw = all
+      .filter((s) => s.hero_section_type === "desktop")
+      .sort(sortByOrder)[0]?.image_url;
+    const mobileRaw = all
+      .filter((s) => s.hero_section_type === "mobile")
+      .sort(sortByOrder)[0]?.image_url;
+
+    // Fall back to any active slide if a device-specific one isn't configured
+    const fallback = all.sort(sortByOrder)[0]?.image_url;
+
+    return {
+      desktop: cloudinaryOptimized(desktopRaw || fallback, { width: 1920 }),
+      mobile: cloudinaryOptimized(mobileRaw || fallback, { width: 768 }),
+    };
+  } catch (err) {
+    console.warn("⚠ Could not fetch hero slides for preload:", err.message);
+    return {};
+  }
+}
+
+/**
+ * Build the <link rel="preload"> tags that go in <head> to start the LCP
+ * image fetch in parallel with the JS bundle. Mobile and desktop variants
+ * are gated by media queries so each device only downloads its own image.
+ */
+function buildHeroPreloadLinks({ desktop, mobile }) {
+  const tags = [];
+  if (mobile) {
+    tags.push(
+      `<link rel="preload" as="image" fetchpriority="high" href="${esc(mobile)}" media="(max-width: 767px)" />`
+    );
+  }
+  if (desktop) {
+    tags.push(
+      `<link rel="preload" as="image" fetchpriority="high" href="${esc(desktop)}" media="(min-width: 768px)" />`
+    );
+  }
+  return tags.join("\n  ");
 }
 
 function buildBodyContent(content) {
@@ -191,10 +259,28 @@ async function main() {
   const shell = fs.readFileSync(shellOrigPath, "utf-8");
   const results = [];
 
+  // ── Initialize Firebase up-front so we can fetch the LCP hero for preload ──
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const heroPreload = await fetchHeroPreloadCandidates(db);
+  if (heroPreload.desktop || heroPreload.mobile) {
+    console.log(
+      `🚀 Hero preload — desktop: ${heroPreload.desktop ? "✓" : "—"}, mobile: ${heroPreload.mobile ? "✓" : "—"}`
+    );
+  }
+
   // ── Static pages ────────────────────────────────────────────────────────────
   for (const page of STATIC_PAGES) {
     const canonical = `${DOMAIN}${page.route}`;
-    const head = buildHead({ title: page.title, description: page.description, canonical, schema: page.schema });
+    // Only the homepage gets the hero preload (LCP image is the slider).
+    const extraLinks = page.route === "/" ? buildHeroPreloadLinks(heroPreload) : "";
+    const head = buildHead({
+      title: page.title,
+      description: page.description,
+      canonical,
+      schema: page.schema,
+      extraLinks,
+    });
     const body = buildBodyContent(`<h1>${esc(page.h1)}</h1>${page.body}`);
     const html = injectIntoShell(shell, head, body);
     const file = writeHtml(page.route, html);
@@ -203,8 +289,6 @@ async function main() {
   }
 
   // ── Dynamic pages from Firebase ─────────────────────────────────────────────
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
 
   // Collections / categories
   const catSnap = await getDocs(collection(db, "categories"));
