@@ -58,9 +58,48 @@ export default function Home() {
     });
   };
 
+  // Repeat-visit LCP fast-path: read the hero URL cached by a previous visit
+  // and synthesise a minimal HomepageSlide[] so the hero <img> renders on the
+  // very first React paint — no Firestore round trip required. This pairs
+  // with the inline <link rel="preload"> in index.html, so by the time React
+  // mounts the cached image is already in the browser cache.
+  const cachedHeroPlaceholder = useMemo<HomepageSlide[] | undefined>(() => {
+    if (typeof window === "undefined") return undefined;
+    try {
+      const raw = window.localStorage.getItem("pakcart_hero_v1");
+      if (!raw) return undefined;
+      const data = JSON.parse(raw) as { mobile?: string; desktop?: string };
+      const stubs: HomepageSlide[] = [];
+      if (data?.mobile) {
+        stubs.push({
+          id: "__cached_mobile",
+          image_url: data.mobile,
+          image_webp_url: data.mobile,
+          is_active: true,
+          display_order: 0,
+          hero_section_type: "mobile",
+        } as HomepageSlide);
+      }
+      if (data?.desktop) {
+        stubs.push({
+          id: "__cached_desktop",
+          image_url: data.desktop,
+          image_webp_url: data.desktop,
+          is_active: true,
+          display_order: 0,
+          hero_section_type: "desktop",
+        } as HomepageSlide);
+      }
+      return stubs.length > 0 ? stubs : undefined;
+    } catch {
+      return undefined;
+    }
+  }, []);
+
   const { data: slides, isLoading: isHeroLoading } = useQuery<HomepageSlide[]>({
     queryKey: ["/api/homepage-slides", "active"],
     queryFn: () => homepageSlideService.getActiveSlides(),
+    placeholderData: cachedHeroPlaceholder,
   });
 
   // Track viewport changes via matchMedia (cheaper than 'resize' + initial state
@@ -95,6 +134,11 @@ export default function Home() {
   // <link rel="preload"> the LCP image on the user's NEXT visit, in parallel
   // with the JS bundle download. This is the single biggest LCP win we can
   // make for an SPA without server-side rendering.
+  //
+  // We store the EXACT same URL that the <picture> source below will request
+  // (admin-provided WebP if present, otherwise the same Cloudinary WebP
+  // transform). That way the preload, the placeholderData stub, and the real
+  // rendered <img> all hit one URL and the browser reuses a single download.
   useEffect(() => {
     if (!slides || slides.length === 0) return;
     try {
@@ -103,7 +147,12 @@ export default function Home() {
           .filter(s => s.hero_section_type === deviceType && s.is_active !== false)
           .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
         const slide = list[0] ?? slides[0];
-        return slide?.image_webp_url || slide?.image_url || null;
+        if (!slide) return null;
+        if (slide.image_webp_url) return slide.image_webp_url;
+        return getOptimizedImageUrl(slide.image_url, {
+          format: "webp",
+          width: deviceType === "mobile" ? 768 : 1920,
+        });
       };
       const payload = {
         v: 1,

@@ -1,0 +1,284 @@
+TIER 1: CRITICAL FIXES (Highest Impact)
+Prompt 1: Third-Party Script Defer & Removal Audit
+CopyReview all scripts loaded in client/index.html and any script tags in React components. 
+Create a spreadsheet showing:
+1. Script name, source, purpose, and current load strategy
+2. Which scripts are NOT critical for First Contentful Paint (FCP)
+3. For each non-critical script:
+   - Does it need to load synchronously? If no, defer it or wrap it in requestIdleCallback()
+   - Can it be conditionally loaded (e.g., only for non-bot users)?
+   - Can it load via Web Worker instead of main thread?
+
+Specific focus:
+- TikTok Pixel: Already deferred in Phase 8 — verify the deferral is working in browser DevTools (Network tab)
+- Google Analytics: Should load async, not block page
+- Any font loading scripts: Should use font-display: swap or optional
+- Cloudinary: Is the library being lazy-loaded or eagerly bundled?
+- Sentry/error tracking: Should be deferred until after interaction
+
+Then prioritize which scripts to remove entirely vs. defer vs. optimize. Consider the performance ROI vs. business value lost.
+Prompt 2: Image Optimization & Responsive Sizing Strategy
+CopyAudit all images on the homepage, category collection pages, and product detail pages:
+
+1. For hero images (LCP candidates):
+   - Verify Cloudinary transformations are applied: f_auto,q_auto,dpr_auto,w_768 (mobile) and w_1920 (desktop)
+   - Check if WEBP format is being served to modern browsers
+   - Verify the preload link in index.html has the correct fetchPriority and media query
+   - Test on PageSpeed: does the LCP image start downloading in parallel with JS?
+
+2. For product grid images:
+   - Are srcset and sizes attributes used to serve correct resolution per device?
+   - Is lazy loading (loading="lazy") applied to below-fold images?
+   - Are placeholder / LQIP (Low Quality Image Placeholder) being used?
+
+3. For category hero images:
+   - Are they being optimized the same way as homepage hero?
+   - Is the Cloudinary URL correct in the sitemap phase 7 image extension?
+
+Create a checklist of which image optimizations are missing and estimate the LCP / CLS reduction per fix.
+Prompt 3: React Component Re-render Profiling & Memoization
+CopyUse React DevTools Profiler to record a 10-second interaction on:
+1. Homepage load → scroll down to product grid
+2. Category collection page load → filter/search products
+3. Product detail page load → scroll down to reviews
+
+For each recording, identify:
+- Which components re-render on every keystroke / scroll / state change?
+- Which re-renders are unnecessary (same props as before)?
+- Top 5 slowest render operations by duration
+
+Then create a fix plan:
+- Wrap components with React.memo() if they re-render with same props
+- Extract children/expensive computations into useMemo()
+- Move state down from parent to isolated child (avoid parent re-render cascade)
+- Check if TanStack Query is caching correctly or refetching unnecessarily
+- Verify Zustand selectors are granular (subscribe to only the store slice you need, not whole store)
+
+Estimate CLS / LCP / TTI (Time to Interactive) reduction per fix.
+TIER 2: HIGH-IMPACT FIXES (Performance band 40–60)
+Prompt 4: Font Loading & CLS Prevention
+CopyAudit all font usage:
+
+1. Which fonts are critical for FCP? (only headlines/branding) vs. decorative?
+2. For each critical font:
+   - Is it self-hosted or CDN? (self-hosted + preload is faster)
+   - Are variable font files being used (smaller than multiple weights)?
+   - Is font-display: swap applied? (allows fallback text to render immediately)
+   - Is font-size-adjust being used to reduce layout shift when font loads?
+
+3. For decorative fonts:
+   - Can they be loaded deferred (font-display: optional)?
+   - Are they being preloaded unnecessarily?
+
+Then:
+- Measure layout shift caused by font swapping: use Lighthouse CLS metric before/after each change
+- Consider using system fonts for body text (faster, familiar to users) and only load branded fonts for h1/logo
+- Generate a font subsetting strategy: do you need all Unicode glyphs or just Latin + numbers?
+
+Create a report: "Estimated CLS improvement: X → 0.0Y after font loading fixes"
+Prompt 5: Code Splitting & Lazy Loading Strategy
+CopyReview the current Vite manualChunks strategy in vite.config.ts:
+
+Current state: recharts, react-hook-form, zod are lazy-loaded. Good!
+
+But check:
+1. Are these lazy chunks actually being code-split in production build? (Run: npx vite build, check dist/assets, verify separate chunk files exist)
+2. Are any components importing heavy dependencies at the top level instead of lazy?
+   - Example: if BulkAddProducts.tsx imports recharts at top, move it inside lazy(() => import(...))
+3. Are there any unused imports that could be tree-shaken?
+
+New opportunities:
+- framer-motion: Currently used only in components? Lazy-load the animation components
+- zod validation: Is it imported by forms library or directly by components? If direct, can it be lazy?
+- Admin routes: Are admin page imports causing the main chunk to grow? Should use React.lazy()
+- Date libraries (if used): Often large; consider lazy or use a lighter alternative
+
+Then create a report:
+- Current main chunk size (from build output)
+- Target: main chunk < 200 KB (currently 213 KB, good but can improve)
+- Lazy chunks that could be code-split further
+- Estimated FCP/TTI improvement per new code split
+
+Action: Implement new code splits and measure bundle size delta.
+Prompt 6: Lighthouse Performance Audit Deep Dive
+CopyRun Lighthouse in DevTools on:
+1. Desktop homepage
+2. Mobile homepage
+3. Desktop /collections/women-bags
+4. Mobile /collections/women-bags
+5. Desktop /products/:slug
+6. Mobile /products/:slug
+
+For each, export the JSON report and analyze:
+
+1. **Unused JavaScript**: Which files/bundles are unused on each page?
+   - If the admin recharts bundle loads on a public category page, that's a problem
+   - Solution: dynamic imports or route-based code splitting
+
+2. **Unused CSS**: Are Tailwind classes being purged correctly?
+   - Verify tailwind.config.ts has correct content globs
+   - Check if shadcn UI components are including unnecessary styles
+
+3. **Cumulative Layout Shift (CLS)**: Should be < 0.1 after Phase 11 fix
+   - If still high, which elements are shifting? (DevTools → Layout Shifts)
+   - Likely: images without fixed aspect ratio, ads, dynamic banners
+
+4. **First Contentful Paint (FCP)**: Currently ~2–3s on mobile?
+   - Identify render-blocking resources (scripts, stylesheets)
+   - Can inline critical CSS instead of deferring?
+
+5. **Largest Contentful Paint (LCP)**: Should be < 2.5s
+   - What is the LCP element? (image, heading, etc.)
+   - Is it being preloaded correctly?
+
+Create a prioritized fix list with estimated improvement per fix.
+TIER 3: MEDIUM-IMPACT FIXES (Polish & Core Web Vitals tuning)
+Prompt 7: Server-Side & Build-Time Optimizations
+CopyReview the current build pipeline (phases 8–11):
+
+Current wins:
+- Hero preload injected at build time ✓
+- AnnouncementBanner placeholder prevents CLS ✓
+- Vite manual chunks optimized ✓
+
+New opportunities:
+1. **Static HTML generation**: 
+   - Are category collection pages being prerendered at build time?
+   - Can you prerender the top 10 most popular products?
+   - Benefit: no React hydration delay, instant FCP for those pages
+
+2. **CSS-in-JS optimization**:
+   - If using Tailwind, is PurgeCSS removing unused styles?
+   - Can critical CSS be inlined in <head> for FCP pages?
+
+3. **Sitemap & robots.txt caching**:
+   - Is /api/sitemap being cached aggressively? (Phase 9 set 1hr cache, can this be longer?)
+   - Any static assets missing Cache-Control headers?
+
+4. **Build-time dependency analysis**:
+   - npm audit: are there any security patches that also reduce bundle size?
+   - Are deprecated packages being imported? (e.g., old polyfills)
+
+5. **Compression**:
+   - Is Gzip/Brotli enabled on Vercel? (should be automatic, verify in Response Headers)
+   - Are images being served in next-gen format (WEBP)?
+
+Create a checklist of 5–10 build/server tweaks and test each.
+Prompt 8: Interaction to Next Paint (INP) & Input Responsiveness
+CopyINP is Google's new responsiveness metric (replacing FID in 2024).
+
+Test on mobile device or Chrome DevTools emulation:
+1. Homepage: click a category card, measure delay before next paint
+2. Product page: click "Add to Cart", measure button feedback delay
+3. Category page: type in search box, measure filter update latency
+
+For each slow interaction (> 200 ms):
+1. Use Chrome DevTools Performance tab → record interaction → find what's blocking the main thread
+2. Questions to ask:
+   - Is a large function running synchronously?
+   - Is React re-rendering too much?
+   - Is a network request blocking the UI?
+3. Solutions:
+   - Move work to Web Worker or requestIdleCallback()
+   - Batch updates with useTransition() (React 18+)
+   - Pre-fetch data before interaction (eager loading)
+   - Debounce expensive operations (e.g., search filter)
+
+Report: "INP baseline: X ms → target: < 200 ms after Y fixes"
+TIER 4: MONITORING & ONGOING (Observability)
+Prompt 9: Web Vitals Monitoring Setup
+CopyAdd real-user monitoring (RUM) for Core Web Vitals:
+
+Current state: TikTok Pixel loads (Phase 8 deferred), but no Web Vitals tracking.
+
+Add:
+1. **web-vitals npm package**: Install and wrap in requestIdleCallback so it doesn't impact FCP
+   - Collect LCP, FID, CLS, FCP, TTFB
+   - Send to Google Analytics or custom analytics endpoint
+   
+2. **Google Analytics events**: Track Core Web Vitals as custom events so you can see:
+   - Median/p75/p90 LCP across all users
+   - Which pages have worst metrics?
+   - Which device types (mobile/desktop) have issues?
+
+3. **Real user monitoring dashboard**:
+   - Create a Firestore collection `web_vitals_events` to log events
+   - Build an admin dashboard showing trends over last 30 days
+   - Alert on regressions (e.g., if p75 LCP jumps > 10%)
+
+This ensures you catch regressions before users notice.
+Prompt 10: Continuous Performance Testing
+CopySet up automated performance regression detection:
+
+1. **CI/CD performance check**: Add a GitHub Action (or Vercel Build Insights) that:
+   - Runs Lighthouse on every PR merge to main
+   - Fails PR if Performance score drops > 5 points
+   - Compares bundle size: fails if main.js increases > 10 KB
+
+2. **Field data monitoring**: 
+   - Connect Google Search Console "Core Web Vitals" report to Slack alerts
+   - If "Poor" URLs increase by > 5%, notify team
+
+3. **Synthetic monitoring**:
+   - Use Vercel Analytics or Datadog RUM to continuously ping key pages
+   - Measure LCP, CLS, TTI from real mobile/desktop networks
+   - Alert on regressions
+
+4. **Weekly performance review**:
+   - Pull metrics from Google Analytics + GSC + Vercel
+   - Identify top 5 slowest pages or metrics that got worse
+   - Create 1–2 targeted fixes for next sprint
+
+This turns performance into a product metric, not a one-time optimization.
+TIER 5: BUSINESS LOGIC OPTIMIZATIONS (Specific to PakCart)
+Prompt 11: Product Grid & Category Filtering Performance
+CopyOn category collection pages, when user applies filters (price, size, color, etc.):
+
+Current state: Likely using TanStack Query to fetch filtered products from Firestore.
+
+Optimization opportunities:
+1. **Client-side filtering**: If the full product list is < 500 items, cache on client and filter locally
+   - Reduces network latency from 200–500 ms to 0–50 ms
+   - Trade-off: initial load is slightly larger but subsequent filters are instant
+
+2. **Pagination / Virtual scrolling**: 
+   - Is the page loading all 100 products at once? Paginate or use react-window for virtual scrolling
+   - Benefit: fewer DOM nodes → faster re-renders
+
+3. **Search debouncing**: 
+   - Does search trigger Firestore query on every keystroke? Debounce to 300–500 ms
+   - Saves bandwidth and latency
+
+4. **Aggregate data**: 
+   - Are you fetching min/max price every time? Cache in Firestore doc or Redis
+   - Benefit: filter dropdowns load instantly
+
+Create a performance profile of the category page:
+- Time to fetch product list
+- Time to render grid (depends on React re-renders)
+- Time to apply first filter
+- After fixes, measure again and document improvement
+Prompt 12: Checkout & Product Detail Page Optimization
+CopyProduct detail & checkout pages often have high abandonment due to slow load:
+
+1. **Product images**: Are all 5+ product images loading at once?
+   - Solution: Lazy-load images outside viewport, use thumbnail selector
+   - Preload only the primary image on page load
+
+2. **Related products section**: 
+   - Is this fetching from Firestore on every page load?
+   - Solution: Cache top 20 related items at build time or use CDN cache
+
+3. **Reviews / ratings section**:
+   - If loading hundreds of reviews, paginate or load on-demand
+   - Estimated benefit: LCP can improve by 500–1000 ms if reviews are deferred
+
+4. **Checkout form**:
+   - Is form validation running synchronously? Use debounced async validation
+   - Measure Time to Interactive on the checkout form
+
+5. **Payment gateway**: 
+   - Which payment gateway are you using? (Stripe, Razorpay, etc.)
+   - Does it load its script synchronously? Defer to after FCP
+
+Create a "checkout happy path" performance timeline and optimize each step.
