@@ -1,9 +1,11 @@
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
+import { useCartValidation } from "@/hooks/use-cart-validation";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -68,7 +70,9 @@ const PAKISTANI_CITIES = [
 ].sort();
 
 export default function Checkout() {
-  const { items, clearCart } = useCartStore();
+  const { clearCart } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const validation = useCartValidation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,33 +107,62 @@ export default function Checkout() {
       return;
     }
 
+    // Refuse to place an order if any item is unpurchasable. The validation
+    // hook has already triggered a reconcile against Firestore, so this is the
+    // last line of defence before we write to the orders collection.
+    if (validation.hasBlockingIssue) {
+      toast({
+        title: "Cart needs your attention",
+        description:
+          "One or more items are out of stock or no longer available. Please update your cart and try again.",
+        variant: "destructive",
+      });
+      setLocation("/cart");
+      return;
+    }
+    if (validation.isValidating) {
+      toast({
+        title: "Verifying your cart",
+        description: "Please wait a moment while we confirm the latest prices and stock.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Get current user from store
       const user = useAuthStore.getState().user;
-      
-      // 1. Prepare order data
-      const subtotal = items.reduce((sum, item) => sum + (Number((item as any).price || 0) * Number(item.quantity)), 0);
-      const shipping = subtotal > 10000 ? 0 : 250; 
-      const total = Number(subtotal + shipping);
+
+      // Always source pricing from the validated (live) snapshot, never from
+      // the persisted localStorage values, to prevent stale-price checkout.
+      const purchasable = validation.items.filter((item) => !item.isBlocked);
+      if (purchasable.length === 0) {
+        throw new Error("Your cart is empty after removing unavailable items.");
+      }
+
+      const subtotal = purchasable.reduce(
+        (sum, item) => sum + item.livePrice * item.quantity,
+        0
+      );
+      const shipping = subtotal > 10000 ? 0 : 250;
+      const total = subtotal + shipping;
 
       const orderData = {
         userId: user?.uid || "guest",
-        items: items.map(item => ({
-          id: String(item.id || Math.random().toString(36).substring(7)),
+        items: purchasable.map((item) => ({
+          id: String(item.id ?? Math.random().toString(36).substring(7)),
           productId: String(item.productId),
-          quantity: Math.max(1, Math.floor(Number(item.quantity))),
-          selectedVariant: item.selectedVariant || {},
+          quantity: Math.max(1, Math.floor(item.quantity)),
+          selectedVariant: item.selectedVariant ?? {},
           product: {
-            name: String((item as any).name || "Unknown Product"),
-            price: Number((item as any).price || 0),
-            profit: Number((item as any).profit || 0),
-            images: Array.isArray((item as any).images) ? (item as any).images : [],
-            slug: String((item as any).slug || "")
-          }
+            name: item.name,
+            price: item.livePrice,
+            profit: item.profit,
+            images: Array.isArray(item.images) ? item.images : [],
+            slug: item.slug,
+          },
         })),
-        total: total,
-        status: "pending",
+        total,
+        status: "pending" as const,
         createdAt: new Date(),
         customerInfo: {
           fullName: String(data.fullName),
@@ -140,12 +173,9 @@ export default function Checkout() {
           street: String(data.address),
           area: String(data.area),
           city: String(data.city),
-        }
+        },
       };
-      
-      console.log("DEBUG Order Payload:", orderData);
-      
-      // 2. Direct Firestore call instead of backend API
+
       const { addDocument } = await import("@/lib/firestore");
       const { insertOrderSchema } = await import("@shared/schema");
       const result = await addDocument("orders", orderData, insertOrderSchema);
@@ -155,7 +185,6 @@ export default function Checkout() {
         description: `Thank you for shopping with us. Your order ID is #${result}`,
       });
 
-      // Send email & WhatsApp notifications to admin
       const notificationData = {
         orderId: result,
         customerName: data.fullName,
@@ -163,10 +192,10 @@ export default function Checkout() {
         customerPhone: data.phone,
         customerAddress: `${data.address}, ${data.area}`,
         customerCity: data.city,
-        items: items.map(item => ({
-          name: String((item as any).name || "Unknown Product"),
-          quantity: Math.max(1, Math.floor(Number(item.quantity))),
-          price: Number((item as any).price || 0),
+        items: purchasable.map((item) => ({
+          name: item.name,
+          quantity: Math.max(1, Math.floor(item.quantity)),
+          price: item.livePrice,
         })),
         total,
         subtotal,
@@ -174,14 +203,14 @@ export default function Checkout() {
         notes: data.notes,
       };
 
-      sendOrderEmailNotification(notificationData).catch(err => {
+      sendOrderEmailNotification(notificationData).catch((err) => {
         console.error("Email notification failed:", err);
       });
 
       clearCart();
       setLocation("/thank-you");
     } catch (error: any) {
-      console.error("DEBUG Order error:", error);
+      console.error("Order error:", error);
       toast({
         title: "Error",
         description: error.message || "Something went wrong. Please try again.",
@@ -257,6 +286,19 @@ export default function Checkout() {
           ))}
         </div>
       </div>
+
+      {validation.hasBlockingIssue && (
+        <Alert variant="destructive" className="mb-6" data-testid="alert-checkout-blocking">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Some items can't be ordered right now</AlertTitle>
+          <AlertDescription className="text-xs">
+            Please return to your cart to remove or replace unavailable items before completing your order.
+            <Link href="/cart" className="ml-2 underline font-medium" data-testid="link-back-to-cart">
+              Back to cart
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
         {/* Left Column: Forms */}
@@ -463,21 +505,26 @@ export default function Checkout() {
                     Back to Shipping
                   </Button>
                 )}
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className={`flex-[2] bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-6 ${
                     isSubmitting ? "opacity-80" : ""
                   }`}
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting ||
+                    (step === "payment" && (validation.hasBlockingIssue || validation.isValidating))
+                  }
                   data-testid={step === "info" ? "button-continue-payment" : "button-complete-order"}
                 >
-                  {isSubmitting ? (
-                    "Processing..."
-                  ) : step === "info" ? (
-                    "Continue to Payment"
-                  ) : (
-                    "Complete Order"
-                  )}
+                  {isSubmitting
+                    ? "Processing..."
+                    : step === "info"
+                      ? "Continue to Payment"
+                      : validation.hasBlockingIssue
+                        ? "Resolve issues to continue"
+                        : validation.isValidating
+                          ? "Verifying cart..."
+                          : "Complete Order"}
                 </Button>
               </div>
             </form>

@@ -506,3 +506,32 @@ Live Lighthouse showed Performance = 40 while SEO = 100. This phase targets the 
 - react-hook-form + zod (~88 KB) now lazy — only loads on form pages
 - framer-motion (~114 KB) split into its own cacheable chunk
 - Vendor chunks are now independently cacheable across deploys (changes to app code no longer invalidate the React/Firebase/Radix caches)
+
+## Phase 9 — Cart Stale-Price & Stock Validation (April 25, 2026)
+
+Audit-driven fix for a non-obvious revenue-leakage bug. Cart items were persisted as denormalized snapshots (price/name/images/stock) in `localStorage` and mirrored to Firestore via `cartStore.syncToFirebase`. When admins updated a product's price, marked it out of stock, or deactivated it, the stale snapshot was never re-validated — `Cart.tsx`, `OrderSummary.tsx`, and `Checkout.tsx` (line 112) all read price directly from the snapshot and wrote it straight into the `orders/{id}` document. Net effect: orders could complete at outdated prices and oversell beyond actual inventory. The cart store also lacked persist `version`/`migrate`, so any future `CartItem` shape change would silently corrupt every existing cart.
+
+### Changes Made
+1. **`client/src/store/cartStore.ts`** — full rewrite of typing & persistence:
+   - Introduced `LocalCartItem` (the actual flat shape stored locally) and removed the proliferation of `as any` casts.
+   - `persist` middleware now declares `version: 1`, a `migrate` function that coerces legacy entries (`coerceLegacyItem`), and a `safeJSONStorage` wrapper that recovers from corrupted localStorage payloads instead of crashing the app.
+   - New `reconcileCart(updates)` action applies a batch of authoritative updates (remove unavailable items, clamp quantities to live stock, refresh display metadata) and resyncs to Firestore.
+   - `partialize` now also persists `reconciledAt` for observability.
+2. **`client/src/hooks/use-cart-validation.ts`** (new) — single hook that the cart, order summary, and checkout all consume:
+   - `useQueries` fans out one Firestore fetch per cart `productId` (60 s `staleTime`, 5 min `gcTime`, parallel, no retry).
+   - Computes `livePrice`, `liveStock`, per-item `issues` (`price-increased`, `price-decreased`, `low-stock`, `out-of-stock`, `inactive`, `unavailable`) and an aggregate `subtotal`/`itemCount` derived from the live values, never the snapshot.
+   - Auto-reconciles to drop unavailable items and clamp quantities, but **deliberately preserves the original `item.price`** so the UI can show the user *what changed* (struck-through old price, new price). Only `livePrice` flows into totals and order placement.
+   - Re-entrancy guarded by a signature ref to prevent reconcile loops.
+   - Exposes `refresh()` for an explicit "Refresh prices" button.
+3. **`client/src/pages/Cart.tsx`** — rewritten to consume the validation layer:
+   - Per-item warning badges (price changed, low stock, out-of-stock, unavailable) and an aggregate banner summarising changes.
+   - Real `liveStock` cap on the +/- quantity buttons (replaces the old hard-coded `maxStock = 10`).
+   - "Refresh prices" button invalidates every product query.
+   - Checkout button is disabled with explanatory text when any item is blocking; subtotals are memoised.
+4. **`client/src/components/checkout/OrderSummary.tsx`** — reads from `useCartValidation`; shows per-line strike-through pricing when drift exists; warns on blocking issues.
+5. **`client/src/pages/Checkout.tsx`** — order placement now sources every price from `validation.items[].livePrice`, refuses to submit if `hasBlockingIssue`, defers submission while `isValidating`, and shows a top-of-page alert plus button-state messaging when blocked.
+
+### Verification
+- `tsc --noEmit` — zero new errors introduced; pre-existing errors in `productFirestoreService.ts`, `BulkAddProducts.tsx`, `AIRecommendations.tsx`, and `ProductDetail.tsx` are unrelated.
+- `/cart` and `/checkout` render with zero new console warnings or errors.
+- Persisted cart state from older builds is silently migrated by `coerceLegacyItem`.
