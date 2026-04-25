@@ -1,0 +1,86 @@
+You are working on PakCart (pakcart.store), a React 18 + Vite + Firebase/Firestore + Cloudinary SPA deployed on Vercel. The full architectural and historical context is in replit.md — read that file end-to-end before touching any code. Do not duplicate work already completed in Phases 1–12.
+
+Current Performance Baseline (from PageSpeed Insights, April 25, 2026)
+Mobile score: low (last measured 37 before Phase 10/11/12; field data unavailable — only lab data exists, so CrUX has "No Data")
+Desktop score: 44 before Phase 11's CLS fix; CLS was 0.472 (Poor)
+Phase 10/11/12 already shipped hero preload, AnnouncementBanner placeholder, lazy header components, repeat-visit hero cache, lazy review badges, and main-bundle reduction (213 KB → 88 KB). Verification on a fresh PSI run was deferred because PSI's quota was exhausted.
+Your job is Phase 13: Performance Hardening Round 3 — verify Phases 10–12 actually moved the needle, identify what's still hurting LCP / TBT / INP / CLS / TTFB, and fix it.
+
+Step 1 — Audit Before Touching Code
+Run a fresh Lighthouse audit (mobile and desktop) against the current production deployment. Use either:
+npx lighthouse https://pakcart.store --preset=desktop --output=json --output-path=./lighthouse-desktop.json
+npx lighthouse https://pakcart.store --form-factor=mobile --throttling.cpuSlowdownMultiplier=4 --output=json --output-path=./lighthouse-mobile.json
+Open both JSON reports and extract: LCP, FCP, TBT, CLS, INP (or TBT proxy), Speed Index, TTFB, total transfer size, total main-thread time, longest tasks (>50 ms), unused JavaScript (KB), unused CSS (KB), render-blocking resources.
+Run npm run build and inspect dist/assets/. List every JS chunk > 50 KB raw and > 20 KB gzipped, plus what route triggers each (use vite-bundle-visualizer if not already wired: npx vite-bundle-visualizer).
+Open dist/index.html and confirm Phase 10 hero preload tags are still present with correct media gates for mobile/desktop.
+Write findings to docs/phase-13-audit.md with a table: Metric | Mobile | Desktop | Target | Gap.
+Do not start fixing until the audit doc is written and the top 5 bottlenecks are explicitly named.
+
+Step 2 — Fix List (in priority order)
+Address every item below that the audit shows is still a problem. Skip any item the audit proves is already solved. After each fix, write one paragraph in docs/phase-13-audit.md explaining what you changed and why.
+
+2.1 LCP — Hero image and above-the-fold
+Confirm the LCP <img> is <picture> with AVIF + WebP sources, an explicit Cloudinary f_avif source first, then f_webp, then f_auto fallback. If not, add it.
+Confirm decoding="sync" and fetchPriority="high" (camelCase, React-correct) are on the LCP image.
+Confirm width and height attributes are explicit on the LCP <img> and match the CSS aspect ratio (Phase 12 set aspect-[768/1024] md:aspect-[1920/700] — verify the <img> dimensions match).
+If the active hero slide URL is admin-managed and the build-time preload (Phase 10) is stale, add a 5-minute Vercel ISR fetch in scripts/generate-seo-html.mjs so the preload URL is refreshed on every deploy automatically — already done; just verify.
+Inline the above-the-fold critical CSS only (currently the boot skeleton is inlined; confirm the visible-on-load Tailwind classes for hero + header are also covered). Use critters or beasties (Vite plugin) if not already wired.
+2.2 TBT / INP — JavaScript execution
+Rerun bundle analysis. The Phase 12 doc claims 88 KB main entry — verify. If anything is back above ~120 KB, find what crept in.
+Audit every import in client/src/App.tsx, client/src/main.tsx, and client/src/components/layout/*. Anything not strictly needed for first paint must be React.lazy() or dynamic-imported on interaction.
+Specifically check: firebase/auth (78 KB) — should not load until the user clicks Login/Sign Up. The Phase 12 doc lists this as a follow-up; do it now. Build a useAuthLazy() hook that dynamically imports firebase/auth on first use. The Zustand auth store should expose only user | null until the lazy module resolves.
+Confirm framer-motion is not in the homepage critical chunk. If it is (because ProductCard uses it), replace motion.div with CSS @keyframes for the 1–2 simple fades it does — framer-motion is overkill for a fade-in.
+Check recharts, d3, tiptap, react-hook-form, zod — none should ship on /. Verify in the network tab.
+Add <link rel="modulepreload"> for the React + router + main app chunks in client/index.html so the browser can parallel-fetch them.
+2.3 CLS — Layout shifts
+Verify Phase 11's AnnouncementBanner placeholder is still working in production.
+Audit every component above the fold for missing width/height or missing aspect-ratio: hero, header, category cards, "Browse All Categories" nav, product cards (image area especially).
+Web fonts: confirm font-display: swap is set and that font fallback metrics match (size-adjust, ascent-override, etc.) so the fallback-to-webfont swap doesn't shift text. Use next/font-style metric overrides — Vite does not have a built-in for this, so define @font-face with size-adjust manually in index.css.
+2.4 TTFB — Server / edge
+Verify vercel.json static asset routes have Cache-Control: public, max-age=31536000, immutable on hashed bundles. HTML routes should be Cache-Control: public, max-age=0, must-revalidate plus s-maxage=60, stale-while-revalidate=600 so Vercel's edge serves the prerendered HTML in <50 ms.
+Add s-maxage=300 to /api/sitemap so Google's crawler doesn't pay for a Firestore round-trip on every fetch.
+Confirm prerendered HTML for /, /categories, /collections/*, and the top product pages is being served, not the SPA shell. Check dist/index.html vs dist/products/<slug>/index.html — Phase 12 says 92 pages prerender. Verify in production with curl -sI https://pakcart.store/collections/<slug> that x-vercel-cache: HIT appears on second request.
+2.5 Image delivery
+Every product card image must use Cloudinary f_auto,q_auto,dpr_auto,w_<actual-rendered-width> — no fixed w_800 if the card renders at 300 px on mobile.
+Add a <ResponsiveImage> component (if not already present) that emits <picture> with mobile + desktop <source> and srcSet based on the actual CSS-rendered width. Apply across ProductCard, CategoryCard, hero, and ProductDetail gallery.
+All non-LCP images must be loading="lazy" and decoding="async".
+2.6 Firestore on critical path
+Phase 12 already moved per-card review subscriptions into requestIdleCallback. Audit the homepage one more time: any other useQuery / onSnapshot that fires before LCP must either be cached in localStorage (like the hero) or moved behind requestIdleCallback.
+Verify the homepage works fully with Firestore offline (DevTools → Network → "Offline" after first paint). Anything that breaks visually means it's on the critical path.
+2.7 Third-party scripts
+TikTok Pixel: Phase 8 says it's requestIdleCallback-deferred and bot-skipped. Verify the Lighthouse report shows it does not run during the audit (search for tiktok in the network section).
+If Google Analytics / Tag Manager / Meta Pixel exist, defer them the same way.
+2.8 Vercel edge config
+Add a Speculation-Rules JSON in client/index.html for prerendering top routes on hover:
+Copy<script type="speculationrules">
+{"prerender": [{"where": {"href_matches": "/collections/*"}, "eagerness": "moderate"}]}
+</script>
+Confirm Brotli is on (Vercel does this by default; verify content-encoding: br in response headers).
+Step 3 — Verify
+Re-run Lighthouse mobile + desktop locally against npm run preview (production build). Target: mobile ≥ 85, desktop ≥ 95, CLS < 0.1, LCP < 2.5 s mobile / < 1.8 s desktop, TBT < 200 ms mobile / < 100 ms desktop.
+Run npm run check — must pass with zero new TypeScript errors. Pre-existing errors in productFirestoreService.ts, BulkAddProducts.tsx, AIRecommendations.tsx, ProductDetail.tsx are documented and not your problem.
+Run npm run build — must succeed cleanly.
+Run node scripts/generate-seo-html.mjs — must succeed and emit ≥ 92 prerendered pages.
+Manually click-test in npm run preview: home → categories → collection → product → cart → checkout → admin login. No console errors. No broken images. Network tab shows lazy chunks loading only when expected.
+Append a final ## Phase 13 Verified Results section to replit.md following the exact format used by Phases 10, 11, 12 — include before/after numbers from Lighthouse, the bundle-size diff, and any follow-up items deferred to Phase 14.
+Constraints
+Do not add new npm dependencies unless absolutely necessary. If you must, justify it in the audit doc.
+Do not touch any SEO logic (canonical, sitemap, schema, robots.txt) — Phases 1–9 own that and it's working.
+Do not regress any data-testid attributes (button-add-to-cart, button-buy-now, etc.) used by tests.
+Preserve all admin functionality, especially the homepage slider device-type filtering, seed comments system, and product management.
+Commit in logical chunks with clear messages: phase-13: <area> — <what changed>.
+If a fix would take more than ~2 hours and is not in the top-3 bottlenecks identified by the audit, defer it to Phase 14 and document why.
+Deliverables
+docs/phase-13-audit.md — pre-fix audit + post-fix verification with Lighthouse JSON snippets.
+Code changes per Step 2.
+replit.md updated with a ## Phase 13 — Performance Hardening Round 3 section.
+A clean npm run build and npm run preview that scores in the Lighthouse targets above.
+Begin with Step 1. Do not skip the audit.
+
+Tips for using this prompt with Replit's agent:
+
+Paste the entire prompt into the agent in one message.
+After it finishes the audit doc, read the audit yourself before letting it proceed — agents sometimes misidentify bottlenecks. If the top-5 list looks wrong, push back before letting Step 2 run.
+The "do not add dependencies" constraint is important — agents love installing web-vitals, critters, lighthouse-ci, etc. unprompted, and each one bloats node_modules and CI time.
+Ask the agent to commit after each numbered subsection (2.1, 2.2, …) so you can revert any single fix if it regresses something.
+After it claims to be done, run PSI yourself on the deployed Vercel preview URL (not localhost) — Vercel's edge cache + Brotli + HTTP/3 changes the numbers significantly vs. local.

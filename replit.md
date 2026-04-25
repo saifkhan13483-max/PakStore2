@@ -352,6 +352,38 @@ Final pass to close the last technical gaps before submitting the property for f
 - Static + dynamic sitemap both valid XML with image extension
 - All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)
 
+## Phase 13 — Performance Hardening Round 3: Edge & Speculation (April 25, 2026)
+
+Targeted edge-layer + browser-hint pass on top of Phase 12. Full audit lives in `docs/phase-13-audit.md`.
+
+### Root Causes Found
+1. **HTML routes had `Cache-Control: no-cache, no-store, must-revalidate`** — the Vercel edge could not serve a stale prerendered HTML while revalidating, so a cache miss paid full origin TTFB. Live `curl -sI https://pakcart.store/` confirmed the weak header.
+2. **`/api/sitemap` paid a Firestore round-trip on every Googlebot fetch** — no edge-shared cache instruction was set.
+3. **In-site navigation always paid a full SPA boot** — clicking a category link replayed router work + ran the next page's queries from scratch even though the user often telegraphs intent by hovering first.
+
+### Changes Made
+1. **`vercel.json`** — All HTML routes now ship `Cache-Control: public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=600`. Browser still revalidates on every navigation; Vercel's edge can serve a stale prerendered HTML for up to 600 s while it fetches fresh in the background. Effective TTFB on a cache hit drops from full origin round-trip to single-digit ms.
+2. **`vercel.json`** — `/api/sitemap` gets `Cache-Control: public, max-age=0, s-maxage=300, stale-while-revalidate=86400`. Phase 7's `X-Robots-Tag: noindex` (set in the function code itself) is preserved verbatim.
+3. **`client/index.html`** — Added a `<script type="speculationrules">` block declaring `prerender` for `/collections/*`, `/products/*`, `/categories`, and `/new-arrivals` with `eagerness: "moderate"`. Chrome / Edge silently prerender those URLs on hover, so a click paints instantly with no SPA navigation cost. Safari / older browsers ignore the directive — zero downside.
+
+### Items Explicitly NOT Done This Phase (Documented Trade-offs)
+- **AVIF source on `<picture>`** — Cloudinary `f_auto` already negotiates AVIF for supporting browsers; an explicit `f_avif` source would defeat that.
+- **Lazy-load `firebase/auth` (78 KB raw / ~28 KB gzipped)** — real win, but `useAuthStore` initialises on mount and `Header` / `ProtectedRoute` / `AdminRoute` / `AuthProvider` all read its state. A safe refactor needs a fallback `user: null` window before the lazy module resolves and integration testing of cart, checkout, login, admin gating. Scoped as the highest-priority Phase 14 candidate.
+- **Replace framer-motion in `ProductCard` with CSS** — saves at most ~3 KB gzipped because framer-motion is already used by `Home` and `Header`. Risk of regressing card hover animation outweighs the win.
+- **`web-vitals` RUM emitter** — needs a new dependency. Deferred pending user go-ahead.
+- **Local Lighthouse run** — no Chromium in this environment + the live site doesn't yet ship Phases 11–13. Verification deferred to a fresh PSI run on the post-deploy production URL.
+
+### Verified
+- `vercel.json` parses as valid JSON; all 11 routes preserved; Phase 9 security headers unchanged.
+- `npm run build` — clean (22.4 s, 91 assets); `index.js` still 88 KB raw (unchanged from Phase 12).
+- `node scripts/generate-seo-html.mjs` — clean, 92 pages prerendered.
+- `dist/index.html` now contains: 11 Vite-emitted `<link rel="modulepreload">` hints for every vendor chunk, 2 Phase 10 hero `<link rel="preload" as="image" fetchpriority="high">` tags with correct `media` gates, and 1 Phase 13 `<script type="speculationrules">` block.
+
+### Post-Deploy Verification Checklist (for the user)
+1. Run a fresh PSI on `https://pakcart.store` for both form factors. Compare LCP / TBT / CLS / INP / Speed Index against the `dezpmlkjy2` baseline.
+2. `curl -sI https://pakcart.store/` should show `cache-control` containing `s-maxage=60, stale-while-revalidate=600` and `x-vercel-cache: HIT` on a repeat fetch.
+3. Hover any category card on the homepage in Chrome and check DevTools → Application → Speculative loads — the destination should appear as `Ready`.
+
 ## Phase 12 — Performance Hardening Round 2 (April 25, 2026)
 
 Follow-up performance pass after Phases 8/10/11. Goal: cut critical-path JS, eliminate the remaining sources of LCP latency on the homepage, and remove the live-Firestore fan-out that ran during initial paint.

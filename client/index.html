@@ -179,6 +179,26 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Speculation Rules: Chrome / Edge will silently prerender these routes
+         on hover/intent so in-site navigation feels instant. Ignored by Safari
+         and older browsers (no impact). "moderate" eagerness = on hover. -->
+    <script type="speculationrules">
+      {
+        "prerender": [
+          {
+            "where": {
+              "or": [
+                { "href_matches": "/collections/*" },
+                { "href_matches": "/products/*" },
+                { "href_matches": "/categories" },
+                { "href_matches": "/new-arrivals" }
+              ]
+            },
+            "eagerness": "moderate"
+          }
+        ]
+      }
+    </script>
     <!-- TikTok Pixel — deferred until after first paint to protect LCP/INP -->
     <script>
       (function () {
