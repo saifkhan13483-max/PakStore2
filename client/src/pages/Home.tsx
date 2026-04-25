@@ -28,7 +28,13 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialise synchronously from matchMedia so the very first render picks the
+  // correct device variant. This avoids:
+  //   1. A desktop->mobile aspect-ratio snap (massive CLS on phones)
+  //   2. Fetching the desktop slide image on a phone before swapping to mobile
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches,
+  );
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
   const scrollCategories = (direction: "left" | "right") => {
@@ -57,15 +63,14 @@ export default function Home() {
     queryFn: () => homepageSlideService.getActiveSlides(),
   });
 
-  // Detect screen size on mount and on resize
+  // Track viewport changes via matchMedia (cheaper than 'resize' + initial state
+  // is already correct from useState initializer above, so no extra paint here).
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    handleResize(); // Call once on mount
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
   }, []);
 
   const HERO_SLIDES = useMemo(() => {
@@ -171,16 +176,10 @@ export default function Home() {
         ]}
       />
       <main className="flex-1">
-        {/* Hero Section with Custom Slider */}
-        <section 
-          className={`relative w-full overflow-hidden bg-black group ${
-            isMobile 
-              ? "aspect-[768/1024] min-h-[280px]" 
-              : "aspect-[1920/700] min-h-[500px] sm:min-h-[500px]"
-          }`}
-          style={{ 
-            containIntrinsicSize: isMobile ? '768px 1024px' : '1920px 700px'
-          }}
+        {/* Hero Section with Custom Slider — aspect ratio is CSS-driven so the
+            box reserves the correct space immediately, before any JS work. */}
+        <section
+          className="relative w-full overflow-hidden bg-black group aspect-[768/1024] min-h-[280px] md:aspect-[1920/700] md:min-h-[500px]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={(e) => { touchStart.current = e.touches[0].clientX }}
@@ -201,27 +200,41 @@ export default function Home() {
             <div className="w-full h-full bg-muted animate-pulse" />
           ) : HERO_SLIDES.length > 0 && safeSlide ? (
             <>
-          <AnimatePresence mode="wait">
+          {/* `initial={false}` skips the opacity-0 -> opacity-1 fade on first
+              mount so the LCP image is painted at full opacity immediately.
+              Subsequent slide changes still cross-fade. */}
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
               className="absolute inset-0"
             >
                   <picture>
                     {safeSlide.image_webp_url ? (
                       <source srcSet={safeSlide.image_webp_url} type="image/webp" />
                     ) : (
-                      <source srcSet={getOptimizedImageUrl(safeSlide.image_url, { format: 'webp' })} type="image/webp" />
+                      <source
+                        srcSet={getOptimizedImageUrl(safeSlide.image_url, {
+                          format: 'webp',
+                          width: isMobile ? 768 : 1920,
+                        })}
+                        type="image/webp"
+                      />
                     )}
-                    <img 
-                      src={getOptimizedImageUrl(safeSlide.image_url, { quality: 'auto', format: 'auto' })} 
+                    <img
+                      src={getOptimizedImageUrl(safeSlide.image_url, {
+                        quality: 'auto',
+                        format: 'auto',
+                        width: isMobile ? 768 : 1920,
+                      })}
                       alt={`Hero slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
                       fetchPriority={currentSlide === 0 ? "high" : "low"}
+                      decoding={currentSlide === 0 ? "sync" : "async"}
                       width={isMobile ? "768" : "1920"}
                       height={isMobile ? "1024" : "700"}
                     />

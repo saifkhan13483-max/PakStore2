@@ -288,10 +288,6 @@ function Router() {
 
   return (
     <Layout>
-      <Helmet>
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-      </Helmet>
       <Suspense fallback={null}>
         {routes}
       </Suspense>
