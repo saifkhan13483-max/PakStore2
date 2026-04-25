@@ -352,6 +352,55 @@ Final pass to close the last technical gaps before submitting the property for f
 - Static + dynamic sitemap both valid XML with image extension
 - All TypeScript errors visible in `npm run check` are pre-existing (not introduced by this pass)
 
+## Phase 12 — Performance Hardening Round 2 (April 25, 2026)
+
+Follow-up performance pass after Phases 8/10/11. Goal: cut critical-path JS, eliminate the remaining sources of LCP latency on the homepage, and remove the live-Firestore fan-out that ran during initial paint.
+
+### Root Causes Found
+1. **First-paint hero flash + CLS** — `isMobile` was initialised to `false` then corrected in `useEffect`, causing a desktop-aspect render to flash on mobile. The `<section>` used JS to swap height instead of CSS.
+2. **Hero LCP gated by Firestore round-trip on every visit** — the `<img>` URL was unknown until the active-slides query resolved. Phase 10 fixed this for build-time-known URLs; repeat-visit cache + first-paint placeholder were still missing.
+3. **30+ live Firestore `onSnapshot` subscriptions during initial paint** — each `ProductCard` opened its own review subscription, blocking the main thread and saturating WebSockets before LCP.
+4. **Heavy header sub-components in the critical bundle** — `MegaDropdown`, `MobileNav`, and `SearchOverlay` were eagerly imported even though they only render on hover/click.
+5. **Hero image preload existed at build-time only** — first visits were covered by Phase 10, but repeat visits had no preload because the URL was admin-managed and could change.
+
+### Changes Made
+1. **`client/src/pages/Home.tsx`**
+   - `isMobile` now initialises synchronously via `window.matchMedia("(max-width: 767px)")` so the very first paint is correct on every device.
+   - Replaced the JS height swap on the hero `<section>` with CSS `aspect-[768/1024] md:aspect-[1920/700]` so layout is fixed before hydration.
+   - Switched the resize listener to `matchMedia("change")` (cheaper than `resize`).
+   - `AnimatePresence initial={false}` and slide transition shortened to 0.6s so the first slide paints immediately.
+   - Added `decoding="sync"` and explicit `width="768/1920"` on the LCP `<img>` Cloudinary transform.
+   - Added `style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 1200px' }}` to the New Arrivals and per-category sections so off-screen content does not pay rendering cost during initial paint.
+   - Removed redundant outer `motion.div` wrappers around `<ProductCard>` (the card has its own internal motion).
+   - **Repeat-visit hero LCP fast path**: the slides query now consumes a `placeholderData` stub built from `localStorage["pakcart_hero_v1"]`. The hero `<img>` therefore renders on the very first React paint with no Firestore round-trip.
+   - A new `useEffect` writes the active mobile + desktop hero URLs to `localStorage["pakcart_hero_v1"]` whenever fresh slides arrive. The cached URL is exactly the URL the `<picture>` source would request (admin-uploaded WebP if present, otherwise the same `f_auto/q_auto/dpr_auto/w_768|1920` Cloudinary transform), so the preload, the placeholder render, and the real `<img>` all hit one network request.
+2. **`client/src/components/product/ProductCard.tsx`**
+   - Per-card live review subscription extracted into a new `ReviewsBadge` sub-component that only mounts after `requestIdleCallback` (or 2.5s fallback). Initial paint no longer opens 30+ Firestore WebSocket subscriptions.
+3. **`client/src/components/layout/Header.tsx`**
+   - `MegaDropdown`, `MobileNav`, and `SearchOverlay` converted to `React.lazy()` and only mount when the user actually opens them. Fallback is `null` to avoid layout shift; the chunks are now `MegaDropdown-*.js` (3.6 kB), `MobileNav-*.js` (4.7 kB), and `SearchOverlay-*.js` (17.9 kB), all served on demand.
+4. **`client/index.html`**
+   - Added inline critical CSS plus a pre-hydration skeleton (`pc-boot__banner / __header / __hero`) that mirrors the real layout heights (36 px banner, 64/80 px header, mobile 768/1024 + desktop 1920/700 hero aspect ratios) so the user sees something paint before any JS runs and CLS stays at 0.
+   - Added a tiny synchronous boot-script that reads `pakcart_hero_v1` from `localStorage`, picks the device-correct URL via `matchMedia`, and injects a `<link rel="preload" as="image" fetchpriority="high">` BEFORE the JS bundle parses. Layered with Phase 10's build-time preload, this means: first visit → Phase 10 preload fires; repeat visits → both fire (browser dedupes). Either way, the LCP image starts downloading in parallel with the JS bundle.
+5. **`client/src/App.tsx`**
+   - Removed the redundant Helmet `preconnect` to `res.cloudinary.com` (already present in `client/index.html`, was causing duplicate hint).
+
+### Bundle Size Impact
+- `index.js` (homepage main entry): **213 KB → 88 KB raw (-59%)** — well under the Phase 8 documented baseline.
+- New on-demand chunks: `MegaDropdown` (3.6 kB), `MobileNav` (4.7 kB), `SearchOverlay` (17.9 kB) — previously bundled into the homepage critical path.
+- All Phase 8 lazy chunks (`vendor-charts` 414 kB, `vendor-tiptap` 354 kB, `vendor-forms` 88 kB, `vendor-firebase-auth` 78 kB on auth flows) remain correctly off the homepage.
+
+### Verified
+- `npm run build` — clean (22.6 s, 91 assets).
+- `node scripts/generate-seo-html.mjs` — clean. `dist/index.html` contains both Phase 10 hero `<link rel="preload">` tags with the correct device-specific media gates and Cloudinary transforms (`w_768` for mobile, `w_1920` for desktop). 92 pages prerendered (8 static + 7 collections + 77 products).
+- Pre-existing TypeScript errors in `productFirestoreService.ts`, `BulkAddProducts.tsx`, `AIRecommendations.tsx`, and `ProductDetail.tsx` are unrelated to this pass and remain as documented in earlier phases.
+- Manual click-test: home → categories → collection → product → cart → checkout — no console errors, no broken Firestore queries, no missing images.
+
+### Follow-Up Items for a Future Phase
+- Install `web-vitals` and ship a `requestIdleCallback`-gated RUM emitter writing to a `web_vitals_events` Firestore collection, plus an admin dashboard. Skipped here because adding a dependency is out of scope for this pass.
+- Consider lazy-loading `vendor-firebase-auth` (78 kB) until the user clicks Login/Sign Up — the homepage shell does not need Auth before user interaction.
+- Consider pre-rendering the top 10 product detail pages at build time (`scripts/prerender-seo-pages.ts` already prerenders 77, but they hydrate as SPA — investigate true static-content-first delivery for those pages).
+- Run a fresh PSI analysis on the next production deploy and compare LCP / TBT / CLS / INP against the `dezpmlkjy2` baseline. PSI's quota was exhausted during this pass so verification is deferred to post-deploy.
+
 ## Phase 11 — Desktop CLS Fix (April 25, 2026)
 
 Targeted fix for **PageSpeed Insights desktop CLS = 0.472** (catastrophic — anything > 0.25 is "Poor"). The desktop score was 44 and CLS was the biggest single contributor.

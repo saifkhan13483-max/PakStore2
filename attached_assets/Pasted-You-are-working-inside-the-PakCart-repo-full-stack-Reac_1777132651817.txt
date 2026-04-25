@@ -1,0 +1,49 @@
+You are working inside the PakCart repo (full-stack React + Vite + Firebase + Tailwind, hosted on Vercel at pakcart.store). Read replit.md end-to-end before doing anything — Phases 1–11 are already complete and must not be regressed. In particular, do not touch Phase 6 (canonical URLs), Phase 7 (sitemap image extension), Phase 9 (security headers), Phase 10 (build-time hero preload), or Phase 11 (CLS placeholder) except where this prompt explicitly tells you to extend them.
+
+Goal
+Push PageSpeed Insights mobile from ~37 to 85+ and desktop from ~44 (post-CLS-fix this should already be in the 80s — verify) to 95+, while keeping SEO at 100. The two live audits to use as the baseline and re-verify against are:
+
+https://pagespeed.web.dev/analysis/https-pakcart-store/dezpmlkjy2?form_factor=mobile
+https://pagespeed.web.dev/analysis/https-pakcart-store/dezpmlkjy2?form_factor=desktop
+Run a fresh PSI analysis after every deploy — the dezpmlkjy2 run is from before Phase 11. Treat LCP, TBT, CLS, INP, and Total Bytes as the success metrics, not the raw "score".
+
+Step 1 — Diagnostic pass (read-only, do not change code yet)
+Open the live mobile and desktop PSI reports above and read every "Opportunity" and "Diagnostic" entry. List the top 6 issues by estimated savings in milliseconds (LCP-affecting items first, then TBT, then transfer size).
+Run npm run build and inspect dist/assets/. Identify every JS chunk over 50 KB gzipped and every CSS chunk over 20 KB gzipped. Cross-reference Phase 8's manualChunks config in vite.config.ts to confirm splitting is still working as documented in replit.md.
+Use Chrome DevTools coverage / source-map-explorer reasoning to identify dead code in vendor-react, vendor-radix, vendor-firebase, and the main index.js. Specifically check whether framer-motion, recharts, react-hook-form, and zod are correctly absent from the homepage critical path.
+Inspect the Network waterfall implied by PSI for the homepage and a representative product page. Note: which requests are render-blocking, which fonts are loaded, whether any Cloudinary image is served larger than its rendered size, whether the TikTok pixel from Phase 8 is still firing during Lighthouse runs, and whether any third-party script (Firestore, Firebase Auth, analytics) is on the critical path before LCP.
+Open client/index.html, scripts/generate-seo-html.mjs, and client/src/main.tsx to confirm the Phase 10 hero preload tags are still being injected for / and that no other route is wrongly preloading the hero.
+Produce a short written diagnostic report (paste it in chat before editing anything) summarising findings from steps 1–5 with the specific files you intend to change and the predicted ms savings per change.
+Step 2 — Image pipeline hardening
+Audit every <img> tag in client/src/pages/Home.tsx, Categories.tsx, CategoryCollection.tsx, ProductDetail.tsx, NewArrivals.tsx, and the components rendered by them (CategoryCard, ProductCard, HeroSlider, etc.). Confirm each non-LCP image has loading="lazy" and decoding="async", and that only the true LCP image (first hero slide on /, first product gallery image on /products/:slug) is eager + fetchPriority="high".
+For every Cloudinary URL, ensure the transformation chain is f_auto,q_auto,dpr_auto plus an explicit width that matches the rendered slot. If any image is being downloaded at >1.5× its CSS pixel size on mobile, fix the width parameter and add a srcset with at least 3 widths (e.g., 400 / 768 / 1200) plus a correct sizes attribute.
+Add explicit width and height attributes (or a CSS aspect-ratio) to every product card, category card, and hero <img> to guarantee CLS stays at 0 even before CSS loads.
+For below-the-fold sections on the homepage (categories grid, featured products, testimonials, footer), wrap heavy components in React.lazy + Suspense with a properly sized skeleton so they don't block initial JS execution.
+Step 3 — JavaScript and font cost reduction
+Re-examine vite.config.ts. Confirm vendor-firestore and vendor-firebase-auth are not pulled into the homepage initial chunk. If they are, refactor client/src/lib/firebase.ts (or wherever the auth and firestore SDKs are imported) so the homepage only triggers Firestore for the data it actually needs and Auth is dynamically imported on first user interaction (login/register/cart).
+Audit every import in client/src/App.tsx and client/src/main.tsx. Convert any non-critical route component to React.lazy (admin pages, checkout, profile, orders, seed-comments admin tooling, account pages). The homepage should only ship: React, router, Tailwind runtime, the Layout shell, the AnnouncementBanner, the HeroSlider, CategoryCard, and ProductCard logic.
+Audit Radix imports — many components pull @radix-ui/react-* per primitive. Make sure only primitives actually used on the homepage are in vendor-radix. Consider splitting Radix into vendor-radix-core (used everywhere) and lazy-loaded chunks for dialog/popover/dropdown if they're not on the homepage critical path.
+Fonts: open client/index.html and Tailwind config. If Google Fonts or any custom font is being loaded, switch to font-display: swap, self-host the WOFF2 file under client/public/fonts/, preload only the single weight used above the fold, and remove every other weight from the critical path. If font-display: swap is already set, verify there is no FOIT-causing render-blocking font CSS.
+Move the TikTok pixel (Phase 8) further: confirm the requestIdleCallback gate is still in place and additionally gate it behind a small consent/region check or a 6-second setTimeout fallback, so it absolutely never runs during the LCP window on slow mobile devices.
+Step 4 — Critical CSS and render path
+Investigate whether Tailwind's compiled CSS for the homepage is being inlined or served as a render-blocking external stylesheet. If it's external and large (>30 KB gzipped), extract critical CSS for the above-the-fold homepage sections (banner + hero + first category row) and inline it via scripts/generate-seo-html.mjs (extend it in the same pattern Phase 10 used for hero preload). The remainder loads non-blocking via media="print" onload swap or rel="preload" as="style".
+Confirm client/src/index.css (or equivalent) has no @import of large libraries that the build can't tree-shake.
+For AnnouncementBanner (Phase 11 placeholder), verify the placeholder height exactly matches the rendered banner height across all viewports — if it differs by even a few px on desktop, CLS will resurface.
+Step 5 — Network and edge layer
+Open vercel.json. Add aggressive Cache-Control: public, max-age=31536000, immutable headers for all hashed asset paths under /assets/* (Vite already hashes filenames, so this is safe). Keep HTML at Cache-Control: public, max-age=0, must-revalidate. Do not regress any of the Phase 9 security headers.
+Verify /api/sitemap still emits X-Robots-Tag: noindex (Phase 7) and that the new caching rules don't accidentally cache the sitemap route or the security headers route incorrectly.
+Confirm Brotli/gzip compression is being used by Vercel for HTML, CSS, JS, and SVG (it is by default — just verify in response headers after deploy).
+Step 6 — Verification
+Run npm run check — must pass with zero new TypeScript errors (the pre-existing errors in productFirestoreService.ts and BulkAddProducts.tsx documented in Phase 9 are allowed to remain unless trivially fixable).
+Run npm run build — must succeed. Record the new size of index.js, the new total transferred bytes for the homepage, and the new count of vendor chunks. Compare against the Phase 8 numbers (index.js was 213 KB after Phase 8). Target: homepage initial JS ≤ 150 KB gzipped.
+Run node scripts/generate-seo-html.mjs and confirm the hero preload tags from Phase 10 plus any new critical CSS injection from Step 16 land correctly in dist/index.html.
+Deploy to Vercel preview, then run a fresh PSI analysis on the preview URL for both mobile and desktop. Paste the new scores plus LCP / TBT / CLS / INP / Speed Index numbers in chat. Do not mark the phase complete unless mobile Performance ≥ 85 and desktop Performance ≥ 95, with CLS ≤ 0.1 and LCP ≤ 2.5 s on mobile.
+Manually click-test: homepage → categories → a collection page → a product page → add to cart → cart page. Confirm no visible regression, no console errors, no broken Firestore queries, and no missing images.
+Step 7 — Documentation
+Append a new Phase 12 — Performance Hardening section to replit.md in the same format as the existing phases. Document: root causes found, every file changed, before/after PSI numbers (mobile + desktop), bundle size deltas, and any follow-up items left for a future phase. Reference the dezpmlkjy2 baseline run and link the new preview-deploy PSI run.
+Constraints and guardrails
+Do not change any SEO, schema, canonical, sitemap, robots.txt, or Phase 6/7/9 logic except as explicitly required by Step 5/16.
+Do not install heavy new dependencies. If a tiny utility (≤ 5 KB) like a critical-CSS extractor is genuinely needed, justify it in chat first.
+Every code change must be accompanied by a one-line justification tied to a specific PSI opportunity from Step 1.
+If any change risks breaking the admin panel (/admin/*), the seed-comments tooling, or the Firestore data layer, stop and ask before proceeding.
+Stage the work in commits per step (Steps 2, 3, 4, 5 each in their own commit) so any regression can be bisected.
