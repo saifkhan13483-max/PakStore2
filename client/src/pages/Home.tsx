@@ -451,7 +451,10 @@ export default function Home() {
         </section>
 
         {/* New Arrivals */}
-        <section className="py-10 bg-muted/30">
+        <section
+          className="py-10 bg-muted/30"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 1200px' }}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <motion.div
@@ -475,16 +478,11 @@ export default function Home() {
                   </div>
                 ))
               ) : (
-                newArrivals?.map((product, index) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
+                // ProductCard has its own framer-motion entrance + hover,
+                // so we render it directly to avoid wrapping every card in a
+                // second IntersectionObserver-driven motion.div.
+                newArrivals?.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))
               )}
             </div>
@@ -523,6 +521,7 @@ export default function Home() {
               key={category.id}
               className="py-10 bg-muted/30"
               data-testid={`section-category-${categorySlug}`}
+              style={{ contentVisibility: 'auto', containIntrinsicSize: '1px 1200px' }}
             >
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -549,16 +548,8 @@ export default function Home() {
                       </div>
                     ))
                   ) : (
-                    visibleProducts.map((product, index) => (
-                      <motion.div
-                        key={product.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: (index % 5) * 0.1 }}
-                      >
-                        <ProductCard product={product} />
-                      </motion.div>
+                    visibleProducts.map((product) => (
+                      <ProductCard key={product.id} product={product} />
                     ))
                   )}
                 </div>

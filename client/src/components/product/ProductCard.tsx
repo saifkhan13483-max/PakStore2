@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { where } from "firebase/firestore";
 import { useDropshipperStatus } from "@/hooks/use-dropshipper-status";
@@ -16,6 +16,45 @@ interface ProductCardProps {
   product: Product;
 }
 
+/**
+ * Per-product real-time review listener. Extracted into its own component so
+ * the (expensive) Firestore `onSnapshot` subscription is only created after
+ * the browser is idle — keeping it off the LCP / TBT critical path. With many
+ * cards on a single page this avoids opening 30+ live WebSocket subscriptions
+ * during initial paint.
+ */
+function ReviewsBadge({ productId }: { productId: string }) {
+  const constraints = useMemo(() => [where("productId", "==", productId)], [productId]);
+  const { data: comments, isLoading } = useRealtimeCollection(
+    "comments",
+    commentSchema,
+    ["comments", productId],
+    constraints,
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center px-1 py-0 rounded w-fit shrink-0">
+        <Loader2 className="w-2 h-2 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!comments || comments.length === 0) return null;
+
+  const total = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
+  const displayRating = (total / comments.length).toFixed(1);
+
+  return (
+    <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
+      <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
+      <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">
+        {displayRating}
+      </span>
+    </div>
+  );
+}
+
 export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const { toast } = useToast();
@@ -23,25 +62,20 @@ export function ProductCard({ product }: ProductCardProps) {
   const [mediaOpen, setMediaOpen] = useState(false);
   const { isApprovedDropshipper } = useDropshipperStatus();
 
-  // Real-time rating/reviews from Firestore
-  const constraints = useMemo(() => [where("productId", "==", product.id)], [product.id]);
-  const { data: comments, isLoading: isLoadingReviews } = useRealtimeCollection(
-    "comments",
-    commentSchema,
-    ["comments", product.id],
-    constraints
-  );
-
-  const { displayRating, displayReviewCount } = useMemo(() => {
-    if (!comments || comments.length === 0) {
-      return { displayRating: 0, displayReviewCount: 0 };
+  // Defer mounting the reviews listener until the browser is idle so it
+  // doesn't compete with hero/LCP work or fire dozens of WebSocket
+  // subscriptions during initial paint.
+  const [reviewsReady, setReviewsReady] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ric = (window as any).requestIdleCallback;
+    if (typeof ric === "function") {
+      const id = ric(() => setReviewsReady(true), { timeout: 4000 });
+      return () => (window as any).cancelIdleCallback?.(id);
     }
-    const total = comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0);
-    return {
-      displayRating: (total / comments.length).toFixed(1),
-      displayReviewCount: comments.length
-    };
-  }, [comments]);
+    const t = window.setTimeout(() => setReviewsReady(true), 2500);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -165,16 +199,7 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.name}
             </h3>
           </Link>
-          {isLoadingReviews ? (
-            <div className="flex items-center px-1 py-0 rounded w-fit shrink-0">
-              <Loader2 className="w-2 h-2 animate-spin text-muted-foreground" />
-            </div>
-          ) : Number(displayReviewCount) > 0 && (
-            <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-950/30 px-1 py-0 rounded w-fit shrink-0">
-              <Star className="w-2 h-2 fill-yellow-500 text-yellow-500" />
-              <span className="text-[8px] md:text-[9px] font-bold text-yellow-700 dark:text-yellow-500">{displayRating}</span>
-            </div>
-          )}
+          {reviewsReady && <ReviewsBadge productId={product.id} />}
         </div>
         
         <div className="flex items-center justify-between mt-1 md:mt-2 pt-1 md:pt-2 border-t border-muted/50">
