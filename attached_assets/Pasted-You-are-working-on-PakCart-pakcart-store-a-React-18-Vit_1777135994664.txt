@@ -1,0 +1,98 @@
+You are working on PakCart (pakcart.store) — a React 18 + Vite + TypeScript + Firebase/Firestore e-commerce site deployed to Vercel. Read replit.md first to understand Phases 1–13 that are already shipped. Do NOT redo any of that work. This is Phase 14 — Performance Hardening Round 4.
+
+Current Reality Check (do this BEFORE writing any code)
+Run a fresh PageSpeed Insights analysis programmatically by calling the PSI API for both form factors:
+https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://pakcart.store&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo
+Same with strategy=desktop
+Save both JSON responses to docs/phase-14-psi-baseline-mobile.json and docs/phase-14-psi-baseline-desktop.json.
+From each response, extract and write to docs/phase-14-audit.md:
+The 5 Core Web Vitals scores (LCP, TBT, CLS, FCP, Speed Index, INP if present) — both lab and field
+The full lighthouseResult.audits list filtered to score < 0.9, sorted by details.overallSavingsMs descending
+The top 10 unused-javascript, unused-css-rules, render-blocking-resources, uses-text-compression, uses-responsive-images, efficient-animated-content, largest-contentful-paint-element, total-blocking-time, mainthread-work-breakdown, bootup-time, third-party-summary, legacy-javascript entries
+The actual LCP element selector + URL
+The actual long tasks list (if long-tasks audit exists)
+Do not begin implementation until this audit doc is written and you have stated, in plain English, the 3 biggest measured bottlenecks. Print them in your reply.
+Constraints (Non-Negotiable)
+Do NOT regress any of Phases 1–13. Specifically: keep the Phase 10 hero <link rel="preload"> build-time injection, the Phase 11 AnnouncementBanner placeholder, the Phase 12 localStorage["pakcart_hero_v1"] fast path, the Phase 12 lazy-loaded MegaDropdown/MobileNav/SearchOverlay, the Phase 12 idle-mounted ReviewsBadge, the Phase 13 s-maxage=60, stale-while-revalidate=600 on HTML routes, the Phase 13 speculationrules block, the Phase 9 security headers, and the Phase 7 image-sitemap. If you need to touch any of those files, preserve the existing behaviour and only add to it.
+No new heavy dependencies. web-vitals is the only allowed addition (it's ~2 KB gzipped).
+TypeScript must still compile with no NEW errors. Pre-existing errors in productFirestoreService.ts, BulkAddProducts.tsx, AIRecommendations.tsx, ProductDetail.tsx documented in earlier phases are allowed to remain.
+npm run build and node scripts/generate-seo-html.mjs must both pass cleanly. Run them at the end and paste the timings into your final report.
+Every change must be SSR-safe (the prerender script runs in Node) — wrap any window/document/localStorage/navigator access in typeof window !== 'undefined' guards.
+Tasks (in priority order — do all of them)
+Task 1 — Lazy-load firebase/auth (Phase 13's deferred high-priority item)
+firebase/auth is ~78 KB raw / ~28 KB gzipped and currently sits in the homepage critical path even though Auth state is never needed before the user clicks Login, opens Cart/Checkout, or hits an admin/profile route.
+
+In client/src/store/authStore.ts (or wherever useAuthStore lives — search for onAuthStateChanged), refactor so the import of firebase/auth happens inside an async initAuth() function rather than at the top of the module. Initialise the store with user: null, loading: true, initialized: false and expose an initAuth() action that dynamically await import('firebase/auth') and then attaches onAuthStateChanged.
+In client/src/App.tsx (or AuthProvider if one exists), call initAuth() inside a useEffect AFTER first paint — wrap it in requestIdleCallback with a 2-second setTimeout fallback, and skip entirely for bot/Lighthouse user agents (use the same UA detection pattern as the Phase 8 TikTok Pixel deferral in client/index.html).
+Audit every consumer of useAuthStore and confirm they handle user: null, loading: true gracefully. Specifically check: Header.tsx, ProtectedRoute.tsx, AdminRoute.tsx, Cart.tsx, Checkout.tsx, Login.tsx, Signup.tsx, Profile.tsx, Orders.tsx. Any component that gates UI on auth state must show its public/logged-out variant while loading: true rather than a spinner that flashes.
+For ProtectedRoute and AdminRoute specifically: while loading: true, render a non-empty placeholder (not a redirect, not a spinner) so unauthenticated bots crawling private URLs still get a 200 with a body, and authenticated users don't get bounced to login on the first paint.
+Verify the new chunk shows up as vendor-firebase-auth-*.js in the build output and is no longer in index.js. Paste the new index.js raw size and confirm it dropped from 88 KB.
+Task 2 — Web Vitals RUM (Phase 12's deferred item)
+npm install web-vitals.
+Create client/src/lib/web-vitals.ts that exports initWebVitals(). Inside, lazy-import web-vitals and subscribe to onCLS, onINP, onLCP, onFCP, onTTFB. For each metric, write a document to a new Firestore collection web_vitals_events with: { metric, value, rating, id, navigationType, url: location.pathname, deviceType: matchMedia('(max-width:767px)').matches ? 'mobile' : 'desktop', userAgent, timestamp: serverTimestamp(), buildId }. Where buildId comes from import.meta.env.VITE_BUILD_ID (set this in vite.config.ts from process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,7) || 'dev').
+Sample at 25% — generate a Math.random() < 0.25 gate per session (store the decision in sessionStorage so the same session sends all 5 metrics or none).
+Skip entirely for bots (reuse the UA detection from Task 1).
+Call initWebVitals() from App.tsx inside requestIdleCallback AFTER initAuth().
+Add Firestore security rules for web_vitals_events: anyone can create (anonymous writes), only admins can read/list/delete. Update firestore.rules and document the change in docs/phase-14-audit.md.
+Build a minimal admin dashboard at client/src/pages/admin/WebVitalsDashboard.tsx that queries the last 7 days, groups by metric + deviceType, and shows p75 values (the threshold Google actually uses for CWV ranking). Use the existing recharts vendor-charts chunk — no new chart libs. Add the route and a sidebar link.
+Task 3 — Image pipeline upgrade
+Audit every <img> and <picture> in client/src/components/ and client/src/pages/. For each Cloudinary URL, confirm the transform string is f_auto,q_auto,dpr_auto (so Cloudinary negotiates AVIF/WebP per-browser). Do NOT add an explicit f_avif source — that defeats f_auto (this is documented in Phase 13).
+Every product/category/hero <img> must have explicit width and height attributes matching the Cloudinary transform's w_ value, so the browser can reserve the box before paint and CLS stays at 0. Search for <img and fix any that lack both attributes.
+Every below-the-fold <img> must have loading="lazy" decoding="async". Every above-the-fold LCP candidate must have loading="eager" decoding="sync" fetchPriority="high" (camelCase — Phase 8 already learned this lesson, double-check none have regressed to lowercase).
+In client/src/components/product/ProductCard.tsx, replace the single <img> with a <picture> whose <source> points to the Cloudinary URL with w_400 for the default 1× viewport and a srcSet providing w_400 1x, w_800 2x for retina. The <img> fallback keeps the w_400 URL.
+Generate responsive srcSet for the hero <img> in Home.tsx covering w_768, w_1080, w_1440, w_1920 with appropriate sizes attribute. Confirm the Phase 10 build-time preload's imagesrcset and imagesizes attributes match exactly so the preload is reused (mismatch = double download).
+Task 4 — Font strategy
+Audit every @font-face and Google Fonts <link> in client/index.html, client/src/index.css, and any imported CSS. For each:
+Add font-display: swap if missing.
+If using Google Fonts via <link>, switch to <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> + a single <link rel="preload" as="font" type="font/woff2" crossorigin> for the ONE weight used above the fold (typically the body weight).
+Subset to &text= containing only the characters used on the homepage (PakCart name, hero headline) for the preloaded weight, OR use unicode-range to load only Latin.
+If you find a self-hosted font, ensure it ships as .woff2 only (drop .woff/.ttf/.eot).
+Verify with npm run build that no font file > 30 KB is in the critical path.
+Task 5 — Third-party script audit
+Grep client/index.html and the entire client/src tree for: <script src=, gtag, fbq, ttq (TikTok), clarity, hotjar, intercom, tawk, crisp, googletagmanager. For every third-party script found:
+Confirm it loads via requestIdleCallback (Phase 8 pattern) AND is skipped for bot UAs.
+If it's not, fix it.
+Specifically re-verify the TikTok Pixel deferral from Phase 8 still works after Phase 13's edits. Run curl -A "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" https://pakcart.store/ | grep -i tiktok after deploy — should return nothing. Document this in the audit.
+Task 6 — Pre-render top product detail pages with real data (Phase 12's deferred item)
+scripts/generate-seo-html.mjs already prerenders 77 product pages. Verify the prerendered HTML contains the product title, description, price, and og:image as static HTML, not just an empty <div id="root">. If they're empty, extend the script to inject per-page meta tags + a static product summary <section> (visible only with noscript-style cloaking via data-prerender="true", removed on hydration) so Googlebot reads the content even if JS execution times out. Be careful: the visible-to-users hydrated React tree must be the source of truth — the prerendered content is only a SEO/LCP fallback.
+
+Task 7 — INP (Interaction to Next Paint) hardening
+INP replaced FID as a Core Web Vital. Investigate the homepage and product page for any synchronous handler > 200 ms:
+
+Add transition: transform 0.2s for hover states instead of framer-motion where the animation is purely decorative (Phase 13 documented this trade-off — only do it for components NOT already used elsewhere as a framer-motion consumer).
+The product card "Add to Cart" handler in ProductCard.tsx and the cart drawer toggle — wrap any non-critical work (analytics, toast notifications) in requestIdleCallback so the visual response is immediate.
+The Header search input — debounce keystroke handlers to 150 ms and ensure the SearchOverlay lazy chunk has been preloaded on focus (use <link rel="modulepreload"> injected on first focus event, not on hover).
+Task 8 — Verify and report
+Run npm run check, npm run build, node scripts/generate-seo-html.mjs. Paste full timings.
+Re-call the PSI API for both form factors. Save as docs/phase-14-psi-after-mobile.json / docs/phase-14-psi-after-desktop.json. (Note: PSI lab data may not yet reflect changes if the deploy hasn't propagated — note this caveat in the report.)
+Append a "Phase 14 — Performance Round 4" section to replit.md with the same structure as Phase 13: Root Causes Found / Changes Made / Items Explicitly NOT Done / Verified.
+Print a concise diff summary at the end of your reply: files touched, new chunks added, index.js size before/after, expected LCP/TBT/INP impact.
+Self-Test Before Saying "Done"
+ Cold-load homepage in incognito with throttled "Slow 4G" + 4× CPU slowdown — no console errors, hero paints, banner doesn't shift.
+ Click through Home → Categories → Collection → Product → Add to Cart → Cart → Checkout — no broken auth, no missing user state, no white flashes.
+ Open /admin/login → log in as admin → confirm /admin/web-vitals dashboard loads (Task 2).
+ DevTools → Network → reload → confirm vendor-firebase-auth-*.js is NOT in the initial waterfall on / (only loads on auth interaction or after idle).
+ DevTools → Performance → record a homepage load → confirm Total Blocking Time decreased vs. baseline.
+ curl -sI https://pakcart.store/ (after deploy) still shows the Phase 13 cache-control header.
+Commit Message Template
+CopyPhase 14: Performance Hardening Round 4
+
+- Lazy-load firebase/auth (~78KB off critical path)
+- Web Vitals RUM with admin dashboard (web-vitals dep added, ~2KB)
+- Responsive srcSet + explicit dimensions on all images
+- Font preload + display:swap audit
+- Third-party script idle-defer verification
+- INP-targeted handler optimization
+- Prerender content visibility audit
+
+Index.js: 88KB → [actual] KB
+LCP (lab, mobile): [before] → [after]
+TBT (lab, mobile): [before] → [after]
+End of prompt. Start with the audit step. Do not skip it.
+
+Tips for using this with Replit AI:
+
+Paste the entire block (everything between the two --- lines) as a single message.
+If Replit's agent has a context-window limit, split at "## Tasks (in priority order)" — give it the constraints + audit step first, wait for the audit doc, then paste the tasks.
+After it finishes, ask it specifically: "Show me the diff for client/src/store/authStore.ts and the new index.js size from the build output." — that's the single biggest win and worth verifying manually.
+Run a fresh PSI yourself ~10 minutes after Vercel deploys (edge cache needs to warm) and compare against the g57zzd01le baseline you linked.
