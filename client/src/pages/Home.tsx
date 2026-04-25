@@ -91,6 +91,31 @@ export default function Home() {
     setCurrentSlide(0);
   }, [HERO_SLIDES.length]);
 
+  // Cache active hero slide URLs so the inline boot-script in index.html can
+  // <link rel="preload"> the LCP image on the user's NEXT visit, in parallel
+  // with the JS bundle download. This is the single biggest LCP win we can
+  // make for an SPA without server-side rendering.
+  useEffect(() => {
+    if (!slides || slides.length === 0) return;
+    try {
+      const pickFirst = (deviceType: "mobile" | "desktop") => {
+        const list = slides
+          .filter(s => s.hero_section_type === deviceType && s.is_active !== false)
+          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+        const slide = list[0] ?? slides[0];
+        return slide?.image_webp_url || slide?.image_url || null;
+      };
+      const payload = {
+        v: 1,
+        mobile: pickFirst("mobile"),
+        desktop: pickFirst("desktop"),
+      };
+      localStorage.setItem("pakcart_hero_v1", JSON.stringify(payload));
+    } catch {
+      /* localStorage may be disabled — fail silently */
+    }
+  }, [slides]);
+
   useEffect(() => {
     if (HERO_SLIDES.length <= 1 || isPaused) return;
     const timer = setInterval(() => {

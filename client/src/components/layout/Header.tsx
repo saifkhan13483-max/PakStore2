@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Search,
@@ -23,9 +23,12 @@ import logoImg from "@/assets/logo.png";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useCategories } from "@/hooks/use-categories";
-import { MegaDropdown } from "./MegaDropdown";
-import { MobileNav } from "./MobileNav";
-import { SearchOverlay } from "./SearchOverlay";
+
+// Heavy sub-components are only needed on hover/click — keep them off the
+// critical bundle so initial paint is faster.
+const MegaDropdown = lazy(() => import("./MegaDropdown").then(m => ({ default: m.MegaDropdown })));
+const MobileNav = lazy(() => import("./MobileNav").then(m => ({ default: m.MobileNav })));
+const SearchOverlay = lazy(() => import("./SearchOverlay").then(m => ({ default: m.SearchOverlay })));
 
 const NAV_LINKS_LEFT = [
   { href: "/", label: "Home" },
@@ -334,19 +337,25 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mega dropdown — anchored to container width */}
+          {/* Mega dropdown — anchored to container width. Only mount once
+              the user actually engages so the chunk stays off the critical
+              bundle. */}
           <div
             onMouseEnter={handleMegaMouseEnter}
             onMouseLeave={handleMegaMouseLeave}
           >
-            <MegaDropdown
-              isOpen={isMegaOpen}
-              parentCategories={parentCategories}
-              categories={categories}
-              hoveredParentId={hoveredParentId}
-              onParentHover={handleParentHover}
-              onClose={handleMegaClose}
-            />
+            {isMegaOpen && (
+              <Suspense fallback={null}>
+                <MegaDropdown
+                  isOpen={isMegaOpen}
+                  parentCategories={parentCategories}
+                  categories={categories}
+                  hoveredParentId={hoveredParentId}
+                  onParentHover={handleParentHover}
+                  onClose={handleMegaClose}
+                />
+              </Suspense>
+            )}
           </div>
         </div>
       </header>
@@ -389,19 +398,27 @@ const Header = () => {
         </div>
       </header>
 
-      {/* ── MOBILE NAV SHEET ── */}
-      <MobileNav
-        isOpen={isMobileNavOpen}
-        onClose={() => setIsMobileNavOpen(false)}
-        parentCategories={parentCategories}
-        categories={categories}
-      />
+      {/* ── MOBILE NAV SHEET — code-split, only mounts once opened ── */}
+      {isMobileNavOpen && (
+        <Suspense fallback={null}>
+          <MobileNav
+            isOpen={isMobileNavOpen}
+            onClose={() => setIsMobileNavOpen(false)}
+            parentCategories={parentCategories}
+            categories={categories}
+          />
+        </Suspense>
+      )}
 
-      {/* ── SEARCH OVERLAY ── */}
-      <SearchOverlay
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-      />
+      {/* ── SEARCH OVERLAY — code-split, only mounts once opened ── */}
+      {isSearchOpen && (
+        <Suspense fallback={null}>
+          <SearchOverlay
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

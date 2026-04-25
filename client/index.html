@@ -141,6 +141,31 @@
       .pc-boot__hero{width:100%;background:#0a0a0a;aspect-ratio:768/1024;min-height:280px}
       @media (min-width:768px){.pc-boot__header{height:80px}.pc-boot__hero{aspect-ratio:1920/700;min-height:500px}}
     </style>
+
+    <!-- LCP preload bootstrap. On repeat visits we know the hero slide URL
+         from the previous visit (cached in localStorage by Home.tsx). Inject a
+         <link rel="preload"> for it BEFORE the JS bundle parses so the LCP
+         image downloads in parallel with the bundle instead of waiting on
+         React mount + Firestore round trip. -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('pakcart_hero_v1');
+          if (!raw) return;
+          var data = JSON.parse(raw);
+          if (!data) return;
+          var isMobile = window.matchMedia('(max-width: 767px)').matches;
+          var url = isMobile ? data.mobile : data.desktop;
+          if (!url || typeof url !== 'string') return;
+          var link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = url;
+          link.fetchPriority = 'high';
+          document.head.appendChild(link);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root">
