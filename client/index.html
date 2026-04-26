@@ -129,16 +129,9 @@
       />
     </noscript>
 
-    <!-- Critical inline CSS: paints the brand background and reserves the
-         hero/banner boxes BEFORE the JS bundle parses, so the user sees
-         something immediately and there is no layout shift when React mounts. -->
     <style>
-      html,body{margin:0;background:#f6f0e6;color:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+      html,body{margin:0;background:#fff;color:#111;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
       #root{min-height:100vh}
-      .pc-boot{display:flex;flex-direction:column;min-height:100vh}
-      .pc-boot__banner{height:36px;background:#16a34a}
-      .pc-boot__header{height:64px;background:#fff;border-bottom:1px solid #e5e7eb}
-      @media (min-width:768px){.pc-boot__header{height:80px}}
     </style>
 
     <!-- LCP preload bootstrap. On repeat visits we know the hero slide URL
@@ -167,15 +160,7 @@
     </script>
   </head>
   <body>
-    <div id="root">
-      <!-- Lightweight pre-hydration skeleton. React replaces this entire tree
-           on first render. Mirrors the real layout so LCP/CLS aren't penalised
-           by the SPA boot. -->
-      <div class="pc-boot" aria-hidden="true">
-        <div class="pc-boot__banner"></div>
-        <div class="pc-boot__header"></div>
-      </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <!-- Speculation Rules: Chrome / Edge will silently prerender these routes
          on hover/intent so in-site navigation feels instant. Ignored by Safari
