@@ -387,7 +387,7 @@ export default function AdminProductForm() {
 
     setAiVariantLoadingIndex(vIndex);
     try {
-      const names = await generateAIVariantNames(
+      const { names, error } = await generateAIVariantNames(
         productName,
         cat?.name || catId || "General",
         variantType,
@@ -395,21 +395,38 @@ export default function AdminProductForm() {
         productImages,
       );
 
-      if (!names || names.length === 0) {
-        toast({ title: "AI couldn't name the variants", description: "Try again with clearer images.", variant: "destructive" });
+      if (error) {
+        toast({
+          title: "AI naming failed",
+          description: error,
+          variant: "destructive",
+        });
         return;
       }
 
+      if (!names || names.length === 0) {
+        toast({
+          title: "AI couldn't name the variants",
+          description: "The model returned no usable names. Check the variant images are loading and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      let applied = 0;
       optionsWithImages.forEach((o, idx) => {
         const newName = names[idx];
         if (newName) {
           form.setValue(`variants.${vIndex}.options.${o.index}.value` as any, newName, { shouldValidate: true, shouldDirty: true });
+          applied++;
         }
       });
 
       toast({
-        title: `Named ${names.length} variant${names.length === 1 ? "" : "s"}`,
-        description: "Review the names and edit if needed.",
+        title: `Named ${applied} variant${applied === 1 ? "" : "s"}`,
+        description: applied < optionsWithImages.length
+          ? `${optionsWithImages.length - applied} option${optionsWithImages.length - applied === 1 ? "" : "s"} could not be named — review and edit if needed.`
+          : "Review the names and edit if needed.",
       });
     } finally {
       setAiVariantLoadingIndex(null);

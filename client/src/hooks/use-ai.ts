@@ -146,6 +146,7 @@ export function useAISEO() {
 
 export function useAIVariantNames() {
   const [isLoading, setIsLoading] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const generate = useCallback(
     async (
@@ -154,13 +155,17 @@ export function useAIVariantNames() {
       variantType: string,
       imageUrls: string[],
       productImageUrls: string[] = []
-    ) => {
+    ): Promise<{ names: string[]; error: string | null }> => {
       setIsLoading(true);
+      setLastError(null);
       try {
-        return await generateVariantNames(productName, category, variantType, imageUrls, productImageUrls);
-      } catch (err) {
-        console.error("AI variant names error:", err);
-        return [];
+        const names = await generateVariantNames(productName, category, variantType, imageUrls, productImageUrls);
+        return { names, error: null };
+      } catch (err: any) {
+        const msg = err?.message || "Unknown error";
+        console.error("AI variant names error:", msg);
+        setLastError(msg);
+        return { names: [], error: msg };
       } finally {
         setIsLoading(false);
       }
@@ -168,7 +173,7 @@ export function useAIVariantNames() {
     []
   );
 
-  return { generate, isLoading };
+  return { generate, isLoading, lastError };
 }
 
 export function useAIFullContent() {

@@ -66,6 +66,7 @@ async function callAI(
       messages: resolvedMessages,
       maxTokens: opts.maxTokens ?? 512,
       temperature: opts.temperature ?? 0.7,
+      ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
     }),
   });
 
@@ -302,21 +303,50 @@ Example output for 5 color variants: ["Pink","Teal","Maroon","Black","Purple"]`;
 
   imageUrls.forEach((url) => contentParts.push({ type: "image_url" as const, image_url: url }));
 
+  // Allow ~40 output tokens per variant name, with a healthy floor and ceiling.
+  // Without an explicit thinkingBudget, Gemini 2.5 Flash silently spends most of
+  // maxOutputTokens on hidden reasoning and returns an empty answer — so we also
+  // disable thinking for this deterministic naming task.
+  const dynamicMaxTokens = Math.min(2048, Math.max(400, imageUrls.length * 40 + 200));
+
   const result = await callAI(
     [{ role: "user", content: contentParts }],
-    { maxTokens: 400, temperature: 0.2 }
+    { maxTokens: dynamicMaxTokens, temperature: 0.2, thinkingBudget: 0 }
   );
 
+  const cleaned = result.replace(/```json|```/g, "").trim();
+
+  // Primary: strict JSON array parse.
   try {
-    const cleaned = result.replace(/```json|```/g, "").trim();
     const arr = JSON.parse(cleaned);
-    if (Array.isArray(arr)) {
-      return arr.slice(0, imageUrls.length).map((s) => String(s).trim());
+    if (Array.isArray(arr) && arr.length > 0) {
+      return arr.slice(0, imageUrls.length).map((s) => String(s).trim()).filter(Boolean);
     }
-    return [];
   } catch {
-    return [];
+    // fall through to fallback parsers
   }
+
+  // Fallback 1: extract the first [...] block from the response.
+  const bracketMatch = cleaned.match(/\[[\s\S]*?\]/);
+  if (bracketMatch) {
+    try {
+      const arr = JSON.parse(bracketMatch[0]);
+      if (Array.isArray(arr) && arr.length > 0) {
+        return arr.slice(0, imageUrls.length).map((s) => String(s).trim()).filter(Boolean);
+      }
+    } catch {
+      // continue
+    }
+  }
+
+  // Fallback 2: take any quoted strings the model returned.
+  const quoted = Array.from(cleaned.matchAll(/"([^"\n]{1,40})"/g)).map((m) => m[1].trim()).filter(Boolean);
+  if (quoted.length > 0) {
+    return quoted.slice(0, imageUrls.length);
+  }
+
+  console.warn("[generateVariantNames] Could not parse AI response:", cleaned.slice(0, 200));
+  return [];
 }
 
 export interface FullProductContent {

@@ -118,6 +118,9 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         generationConfig: {
           maxOutputTokens: parsed.maxTokens ?? parsed.max_tokens ?? defaults.max_tokens,
           temperature: parsed.temperature ?? defaults.temperature,
+          ...(typeof parsed.thinkingBudget === "number"
+            ? { thinkingConfig: { thinkingBudget: parsed.thinkingBudget } }
+            : {}),
         },
       };
 
