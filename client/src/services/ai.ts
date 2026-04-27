@@ -212,38 +212,54 @@ export async function generateVariantNames(
   productName: string,
   category: string,
   variantType: string,
-  imageUrls: string[]
+  imageUrls: string[],
+  productImageUrls: string[] = []
 ): Promise<string[]> {
   if (imageUrls.length === 0) return [];
 
-  const promptText = `You are naming product variant options for a Pakistani fashion/accessories e-commerce store.
+  const hasProductImages = productImageUrls.length > 0;
+
+  const promptText = `You are a professional product analyst for a Pakistani fashion/accessories e-commerce store. Your task is to examine each variant image carefully and assign it the MOST ACCURATE possible name.
 
 Product: "${productName}"
 Category: ${category}
-Variant Type: ${variantType || "Option"}
+Variant Type: ${variantType || "Color"}
+${hasProductImages ? `\nContext: ${productImageUrls.length} main product image(s) appear FIRST (before the variant images) to give you product context. Then ${imageUrls.length} VARIANT image(s) follow — one per option, in order.` : `\n${imageUrls.length} variant image(s) follow — one per option, in order.`}
 
-I'm providing ${imageUrls.length} image(s) below — one per variant option, in order. Look at each image and produce a SIMPLE, customer-friendly name for that option.
+YOUR JOB:
+- Carefully look at EACH variant image pixel by pixel.
+- Identify the DOMINANT attribute of that variant (color, size, material, pattern, etc.) based on the variant type.
+- ${variantType === "Color" || !variantType ? "For COLOR variants: Look at the actual hue of the garment/item. Name it using a simple, widely-recognized color word a Pakistani shopper would use (e.g., Pink, Teal, Maroon, Black, Purple, Navy Blue, Off White, Beige, Red, Olive Green)." : ""}
+- ${variantType === "Size" ? "For SIZE variants: Use standard sizing (XS, S, M, L, XL, XXL, Free Size, etc.)." : ""}
+- Do NOT guess or assume — only name what you can clearly see in the image.
+- Do NOT use poetic or decorative names unless they perfectly describe the visible attribute.
+- Do NOT combine two colors into one name (e.g., avoid "Dark Teal" when it is simply "Teal").
 
-Naming rules:
-- Keep names VERY SIMPLE — 1 to 3 words maximum.
-- Match the variant type. If type is "Color", return plain color names (e.g., "Blue", "Gold", "Black", "Rose Gold"). If "Size", return sizes (e.g., "Small", "Medium", "Large"). If "Material", return material names. If "Pattern", return pattern names.
-- Use everyday words shoppers recognize. Avoid flowery descriptors like "Sapphire" or "Royal" unless the image clearly shows that exact shade.
-- Title Case. No emojis. No quotes. No extra description.
-- One name per image, in the SAME ORDER as provided.
+STRICT NAMING RULES:
+- 1 to 3 words maximum per name.
+- Title Case always.
+- No emojis, no quotes, no punctuation, no extra explanation.
+- One name per variant image, in EXACT ORDER provided.
+- Total names returned MUST equal exactly ${imageUrls.length} (one per variant image).
 
-Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no explanation. Example: ["Blue","Gold","Black"]`;
+Return ONLY a valid JSON array of exactly ${imageUrls.length} strings. No markdown, no extra text.
+Example output for 5 color variants: ["Pink","Teal","Maroon","Black","Purple"]`;
+
+  const contentParts: AIContentPart[] = [
+    { type: "text", text: promptText },
+  ];
+
+  if (hasProductImages) {
+    contentParts.push({ type: "text", text: `\n--- PRODUCT CONTEXT IMAGES (${productImageUrls.length}) ---` });
+    productImageUrls.forEach((url) => contentParts.push({ type: "image_url" as const, image_url: url }));
+    contentParts.push({ type: "text", text: `\n--- VARIANT OPTION IMAGES (${imageUrls.length}, name these in order) ---` });
+  }
+
+  imageUrls.forEach((url) => contentParts.push({ type: "image_url" as const, image_url: url }));
 
   const result = await callAI(
-    [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: promptText },
-          ...imageUrls.map((url) => ({ type: "image_url" as const, image_url: url })),
-        ],
-      },
-    ],
-    { maxTokens: 300, temperature: 0.4 }
+    [{ role: "user", content: contentParts }],
+    { maxTokens: 400, temperature: 0.2 }
   );
 
   try {

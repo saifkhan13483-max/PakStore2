@@ -152,11 +152,12 @@ export function useAIVariantNames() {
       productName: string,
       category: string,
       variantType: string,
-      imageUrls: string[]
+      imageUrls: string[],
+      productImageUrls: string[] = []
     ) => {
       setIsLoading(true);
       try {
-        return await generateVariantNames(productName, category, variantType, imageUrls);
+        return await generateVariantNames(productName, category, variantType, imageUrls, productImageUrls);
       } catch (err) {
         console.error("AI variant names error:", err);
         return [];

@@ -221,12 +221,11 @@ export default function AdminProductForm() {
       .map(v => v?.name)
       .filter((n: string) => typeof n === "string" && n.trim().length > 0);
 
-    const variantOptionImages: string[] =
-      existingVariants.length === 1
-        ? ((existingVariants[0]?.options || []) as any[])
-            .map((o) => (typeof o?.image === "string" ? o.image : ""))
-            .filter((url) => !!url)
-        : [];
+    const variantOptionImages: string[] = existingVariants.flatMap((v) =>
+      ((v?.options || []) as any[])
+        .map((o) => (typeof o?.image === "string" ? o.image : ""))
+        .filter((url: string) => !!url)
+    );
 
     const result = await generateAIFullContent(images, {
       nameHint,
@@ -365,6 +364,7 @@ export default function AdminProductForm() {
     const cat = categories?.find(c => c.id === catId);
     const variantType = form.getValues(`variants.${vIndex}.name` as any) as string || "";
     const options = (form.getValues(`variants.${vIndex}.options` as any) || []) as any[];
+    const productImages = (form.getValues("images") || []) as string[];
 
     if (!productName) {
       toast({ title: "Enter a product name first", variant: "destructive" });
@@ -391,6 +391,7 @@ export default function AdminProductForm() {
         cat?.name || catId || "General",
         variantType,
         optionsWithImages.map(o => o.image as string),
+        productImages,
       );
 
       if (!names || names.length === 0) {
