@@ -319,13 +319,28 @@ function markdownToHtml(md: string): string {
   return out.join("\n");
 }
 
+function stripInlineMarkdown(s: string): string {
+  return s
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^\s*#{1,6}\s+/g, "")
+    .trim();
+}
+
 function extractSection(text: string, label: string): string {
-  const re = new RegExp(
-    `\\*\\*${label}:\\*\\*\\s*\\n?([\\s\\S]*?)(?=\\n\\*\\*[^*]+:\\*\\*|$)`,
-    "i"
-  );
-  const m = text.match(re);
-  return m ? m[1].trim() : "";
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const patterns = [
+    new RegExp(`\\*\\*${escaped}:?\\*\\*\\s*:?\\s*\\n?([\\s\\S]*?)(?=\\n\\s*\\*\\*[^*\\n]+:?\\*\\*|$)`, "i"),
+    new RegExp(`(?:^|\\n)\\s*#{1,6}\\s*${escaped}:?\\s*\\n([\\s\\S]*?)(?=\\n\\s*#{1,6}\\s|\\n\\s*\\*\\*[^*\\n]+:?\\*\\*|$)`, "i"),
+    new RegExp(`(?:^|\\n)${escaped}:\\s*([\\s\\S]*?)(?=\\n\\s*[A-Z][A-Za-z ]{2,40}:\\s|\\n\\s*\\*\\*[^*\\n]+:?\\*\\*|$)`, "i"),
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m && m[1] && m[1].trim()) return m[1].trim();
+  }
+  return "";
 }
 
 function parseListItems(section: string): string[] {
@@ -475,27 +490,36 @@ export async function generateFullProductContent(
 
   const result = await callAI(
     [{ role: "user", content }],
-    { maxTokens: 1400, temperature: 0.7 }
+    { maxTokens: 3500, temperature: 0.4 }
   );
 
   if (!result || !result.trim()) return null;
 
   const cleaned = result.replace(/```(?:markdown|md)?|```/g, "").trim();
 
-  const name = extractSection(cleaned, "Product Name").replace(/^["']|["']$/g, "").trim();
-  let slug = extractSection(cleaned, "Slug")
+  const name = stripInlineMarkdown(
+    extractSection(cleaned, "Product Name").replace(/^["']|["']$/g, "").replace(/^["']|["']$/g, "").trim()
+  );
+  let slug = stripInlineMarkdown(extractSection(cleaned, "Slug"))
     .replace(/^["']|["']$/g, "")
     .trim()
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  const shortDescription = extractSection(cleaned, "Short Description")
-    .replace(/^\*+|\*+$/g, "")
+  const shortDescription = stripInlineMarkdown(extractSection(cleaned, "Short Description"))
+    .replace(/^["']|["']$/g, "")
     .trim();
 
   const longRaw = extractSection(cleaned, "Long Description");
-  const longDescriptionHtml = longRaw ? markdownToHtml(longRaw) : "";
+  const detailsRaw = extractSection(cleaned, "Product Details");
+  const combinedLong = [
+    longRaw,
+    detailsRaw ? `**Product Details:**\n\n${detailsRaw}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+  const longDescriptionHtml = combinedLong ? markdownToHtml(combinedLong) : "";
 
   const features = parseListItems(extractSection(cleaned, "Key Features"));
   const categoryRaw = extractSection(cleaned, "Category")
