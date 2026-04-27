@@ -6,6 +6,7 @@ import {
   generateAIReviews,
   generateSEOMeta,
   generateSmartSearchQuery,
+  generateVariantNames,
 } from "@/services/ai";
 
 export function useAIDescription() {
@@ -131,6 +132,32 @@ export function useAISEO() {
       } catch (err) {
         console.error("AI SEO error:", err);
         return null;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  return { generate, isLoading };
+}
+
+export function useAIVariantNames() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const generate = useCallback(
+    async (
+      productName: string,
+      category: string,
+      variantType: string,
+      imageUrls: string[]
+    ) => {
+      setIsLoading(true);
+      try {
+        return await generateVariantNames(productName, category, variantType, imageUrls);
+      } catch (err) {
+        console.error("AI variant names error:", err);
+        return [];
       } finally {
         setIsLoading(false);
       }

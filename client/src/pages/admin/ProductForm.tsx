@@ -34,11 +34,11 @@ import { ImageUploader } from "@/components/product/ImageUploader";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 // @ts-ignore - VideoUpload.jsx doesn't have TypeScript declarations
 import { VideoUpload } from "@/components/VideoUpload";
-import { useEffect, Fragment } from "react";
+import { useEffect, Fragment, useState } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { settingsFirestoreService } from "@/services/settingsFirestoreService";
-import { useAIDescription, useAISEO, useAIReviews } from "@/hooks/use-ai";
+import { useAIDescription, useAISEO, useAIReviews, useAIVariantNames } from "@/hooks/use-ai";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -158,6 +158,8 @@ export default function AdminProductForm() {
   const { generate: generateAIDesc, isLoading: isAIDescLoading } = useAIDescription();
   const { generate: generateAISEOMeta, isLoading: isAISEOLoading } = useAISEO();
   const { generate: generateAIReviews, isLoading: isAIReviewsLoading } = useAIReviews();
+  const { generate: generateAIVariantNames } = useAIVariantNames();
+  const [aiVariantLoadingIndex, setAiVariantLoadingIndex] = useState<number | null>(null);
 
   const name = form.watch("name");
 
@@ -192,6 +194,61 @@ export default function AdminProductForm() {
         title: "AI SEO Meta Generated",
         description: `Title: ${meta.title}`,
       });
+    }
+  };
+
+  const handleGenerateVariantNames = async (vIndex: number) => {
+    const productName = form.getValues("name");
+    const catId = form.getValues("categoryId");
+    const cat = categories?.find(c => c.id === catId);
+    const variantType = form.getValues(`variants.${vIndex}.name` as any) as string || "";
+    const options = (form.getValues(`variants.${vIndex}.options` as any) || []) as any[];
+
+    if (!productName) {
+      toast({ title: "Enter a product name first", variant: "destructive" });
+      return;
+    }
+
+    const optionsWithImages = options
+      .map((o, i) => ({ index: i, image: o?.image as string | undefined }))
+      .filter(o => typeof o.image === "string" && o.image.length > 0);
+
+    if (optionsWithImages.length === 0) {
+      toast({
+        title: "No variant images uploaded",
+        description: "Upload at least one option image before auto-naming.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAiVariantLoadingIndex(vIndex);
+    try {
+      const names = await generateAIVariantNames(
+        productName,
+        cat?.name || catId || "General",
+        variantType,
+        optionsWithImages.map(o => o.image as string),
+      );
+
+      if (!names || names.length === 0) {
+        toast({ title: "AI couldn't name the variants", description: "Try again with clearer images.", variant: "destructive" });
+        return;
+      }
+
+      optionsWithImages.forEach((o, idx) => {
+        const newName = names[idx];
+        if (newName) {
+          form.setValue(`variants.${vIndex}.options.${o.index}.value` as any, newName, { shouldValidate: true, shouldDirty: true });
+        }
+      });
+
+      toast({
+        title: `Named ${names.length} variant${names.length === 1 ? "" : "s"}`,
+        description: "Review the names and edit if needed.",
+      });
+    } finally {
+      setAiVariantLoadingIndex(null);
     }
   };
 
@@ -475,6 +532,22 @@ export default function AdminProductForm() {
                             )}
                           />
                         </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleGenerateVariantNames(vIndex)}
+                          disabled={aiVariantLoadingIndex === vIndex}
+                          className="mt-6 gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover-elevate"
+                          data-testid={`button-ai-name-variants-${vIndex}`}
+                        >
+                          {aiVariantLoadingIndex === vIndex ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                          )}
+                          {aiVariantLoadingIndex === vIndex ? "Naming…" : "Auto-name with AI"}
+                        </Button>
                         <Button 
                           type="button" 
                           variant="ghost" 

@@ -1,5 +1,38 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+async function fetchImageAsInlineData(url: string): Promise<{ mimeType: string; data: string } | null> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const mimeType = resp.headers.get("content-type")?.split(";")[0]?.trim() || "image/jpeg";
+    const buf = Buffer.from(await resp.arrayBuffer());
+    return { mimeType, data: buf.toString("base64") };
+  } catch {
+    return null;
+  }
+}
+
+async function buildPartsFromContent(content: any): Promise<any[]> {
+  if (typeof content === "string") {
+    return [{ text: content }];
+  }
+  if (Array.isArray(content)) {
+    const parts: any[] = [];
+    for (const item of content) {
+      if (item?.type === "text" && typeof item.text === "string") {
+        parts.push({ text: item.text });
+      } else if (item?.type === "image_url" && typeof item.image_url === "string") {
+        const img = await fetchImageAsInlineData(item.image_url);
+        if (img) {
+          parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
+        }
+      }
+    }
+    return parts;
+  }
+  return [{ text: String(content ?? "") }];
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -15,10 +48,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const systemMessage = messages.find((m: any) => m.role === "system");
   const userMessages = messages.filter((m: any) => m.role !== "system");
 
-  const geminiContents = userMessages.map((m: any) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
+  const geminiContents = await Promise.all(
+    userMessages.map(async (m: any) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: await buildPartsFromContent(m.content),
+    }))
+  );
 
   while (geminiContents.length > 0 && geminiContents[0].role === "model") {
     geminiContents.shift();

@@ -1,6 +1,10 @@
+type AIContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: string };
+
 interface AIMessage {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: string | AIContentPart[];
 }
 
 const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert and SEO specialist for PakCart, a Pakistani e-commerce store selling Bags & Wallets, Jewelry, Shoes, Slippers, Stitched Dresses, Watches, and Tech Gadgets. Help increase sales by writing persuasive product content, recommending relevant products, and improving the shopping experience. Keep responses concise, persuasive, human-like, and conversion-focused.`;
@@ -198,6 +202,55 @@ Return ONLY a JSON array (no markdown):
     const cleaned = result.replace(/```json|```/g, "").trim();
     const reviews = JSON.parse(cleaned);
     return Array.isArray(reviews) ? reviews.slice(0, count) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function generateVariantNames(
+  productName: string,
+  category: string,
+  variantType: string,
+  imageUrls: string[]
+): Promise<string[]> {
+  if (imageUrls.length === 0) return [];
+
+  const promptText = `You are naming product variant options for a Pakistani fashion/accessories e-commerce store.
+
+Product: "${productName}"
+Category: ${category}
+Variant Type: ${variantType || "Option"}
+
+I'm providing ${imageUrls.length} image(s) below — one per variant option, in order. Look at each image and produce a short, descriptive, customer-friendly name for that option.
+
+Naming rules:
+- Match the variant type. If type is "Color", return color names (e.g., "Royal Blue", "Rose Gold", "Emerald Green", "Jet Black"). If "Size", return sizes. If "Material", return material names. If "Pattern", return pattern names.
+- Use evocative, fashion-appropriate descriptors (not just "Blue" — prefer "Sapphire Blue" or "Navy Blue").
+- 1–3 words each. Title Case. No emojis. No quotes.
+- One name per image, in the SAME ORDER as provided.
+
+Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no explanation. Example: ["Royal Blue","Rose Gold","Jet Black"]`;
+
+  const result = await callAI(
+    [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: promptText },
+          ...imageUrls.map((url) => ({ type: "image_url" as const, image_url: url })),
+        ],
+      },
+    ],
+    { maxTokens: 300, temperature: 0.4 }
+  );
+
+  try {
+    const cleaned = result.replace(/```json|```/g, "").trim();
+    const arr = JSON.parse(cleaned);
+    if (Array.isArray(arr)) {
+      return arr.slice(0, imageUrls.length).map((s) => String(s).trim());
+    }
+    return [];
   } catch {
     return [];
   }
