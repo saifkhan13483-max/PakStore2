@@ -92,7 +92,7 @@ export default function AdminProductForm() {
   });
 
   // Handle features array
-  const { fields: featureFields, append: appendFeature, remove: removeFeature } = useFieldArray({
+  const { fields: featureFields, append: appendFeature, remove: removeFeature, replace: replaceFeatures } = useFieldArray({
     control: form.control,
     name: "features" as any,
   });
@@ -248,7 +248,7 @@ export default function AdminProductForm() {
       form.setValue("longDescription", result.longDescriptionHtml, { shouldValidate: true, shouldDirty: true });
     }
     if (result.features.length > 0) {
-      form.setValue("features", result.features as any, { shouldValidate: true, shouldDirty: true });
+      replaceFeatures(result.features as any);
     }
 
     const filled: string[] = [];

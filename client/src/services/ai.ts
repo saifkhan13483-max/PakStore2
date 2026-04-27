@@ -334,7 +334,9 @@ function parseListItems(section: string): string[] {
     .map((l) =>
       l
         .replace(/^[-*]\s+/, "")
-        .replace(/^\*\*(.+?)\*\*$/, "$1")
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/__([^_]+)__/g, "$1")
+        .replace(/`([^`]+)`/g, "$1")
         .trim()
     )
     .filter((l) => l.length > 0);
