@@ -3,6 +3,40 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
+async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "image/jpeg";
+    const mimeType = contentType.split(";")[0].trim() || "image/jpeg";
+    const buffer = await res.arrayBuffer();
+    const data = Buffer.from(buffer).toString("base64");
+    return { data, mimeType };
+  } catch {
+    return null;
+  }
+}
+
+async function buildGeminiParts(content: string | any[]): Promise<any[]> {
+  if (typeof content === "string") {
+    return [{ text: content }];
+  }
+  const parts: any[] = [];
+  for (const part of content) {
+    if (part.type === "text") {
+      parts.push({ text: part.text ?? "" });
+    } else if (part.type === "image_url" && typeof part.image_url === "string") {
+      const img = await fetchImageAsBase64(part.image_url);
+      if (img) {
+        parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
+      } else {
+        parts.push({ text: `[Image could not be loaded: ${part.image_url}]` });
+      }
+    }
+  }
+  return parts;
+}
+
 async function geminiProxy(req: any, res: any, model: string, defaults: { max_tokens: number; temperature: number }) {
   let body = "";
   req.on("data", (chunk: Buffer) => { body += chunk.toString(); });
@@ -17,15 +51,19 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         return;
       }
 
-      const messages: { role: string; content: string }[] = parsed.messages ?? [];
+      const messages: { role: string; content: string | any[] }[] = parsed.messages ?? [];
 
       const systemMsg = messages.find((m) => m.role === "system");
       const conversationMsgs = messages.filter((m) => m.role !== "system");
 
-      const contents = conversationMsgs.map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
+      const contents: any[] = [];
+      for (const m of conversationMsgs) {
+        const parts = await buildGeminiParts(m.content);
+        contents.push({
+          role: m.role === "assistant" ? "model" : "user",
+          parts,
+        });
+      }
 
       const requestBody: any = {
         contents,
