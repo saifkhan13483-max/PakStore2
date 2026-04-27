@@ -40,46 +40,79 @@ function getGeminiApiKeys(): string[] {
   return keys;
 }
 
+/**
+ * Fallback model chain. We try the primary model first; if every key is
+ * rate-limited (429/503), we degrade to lighter Gemini models that have their
+ * own independent quotas. A non-rate-limit error stops the cascade.
+ */
+const MODEL_FALLBACK_CHAIN = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+];
+
+function buildModelChain(primary: string): string[] {
+  const chain = [primary, ...MODEL_FALLBACK_CHAIN.filter((m) => m !== primary)];
+  // de-duplicate while preserving order
+  return Array.from(new Set(chain));
+}
+
 async function callGeminiWithFallback(
   requestBody: any,
-  model: string,
+  primaryModel: string,
   keys: string[]
-): Promise<{ status: number; data: any; keyIndex: number }> {
+): Promise<{ status: number; data: any; keyIndex: number; modelUsed: string | null }> {
   let lastStatus = 500;
   let lastData: any = { error: "No API keys configured" };
+  const models = buildModelChain(primaryModel);
 
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    try {
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-          signal: AbortSignal.timeout(120000),
+  for (let mi = 0; mi < models.length; mi++) {
+    const model = models[mi];
+    let allRateLimited = true;
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      try {
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+            signal: AbortSignal.timeout(120000),
+          }
+        );
+        const data = await geminiRes.json();
+        lastStatus = geminiRes.status;
+        lastData = data;
+
+        if (geminiRes.ok) {
+          if (mi > 0 || i > 0) {
+            console.log(`[AI proxy] Succeeded on model "${model}" with key #${i + 1} (after ${mi} model fallback(s))`);
+          }
+          return { status: geminiRes.status, data, keyIndex: i, modelUsed: model };
         }
-      );
-      const data = await geminiRes.json();
-      lastStatus = geminiRes.status;
-      lastData = data;
 
-      if (geminiRes.ok) {
-        if (i > 0) console.log(`[AI proxy] Key #${i + 1} succeeded after ${i} failure(s)`);
-        return { status: geminiRes.status, data, keyIndex: i };
+        const isRateLimit = geminiRes.status === 429 || geminiRes.status === 503;
+        console.warn(`[AI proxy] ${model} key #${i + 1} failed (${geminiRes.status}${isRateLimit ? " rate-limited" : ""}):`, data.error?.message ?? "unknown");
+
+        if (!isRateLimit) {
+          // Permanent failure (bad request, auth, etc.) — switching keys/models won't help.
+          allRateLimited = false;
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`[AI proxy] ${model} key #${i + 1} threw:`, err.message);
+        lastData = { error: err.message };
+        allRateLimited = false; // network failure isn't a quota issue; stop cascading
+        break;
       }
-
-      const isRateLimit = geminiRes.status === 429 || geminiRes.status === 503;
-      console.warn(`[AI proxy] Key #${i + 1} failed (${geminiRes.status}${isRateLimit ? " rate-limited" : ""}):`, data.error?.message ?? "unknown");
-
-      if (!isRateLimit) break; // non-rate-limit errors won't be fixed by switching keys
-    } catch (err: any) {
-      console.warn(`[AI proxy] Key #${i + 1} threw:`, err.message);
-      lastData = { error: err.message };
     }
+
+    if (!allRateLimited) break; // only cascade to next model when every key was rate-limited
   }
 
-  return { status: lastStatus, data: lastData, keyIndex: -1 };
+  return { status: lastStatus, data: lastData, keyIndex: -1, modelUsed: null };
 }
 
 async function geminiProxy(req: any, res: any, model: string, defaults: { max_tokens: number; temperature: number }) {
@@ -128,21 +161,35 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         requestBody.system_instruction = { parts: [{ text: systemMsg.content }] };
       }
 
-      const { status, data, keyIndex } = await callGeminiWithFallback(requestBody, model, keys);
+      const { status, data, keyIndex, modelUsed } = await callGeminiWithFallback(requestBody, model, keys);
 
       if (keyIndex === -1) {
-        console.error(`[AI proxy] All ${keys.length} key(s) exhausted. Last status: ${status}`);
+        console.error(`[AI proxy] Exhausted ${keys.length} key(s) across all fallback models. Last status: ${status}`);
+        // Try to extract a retry-after hint from the upstream error so the UI can show it.
+        let retryAfter: number | undefined;
+        const detailsArr = data?.error?.details;
+        if (Array.isArray(detailsArr)) {
+          const retryInfo = detailsArr.find((d: any) => typeof d?.retryDelay === "string");
+          if (retryInfo) {
+            const m = String(retryInfo.retryDelay).match(/(\d+(?:\.\d+)?)/);
+            if (m) retryAfter = Math.ceil(parseFloat(m[1]));
+          }
+        }
+        const baseMsg = data?.error?.message ?? "Gemini API error";
+        const friendlyMsg = status === 429 || status === 503
+          ? `All ${keys.length} Gemini API key(s) are rate-limited on every fallback model${retryAfter ? `. Try again in ~${retryAfter}s.` : "."} Add another GEMINI_API_KEY_B/C/D… to increase capacity. (${baseMsg})`
+          : baseMsg;
         res.writeHead(status, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: data.error?.message ?? "Gemini API error" }));
+        res.end(JSON.stringify({ error: friendlyMsg, retryAfter }));
         return;
       }
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
       if (!text) {
         const reason = data.candidates?.[0]?.finishReason ?? "unknown";
-        console.error(`[AI proxy] Gemini returned no text. finishReason=${reason}`);
+        console.error(`[AI proxy] ${modelUsed} returned no text. finishReason=${reason}`);
       } else {
-        console.log(`[AI proxy] OK — response length=${text.length} chars`);
+        console.log(`[AI proxy] OK — model=${modelUsed} key=#${keyIndex + 1} response length=${text.length} chars`);
       }
 
       res.writeHead(200, { "Content-Type": "application/json" });
