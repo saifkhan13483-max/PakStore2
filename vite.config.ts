@@ -3,21 +3,12 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) return null;
-    const contentType = res.headers.get("content-type") || "image/jpeg";
-    const mimeType = contentType.split(";")[0].trim() || "image/jpeg";
-    const buffer = await res.arrayBuffer();
-    const data = Buffer.from(buffer).toString("base64");
-    return { data, mimeType };
-  } catch {
-    return null;
-  }
-}
-
-async function buildGeminiParts(content: string | any[]): Promise<any[]> {
+/**
+ * Convert a single message's content (string or array of parts) into
+ * Gemini API parts. The browser pre-converts image_url → inline_data,
+ * so the proxy only needs to handle text and inline_data.
+ */
+function buildGeminiParts(content: string | any[]): any[] {
   if (typeof content === "string") {
     return [{ text: content }];
   }
@@ -25,13 +16,13 @@ async function buildGeminiParts(content: string | any[]): Promise<any[]> {
   for (const part of content) {
     if (part.type === "text") {
       parts.push({ text: part.text ?? "" });
+    } else if (part.type === "inline_data" && part.data && part.mimeType) {
+      // Browser already fetched & base64-encoded the image
+      parts.push({ inline_data: { mime_type: part.mimeType, data: part.data } });
     } else if (part.type === "image_url" && typeof part.image_url === "string") {
-      const img = await fetchImageAsBase64(part.image_url);
-      if (img) {
-        parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
-      } else {
-        parts.push({ text: `[Image could not be loaded: ${part.image_url}]` });
-      }
+      // Fallback: if somehow an image_url slips through, log it
+      console.warn("[AI proxy] Received raw image_url — browser should have resolved it:", part.image_url.slice(0, 80));
+      parts.push({ text: `[image: ${part.image_url}]` });
     }
   }
   return parts;
@@ -52,18 +43,21 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
       }
 
       const messages: { role: string; content: string | any[] }[] = parsed.messages ?? [];
-
       const systemMsg = messages.find((m) => m.role === "system");
       const conversationMsgs = messages.filter((m) => m.role !== "system");
 
-      const contents: any[] = [];
-      for (const m of conversationMsgs) {
-        const parts = await buildGeminiParts(m.content);
-        contents.push({
-          role: m.role === "assistant" ? "model" : "user",
-          parts,
-        });
-      }
+      const imageCount = conversationMsgs.reduce((acc, m) => {
+        if (Array.isArray(m.content)) {
+          return acc + m.content.filter((p: any) => p.type === "inline_data").length;
+        }
+        return acc;
+      }, 0);
+      console.log(`[AI proxy] ${model} | maxTokens=${parsed.maxTokens ?? defaults.max_tokens} | images=${imageCount}`);
+
+      const contents = conversationMsgs.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: buildGeminiParts(m.content),
+      }));
 
       const requestBody: any = {
         contents,
@@ -83,25 +77,31 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(120000),
         }
       );
 
       const data = await geminiRes.json();
 
       if (!geminiRes.ok) {
+        console.error(`[AI proxy] Gemini error ${geminiRes.status}:`, data.error?.message ?? JSON.stringify(data.error));
         res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: data.error?.message ?? "Gemini API error" }));
         return;
       }
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-      const openAiResponse = {
-        choices: [{ message: { role: "assistant", content: text } }],
-      };
+      if (!text) {
+        const reason = data.candidates?.[0]?.finishReason ?? "unknown";
+        console.error(`[AI proxy] Gemini returned no text. finishReason=${reason}`);
+      } else {
+        console.log(`[AI proxy] OK — response length=${text.length} chars`);
+      }
 
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(openAiResponse));
+      res.end(JSON.stringify({ choices: [{ message: { role: "assistant", content: text } }] }));
     } catch (err: any) {
+      console.error("[AI proxy] Unhandled error:", err.message);
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
     }

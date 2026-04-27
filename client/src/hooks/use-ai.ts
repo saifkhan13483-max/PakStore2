@@ -173,6 +173,7 @@ export function useAIVariantNames() {
 
 export function useAIFullContent() {
   const [isLoading, setIsLoading] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const generate = useCallback(
     async (
@@ -187,10 +188,13 @@ export function useAIFullContent() {
       } = {}
     ): Promise<FullProductContent | null> => {
       setIsLoading(true);
+      setLastError(null);
       try {
         return await generateFullProductContent(productImageUrls, hints);
-      } catch (err) {
-        console.error("AI full content error:", err);
+      } catch (err: any) {
+        const msg = err?.message || "Unknown error";
+        console.error("AI full content error:", msg);
+        setLastError(msg);
         return null;
       } finally {
         setIsLoading(false);
@@ -199,7 +203,7 @@ export function useAIFullContent() {
     []
   );
 
-  return { generate, isLoading };
+  return { generate, isLoading, lastError };
 }
 
 export function useAISmartSearch() {

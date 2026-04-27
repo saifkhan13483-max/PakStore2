@@ -1,6 +1,7 @@
 type AIContentPart =
   | { type: "text"; text: string }
-  | { type: "image_url"; image_url: string };
+  | { type: "image_url"; image_url: string }
+  | { type: "inline_data"; mimeType: string; data: string };
 
 interface AIMessage {
   role: "system" | "user" | "assistant";
@@ -9,18 +10,62 @@ interface AIMessage {
 
 const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert and SEO specialist for PakCart, a Pakistani e-commerce store selling Bags & Wallets, Jewelry, Shoes, Slippers, Stitched Dresses, Watches, and Tech Gadgets. Help increase sales by writing persuasive product content, recommending relevant products, and improving the shopping experience. Keep responses concise, persuasive, human-like, and conversion-focused.`;
 
+/** Fetch a URL in the browser and return its base64 encoded data + MIME type. */
+async function browserFetchBase64(url: string): Promise<{ mimeType: string; data: string } | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/s);
+        if (!match) { resolve(null); return; }
+        resolve({ mimeType: match[1], data: match[2] });
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Convert any image_url parts in a message's content to inline_data (base64)
+ * so the proxy never needs to do server-side image fetching.
+ */
+async function resolveImageParts(content: string | AIContentPart[]): Promise<string | AIContentPart[]> {
+  if (typeof content === "string") return content;
+  return Promise.all(
+    content.map(async (part) => {
+      if (part.type !== "image_url") return part;
+      const b64 = await browserFetchBase64(part.image_url);
+      if (!b64) return { type: "text" as const, text: "[image unavailable]" };
+      return { type: "inline_data" as const, mimeType: b64.mimeType, data: b64.data };
+    })
+  );
+}
+
 async function callAI(
   messages: AIMessage[],
   opts: { maxTokens?: number; temperature?: number; thinkingBudget?: number } = {}
 ): Promise<string> {
+  const allMessages = [{ role: "system" as const, content: AI_SYSTEM_PROMPT }, ...messages];
+
+  // Convert all image_url parts to base64 inline_data in the browser before sending
+  const resolvedMessages = await Promise.all(
+    allMessages.map(async (m) => ({ ...m, content: await resolveImageParts(m.content) }))
+  );
+
   const res = await fetch("/api/ai", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      messages: [{ role: "system", content: AI_SYSTEM_PROMPT }, ...messages],
+      messages: resolvedMessages,
       maxTokens: opts.maxTokens ?? 512,
       temperature: opts.temperature ?? 0.7,
-      ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
     }),
   });
 

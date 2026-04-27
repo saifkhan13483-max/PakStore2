@@ -159,7 +159,7 @@ export default function AdminProductForm() {
   const { generate: generateAISEOMeta, isLoading: isAISEOLoading } = useAISEO();
   const { generate: generateAIReviews, isLoading: isAIReviewsLoading } = useAIReviews();
   const { generate: generateAIVariantNames } = useAIVariantNames();
-  const { generate: generateAIFullContent, isLoading: isAIFullContentLoading } = useAIFullContent();
+  const { generate: generateAIFullContent, isLoading: isAIFullContentLoading, lastError: aiContentError } = useAIFullContent();
   const [aiVariantLoadingIndex, setAiVariantLoadingIndex] = useState<number | null>(null);
   const [aiExtraDetails, setAiExtraDetails] = useState("");
 
@@ -239,8 +239,9 @@ export default function AdminProductForm() {
     if (!result) {
       toast({
         title: "AI couldn't generate content",
-        description: "Try again or check your images.",
+        description: aiContentError || "Try again or check your images.",
         variant: "destructive",
+        duration: 8000,
       });
       return;
     }
