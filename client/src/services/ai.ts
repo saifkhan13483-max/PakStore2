@@ -371,8 +371,11 @@ const FULL_CONTENT_PROMPT = `Analyze both the text and product images using thes
 
 MULTI-IMAGE & VARIANT DETECTION (CRITICAL):
 - If multiple images clearly show the SAME product in different colors, sizes, or finishes, treat them as ONE product with VARIANTS — not as separate products.
-- In that case, the product name describes the single item (e.g. "2-Piece Maxi & Front-Open Shirt"), and each color/size becomes an entry in Available Variants.
+- The product name describes the single item (e.g. "2-Piece Romper Maxi & Front-Open Shirt"). Do NOT include a color/variant in the product name itself.
 - Identify the variant axis (Color, Size, Material, Pattern, Style, etc.) and write it on the "Variant Type" line.
+- Available Variants MUST contain EXACTLY ONE entry per image, in the SAME ORDER as the images were provided. If 5 images are provided, output exactly 5 variant entries.
+- For each image, output the SIMPLEST 1–2 word identifier of the dominant variant attribute visible (e.g. for color variants: "Pink", "Teal", "Maroon", "Black", "Purple"). NEVER combine two attributes into one entry like "White & Teal" — pick the single dominant color.
+- Use plain everyday color/size names a Pakistani shopper would recognize. Avoid flowery terms.
 - If only one image is provided, or images show genuinely different products, write "No variants specified".
 
 INPUT-TEXT CLEANING (when seller pastes WhatsApp/Facebook style text):

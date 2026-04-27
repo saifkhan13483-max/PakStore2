@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -43,6 +44,17 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    const incoming = value || '';
+    if (incoming && incoming !== current) {
+      editor.commands.setContent(incoming, { emitUpdate: false });
+    } else if (!incoming && current && current !== '<p></p>') {
+      editor.commands.setContent('', { emitUpdate: false });
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;
