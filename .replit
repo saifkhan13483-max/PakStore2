@@ -57,6 +57,8 @@ VITE_CLOUDINARY_A_CLOUD_NAME = "dftvtsjcg"
 VITE_CLOUDINARY_A_UPLOAD_PRESET = "pakcart"
 VITE_CLOUDINARY_B_CLOUD_NAME = "de2wrwg6e"
 VITE_CLOUDINARY_B_UPLOAD_PRESET = "portfolio"
+VITE_CLOUDINARY_CLOUD_NAME = "dftvtsjcg"
+VITE_CLOUDINARY_UPLOAD_PRESET = "pakcart"
 
 [userenv.development]
 
@@ -65,10 +67,6 @@ VITE_CLOUDINARY_B_UPLOAD_PRESET = "portfolio"
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 3000
 
 [[ports]]
 localPort = 5002
