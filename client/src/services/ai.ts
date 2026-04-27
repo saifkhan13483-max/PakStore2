@@ -422,6 +422,11 @@ export async function generateVariantNames(
   return results;
 }
 
+export interface VariantGroup {
+  type: string;
+  options: string[];
+}
+
 export interface FullProductContent {
   name: string;
   slug: string;
@@ -429,8 +434,12 @@ export interface FullProductContent {
   shortDescription: string;
   longDescriptionHtml: string;
   features: string[];
+  /** Legacy: kept in sync with variantGroups[0] for backward compatibility. */
   variantType: string;
+  /** Legacy: kept in sync with variantGroups[0].options for backward compatibility. */
   variants: string[];
+  /** All variant axes detected (e.g. Color from images + Size from text). */
+  variantGroups: VariantGroup[];
   raw: string;
 }
 
@@ -536,11 +545,17 @@ const FULL_CONTENT_PROMPT = `Analyze both the text and product images using thes
 MULTI-IMAGE & VARIANT DETECTION (CRITICAL):
 - If multiple images clearly show the SAME product in different colors, sizes, or finishes, treat them as ONE product with VARIANTS — not as separate products.
 - The product name describes the single item (e.g. "2-Piece Romper Maxi & Front-Open Shirt"). Do NOT include a color/variant in the product name itself.
-- Identify the variant axis (Color, Size, Material, Pattern, Style, etc.) and write it on the "Variant Type" line.
-- Available Variants MUST contain EXACTLY ONE entry per image, in the SAME ORDER as the images were provided. If 5 images are provided, output exactly 5 variant entries.
-- For each image, output the SIMPLEST 1–2 word identifier of the dominant variant attribute visible (e.g. for color variants: "Pink", "Teal", "Maroon", "Black", "Purple"). NEVER combine two attributes into one entry like "White & Teal" — pick the single dominant color.
-- Use plain everyday color/size names a Pakistani shopper would recognize. Avoid flowery terms.
-- If only one image is provided, or images show genuinely different products, write "No variants specified".
+
+A product may have MULTIPLE variant axes simultaneously. Detect every axis that applies:
+  • COLOR axis — derive ONE entry per product image, in the SAME ORDER as the images. Use simple 1-word color names (Pink, Maroon, Teal Green, Black, Royal Blue, etc.). NEVER combine two attributes ("White & Teal" is wrong — pick the dominant single color).
+  • SIZE axis — extract ONLY from the seller's text/Product Details (NOT from images). Look for explicit size lists like "S/M/L/XL", "Free Size", numeric sizes (28/30/32/34/36/38), or age-based sizes ("32 size 8-10 Years"). Output one entry per size, kept SHORT (e.g. "32 (8-10Y)", "M", "Free Size"). If the text mentions a size only as an offer ("Available in Small Size on Demand") still include it.
+  • MATERIAL / PATTERN / STYLE axes — only if the seller's text or images clearly enumerate multiple options.
+
+Rules per axis:
+- For COLOR: number of entries MUST equal the number of product images, in image order.
+- For SIZE and other text-derived axes: number of entries equals what the text actually lists. Do not pad or invent sizes.
+- Use plain everyday names a Pakistani shopper would recognize. Avoid flowery terms.
+- If genuinely no variants exist (single image, no size/material list in text), output "No variants specified" under Variant Groups.
 
 INPUT-TEXT CLEANING (when seller pastes WhatsApp/Facebook style text):
 - IGNORE and never reproduce: prices, currency mentions, "Price only Rs X", "Come First Get First", "JESA DEKHAGA WESA MELAGA", religious openers like ﷽ or "Bismillah", contact numbers, Whatsapp/IG handles, store-name slogans, and similar seller boilerplate.
@@ -556,8 +571,7 @@ Generate exactly these sections in this order:
 4. Long Description — Persuasive and structured, 70–150 words max. Must include a "Product Details" subsection heading. Combine emotional appeal with practical benefits. Sound premium, clear, trustworthy.
 5. Key Features — 3 to 5 features. Each 4–6 words max. Benefit-oriented and punchy. Bold the most important words.
 6. Category — Pick the SINGLE BEST matching category for this product from the "Available Categories" list given in CONTEXT. Write the category name EXACTLY as it appears in that list (case and punctuation must match). If the list is missing or no match fits, write "Uncategorized".
-7. Variant Type — A single word/short label naming the variant axis (e.g. "Color", "Size", "Material"). Write "None" if no variants.
-8. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
+7. Variant Groups — All variant axes that apply (Color, Size, Material, etc.). One line per axis in the format \`- AxisName: option1, option2, option3\`. Output every detected axis. If no variants at all, write "No variants specified".
 
 STRICT RULES:
 - Do NOT mention price, cost, profit, margin, discount, or currency anywhere in output.
@@ -612,12 +626,11 @@ OUTPUT FORMAT — return EXACTLY in this template, nothing else, no preamble, no
 **Category:**
 [exact category name from Available Categories list, or "Uncategorized"]
 
-**Variant Type:**
-[Color | Size | Material | Pattern | Style | None]
+**Variant Groups:**
+- Color: [opt1], [opt2], [opt3]
+- Size: [opt1], [opt2], [opt3]
 
-**Available Variants:**
-- [Variant 1 - 1–3 words]
-- [Variant 2 - 1–3 words]
+(Include only the axes that actually apply. Omit axes you cannot detect. If none, write a single line "No variants specified".)
 
 All variation names must be very simple.`;
 
@@ -655,7 +668,7 @@ export async function generateFullProductContent(
   const variantImgs = (hints.variantOptionImages || []).filter(Boolean);
   const variantNote =
     variantImgs.length > 0
-      ? `\n\nIMPORTANT VARIANT IMAGES: After the ${productImageUrls.length} product image(s), there are ${variantImgs.length} additional VARIANT OPTION image(s). Each variant image represents ONE option (typically a color swatch or alternate-color photo) in the order shown. For the "Available Variants" section you MUST output EXACTLY ${variantImgs.length} entries, one per variant image, in the SAME ORDER. Use simple 1–2 word names that describe the dominant color/attribute of EACH variant image individually. Do not repeat or skip variant images.`
+      ? `\n\nIMPORTANT VARIANT IMAGES: After the ${productImageUrls.length} product image(s), there are ${variantImgs.length} additional VARIANT OPTION image(s). Each represents ONE color option in the order shown. For the COLOR axis under "Variant Groups" you MUST output EXACTLY ${variantImgs.length} entries, one per variant image, in the SAME ORDER. Use simple 1-word color names. Do not repeat or skip variant images. Other axes (Size, Material, etc.) are independent and come from the seller's text — do not align them to image count.`
       : "";
 
   const userText = `${FULL_CONTENT_PROMPT}\n\n--- CONTEXT ---\n${contextLines.join("\n")}\n\n--- IMAGES ---\n${productImageUrls.length} main product image(s) attached below for analysis.${variantNote}`;
@@ -711,15 +724,45 @@ export async function generateFullProductContent(
     .replace(/^["']|["']$/g, "")
     .trim();
   const category = /^uncategorized$/i.test(categoryRaw) ? "" : categoryRaw;
-  const variantTypeRaw = extractSection(cleaned, "Variant Type")
-    .replace(/^[-*]\s*/g, "")
-    .replace(/\*\*/g, "")
-    .trim();
-  const variantType = /^none$/i.test(variantTypeRaw) ? "" : variantTypeRaw;
-  const variantsSection = extractSection(cleaned, "Available Variants");
-  const variants = /no variants specified/i.test(variantsSection)
-    ? []
-    : parseListItems(variantsSection);
+  // Parse multi-axis "Variant Groups" section. Falls back to legacy
+  // "Variant Type" + "Available Variants" pair if the model used the old format.
+  const variantGroups: VariantGroup[] = [];
+  const groupsSection = extractSection(cleaned, "Variant Groups");
+  if (groupsSection && !/no variants specified/i.test(groupsSection)) {
+    const lines = groupsSection.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    for (const line of lines) {
+      // Accept "- Color: a, b, c" or "Color: a, b, c" or "**Color:** a, b, c"
+      const m = line
+        .replace(/^[-*]\s*/, "")
+        .replace(/\*\*/g, "")
+        .match(/^([A-Za-z][A-Za-z /&-]{1,30})\s*[:：]\s*(.+)$/);
+      if (!m) continue;
+      const type = m[1].trim();
+      const opts = m[2]
+        .split(/[,/、]|\s{2,}/)
+        .map((s) => stripInlineMarkdown(s).replace(/^["']|["']$/g, "").trim())
+        .filter((s) => s.length > 0 && !/^no variants specified$/i.test(s));
+      if (opts.length > 0) {
+        variantGroups.push({ type, options: opts });
+      }
+    }
+  }
+  if (variantGroups.length === 0) {
+    const legacyTypeRaw = extractSection(cleaned, "Variant Type")
+      .replace(/^[-*]\s*/g, "")
+      .replace(/\*\*/g, "")
+      .trim();
+    const legacyType = /^none$/i.test(legacyTypeRaw) ? "" : legacyTypeRaw;
+    const legacySection = extractSection(cleaned, "Available Variants");
+    const legacyOptions = /no variants specified/i.test(legacySection)
+      ? []
+      : parseListItems(legacySection);
+    if (legacyType && legacyOptions.length > 0) {
+      variantGroups.push({ type: legacyType, options: legacyOptions });
+    }
+  }
+  const variantType = variantGroups[0]?.type ?? "";
+  const variants = variantGroups[0]?.options ?? [];
 
   if (!slug && name) {
     slug = name
@@ -738,6 +781,7 @@ export async function generateFullProductContent(
     features,
     variantType,
     variants,
+    variantGroups,
     raw: cleaned,
   };
 }

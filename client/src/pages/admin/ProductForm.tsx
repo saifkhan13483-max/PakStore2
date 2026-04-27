@@ -277,8 +277,18 @@ export default function AdminProductForm() {
       }
     }
 
-    let variantsAdded = 0;
-    if (result.variants.length > 0 && result.variantType) {
+    // Build groups list. Prefer multi-axis variantGroups; fall back to legacy single axis.
+    const groups: { type: string; options: string[] }[] =
+      result.variantGroups && result.variantGroups.length > 0
+        ? result.variantGroups
+        : result.variantType && result.variants.length > 0
+        ? [{ type: result.variantType, options: result.variants }]
+        : [];
+
+    const variantsAddedPerType: Record<string, number> = {};
+    const skippedGroups: { type: string; options: string[] }[] = [];
+
+    if (groups.length > 0) {
       const existing = (form.getValues("variants") || []) as any[];
       const basePrice = (form.getValues("price") as number) || 0;
 
@@ -287,56 +297,69 @@ export default function AdminProductForm() {
         existing.every((v) => !v?.name?.trim() && (!v?.options || v.options.length === 0));
 
       if (isEmpty) {
-        const newVariant = {
+        // Replace with all detected groups at once.
+        const newVariants = groups.map((g) => ({
           id: Math.random().toString(36).slice(2, 11),
-          name: result.variantType,
-          options: result.variants.map((v) => ({
+          name: g.type,
+          options: g.options.map((v) => ({
             id: Math.random().toString(36).slice(2, 11),
             value: v,
             price: basePrice,
             image: "",
           })),
-        };
-        replaceVariants([newVariant] as any);
-        variantsAdded = result.variants.length;
-      } else if (existing.length === 1) {
-        const v = existing[0];
-        const opts = (v?.options || []) as any[];
-        const emptyOptionIndices = opts
-          .map((o, i) => ({ o, i }))
-          .filter(({ o }) => !o?.value?.toString().trim())
-          .map(({ i }) => i);
-
-        if (emptyOptionIndices.length > 0) {
-          if (!v?.name?.trim()) {
-            form.setValue(`variants.0.name` as any, result.variantType, {
-              shouldValidate: true,
-              shouldDirty: true,
-            });
+        }));
+        replaceVariants(newVariants as any);
+        for (const g of groups) variantsAddedPerType[g.type] = g.options.length;
+      } else {
+        // Form already has variants. For each AI-detected group, try to fill empty
+        // option slots inside a same-named existing axis. Otherwise skip and surface as suggestion.
+        groups.forEach((g) => {
+          const matchIdx = existing.findIndex(
+            (v) => (v?.name || "").trim().toLowerCase() === g.type.toLowerCase()
+          );
+          if (matchIdx === -1) {
+            skippedGroups.push(g);
+            return;
           }
+          const v = existing[matchIdx];
+          const opts = (v?.options || []) as any[];
+          const emptyOptionIndices = opts
+            .map((o, i) => ({ o, i }))
+            .filter(({ o }) => !o?.value?.toString().trim())
+            .map(({ i }) => i);
+
+          if (emptyOptionIndices.length === 0) {
+            skippedGroups.push(g);
+            return;
+          }
+
+          let added = 0;
           emptyOptionIndices.forEach((optionIdx, suggestionIdx) => {
-            const newName = result.variants[suggestionIdx];
+            const newName = g.options[suggestionIdx];
             if (!newName) return;
             form.setValue(
-              `variants.0.options.${optionIdx}.value` as any,
+              `variants.${matchIdx}.options.${optionIdx}.value` as any,
               newName,
               { shouldValidate: true, shouldDirty: true }
             );
             const currentPrice = form.getValues(
-              `variants.0.options.${optionIdx}.price` as any
+              `variants.${matchIdx}.options.${optionIdx}.price` as any
             );
             if (typeof currentPrice !== "number" || !currentPrice) {
               form.setValue(
-                `variants.0.options.${optionIdx}.price` as any,
+                `variants.${matchIdx}.options.${optionIdx}.price` as any,
                 basePrice,
                 { shouldDirty: true }
               );
             }
-            variantsAdded += 1;
+            added += 1;
           });
-        }
+          if (added > 0) variantsAddedPerType[g.type] = added;
+        });
       }
     }
+
+    const totalVariantsAdded = Object.values(variantsAddedPerType).reduce((a, b) => a + b, 0);
 
     const filled: string[] = [];
     if (result.name) filled.push("name");
@@ -344,11 +367,21 @@ export default function AdminProductForm() {
     if (result.shortDescription) filled.push("short description");
     if (result.longDescriptionHtml) filled.push("long description");
     if (result.features.length) filled.push(`${result.features.length} features`);
-    if (variantsAdded > 0) filled.push(`${variantsAdded} ${result.variantType.toLowerCase()} variants`);
+    if (totalVariantsAdded > 0) {
+      const parts = Object.entries(variantsAddedPerType).map(
+        ([t, n]) => `${n} ${t.toLowerCase()}`
+      );
+      filled.push(`${parts.join(" + ")} variants`);
+    }
 
     let suggestionText = "";
-    if (variantsAdded === 0 && result.variants.length > 0) {
-      suggestionText = ` Suggested ${result.variantType || "variants"}: ${result.variants.join(", ")} (you already have variants set up — review manually).`;
+    if (skippedGroups.length > 0) {
+      suggestionText =
+        " " +
+        skippedGroups
+          .map((g) => `Suggested ${g.type}: ${g.options.join(", ")}`)
+          .join(". ") +
+        " (you already have variants set up — review manually).";
     }
 
     toast({
