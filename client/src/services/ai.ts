@@ -221,15 +221,16 @@ Product: "${productName}"
 Category: ${category}
 Variant Type: ${variantType || "Option"}
 
-I'm providing ${imageUrls.length} image(s) below — one per variant option, in order. Look at each image and produce a short, descriptive, customer-friendly name for that option.
+I'm providing ${imageUrls.length} image(s) below — one per variant option, in order. Look at each image and produce a SIMPLE, customer-friendly name for that option.
 
 Naming rules:
-- Match the variant type. If type is "Color", return color names (e.g., "Royal Blue", "Rose Gold", "Emerald Green", "Jet Black"). If "Size", return sizes. If "Material", return material names. If "Pattern", return pattern names.
-- Use evocative, fashion-appropriate descriptors (not just "Blue" — prefer "Sapphire Blue" or "Navy Blue").
-- 1–3 words each. Title Case. No emojis. No quotes.
+- Keep names VERY SIMPLE — 1 to 3 words maximum.
+- Match the variant type. If type is "Color", return plain color names (e.g., "Blue", "Gold", "Black", "Rose Gold"). If "Size", return sizes (e.g., "Small", "Medium", "Large"). If "Material", return material names. If "Pattern", return pattern names.
+- Use everyday words shoppers recognize. Avoid flowery descriptors like "Sapphire" or "Royal" unless the image clearly shows that exact shade.
+- Title Case. No emojis. No quotes. No extra description.
 - One name per image, in the SAME ORDER as provided.
 
-Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no explanation. Example: ["Royal Blue","Rose Gold","Jet Black"]`;
+Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no explanation. Example: ["Blue","Gold","Black"]`;
 
   const result = await callAI(
     [
@@ -254,6 +255,229 @@ Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no e
   } catch {
     return [];
   }
+}
+
+export interface FullProductContent {
+  name: string;
+  slug: string;
+  shortDescription: string;
+  longDescriptionHtml: string;
+  features: string[];
+  variants: string[];
+  raw: string;
+}
+
+function markdownToHtml(md: string): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const out: string[] = [];
+  let inList = false;
+  const flushList = () => {
+    if (inList) {
+      out.push("</ul>");
+      inList = false;
+    }
+  };
+  const inline = (s: string) =>
+    s
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushList();
+      continue;
+    }
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      flushList();
+      const level = Math.min(headingMatch[1].length + 1, 6);
+      out.push(`<h${level}>${inline(headingMatch[2])}</h${level}>`);
+      continue;
+    }
+    const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+    if (bulletMatch) {
+      if (!inList) {
+        out.push("<ul>");
+        inList = true;
+      }
+      out.push(`<li>${inline(bulletMatch[1])}</li>`);
+      continue;
+    }
+    const boldOnlyMatch = line.match(/^\*\*(.+?):\*\*$/);
+    if (boldOnlyMatch) {
+      flushList();
+      out.push(`<h3>${inline(boldOnlyMatch[1])}</h3>`);
+      continue;
+    }
+    flushList();
+    out.push(`<p>${inline(line)}</p>`);
+  }
+  flushList();
+  return out.join("\n");
+}
+
+function extractSection(text: string, label: string): string {
+  const re = new RegExp(
+    `\\*\\*${label}:\\*\\*\\s*\\n?([\\s\\S]*?)(?=\\n\\*\\*[^*]+:\\*\\*|$)`,
+    "i"
+  );
+  const m = text.match(re);
+  return m ? m[1].trim() : "";
+}
+
+function parseListItems(section: string): string[] {
+  return section
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter((l) => /^[-*]\s+/.test(l))
+    .map((l) =>
+      l
+        .replace(/^[-*]\s+/, "")
+        .replace(/^\*\*(.+?)\*\*$/, "$1")
+        .trim()
+    )
+    .filter((l) => l.length > 0);
+}
+
+const FULL_CONTENT_PROMPT = `Analyze both the text and product images using these guidelines:
+
+- Examine visible color, shape, style, material cues, packaging, use case, and positioning from images
+- Do not invent hidden specifications that are not visible or not provided
+- Make only safe, context-based assumptions when something is unclear
+- Base all claims on provided information and image evidence
+
+Generate exactly these sections in this order:
+
+1. Product Name — Clear and compelling, SEO-friendly with natural keywords, conversion-focused (max 5–6 words).
+2. Slug — Short, readable, keyword-based for URL optimization (lowercase, hyphenated).
+3. Short Description — Concise and sales-focused, 15–25 words max, hook-driven opening.
+4. Long Description — Persuasive and structured, 70–150 words max. Must include a "Product Details" subsection heading. Combine emotional appeal with practical benefits. Sound premium, clear, trustworthy.
+5. Key Features — 3 to 5 features. Each 4–6 words max. Benefit-oriented and punchy. Bold the most important words.
+6. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
+
+STRICT RULES:
+- Do NOT mention price, cost, profit, margin, discount, or currency.
+- Do NOT invent fake claims, warranty, guarantee, refund, or return policies unless explicitly provided.
+- Do NOT use generic language or keyword stuffing.
+- Write SEO-friendly but natural language.
+- Use emotional and benefit-led language strategically.
+- Position product as differentiated, not generic.
+- Bold all key differentiators and important words.
+- Maintain professional, document-ready formatting.
+
+Long Description flow:
+Opening Hook → Problem or Desire → Why This Product Matters → Key Benefits → **Product Details:** subsection (with bold spec subheadings and bullet specs) → Why It Stands Out → Who It's For → Soft CTA (no price mention).
+
+Product Details subsection format example:
+**Product Details:**
+
+**[Product Type] Specifications:**
+- Chest Size: [measurement]
+- Length: [measurement]
+- Fabric: [material and finish]
+- Design: [key design elements]
+
+OUTPUT FORMAT — return EXACTLY in this template, nothing else, no preamble, no closing remarks:
+
+**Product Name:**
+[5–6 words max]
+
+**Slug:**
+[lowercase-hyphenated]
+
+**Short Description:**
+[15–25 words]
+
+**Long Description:**
+[Opening Hook + Problem + Why It Matters + Key Benefits]
+
+**Product Details:**
+
+**[Product Type] Specifications:**
+- [Spec]: [value]
+- [Spec]: [value]
+- [Spec]: [value]
+
+[Why It Stands Out + Who It's For + Soft CTA]
+
+**Key Features:**
+- **[Feature 1 - 4–6 words]**
+- **[Feature 2 - 4–6 words]**
+- **[Feature 3 - 4–6 words]**
+
+**Available Variants:**
+- [Variant 1 - 1–3 words]
+- [Variant 2 - 1–3 words]
+
+All variation names must be very simple.`;
+
+export async function generateFullProductContent(
+  productImageUrls: string[],
+  hints: { nameHint?: string; category?: string; variantTypes?: string[] } = {}
+): Promise<FullProductContent | null> {
+  const contextLines: string[] = [];
+  if (hints.nameHint) contextLines.push(`Product name hint from seller: "${hints.nameHint}"`);
+  if (hints.category) contextLines.push(`Category: ${hints.category}`);
+  if (hints.variantTypes && hints.variantTypes.length > 0) {
+    contextLines.push(`Existing variant types in form: ${hints.variantTypes.join(", ")}`);
+  }
+  contextLines.push(`Store: PakCart (Pakistani e-commerce). Audience: Pakistani shoppers.`);
+
+  const userText = `${FULL_CONTENT_PROMPT}\n\n--- CONTEXT ---\n${contextLines.join("\n")}\n\n--- IMAGES ---\n${productImageUrls.length} product image(s) attached below for analysis.`;
+
+  const content: AIContentPart[] = [
+    { type: "text", text: userText },
+    ...productImageUrls.map((url) => ({ type: "image_url" as const, image_url: url })),
+  ];
+
+  const result = await callAI(
+    [{ role: "user", content }],
+    { maxTokens: 1400, temperature: 0.7 }
+  );
+
+  if (!result || !result.trim()) return null;
+
+  const cleaned = result.replace(/```(?:markdown|md)?|```/g, "").trim();
+
+  const name = extractSection(cleaned, "Product Name").replace(/^["']|["']$/g, "").trim();
+  let slug = extractSection(cleaned, "Slug")
+    .replace(/^["']|["']$/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const shortDescription = extractSection(cleaned, "Short Description")
+    .replace(/^\*+|\*+$/g, "")
+    .trim();
+
+  const longRaw = extractSection(cleaned, "Long Description");
+  const longDescriptionHtml = longRaw ? markdownToHtml(longRaw) : "";
+
+  const features = parseListItems(extractSection(cleaned, "Key Features"));
+  const variantsSection = extractSection(cleaned, "Available Variants");
+  const variants = /no variants specified/i.test(variantsSection)
+    ? []
+    : parseListItems(variantsSection);
+
+  if (!slug && name) {
+    slug = name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  return {
+    name,
+    slug,
+    shortDescription,
+    longDescriptionHtml,
+    features,
+    variants,
+    raw: cleaned,
+  };
 }
 
 export async function generateSEOMeta(

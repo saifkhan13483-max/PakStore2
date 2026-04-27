@@ -38,7 +38,7 @@ import { useEffect, Fragment, useState } from "react";
 import { productFirestoreService } from "@/services/productFirestoreService";
 import { categoryFirestoreService } from "@/services/categoryFirestoreService";
 import { settingsFirestoreService } from "@/services/settingsFirestoreService";
-import { useAIDescription, useAISEO, useAIReviews, useAIVariantNames } from "@/hooks/use-ai";
+import { useAIDescription, useAISEO, useAIReviews, useAIVariantNames, useAIFullContent } from "@/hooks/use-ai";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -159,6 +159,7 @@ export default function AdminProductForm() {
   const { generate: generateAISEOMeta, isLoading: isAISEOLoading } = useAISEO();
   const { generate: generateAIReviews, isLoading: isAIReviewsLoading } = useAIReviews();
   const { generate: generateAIVariantNames } = useAIVariantNames();
+  const { generate: generateAIFullContent, isLoading: isAIFullContentLoading } = useAIFullContent();
   const [aiVariantLoadingIndex, setAiVariantLoadingIndex] = useState<number | null>(null);
 
   const name = form.watch("name");
@@ -195,6 +196,71 @@ export default function AdminProductForm() {
         description: `Title: ${meta.title}`,
       });
     }
+  };
+
+  const handleGenerateFullContent = async () => {
+    const images = (form.getValues("images") || []) as string[];
+    if (images.length === 0) {
+      toast({
+        title: "Upload product images first",
+        description: "AI needs at least one product image to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const nameHint = form.getValues("name") || "";
+    const catId = form.getValues("categoryId");
+    const cat = categories?.find(c => c.id === catId);
+    const variantTypes = ((form.getValues("variants") || []) as any[])
+      .map(v => v?.name)
+      .filter((n: string) => typeof n === "string" && n.trim().length > 0);
+
+    const result = await generateAIFullContent(images, {
+      nameHint,
+      category: cat?.name || catId || "General",
+      variantTypes,
+    });
+
+    if (!result) {
+      toast({
+        title: "AI couldn't generate content",
+        description: "Try again or check your images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (result.name) {
+      form.setValue("name", result.name, { shouldValidate: true, shouldDirty: true });
+    }
+    if (result.slug) {
+      setTimeout(() => {
+        form.setValue("slug", result.slug, { shouldValidate: true, shouldDirty: true });
+      }, 0);
+    }
+    if (result.shortDescription) {
+      form.setValue("description", result.shortDescription, { shouldValidate: true, shouldDirty: true });
+    }
+    if (result.longDescriptionHtml) {
+      form.setValue("longDescription", result.longDescriptionHtml, { shouldValidate: true, shouldDirty: true });
+    }
+    if (result.features.length > 0) {
+      form.setValue("features", result.features as any, { shouldValidate: true, shouldDirty: true });
+    }
+
+    const filled: string[] = [];
+    if (result.name) filled.push("name");
+    if (result.shortDescription) filled.push("short description");
+    if (result.longDescriptionHtml) filled.push("long description");
+    if (result.features.length) filled.push(`${result.features.length} features`);
+
+    toast({
+      title: "AI content generated",
+      description: filled.length
+        ? `Filled: ${filled.join(", ")}.${result.variants.length ? ` Suggested variants: ${result.variants.join(", ")}.` : ""}`
+        : "Content was returned but no fields matched.",
+    });
   };
 
   const handleGenerateVariantNames = async (vIndex: number) => {
@@ -908,6 +974,23 @@ export default function AdminProductForm() {
                   <CardDescription className="text-xs">Generate content with AI to boost conversions</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  <Button
+                    type="button"
+                    className="w-full justify-center gap-2 text-sm h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-200/50 hover-elevate"
+                    onClick={handleGenerateFullContent}
+                    disabled={isAIFullContentLoading}
+                    data-testid="button-ai-full-content"
+                  >
+                    {isAIFullContentLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    {isAIFullContentLoading ? "Analyzing images…" : "Generate All Content"}
+                  </Button>
+                  <p className="text-[11px] text-emerald-700/70 px-1 pb-1">
+                    Reads your product images to fill name, descriptions, and features.
+                  </p>
                   <Button
                     type="button"
                     variant="outline"

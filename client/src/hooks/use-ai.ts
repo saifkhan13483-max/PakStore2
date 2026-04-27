@@ -7,6 +7,8 @@ import {
   generateSEOMeta,
   generateSmartSearchQuery,
   generateVariantNames,
+  generateFullProductContent,
+  type FullProductContent,
 } from "@/services/ai";
 
 export function useAIDescription() {
@@ -158,6 +160,30 @@ export function useAIVariantNames() {
       } catch (err) {
         console.error("AI variant names error:", err);
         return [];
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  return { generate, isLoading };
+}
+
+export function useAIFullContent() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const generate = useCallback(
+    async (
+      productImageUrls: string[],
+      hints: { nameHint?: string; category?: string; variantTypes?: string[] } = {}
+    ): Promise<FullProductContent | null> => {
+      setIsLoading(true);
+      try {
+        return await generateFullProductContent(productImageUrls, hints);
+      } catch (err) {
+        console.error("AI full content error:", err);
+        return null;
       } finally {
         setIsLoading(false);
       }
