@@ -11,7 +11,7 @@ const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert an
 
 async function callAI(
   messages: AIMessage[],
-  opts: { maxTokens?: number; temperature?: number } = {}
+  opts: { maxTokens?: number; temperature?: number; thinkingBudget?: number } = {}
 ): Promise<string> {
   const res = await fetch("/api/ai", {
     method: "POST",
@@ -20,6 +20,7 @@ async function callAI(
       messages: [{ role: "system", content: AI_SYSTEM_PROMPT }, ...messages],
       maxTokens: opts.maxTokens ?? 512,
       temperature: opts.temperature ?? 0.7,
+      ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
     }),
   });
 
@@ -326,6 +327,8 @@ function stripInlineMarkdown(s: string): string {
     .replace(/__([^_]+)__/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/^\s*#{1,6}\s+/g, "")
+    .replace(/\*+/g, "")
+    .replace(/_+/g, "")
     .trim();
 }
 
@@ -490,7 +493,7 @@ export async function generateFullProductContent(
 
   const result = await callAI(
     [{ role: "user", content }],
-    { maxTokens: 3500, temperature: 0.4 }
+    { maxTokens: 4000, temperature: 0.4, thinkingBudget: 0 }
   );
 
   if (!result || !result.trim()) return null;

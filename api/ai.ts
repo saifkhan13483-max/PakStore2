@@ -38,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
-  const { messages, maxTokens = 512, temperature = 0.7 } = req.body;
+  const { messages, maxTokens = 512, temperature = 0.7, thinkingBudget } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -73,6 +73,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           generationConfig: {
             maxOutputTokens: maxTokens,
             temperature,
+            ...(typeof thinkingBudget === "number"
+              ? { thinkingConfig: { thinkingBudget } }
+              : {}),
           },
         }),
       }

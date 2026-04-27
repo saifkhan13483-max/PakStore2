@@ -271,12 +271,13 @@ export default function AdminProductForm() {
     let variantsAdded = 0;
     if (result.variants.length > 0 && result.variantType) {
       const existing = (form.getValues("variants") || []) as any[];
+      const basePrice = (form.getValues("price") as number) || 0;
+
       const isEmpty =
         existing.length === 0 ||
         existing.every((v) => !v?.name?.trim() && (!v?.options || v.options.length === 0));
 
       if (isEmpty) {
-        const basePrice = (form.getValues("price") as number) || 0;
         const newVariant = {
           id: Math.random().toString(36).slice(2, 11),
           name: result.variantType,
@@ -289,6 +290,26 @@ export default function AdminProductForm() {
         };
         replaceVariants([newVariant] as any);
         variantsAdded = result.variants.length;
+      } else if (existing.length === 1) {
+        const v = existing[0];
+        const opts = (v?.options || []) as any[];
+        const allOptionNamesEmpty = opts.length > 0 && opts.every((o) => !o?.value?.trim());
+        if (allOptionNamesEmpty) {
+          const updated = {
+            ...v,
+            id: v?.id || Math.random().toString(36).slice(2, 11),
+            name: v?.name?.trim() ? v.name : result.variantType,
+            options: opts.map((o, i) => ({
+              ...o,
+              id: o?.id || Math.random().toString(36).slice(2, 11),
+              value: result.variants[i] || o?.value || "",
+              price: typeof o?.price === "number" ? o.price : basePrice,
+              image: o?.image || "",
+            })),
+          };
+          replaceVariants([updated] as any);
+          variantsAdded = Math.min(opts.length, result.variants.length);
+        }
       }
     }
 
