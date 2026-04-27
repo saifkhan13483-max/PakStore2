@@ -28,15 +28,69 @@ function buildGeminiParts(content: string | any[]): any[] {
   return parts;
 }
 
+/** Collect all configured Gemini API keys in order: GEMINI_API_KEY, GEMINI_API_KEY_B, GEMINI_API_KEY_C, … */
+function getGeminiApiKeys(): string[] {
+  const keys: string[] = [];
+  const primary = process.env.GEMINI_API_KEY;
+  if (primary) keys.push(primary);
+  for (const suffix of ["B", "C", "D", "E", "F"]) {
+    const k = process.env[`GEMINI_API_KEY_${suffix}`];
+    if (k) keys.push(k);
+  }
+  return keys;
+}
+
+async function callGeminiWithFallback(
+  requestBody: any,
+  model: string,
+  keys: string[]
+): Promise<{ status: number; data: any; keyIndex: number }> {
+  let lastStatus = 500;
+  let lastData: any = { error: "No API keys configured" };
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    try {
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+          signal: AbortSignal.timeout(120000),
+        }
+      );
+      const data = await geminiRes.json();
+      lastStatus = geminiRes.status;
+      lastData = data;
+
+      if (geminiRes.ok) {
+        if (i > 0) console.log(`[AI proxy] Key #${i + 1} succeeded after ${i} failure(s)`);
+        return { status: geminiRes.status, data, keyIndex: i };
+      }
+
+      const isRateLimit = geminiRes.status === 429 || geminiRes.status === 503;
+      console.warn(`[AI proxy] Key #${i + 1} failed (${geminiRes.status}${isRateLimit ? " rate-limited" : ""}):`, data.error?.message ?? "unknown");
+
+      if (!isRateLimit) break; // non-rate-limit errors won't be fixed by switching keys
+    } catch (err: any) {
+      console.warn(`[AI proxy] Key #${i + 1} threw:`, err.message);
+      lastData = { error: err.message };
+    }
+  }
+
+  return { status: lastStatus, data: lastData, keyIndex: -1 };
+}
+
 async function geminiProxy(req: any, res: any, model: string, defaults: { max_tokens: number; temperature: number }) {
   let body = "";
   req.on("data", (chunk: Buffer) => { body += chunk.toString(); });
   req.on("end", async () => {
     try {
       const parsed = JSON.parse(body);
-      const apiKey = process.env.GEMINI_API_KEY;
+      const keys = getGeminiApiKeys();
 
-      if (!apiKey) {
+      if (keys.length === 0) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "GEMINI_API_KEY not configured" }));
         return;
@@ -52,7 +106,7 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         }
         return acc;
       }, 0);
-      console.log(`[AI proxy] ${model} | maxTokens=${parsed.maxTokens ?? defaults.max_tokens} | images=${imageCount}`);
+      console.log(`[AI proxy] ${model} | maxTokens=${parsed.maxTokens ?? defaults.max_tokens} | images=${imageCount} | keys=${keys.length}`);
 
       const contents = conversationMsgs.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
@@ -71,21 +125,11 @@ async function geminiProxy(req: any, res: any, model: string, defaults: { max_to
         requestBody.system_instruction = { parts: [{ text: systemMsg.content }] };
       }
 
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-          signal: AbortSignal.timeout(120000),
-        }
-      );
+      const { status, data, keyIndex } = await callGeminiWithFallback(requestBody, model, keys);
 
-      const data = await geminiRes.json();
-
-      if (!geminiRes.ok) {
-        console.error(`[AI proxy] Gemini error ${geminiRes.status}:`, data.error?.message ?? JSON.stringify(data.error));
-        res.writeHead(geminiRes.status, { "Content-Type": "application/json" });
+      if (keyIndex === -1) {
+        console.error(`[AI proxy] All ${keys.length} key(s) exhausted. Last status: ${status}`);
+        res.writeHead(status, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: data.error?.message ?? "Gemini API error" }));
         return;
       }
