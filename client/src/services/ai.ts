@@ -254,6 +254,116 @@ Return ONLY a JSON array (no markdown):
   }
 }
 
+function cleanVariantName(raw: string): string {
+  if (!raw) return "";
+  let s = raw.replace(/```json|```/g, "").trim();
+
+  // If the model returned JSON despite being asked for a plain string, salvage the first string value.
+  if (s.startsWith("[") || s.startsWith("{") || s.startsWith('"')) {
+    try {
+      const parsed = JSON.parse(s);
+      if (typeof parsed === "string") s = parsed;
+      else if (Array.isArray(parsed) && parsed.length > 0) s = String(parsed[0]);
+      else if (parsed && typeof parsed === "object") {
+        const firstStr = Object.values(parsed).find((v) => typeof v === "string");
+        if (firstStr) s = String(firstStr);
+      }
+    } catch {
+      // continue with raw string
+    }
+  }
+
+  // First non-empty line only, then strip wrapping quotes/punctuation/markdown.
+  s = s.split(/[\r\n]+/).map((l) => l.trim()).find((l) => l.length > 0) ?? "";
+  s = s
+    .replace(/^[\s\-*•"'`]+/, "")
+    .replace(/[\s"'`.,;:!?]+$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Title-case-ish normalization: capitalize each word's first letter.
+  if (s.length > 0) {
+    s = s
+      .split(" ")
+      .map((w) => (w.length === 0 ? w : w[0].toUpperCase() + w.slice(1)))
+      .join(" ");
+  }
+
+  // Hard cap length so a stray sentence can't pollute the field.
+  return s.slice(0, 40);
+}
+
+async function nameSingleVariant(
+  productName: string,
+  category: string,
+  variantType: string,
+  variantImageUrl: string,
+  productImageUrls: string[],
+  index: number,
+  total: number,
+): Promise<string> {
+  const isColor = !variantType || variantType.toLowerCase() === "color";
+  const isSize = variantType.toLowerCase() === "size";
+  const hasContext = productImageUrls.length > 0;
+
+  const typeGuidance = isColor
+    ? `For COLOR variants: examine the dominant hue of the actual product/fabric (NOT the background). Use a simple, widely-recognized color name a Pakistani shopper would use — e.g. Pink, Hot Pink, Magenta, Maroon, Red, Peach, Cream, Off White, Beige, Light Beige, Sage Green, Olive Green, Mint Green, Teal, Dusty Blue, Navy Blue, Royal Blue, Sky Blue, Black, White, Purple, Lavender, Mustard, Yellow, Brown, Grey, Gold, Silver, Rose Gold.`
+    : isSize
+    ? `For SIZE variants: use standard sizing (XS, S, M, L, XL, XXL, Free Size, or numeric sizes if shown).`
+    : `For ${variantType} variants: identify the dominant visible attribute and name it in 1-2 plain everyday words.`;
+
+  const contextLine = hasContext
+    ? `The first ${productImageUrls.length} image(s) below are PRODUCT CONTEXT — DO NOT name these. They only show you what the overall product looks like. The FINAL image is the ONE variant you must name.`
+    : `Only one image is provided — the variant to name.`;
+
+  const promptText = `You are a precise product analyst for a Pakistani fashion/accessories e-commerce store.
+
+Product: "${productName}"
+Category: ${category}
+Variant Type: ${variantType || "Color"}
+You are naming variant ${index + 1} of ${total}.
+
+${contextLine}
+
+INSTRUCTIONS:
+${typeGuidance}
+- Look ONLY at the LAST image (the variant image) and ignore the context images for naming.
+- Focus on the actual product (bag, dress, shoe, etc.) — ignore background, shadows, and packaging.
+- Pick the SINGLE most dominant visible attribute. Do NOT combine two attributes (no "Blue & Pink").
+- Be honest: name what you actually see, not what you think the product line "should" have.
+
+OUTPUT RULES:
+- 1 to 3 words maximum, Title Case.
+- No quotes, no JSON, no punctuation, no explanation, no emojis.
+- Reply with the name only and nothing else.
+
+Example replies: Pink   |   Teal   |   Navy Blue   |   Sage Green`;
+
+  const contentParts: AIContentPart[] = [{ type: "text", text: promptText }];
+
+  if (hasContext) {
+    contentParts.push({ type: "text", text: `\n--- PRODUCT CONTEXT (do NOT name these) ---` });
+    productImageUrls.forEach((url) =>
+      contentParts.push({ type: "image_url" as const, image_url: url })
+    );
+  }
+
+  contentParts.push({ type: "text", text: `\n--- VARIANT IMAGE TO NAME (variant #${index + 1}) ---` });
+  contentParts.push({ type: "image_url" as const, image_url: variantImageUrl });
+
+  const result = await callAI(
+    [{ role: "user", content: contentParts }],
+    { maxTokens: 40, temperature: 0.1, thinkingBudget: 0 }
+  );
+
+  return cleanVariantName(result);
+}
+
+/**
+ * Name each variant image individually with its own focused AI call.
+ * Sending many images in a single request causes Gemini to mis-associate names
+ * with the wrong images, so we fan out and run with limited concurrency.
+ */
 export async function generateVariantNames(
   productName: string,
   category: string,
@@ -263,90 +373,53 @@ export async function generateVariantNames(
 ): Promise<string[]> {
   if (imageUrls.length === 0) return [];
 
-  const hasProductImages = productImageUrls.length > 0;
+  // Cap the product-context payload — 1-2 reference images is plenty and keeps
+  // each call cheap (faster + lower rate-limit pressure).
+  const trimmedContext = productImageUrls.slice(0, 2);
 
-  const promptText = `You are a professional product analyst for a Pakistani fashion/accessories e-commerce store. Your task is to examine each variant image carefully and assign it the MOST ACCURATE possible name.
+  const results: string[] = new Array(imageUrls.length).fill("");
+  const errors: string[] = [];
 
-Product: "${productName}"
-Category: ${category}
-Variant Type: ${variantType || "Color"}
-${hasProductImages ? `\nContext: ${productImageUrls.length} main product image(s) appear FIRST (before the variant images) to give you product context. Then ${imageUrls.length} VARIANT image(s) follow — one per option, in order.` : `\n${imageUrls.length} variant image(s) follow — one per option, in order.`}
+  // Limit concurrency so we don't burst-fire all calls at once and trip every key's per-minute quota.
+  const CONCURRENCY = 3;
+  let cursor = 0;
 
-YOUR JOB:
-- Carefully look at EACH variant image pixel by pixel.
-- Identify the DOMINANT attribute of that variant (color, size, material, pattern, etc.) based on the variant type.
-- ${variantType === "Color" || !variantType ? "For COLOR variants: Look at the actual hue of the garment/item. Name it using a simple, widely-recognized color word a Pakistani shopper would use (e.g., Pink, Teal, Maroon, Black, Purple, Navy Blue, Off White, Beige, Red, Olive Green)." : ""}
-- ${variantType === "Size" ? "For SIZE variants: Use standard sizing (XS, S, M, L, XL, XXL, Free Size, etc.)." : ""}
-- Do NOT guess or assume — only name what you can clearly see in the image.
-- Do NOT use poetic or decorative names unless they perfectly describe the visible attribute.
-- Do NOT combine two colors into one name (e.g., avoid "Dark Teal" when it is simply "Teal").
-
-STRICT NAMING RULES:
-- 1 to 3 words maximum per name.
-- Title Case always.
-- No emojis, no quotes, no punctuation, no extra explanation.
-- One name per variant image, in EXACT ORDER provided.
-- Total names returned MUST equal exactly ${imageUrls.length} (one per variant image).
-
-Return ONLY a valid JSON array of exactly ${imageUrls.length} strings. No markdown, no extra text.
-Example output for 5 color variants: ["Pink","Teal","Maroon","Black","Purple"]`;
-
-  const contentParts: AIContentPart[] = [
-    { type: "text", text: promptText },
-  ];
-
-  if (hasProductImages) {
-    contentParts.push({ type: "text", text: `\n--- PRODUCT CONTEXT IMAGES (${productImageUrls.length}) ---` });
-    productImageUrls.forEach((url) => contentParts.push({ type: "image_url" as const, image_url: url }));
-    contentParts.push({ type: "text", text: `\n--- VARIANT OPTION IMAGES (${imageUrls.length}, name these in order) ---` });
-  }
-
-  imageUrls.forEach((url) => contentParts.push({ type: "image_url" as const, image_url: url }));
-
-  // Allow ~40 output tokens per variant name, with a healthy floor and ceiling.
-  // Without an explicit thinkingBudget, Gemini 2.5 Flash silently spends most of
-  // maxOutputTokens on hidden reasoning and returns an empty answer — so we also
-  // disable thinking for this deterministic naming task.
-  const dynamicMaxTokens = Math.min(2048, Math.max(400, imageUrls.length * 40 + 200));
-
-  const result = await callAI(
-    [{ role: "user", content: contentParts }],
-    { maxTokens: dynamicMaxTokens, temperature: 0.2, thinkingBudget: 0 }
-  );
-
-  const cleaned = result.replace(/```json|```/g, "").trim();
-
-  // Primary: strict JSON array parse.
-  try {
-    const arr = JSON.parse(cleaned);
-    if (Array.isArray(arr) && arr.length > 0) {
-      return arr.slice(0, imageUrls.length).map((s) => String(s).trim()).filter(Boolean);
-    }
-  } catch {
-    // fall through to fallback parsers
-  }
-
-  // Fallback 1: extract the first [...] block from the response.
-  const bracketMatch = cleaned.match(/\[[\s\S]*?\]/);
-  if (bracketMatch) {
-    try {
-      const arr = JSON.parse(bracketMatch[0]);
-      if (Array.isArray(arr) && arr.length > 0) {
-        return arr.slice(0, imageUrls.length).map((s) => String(s).trim()).filter(Boolean);
+  async function worker() {
+    while (true) {
+      const i = cursor++;
+      if (i >= imageUrls.length) return;
+      try {
+        const name = await nameSingleVariant(
+          productName,
+          category,
+          variantType,
+          imageUrls[i],
+          trimmedContext,
+          i,
+          imageUrls.length,
+        );
+        results[i] = name;
+        if (!name) {
+          console.warn(`[generateVariantNames] Empty name returned for variant #${i + 1}`);
+        }
+      } catch (err: any) {
+        const msg = err?.message || "Unknown error";
+        console.error(`[generateVariantNames] Variant #${i + 1} failed:`, msg);
+        errors.push(`#${i + 1}: ${msg}`);
+        results[i] = "";
       }
-    } catch {
-      // continue
     }
   }
 
-  // Fallback 2: take any quoted strings the model returned.
-  const quoted = Array.from(cleaned.matchAll(/"([^"\n]{1,40})"/g)).map((m) => m[1].trim()).filter(Boolean);
-  if (quoted.length > 0) {
-    return quoted.slice(0, imageUrls.length);
+  const workerCount = Math.min(CONCURRENCY, imageUrls.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
+  // If EVERY call failed (e.g. all keys exhausted), surface the first error so the UI can show it.
+  if (results.every((r) => !r) && errors.length > 0) {
+    throw new Error(errors[0]);
   }
 
-  console.warn("[generateVariantNames] Could not parse AI response:", cleaned.slice(0, 200));
-  return [];
+  return results;
 }
 
 export interface FullProductContent {
