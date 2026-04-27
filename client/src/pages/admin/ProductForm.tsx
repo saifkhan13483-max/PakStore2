@@ -293,22 +293,38 @@ export default function AdminProductForm() {
       } else if (existing.length === 1) {
         const v = existing[0];
         const opts = (v?.options || []) as any[];
-        const allOptionNamesEmpty = opts.length > 0 && opts.every((o) => !o?.value?.trim());
-        if (allOptionNamesEmpty) {
-          const updated = {
-            ...v,
-            id: v?.id || Math.random().toString(36).slice(2, 11),
-            name: v?.name?.trim() ? v.name : result.variantType,
-            options: opts.map((o, i) => ({
-              ...o,
-              id: o?.id || Math.random().toString(36).slice(2, 11),
-              value: result.variants[i] || o?.value || "",
-              price: typeof o?.price === "number" ? o.price : basePrice,
-              image: o?.image || "",
-            })),
-          };
-          replaceVariants([updated] as any);
-          variantsAdded = Math.min(opts.length, result.variants.length);
+        const emptyOptionIndices = opts
+          .map((o, i) => ({ o, i }))
+          .filter(({ o }) => !o?.value?.toString().trim())
+          .map(({ i }) => i);
+
+        if (emptyOptionIndices.length > 0) {
+          if (!v?.name?.trim()) {
+            form.setValue(`variants.0.name` as any, result.variantType, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+          }
+          emptyOptionIndices.forEach((optionIdx, suggestionIdx) => {
+            const newName = result.variants[suggestionIdx];
+            if (!newName) return;
+            form.setValue(
+              `variants.0.options.${optionIdx}.value` as any,
+              newName,
+              { shouldValidate: true, shouldDirty: true }
+            );
+            const currentPrice = form.getValues(
+              `variants.0.options.${optionIdx}.price` as any
+            );
+            if (typeof currentPrice !== "number" || !currentPrice) {
+              form.setValue(
+                `variants.0.options.${optionIdx}.price` as any,
+                basePrice,
+                { shouldDirty: true }
+              );
+            }
+            variantsAdded += 1;
+          });
         }
       }
     }
