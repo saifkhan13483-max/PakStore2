@@ -57,18 +57,29 @@ function buildModelChain(primary: string): string[] {
   return Array.from(new Set(chain));
 }
 
+function extractGeminiText(data: any): string {
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+}
+
+function isEmptyFinish(data: any): { empty: boolean; finishReason: string } {
+  const text = extractGeminiText(data);
+  const finishReason = data?.candidates?.[0]?.finishReason ?? "UNKNOWN";
+  return { empty: !text || !text.trim(), finishReason };
+}
+
 async function callGeminiWithFallback(
   requestBody: any,
   primaryModel: string,
   keys: string[]
-): Promise<{ status: number; data: any; keyIndex: number; modelUsed: string | null }> {
+): Promise<{ status: number; data: any; keyIndex: number; modelUsed: string | null; emptyReason: string | null }> {
   let lastStatus = 500;
   let lastData: any = { error: "No API keys configured" };
+  let lastEmptyReason: string | null = null;
   const models = buildModelChain(primaryModel);
 
   for (let mi = 0; mi < models.length; mi++) {
     const model = models[mi];
-    let allRateLimited = true;
+    let allRecoverable = true;
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -86,31 +97,37 @@ async function callGeminiWithFallback(
         lastData = data;
 
         if (geminiRes.ok) {
-          if (mi > 0 || i > 0) {
-            console.log(`[AI] Succeeded on model "${model}" with key #${i + 1} (after ${mi} model fallback(s))`);
+          const { empty, finishReason } = isEmptyFinish(data);
+          if (!empty) {
+            if (mi > 0 || i > 0) {
+              console.log(`[AI] Succeeded on model "${model}" with key #${i + 1} (after ${mi} model fallback(s))`);
+            }
+            return { status: geminiRes.status, data, keyIndex: i, modelUsed: model, emptyReason: null };
           }
-          return { status: geminiRes.status, data, keyIndex: i, modelUsed: model };
+          lastEmptyReason = finishReason;
+          console.warn(`[AI] ${model} key #${i + 1} returned empty text (finishReason=${finishReason}). Falling through.`);
+          continue;
         }
 
         const isRateLimit = geminiRes.status === 429 || geminiRes.status === 503;
         console.warn(`[AI] ${model} key #${i + 1} failed (${geminiRes.status}${isRateLimit ? " rate-limited" : ""}):`, data.error?.message ?? "unknown");
 
         if (!isRateLimit) {
-          allRateLimited = false;
+          allRecoverable = false;
           break;
         }
       } catch (err: any) {
         console.warn(`[AI] ${model} key #${i + 1} threw:`, err.message);
         lastData = { error: err.message };
-        allRateLimited = false;
+        allRecoverable = false;
         break;
       }
     }
 
-    if (!allRateLimited) break;
+    if (!allRecoverable) break;
   }
 
-  return { status: lastStatus, data: lastData, keyIndex: -1, modelUsed: null };
+  return { status: lastStatus, data: lastData, keyIndex: -1, modelUsed: null, emptyReason: lastEmptyReason };
 }
 
 function extractRetryAfter(data: any): number | undefined {
@@ -163,7 +180,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     };
 
-    const { status, data, keyIndex, modelUsed } = await callGeminiWithFallback(
+    const { status, data, keyIndex, modelUsed, emptyReason } = await callGeminiWithFallback(
       requestBody,
       "gemini-2.5-flash",
       keys
@@ -172,17 +189,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (keyIndex === -1) {
       const retryAfter = extractRetryAfter(data);
       const baseMsg = data?.error?.message ?? "Gemini API error";
-      const friendlyMsg = status === 429 || status === 503
-        ? `All ${keys.length} Gemini API key(s) are rate-limited on every fallback model${retryAfter ? `. Try again in ~${retryAfter}s.` : "."} Add another GEMINI_API_KEY_B/C/D… to increase capacity. (${baseMsg})`
-        : baseMsg;
-      return res.status(status).json({ error: friendlyMsg, retryAfter });
+      let friendlyMsg: string;
+      let httpStatus = status;
+      if (emptyReason) {
+        httpStatus = 502;
+        if (emptyReason === "SAFETY" || emptyReason === "BLOCKLIST" || emptyReason === "PROHIBITED_CONTENT") {
+          friendlyMsg = `Gemini blocked the response on every key/model (finishReason=${emptyReason}). Try removing emojis, slang, or sensitive wording from your input and try again.`;
+        } else if (emptyReason === "MAX_TOKENS") {
+          friendlyMsg = `The model ran out of output tokens (finishReason=MAX_TOKENS) on every fallback. Try shorter input or fewer images.`;
+        } else if (emptyReason === "RECITATION") {
+          friendlyMsg = `Gemini suppressed the response due to recitation policy on every key/model. Try rewording your input.`;
+        } else {
+          friendlyMsg = `Gemini returned no text on every key/model (finishReason=${emptyReason}). Try again or simplify your input.`;
+        }
+      } else if (status === 429 || status === 503) {
+        friendlyMsg = `All ${keys.length} Gemini API key(s) are rate-limited on every fallback model${retryAfter ? `. Try again in ~${retryAfter}s.` : "."} Add another GEMINI_API_KEY_B/C/D… to increase capacity. (${baseMsg})`;
+      } else {
+        friendlyMsg = baseMsg;
+      }
+      return res.status(httpStatus).json({ error: friendlyMsg, retryAfter, finishReason: emptyReason });
     }
 
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    if (!text) {
-      const reason = data.candidates?.[0]?.finishReason ?? "unknown";
-      console.error(`[AI] ${modelUsed} returned no text. finishReason=${reason}`);
-    }
+    console.log(`[AI] OK — model=${modelUsed} key=#${keyIndex + 1} response length=${text.length} chars`);
 
     return res.status(200).json({
       choices: [{ message: { content: text } }],

@@ -191,16 +191,17 @@ export function useAIFullContent() {
         variantOptionImages?: string[];
         extraDetails?: string;
       } = {}
-    ): Promise<FullProductContent | null> => {
+    ): Promise<{ result: FullProductContent | null; error: string | null }> => {
       setIsLoading(true);
       setLastError(null);
       try {
-        return await generateFullProductContent(productImageUrls, hints);
+        const result = await generateFullProductContent(productImageUrls, hints);
+        return { result, error: result ? null : "AI returned empty content. The model may have hit a safety filter or token limit. Try again or simplify your input." };
       } catch (err: any) {
         const msg = err?.message || "Unknown error";
         console.error("AI full content error:", msg);
         setLastError(msg);
-        return null;
+        return { result: null, error: msg };
       } finally {
         setIsLoading(false);
       }

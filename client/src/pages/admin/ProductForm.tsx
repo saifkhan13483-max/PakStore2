@@ -227,7 +227,7 @@ export default function AdminProductForm() {
         .filter((url: string) => !!url)
     );
 
-    const result = await generateAIFullContent(images, {
+    const { result, error } = await generateAIFullContent(images, {
       nameHint,
       currentCategory: currentCat?.name || "",
       availableCategories,
@@ -239,9 +239,9 @@ export default function AdminProductForm() {
     if (!result) {
       toast({
         title: "AI couldn't generate content",
-        description: aiContentError || "Try again or check your images.",
+        description: error || aiContentError || "Try again or check your images.",
         variant: "destructive",
-        duration: 8000,
+        duration: 10000,
       });
       return;
     }
