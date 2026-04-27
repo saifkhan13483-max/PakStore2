@@ -414,13 +414,18 @@ All variation names must be very simple.`;
 
 export async function generateFullProductContent(
   productImageUrls: string[],
-  hints: { nameHint?: string; category?: string; variantTypes?: string[] } = {}
+  hints: { nameHint?: string; category?: string; variantTypes?: string[]; extraDetails?: string } = {}
 ): Promise<FullProductContent | null> {
   const contextLines: string[] = [];
   if (hints.nameHint) contextLines.push(`Product name hint from seller: "${hints.nameHint}"`);
   if (hints.category) contextLines.push(`Category: ${hints.category}`);
   if (hints.variantTypes && hints.variantTypes.length > 0) {
     contextLines.push(`Existing variant types in form: ${hints.variantTypes.join(", ")}`);
+  }
+  if (hints.extraDetails && hints.extraDetails.trim()) {
+    contextLines.push(
+      `Additional product details provided by the seller (TREAT AS GROUND TRUTH — use these specs verbatim where applicable, especially in the Product Details subsection. Do not contradict them):\n${hints.extraDetails.trim()}`
+    );
   }
   contextLines.push(`Store: PakCart (Pakistani e-commerce). Audience: Pakistani shoppers.`);
 

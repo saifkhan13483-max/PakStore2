@@ -161,6 +161,7 @@ export default function AdminProductForm() {
   const { generate: generateAIVariantNames } = useAIVariantNames();
   const { generate: generateAIFullContent, isLoading: isAIFullContentLoading } = useAIFullContent();
   const [aiVariantLoadingIndex, setAiVariantLoadingIndex] = useState<number | null>(null);
+  const [aiExtraDetails, setAiExtraDetails] = useState("");
 
   const name = form.watch("name");
 
@@ -220,6 +221,7 @@ export default function AdminProductForm() {
       nameHint,
       category: cat?.name || catId || "General",
       variantTypes,
+      extraDetails: aiExtraDetails,
     });
 
     if (!result) {
@@ -974,6 +976,25 @@ export default function AdminProductForm() {
                   <CardDescription className="text-xs">Generate content with AI to boost conversions</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  <div className="space-y-1.5 pb-1">
+                    <label
+                      htmlFor="ai-extra-details"
+                      className="text-[11px] font-semibold uppercase tracking-wider text-emerald-800/80"
+                    >
+                      Product details (optional)
+                    </label>
+                    <Textarea
+                      id="ai-extra-details"
+                      value={aiExtraDetails}
+                      onChange={(e) => setAiExtraDetails(e.target.value)}
+                      placeholder={`Add any specs the AI can't see in images, e.g.:\n- Fabric: cotton lawn\n- Sizes: S, M, L, XL\n- Chest: 40", Length: 42"\n- Stitching: machine\n- Origin: Lahore`}
+                      className="min-h-[110px] text-xs bg-background/80 border-emerald-200 focus-visible:ring-emerald-500 placeholder:text-emerald-700/40"
+                      data-testid="input-ai-extra-details"
+                    />
+                    <p className="text-[10px] text-emerald-700/60">
+                      AI will use these as ground truth in the Product Details section.
+                    </p>
+                  </div>
                   <Button
                     type="button"
                     className="w-full justify-center gap-2 text-sm h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-200/50 hover-elevate"
@@ -989,7 +1010,7 @@ export default function AdminProductForm() {
                     {isAIFullContentLoading ? "Analyzing images…" : "Generate All Content"}
                   </Button>
                   <p className="text-[11px] text-emerald-700/70 px-1 pb-1">
-                    Reads your product images to fill name, descriptions, and features.
+                    Reads your product images plus any details above to fill name, descriptions, and features.
                   </p>
                   <Button
                     type="button"
