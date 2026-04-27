@@ -176,7 +176,13 @@ export function useAIFullContent() {
   const generate = useCallback(
     async (
       productImageUrls: string[],
-      hints: { nameHint?: string; category?: string; variantTypes?: string[]; extraDetails?: string } = {}
+      hints: {
+        nameHint?: string;
+        currentCategory?: string;
+        availableCategories?: string[];
+        variantTypes?: string[];
+        extraDetails?: string;
+      } = {}
     ): Promise<FullProductContent | null> => {
       setIsLoading(true);
       try {

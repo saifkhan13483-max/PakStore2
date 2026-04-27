@@ -260,6 +260,7 @@ Return ONLY a valid JSON array of ${imageUrls.length} strings. No markdown, no e
 export interface FullProductContent {
   name: string;
   slug: string;
+  category: string;
   shortDescription: string;
   longDescriptionHtml: string;
   features: string[];
@@ -369,8 +370,9 @@ Generate exactly these sections in this order:
 3. Short Description — Concise and sales-focused, 15–25 words max, hook-driven opening.
 4. Long Description — Persuasive and structured, 70–150 words max. Must include a "Product Details" subsection heading. Combine emotional appeal with practical benefits. Sound premium, clear, trustworthy.
 5. Key Features — 3 to 5 features. Each 4–6 words max. Benefit-oriented and punchy. Bold the most important words.
-6. Variant Type — A single word/short label naming the variant axis (e.g. "Color", "Size", "Material"). Write "None" if no variants.
-7. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
+6. Category — Pick the SINGLE BEST matching category for this product from the "Available Categories" list given in CONTEXT. Write the category name EXACTLY as it appears in that list (case and punctuation must match). If the list is missing or no match fits, write "Uncategorized".
+7. Variant Type — A single word/short label naming the variant axis (e.g. "Color", "Size", "Material"). Write "None" if no variants.
+8. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
 
 STRICT RULES:
 - Do NOT mention price, cost, profit, margin, discount, or currency anywhere in output.
@@ -422,6 +424,9 @@ OUTPUT FORMAT — return EXACTLY in this template, nothing else, no preamble, no
 - **[Feature 2 - 4–6 words]**
 - **[Feature 3 - 4–6 words]**
 
+**Category:**
+[exact category name from Available Categories list, or "Uncategorized"]
+
 **Variant Type:**
 [Color | Size | Material | Pattern | Style | None]
 
@@ -433,11 +438,24 @@ All variation names must be very simple.`;
 
 export async function generateFullProductContent(
   productImageUrls: string[],
-  hints: { nameHint?: string; category?: string; variantTypes?: string[]; extraDetails?: string } = {}
+  hints: {
+    nameHint?: string;
+    currentCategory?: string;
+    availableCategories?: string[];
+    variantTypes?: string[];
+    extraDetails?: string;
+  } = {}
 ): Promise<FullProductContent | null> {
   const contextLines: string[] = [];
   if (hints.nameHint) contextLines.push(`Product name hint from seller: "${hints.nameHint}"`);
-  if (hints.category) contextLines.push(`Category: ${hints.category}`);
+  if (hints.currentCategory) {
+    contextLines.push(`Currently selected category in form: ${hints.currentCategory} (you may keep or change it).`);
+  }
+  if (hints.availableCategories && hints.availableCategories.length > 0) {
+    contextLines.push(
+      `Available Categories (PICK EXACTLY ONE for the Category section, write the name verbatim):\n${hints.availableCategories.map((c) => `- ${c}`).join("\n")}`
+    );
+  }
   if (hints.variantTypes && hints.variantTypes.length > 0) {
     contextLines.push(`Existing variant types in form: ${hints.variantTypes.join(", ")}`);
   }
@@ -480,6 +498,12 @@ export async function generateFullProductContent(
   const longDescriptionHtml = longRaw ? markdownToHtml(longRaw) : "";
 
   const features = parseListItems(extractSection(cleaned, "Key Features"));
+  const categoryRaw = extractSection(cleaned, "Category")
+    .replace(/^[-*]\s*/g, "")
+    .replace(/\*\*/g, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+  const category = /^uncategorized$/i.test(categoryRaw) ? "" : categoryRaw;
   const variantTypeRaw = extractSection(cleaned, "Variant Type")
     .replace(/^[-*]\s*/g, "")
     .replace(/\*\*/g, "")
@@ -501,6 +525,7 @@ export async function generateFullProductContent(
   return {
     name,
     slug,
+    category,
     shortDescription,
     longDescriptionHtml,
     features,

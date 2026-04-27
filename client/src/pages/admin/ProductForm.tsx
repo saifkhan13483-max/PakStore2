@@ -212,14 +212,18 @@ export default function AdminProductForm() {
 
     const nameHint = form.getValues("name") || "";
     const catId = form.getValues("categoryId");
-    const cat = categories?.find(c => c.id === catId);
+    const currentCat = categories?.find(c => c.id === catId);
+    const availableCategories = (categories || [])
+      .map(c => c.name)
+      .filter((n): n is string => typeof n === "string" && n.length > 0);
     const variantTypes = ((form.getValues("variants") || []) as any[])
       .map(v => v?.name)
       .filter((n: string) => typeof n === "string" && n.trim().length > 0);
 
     const result = await generateAIFullContent(images, {
       nameHint,
-      category: cat?.name || catId || "General",
+      currentCategory: currentCat?.name || "",
+      availableCategories,
       variantTypes,
       extraDetails: aiExtraDetails,
     });
@@ -251,6 +255,19 @@ export default function AdminProductForm() {
       replaceFeatures(result.features as any);
     }
 
+    let categoryApplied = "";
+    if (result.category && categories?.length) {
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+      const target = norm(result.category);
+      const match =
+        categories.find((c) => norm(c.name || "") === target) ||
+        categories.find((c) => norm(c.name || "").includes(target) || target.includes(norm(c.name || "")));
+      if (match) {
+        form.setValue("categoryId", String(match.id), { shouldValidate: true, shouldDirty: true });
+        categoryApplied = match.name;
+      }
+    }
+
     let variantsAdded = 0;
     if (result.variants.length > 0 && result.variantType) {
       const existing = (form.getValues("variants") || []) as any[];
@@ -277,6 +294,7 @@ export default function AdminProductForm() {
 
     const filled: string[] = [];
     if (result.name) filled.push("name");
+    if (categoryApplied) filled.push(`category (${categoryApplied})`);
     if (result.shortDescription) filled.push("short description");
     if (result.longDescriptionHtml) filled.push("long description");
     if (result.features.length) filled.push(`${result.features.length} features`);
