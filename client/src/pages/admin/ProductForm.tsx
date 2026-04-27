@@ -216,15 +216,24 @@ export default function AdminProductForm() {
     const availableCategories = (categories || [])
       .map(c => c.name)
       .filter((n): n is string => typeof n === "string" && n.length > 0);
-    const variantTypes = ((form.getValues("variants") || []) as any[])
+    const existingVariants = (form.getValues("variants") || []) as any[];
+    const variantTypes = existingVariants
       .map(v => v?.name)
       .filter((n: string) => typeof n === "string" && n.trim().length > 0);
+
+    const variantOptionImages: string[] =
+      existingVariants.length === 1
+        ? ((existingVariants[0]?.options || []) as any[])
+            .map((o) => (typeof o?.image === "string" ? o.image : ""))
+            .filter((url) => !!url)
+        : [];
 
     const result = await generateAIFullContent(images, {
       nameHint,
       currentCategory: currentCat?.name || "",
       availableCategories,
       variantTypes,
+      variantOptionImages,
       extraDetails: aiExtraDetails,
     });
 

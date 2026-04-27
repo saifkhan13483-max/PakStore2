@@ -181,6 +181,7 @@ export function useAIFullContent() {
         currentCategory?: string;
         availableCategories?: string[];
         variantTypes?: string[];
+        variantOptionImages?: string[];
         extraDetails?: string;
       } = {}
     ): Promise<FullProductContent | null> => {

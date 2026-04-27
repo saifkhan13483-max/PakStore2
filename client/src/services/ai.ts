@@ -464,6 +464,7 @@ export async function generateFullProductContent(
     currentCategory?: string;
     availableCategories?: string[];
     variantTypes?: string[];
+    variantOptionImages?: string[];
     extraDetails?: string;
   } = {}
 ): Promise<FullProductContent | null> {
@@ -487,11 +488,23 @@ export async function generateFullProductContent(
   }
   contextLines.push(`Store: PakCart (Pakistani e-commerce). Audience: Pakistani shoppers.`);
 
-  const userText = `${FULL_CONTENT_PROMPT}\n\n--- CONTEXT ---\n${contextLines.join("\n")}\n\n--- IMAGES ---\n${productImageUrls.length} product image(s) attached below for analysis.`;
+  const variantImgs = (hints.variantOptionImages || []).filter(Boolean);
+  const variantNote =
+    variantImgs.length > 0
+      ? `\n\nIMPORTANT VARIANT IMAGES: After the ${productImageUrls.length} product image(s), there are ${variantImgs.length} additional VARIANT OPTION image(s). Each variant image represents ONE option (typically a color swatch or alternate-color photo) in the order shown. For the "Available Variants" section you MUST output EXACTLY ${variantImgs.length} entries, one per variant image, in the SAME ORDER. Use simple 1–2 word names that describe the dominant color/attribute of EACH variant image individually. Do not repeat or skip variant images.`
+      : "";
+
+  const userText = `${FULL_CONTENT_PROMPT}\n\n--- CONTEXT ---\n${contextLines.join("\n")}\n\n--- IMAGES ---\n${productImageUrls.length} main product image(s) attached below for analysis.${variantNote}`;
 
   const content: AIContentPart[] = [
     { type: "text", text: userText },
     ...productImageUrls.map((url) => ({ type: "image_url" as const, image_url: url })),
+    ...(variantImgs.length > 0
+      ? [
+          { type: "text" as const, text: `\n\n--- VARIANT OPTION IMAGES (${variantImgs.length}, in option order) ---` },
+          ...variantImgs.map((url) => ({ type: "image_url" as const, image_url: url })),
+        ]
+      : []),
   ];
 
   const result = await callAI(
