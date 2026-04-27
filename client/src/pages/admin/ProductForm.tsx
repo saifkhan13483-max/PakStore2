@@ -98,7 +98,7 @@ export default function AdminProductForm() {
   });
 
   // Handle variants array
-  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
+  const { fields: variantFields, append: appendVariant, remove: removeVariant, replace: replaceVariants } = useFieldArray({
     control: form.control,
     name: "variants" as any,
   });
@@ -251,16 +251,46 @@ export default function AdminProductForm() {
       replaceFeatures(result.features as any);
     }
 
+    let variantsAdded = 0;
+    if (result.variants.length > 0 && result.variantType) {
+      const existing = (form.getValues("variants") || []) as any[];
+      const isEmpty =
+        existing.length === 0 ||
+        existing.every((v) => !v?.name?.trim() && (!v?.options || v.options.length === 0));
+
+      if (isEmpty) {
+        const basePrice = (form.getValues("price") as number) || 0;
+        const newVariant = {
+          id: Math.random().toString(36).slice(2, 11),
+          name: result.variantType,
+          options: result.variants.map((v) => ({
+            id: Math.random().toString(36).slice(2, 11),
+            value: v,
+            price: basePrice,
+            image: "",
+          })),
+        };
+        replaceVariants([newVariant] as any);
+        variantsAdded = result.variants.length;
+      }
+    }
+
     const filled: string[] = [];
     if (result.name) filled.push("name");
     if (result.shortDescription) filled.push("short description");
     if (result.longDescriptionHtml) filled.push("long description");
     if (result.features.length) filled.push(`${result.features.length} features`);
+    if (variantsAdded > 0) filled.push(`${variantsAdded} ${result.variantType.toLowerCase()} variants`);
+
+    let suggestionText = "";
+    if (variantsAdded === 0 && result.variants.length > 0) {
+      suggestionText = ` Suggested ${result.variantType || "variants"}: ${result.variants.join(", ")} (you already have variants set up — review manually).`;
+    }
 
     toast({
       title: "AI content generated",
       description: filled.length
-        ? `Filled: ${filled.join(", ")}.${result.variants.length ? ` Suggested variants: ${result.variants.join(", ")}.` : ""}`
+        ? `Filled: ${filled.join(", ")}.${suggestionText}`
         : "Content was returned but no fields matched.",
     });
   };

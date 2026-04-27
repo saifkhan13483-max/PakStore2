@@ -263,6 +263,7 @@ export interface FullProductContent {
   shortDescription: string;
   longDescriptionHtml: string;
   features: string[];
+  variantType: string;
   variants: string[];
   raw: string;
 }
@@ -349,6 +350,18 @@ const FULL_CONTENT_PROMPT = `Analyze both the text and product images using thes
 - Make only safe, context-based assumptions when something is unclear
 - Base all claims on provided information and image evidence
 
+MULTI-IMAGE & VARIANT DETECTION (CRITICAL):
+- If multiple images clearly show the SAME product in different colors, sizes, or finishes, treat them as ONE product with VARIANTS — not as separate products.
+- In that case, the product name describes the single item (e.g. "2-Piece Maxi & Front-Open Shirt"), and each color/size becomes an entry in Available Variants.
+- Identify the variant axis (Color, Size, Material, Pattern, Style, etc.) and write it on the "Variant Type" line.
+- If only one image is provided, or images show genuinely different products, write "No variants specified".
+
+INPUT-TEXT CLEANING (when seller pastes WhatsApp/Facebook style text):
+- IGNORE and never reproduce: prices, currency mentions, "Price only Rs X", "Come First Get First", "JESA DEKHAGA WESA MELAGA", religious openers like ﷽ or "Bismillah", contact numbers, Whatsapp/IG handles, store-name slogans, and similar seller boilerplate.
+- Silently NORMALIZE common Pakistani-English misspellings into proper English: "Shiffon" → "Chiffon", "Lenght" → "Length", "Artical" → "Article", "Romper" stays "Romper", "Gehra" → "Flare/Width", "plane/plain" pick the right one from context, etc.
+- Convert Roman Urdu specs into clean English specs.
+- Treat any measurements (Chest, Length, Flare, Fabric, etc.) as ground-truth facts to use verbatim in Product Details.
+
 Generate exactly these sections in this order:
 
 1. Product Name — Clear and compelling, SEO-friendly with natural keywords, conversion-focused (max 5–6 words).
@@ -356,10 +369,11 @@ Generate exactly these sections in this order:
 3. Short Description — Concise and sales-focused, 15–25 words max, hook-driven opening.
 4. Long Description — Persuasive and structured, 70–150 words max. Must include a "Product Details" subsection heading. Combine emotional appeal with practical benefits. Sound premium, clear, trustworthy.
 5. Key Features — 3 to 5 features. Each 4–6 words max. Benefit-oriented and punchy. Bold the most important words.
-6. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
+6. Variant Type — A single word/short label naming the variant axis (e.g. "Color", "Size", "Material"). Write "None" if no variants.
+7. Available Variants — 1 to 3 words per variant. Only include actual or clearly supported variants visible in images. If none, write: "No variants specified".
 
 STRICT RULES:
-- Do NOT mention price, cost, profit, margin, discount, or currency.
+- Do NOT mention price, cost, profit, margin, discount, or currency anywhere in output.
 - Do NOT invent fake claims, warranty, guarantee, refund, or return policies unless explicitly provided.
 - Do NOT use generic language or keyword stuffing.
 - Write SEO-friendly but natural language.
@@ -407,6 +421,9 @@ OUTPUT FORMAT — return EXACTLY in this template, nothing else, no preamble, no
 - **[Feature 1 - 4–6 words]**
 - **[Feature 2 - 4–6 words]**
 - **[Feature 3 - 4–6 words]**
+
+**Variant Type:**
+[Color | Size | Material | Pattern | Style | None]
 
 **Available Variants:**
 - [Variant 1 - 1–3 words]
@@ -463,6 +480,11 @@ export async function generateFullProductContent(
   const longDescriptionHtml = longRaw ? markdownToHtml(longRaw) : "";
 
   const features = parseListItems(extractSection(cleaned, "Key Features"));
+  const variantTypeRaw = extractSection(cleaned, "Variant Type")
+    .replace(/^[-*]\s*/g, "")
+    .replace(/\*\*/g, "")
+    .trim();
+  const variantType = /^none$/i.test(variantTypeRaw) ? "" : variantTypeRaw;
   const variantsSection = extractSection(cleaned, "Available Variants");
   const variants = /no variants specified/i.test(variantsSection)
     ? []
@@ -482,6 +504,7 @@ export async function generateFullProductContent(
     shortDescription,
     longDescriptionHtml,
     features,
+    variantType,
     variants,
     raw: cleaned,
   };
