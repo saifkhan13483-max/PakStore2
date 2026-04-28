@@ -557,3 +557,15 @@ User repeatedly saw "Unexpected token 'R', 'Request En'... is not valid JSON" to
 ### Verification
 - `tsc --noEmit` — no new errors (pre-existing errors in `productFirestoreService.ts`, `BulkAddProducts.tsx`, `AIRecommendations.tsx`, `ProductDetail.tsx` are unrelated and documented in earlier phases).
 - Workflow restarted; users **must hard-refresh** (Ctrl/Cmd+Shift+R) to pick up the new `ai.ts` module since Vite HMR doesn't always replace plain TS service modules cleanly.
+
+## Phase 11 — Variant Chip Showed Wrong Price (April 28, 2026)
+
+On the product detail page, the variant chip badge was rendering the **raw cost** of the variant option (`option.price`, e.g. Rs 1,900) while the main displayed price showed the **selling price** (cost + `product.profit`, e.g. Rs 2,100). Customers saw two different prices for the same selection — the cheaper one in the chip and the higher one as the headline price — which looks like a bait-and-switch.
+
+### Fix (`client/src/pages/ProductDetail.tsx`)
+- The variant chip now renders `option.price + (product.profit || 0)` so it matches the headline price exactly.
+- The badge is hidden when the variant's final price equals the base displayed price (no point showing redundant info).
+- Added `data-testid="text-variant-price-{optionId}"` for stability.
+
+### Files Changed
+- `client/src/pages/ProductDetail.tsx` (variant options render block, ~line 490).

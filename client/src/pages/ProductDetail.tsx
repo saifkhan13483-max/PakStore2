@@ -487,11 +487,25 @@ export default function ProductDetail() {
                             )}
                             <span className="truncate">{option.value}</span>
                           </div>
-                          {option.price && option.price !== product.price && (
-                            <span className="ml-1 sm:ml-1.5 opacity-60 text-xs">
-                              ({formatPrice(option.price)})
-                            </span>
-                          )}
+                          {(() => {
+                            // Show the FINAL selling price for the variant (cost + profit),
+                            // not the raw cost — otherwise customers see two different prices
+                            // (the chip badge and the main displayed price) for the same item.
+                            // Hide the badge when it equals the base displayed price.
+                            if (!option.price) return null;
+                            const profit = product.profit || 0;
+                            const optionFinal = option.price + profit;
+                            const baseFinal = product.price + profit;
+                            if (optionFinal === baseFinal) return null;
+                            return (
+                              <span
+                                className="ml-1 sm:ml-1.5 opacity-60 text-xs"
+                                data-testid={`text-variant-price-${option.id}`}
+                              >
+                                ({formatPrice(optionFinal)})
+                              </span>
+                            );
+                          })()}
                         </button>
                       ))}
                     </div>
