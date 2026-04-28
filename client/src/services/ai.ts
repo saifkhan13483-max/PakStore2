@@ -10,23 +10,88 @@ interface AIMessage {
 
 const AI_SYSTEM_PROMPT = `You are a professional e-commerce conversion expert and SEO specialist for PakCart, a Pakistani e-commerce store selling Bags & Wallets, Jewelry, Shoes, Slippers, Stitched Dresses, Watches, and Tech Gadgets. Help increase sales by writing persuasive product content, recommending relevant products, and improving the shopping experience. Keep responses concise, persuasive, human-like, and conversion-focused.`;
 
-/** Fetch a URL in the browser and return its base64 encoded data + MIME type. */
+/** Read a Blob as a data URL, returning {mimeType, base64} or null. */
+function blobToBase64(blob: Blob): Promise<{ mimeType: string; data: string } | null> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/s);
+      if (!match) { resolve(null); return; }
+      resolve({ mimeType: match[1], data: match[2] });
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Downscale an image blob to fit within maxSide pixels (longest edge) and
+ * re-encode as JPEG at the given quality. Big phone-camera photos can be
+ * 5–10MB raw → 30–50MB after base64 across many images, easily blowing past
+ * edge-proxy body limits. Gemini works fine with ~1024px images, so we cap
+ * aggressively. Returns the original blob if downscaling fails.
+ */
+async function downscaleImage(
+  blob: Blob,
+  maxSide = 1024,
+  quality = 0.82
+): Promise<Blob> {
+  if (typeof document === "undefined" || typeof Image === "undefined") return blob;
+  if (!/^image\//.test(blob.type)) return blob;
+  // SVG and GIF: don't rasterize; small enough to send as-is.
+  if (/svg|gif/.test(blob.type)) return blob;
+
+  try {
+    const url = URL.createObjectURL(blob);
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = () => reject(new Error("image decode failed"));
+      i.src = url;
+    });
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) {
+      URL.revokeObjectURL(url);
+      return blob;
+    }
+    const longest = Math.max(w, h);
+    const scale = longest > maxSide ? maxSide / longest : 1;
+    // If the image is already small AND well under 400KB, skip re-encode entirely
+    if (scale === 1 && blob.size < 400 * 1024) {
+      URL.revokeObjectURL(url);
+      return blob;
+    }
+    const targetW = Math.max(1, Math.round(w * scale));
+    const targetH = Math.max(1, Math.round(h * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = targetW;
+    canvas.height = targetH;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      URL.revokeObjectURL(url);
+      return blob;
+    }
+    ctx.drawImage(img, 0, 0, targetW, targetH);
+    URL.revokeObjectURL(url);
+    const out = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), "image/jpeg", quality);
+    });
+    return out ?? blob;
+  } catch {
+    return blob;
+  }
+}
+
+/** Fetch a URL in the browser, downscale, and return base64 data + MIME type. */
 async function browserFetchBase64(url: string): Promise<{ mimeType: string; data: string } | null> {
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
-    const blob = await res.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/s);
-        if (!match) { resolve(null); return; }
-        resolve({ mimeType: match[1], data: match[2] });
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
+    const raw = await res.blob();
+    const compressed = await downscaleImage(raw);
+    return blobToBase64(compressed);
   } catch {
     return null;
   }
@@ -59,19 +124,49 @@ async function callAI(
     allMessages.map(async (m) => ({ ...m, content: await resolveImageParts(m.content) }))
   );
 
+  const requestBody = JSON.stringify({
+    messages: resolvedMessages,
+    maxTokens: opts.maxTokens ?? 512,
+    temperature: opts.temperature ?? 0.7,
+    ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
+  });
+
+  // Defensive client-side guardrail. If our compressed payload is still
+  // huge, surface a clear error before the request hits the edge proxy.
+  const payloadMB = requestBody.length / (1024 * 1024);
+  if (payloadMB > 25) {
+    throw new Error(
+      `Request payload is ${payloadMB.toFixed(1)} MB which exceeds the 25 MB upload limit. Try fewer images, or smaller images, in this generation.`
+    );
+  }
+
   const res = await fetch("/api/ai", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: resolvedMessages,
-      maxTokens: opts.maxTokens ?? 512,
-      temperature: opts.temperature ?? 0.7,
-      ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
-    }),
+    body: requestBody,
   });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "AI request failed");
+  // The response may be plain text (e.g. "Request Entity Too Large" from an
+  // edge proxy when the body exceeds its limit). Read as text first so we can
+  // produce a friendly error instead of a JSON.parse stack trace.
+  const rawText = await res.text();
+  let data: any = null;
+  try {
+    data = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    if (res.status === 413 || /entity too large/i.test(rawText)) {
+      throw new Error(
+        `Upload too large (${payloadMB.toFixed(1)} MB sent). Use fewer images or smaller images in this generation.`
+      );
+    }
+    if (res.status >= 500) {
+      throw new Error(`AI service is temporarily unavailable (HTTP ${res.status}). Please try again in a moment.`);
+    }
+    throw new Error(
+      `AI service returned an unexpected response (HTTP ${res.status}). ${rawText.slice(0, 140)}`
+    );
+  }
+  if (!res.ok) throw new Error(data.error || `AI request failed (HTTP ${res.status})`);
 
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error("No response from AI");
