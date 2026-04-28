@@ -31,6 +31,10 @@ function blobToBase64(blob: Blob): Promise<{ mimeType: string; data: string } | 
  * 5–10MB raw → 30–50MB after base64 across many images, easily blowing past
  * edge-proxy body limits. Gemini works fine with ~1024px images, so we cap
  * aggressively. Returns the original blob if downscaling fails.
+ *
+ * NOTE: We do NOT gate on `blob.type` because Firebase/Cloudinary often
+ * return blobs with an empty or generic MIME type (e.g. ""). We attempt
+ * decode-and-resize first and only fall back to the original on real failure.
  */
 async function downscaleImage(
   blob: Blob,
@@ -38,61 +42,74 @@ async function downscaleImage(
   quality = 0.82
 ): Promise<Blob> {
   if (typeof document === "undefined" || typeof Image === "undefined") return blob;
-  if (!/^image\//.test(blob.type)) return blob;
-  // SVG and GIF: don't rasterize; small enough to send as-is.
-  if (/svg|gif/.test(blob.type)) return blob;
+  // Don't rasterize SVG/GIF (they're typically tiny anyway).
+  if (/svg|gif/i.test(blob.type)) return blob;
 
+  let url: string | null = null;
   try {
-    const url = URL.createObjectURL(blob);
+    url = URL.createObjectURL(blob);
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const i = new Image();
       i.onload = () => resolve(i);
       i.onerror = () => reject(new Error("image decode failed"));
-      i.src = url;
+      i.src = url!;
     });
     const w = img.naturalWidth || img.width;
     const h = img.naturalHeight || img.height;
-    if (!w || !h) {
-      URL.revokeObjectURL(url);
-      return blob;
-    }
+    if (!w || !h) return blob;
     const longest = Math.max(w, h);
     const scale = longest > maxSide ? maxSide / longest : 1;
-    // If the image is already small AND well under 400KB, skip re-encode entirely
-    if (scale === 1 && blob.size < 400 * 1024) {
-      URL.revokeObjectURL(url);
-      return blob;
-    }
+    // If already small AND under 200KB, skip re-encode entirely.
+    if (scale === 1 && blob.size < 200 * 1024) return blob;
+
     const targetW = Math.max(1, Math.round(w * scale));
     const targetH = Math.max(1, Math.round(h * scale));
     const canvas = document.createElement("canvas");
     canvas.width = targetW;
     canvas.height = targetH;
     const ctx = canvas.getContext("2d");
-    if (!ctx) {
-      URL.revokeObjectURL(url);
-      return blob;
-    }
+    if (!ctx) return blob;
     ctx.drawImage(img, 0, 0, targetW, targetH);
-    URL.revokeObjectURL(url);
     const out = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob((b) => resolve(b), "image/jpeg", quality);
     });
-    return out ?? blob;
-  } catch {
+    // Only use the re-encoded version if it's actually smaller.
+    if (out && out.size < blob.size) return out;
     return blob;
+  } catch (err) {
+    console.warn("[AI] downscaleImage failed; using original blob", err);
+    return blob;
+  } finally {
+    if (url) URL.revokeObjectURL(url);
   }
 }
 
-/** Fetch a URL in the browser, downscale, and return base64 data + MIME type. */
-async function browserFetchBase64(url: string): Promise<{ mimeType: string; data: string } | null> {
+/**
+ * Fetch a URL in the browser, downscale aggressively, return base64 data + MIME.
+ * Logs the size reduction so 413 issues are debuggable in the browser console.
+ */
+async function browserFetchBase64(
+  url: string,
+  opts: { maxSide?: number; quality?: number } = {}
+): Promise<{ mimeType: string; data: string } | null> {
   try {
     const res = await fetch(url);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[AI] browserFetchBase64: fetch failed ${res.status} for ${url.slice(0, 80)}`);
+      return null;
+    }
     const raw = await res.blob();
-    const compressed = await downscaleImage(raw);
+    const rawKB = (raw.size / 1024).toFixed(0);
+    const compressed = await downscaleImage(raw, opts.maxSide ?? 1024, opts.quality ?? 0.82);
+    const compressedKB = (compressed.size / 1024).toFixed(0);
+    if (compressed.size !== raw.size) {
+      console.log(`[AI] image downscaled: ${rawKB}KB → ${compressedKB}KB (${url.slice(0, 60)}…)`);
+    } else {
+      console.log(`[AI] image kept as-is: ${rawKB}KB (${url.slice(0, 60)}…)`);
+    }
     return blobToBase64(compressed);
-  } catch {
+  } catch (err) {
+    console.warn(`[AI] browserFetchBase64 threw for ${url.slice(0, 80)}:`, err);
     return null;
   }
 }
@@ -131,12 +148,21 @@ async function callAI(
     ...(typeof opts.thinkingBudget === "number" ? { thinkingBudget: opts.thinkingBudget } : {}),
   });
 
-  // Defensive client-side guardrail. If our compressed payload is still
-  // huge, surface a clear error before the request hits the edge proxy.
   const payloadMB = requestBody.length / (1024 * 1024);
-  if (payloadMB > 25) {
+  const imageCount = resolvedMessages.reduce((acc, m) => {
+    if (Array.isArray(m.content)) {
+      return acc + m.content.filter((p: any) => p.type === "inline_data").length;
+    }
+    return acc;
+  }, 0);
+  console.log(`[AI] sending request: ${payloadMB.toFixed(2)} MB, ${imageCount} images`);
+
+  // Replit's edge proxy on .replit.dev limits POST bodies to ~10MB. The deployed
+  // domain is more generous but still finite. We cap at 9MB so the friendly
+  // error fires BEFORE the edge returns "Request Entity Too Large".
+  if (payloadMB > 9) {
     throw new Error(
-      `Request payload is ${payloadMB.toFixed(1)} MB which exceeds the 25 MB upload limit. Try fewer images, or smaller images, in this generation.`
+      `Request is ${payloadMB.toFixed(1)} MB after compression — too large for the upload proxy (9 MB cap). You sent ${imageCount} images. Try generating with fewer variant option images at a time, or remove very large images and re-upload smaller ones.`
     );
   }
 

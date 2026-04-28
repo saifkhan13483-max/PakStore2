@@ -535,3 +535,25 @@ Audit-driven fix for a non-obvious revenue-leakage bug. Cart items were persiste
 - `tsc --noEmit` — zero new errors introduced; pre-existing errors in `productFirestoreService.ts`, `BulkAddProducts.tsx`, `AIRecommendations.tsx`, and `ProductDetail.tsx` are unrelated.
 - `/cart` and `/checkout` render with zero new console warnings or errors.
 - Persisted cart state from older builds is silently migrated by `coerceLegacyItem`.
+
+## Phase 10 — AI Generate-Content 413 Root Cause (April 28, 2026)
+
+User repeatedly saw "Unexpected token 'R', 'Request En'... is not valid JSON" toast when clicking **Generate All Content** with a product that had many variant option images. Earlier passes added client-side image downscaling, friendly error wrapping, and a multi-key fallback chain — yet the toast kept re-appearing with the same JSON-parse stack-trace text. That was the diagnostic clue: if downscaling were running, payloads would be small enough; and if the friendly wrapper were running, the toast would say "Upload too large", not "Unexpected token 'R'".
+
+### Root Cause
+`downscaleImage` in `client/src/services/ai.ts` had a defensive guard: `if (!/^image\//.test(blob.type)) return blob;`. **Firebase Storage and Cloudinary both return blobs with empty or generic MIME types** (`""` or `"application/octet-stream"`) depending on the upload path. That regex was failing → the original multi-MB phone-camera blob was being base64-encoded **uncompressed** and shipped to `/api/ai`. Replit's `.replit.dev` edge proxy returned `413 Request Entity Too Large` (plain text), and the response hit `JSON.parse` *before* my error guard could see the status code. Net effect: the friendly wrapper never fired, the user saw the raw V8 SyntaxError.
+
+### Fix (`client/src/services/ai.ts`)
+1. **Removed the `blob.type` short-circuit.** Now we always attempt canvas decode + resize, and only fall back to the original blob on a real decode failure. SVG/GIF are still skipped because rasterizing them is wrong, not because they're small.
+2. **Hardened the canvas pipeline.** `URL.revokeObjectURL` moved to a `finally` block (no leak on error). The re-encoded blob is only used when it's *actually smaller* than the source.
+3. **Lowered the small-file skip threshold** from 400 KB → 200 KB so borderline images still get re-encoded.
+4. **Added per-image size logging** in `browserFetchBase64`: `[AI] image downscaled: 4123KB → 187KB` so 413 issues are debuggable from the browser console without server access.
+5. **Added total payload logging + cap** in `callAI`: prints `[AI] sending request: 2.34 MB, 9 images` and throws a friendly, actionable error if the post-compression payload exceeds **9 MB** (matches Replit's edge proxy limit). Old cap was 25 MB which was wishful thinking.
+6. **Updated friendly error copy** to tell the user exactly how many images they sent and what to do (remove large images, generate with fewer variants at a time).
+
+### Files Changed
+- `client/src/services/ai.ts` — `downscaleImage`, `browserFetchBase64`, payload guard in `callAI`.
+
+### Verification
+- `tsc --noEmit` — no new errors (pre-existing errors in `productFirestoreService.ts`, `BulkAddProducts.tsx`, `AIRecommendations.tsx`, `ProductDetail.tsx` are unrelated and documented in earlier phases).
+- Workflow restarted; users **must hard-refresh** (Ctrl/Cmd+Shift+R) to pick up the new `ai.ts` module since Vite HMR doesn't always replace plain TS service modules cleanly.
