@@ -569,3 +569,23 @@ On the product detail page, the variant chip badge was rendering the **raw cost*
 
 ### Files Changed
 - `client/src/pages/ProductDetail.tsx` (variant options render block, ~line 490).
+
+## Phase 12 — Cart Showed Wrong Price + False Out-of-Stock (April 28, 2026)
+
+User reported a product that was clearly Available in admin (toggle ON, selling price Rs 2,550) appeared in the cart at Rs 2,250 with "currently out of stock" and a Rs 0 total. Three independent bugs converged here.
+
+### Root Causes
+1. **`ProductCard.handleAddToCart`** — passed the raw `product` to `addToCart()`. The card *displays* `product.price + product.profit` (cost + profit = Rs 2,550) but `addToCart` snapshots `product.price` (cost only = Rs 2,250). So clicking "Add to cart" from a card stored a price that didn't match what the user just saw.
+2. **`useCartValidation.livePrice`** — set `livePrice = product.price`, dropping `product.profit`. Even after a fresh refetch, the live total was the bare cost, not the selling price. This also produced a phantom "Price dropped from Rs 2,550 to Rs 2,250" message on every cart load.
+3. **`useCartValidation` out-of-stock logic** — treated `liveStock === 0` as a hard "out of stock" signal. But `stock` is an *optional* numeric counter; the form defaults it to `0` and there is no admin UI to edit it. The source of truth for purchasability is the `inStock` boolean (Availability toggle), not the count. So every product without explicit count tracking appeared out of stock.
+
+### Fixes
+- `client/src/components/product/ProductCard.tsx` — `handleAddToCart` now passes `{ ...product, price: product.price + (product.profit || 0) }`.
+- `client/src/hooks/use-cart-validation.ts` —
+  - `livePrice = product.price + (product.profit || 0)` so the live value matches both the snapshot and the product page.
+  - Renamed local `liveStock` source → `trackedStock`, only set when `product.stock` is a positive number. `stock <= 0` is now treated as "not tracked" rather than "out of stock".
+  - `out-of-stock` issue only fires on `product.inStock === false`. Stock-count branches (low-stock, quantity clamp) only run when `trackedStock !== null`.
+
+### Files Changed
+- `client/src/components/product/ProductCard.tsx`
+- `client/src/hooks/use-cart-validation.ts`

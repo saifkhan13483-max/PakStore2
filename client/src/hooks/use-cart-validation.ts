@@ -115,8 +115,25 @@ export function useCartValidation(): CartValidationResult {
         );
         isBlocked = true;
       } else if (product) {
-        livePrice = product.price;
-        liveStock = typeof product.stock === 'number' ? product.stock : null;
+        // The selling price the customer was shown = cost + profit. The cart
+        // snapshot already stores this combined value (see ProductCard /
+        // ProductDetail addToCart flow), so we MUST compare against the same
+        // combined value here, otherwise every cart shows a fake "price
+        // dropped" notice and totals don't match the product page.
+        livePrice = product.price + (product.profit || 0);
+
+        // `stock` is an OPTIONAL quantity counter that admins can use if they
+        // want fine-grained inventory tracking. It defaults to 0 in the form
+        // and most products never set it. We must NOT treat `stock === 0` as
+        // "out of stock" — the source of truth for purchasability is the
+        // `inStock` boolean (Availability toggle in admin). `stock` only
+        // matters as a low-stock / quantity-cap signal when admin has set it
+        // to a positive number.
+        const trackedStock =
+          typeof product.stock === 'number' && product.stock > 0
+            ? product.stock
+            : null;
+        liveStock = trackedStock;
 
         if (product.active === false) {
           issues.push(
@@ -128,7 +145,7 @@ export function useCartValidation(): CartValidationResult {
             )
           );
           isBlocked = true;
-        } else if (product.inStock === false || liveStock === 0) {
+        } else if (product.inStock === false) {
           issues.push(
             buildIssue(
               item.productId,
@@ -139,28 +156,28 @@ export function useCartValidation(): CartValidationResult {
             )
           );
           isBlocked = true;
-        } else if (liveStock !== null && liveStock < item.quantity) {
+        } else if (trackedStock !== null && trackedStock < item.quantity) {
           issues.push(
             buildIssue(
               item.productId,
               'low-stock',
-              `Only ${liveStock} left in stock — your quantity will be adjusted.`,
+              `Only ${trackedStock} left in stock — your quantity will be adjusted.`,
               'warning',
-              { availableStock: liveStock }
+              { availableStock: trackedStock }
             )
           );
         } else if (
-          liveStock !== null &&
-          liveStock <= LOW_STOCK_THRESHOLD &&
-          liveStock >= item.quantity
+          trackedStock !== null &&
+          trackedStock <= LOW_STOCK_THRESHOLD &&
+          trackedStock >= item.quantity
         ) {
           issues.push(
             buildIssue(
               item.productId,
               'low-stock',
-              `Hurry — only ${liveStock} left in stock.`,
+              `Hurry — only ${trackedStock} left in stock.`,
               'info',
-              { availableStock: liveStock }
+              { availableStock: trackedStock }
             )
           );
         }

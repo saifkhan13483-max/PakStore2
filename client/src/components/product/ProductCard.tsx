@@ -79,7 +79,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    addToCart(product);
+    // The card *displays* `product.price + product.profit` (the selling price),
+    // so we MUST add the same value to the cart. Passing raw `product` would
+    // store the bare cost and cause the cart to show a different (lower) price
+    // than the card. See useCartValidation for the matching live-price math.
+    const sellingPrice = product.price + (product.profit || 0);
+    addToCart({ ...product, price: sellingPrice } as typeof product);
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
