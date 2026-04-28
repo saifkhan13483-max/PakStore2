@@ -589,3 +589,34 @@ User reported a product that was clearly Available in admin (toggle ON, selling 
 ### Files Changed
 - `client/src/components/product/ProductCard.tsx`
 - `client/src/hooks/use-cart-validation.ts`
+
+## Phase 13 — Production Chatbot Had No Key/Model Fallback (April 28, 2026)
+
+User reported PakBot widget on the deployed site (pakcart.store, Vercel) constantly falling back to the friendly "Abhi connection mein thori mushkil aa rahi hai…" message and pointing customers at the WhatsApp number. Local dev worked fine. Earlier work (Phase 7-ish) hardened `/api/ai` with multi-key + multi-model fallback in both the dev proxy and `api/ai.ts`, but **nobody touched `api/chat.ts`** — and the chat widget calls `/api/chat`, not `/api/ai`.
+
+### Root Cause
+`api/chat.ts` was the original single-key, single-model handler:
+- Read only `GEMINI_API_KEY` (ignored `_B`, `_C`, `_D`, `_E`, `_F`).
+- Hardcoded `gemini-2.5-flash` with no degradation path.
+- No rate-limit / perm-denied / transient-server retry — any non-2xx returned straight back to the client.
+
+From Pakistan, individual Gemini keys frequently 403 / 429, so the very first failure caused the widget's catch block to render the friendly fallback. All three keys configured in Vercel were sitting unused.
+
+Local dev was fine because the vite middleware (`/api/chat` → `geminiProxy`) already cycles through every key and every model.
+
+### Fix
+- **`api/_gemini.ts` (new)** — Vercel skips files prefixed with `_`, so this is a private helper. Centralised the key list, model fallback chain (`2.5-flash → 2.5-flash-lite → 2.0-flash`), `callGeminiWithFallback` loop (recoverable: 401/403/429/500/502/503/504 + empty-finish; non-recoverable: 400 etc.), and `extractRetryAfter`.
+- **`api/chat.ts`** — rewritten to use the helper. Now:
+  - Cycles through every `GEMINI_API_KEY*` env var.
+  - Falls back across the 3-model chain.
+  - Returns specific error copy (`rate-limited on every fallback model` / `denied by Google on every fallback model` / `finishReason=...`) so failures are debuggable from the browser network tab instead of a generic widget toast.
+  - Handles empty user-message lists with a 400 instead of dispatching nothing.
+- **`api/ai.ts`** — refactored to import the same helper instead of re-implementing the loop. Behaviour unchanged; ~120 lines of duplicated code removed.
+
+### Files Changed
+- `api/_gemini.ts` (new shared helper, not deployed as an endpoint)
+- `api/chat.ts` (full rewrite)
+- `api/ai.ts` (deduped — behaviour unchanged)
+
+### Deployment
+This fix is server-side and only takes effect when Vercel redeploys. Push `main` to GitHub (or trigger a deploy in the Vercel dashboard). After redeploy, PakBot on `pakcart.store` will quietly cycle through all three keys + three models before ever showing the WhatsApp fallback message.
