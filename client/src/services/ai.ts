@@ -546,14 +546,26 @@ MULTI-IMAGE & VARIANT DETECTION (CRITICAL):
 - If multiple images clearly show the SAME product in different colors, sizes, or finishes, treat them as ONE product with VARIANTS — not as separate products.
 - The product name describes the single item (e.g. "2-Piece Romper Maxi & Front-Open Shirt"). Do NOT include a color/variant in the product name itself.
 
-A product may have MULTIPLE variant axes simultaneously. Detect every axis that applies:
-  • COLOR axis — derive ONE entry per product image, in the SAME ORDER as the images. Use simple 1-word color names (Pink, Maroon, Teal Green, Black, Royal Blue, etc.). NEVER combine two attributes ("White & Teal" is wrong — pick the dominant single color).
-  • SIZE axis — extract ONLY from the seller's text/Product Details (NOT from images). Look for explicit size lists like "S/M/L/XL", "Free Size", numeric sizes (28/30/32/34/36/38), or age-based sizes ("32 size 8-10 Years"). Output one entry per size, kept SHORT (e.g. "32 (8-10Y)", "M", "Free Size"). If the text mentions a size only as an offer ("Available in Small Size on Demand") still include it.
-  • MATERIAL / PATTERN / STYLE axes — only if the seller's text or images clearly enumerate multiple options.
+A product may have MULTIPLE variant axes simultaneously. Detect every axis that applies — but be CONSERVATIVE. An axis is only worth listing when it has 2 OR MORE distinct options.
+
+  • COLOR axis — derive ONE entry per product image, in the SAME ORDER as the images. Use simple 1-word color names (Pink, Maroon, Teal Green, Black, Royal Blue, etc.). NEVER combine two attributes ("White & Teal" is wrong — pick the dominant single color). If only one product image is given, do NOT add a Color axis.
+
+  • SIZE axis — extract ONLY from the seller's text/Product Details (NOT from images). ONLY add a Size axis when the text EXPLICITLY enumerates TWO OR MORE distinct sizes. Examples that DO qualify:
+      – "Available in S, M, L, XL" → Size: S, M, L, XL
+      – "(32 size 8-10 Years), (34 size 10-12 Years), (36 size 13-15 Years)" → Size: 32 (8-10Y), 34 (10-12Y), 36 (13-15Y)
+      – "Sizes 28 30 32 34" → Size: 28, 30, 32, 34
+    Examples that do NOT qualify (DO NOT add a Size axis for these):
+      – "Chest Size 21/22" — this is a single measurement range for ONE garment, NOT two sizes.
+      – "Free Size" or "One Size" alone — keep this as a spec line in Product Details only.
+      – A single set of measurements like "Chest 18, Length 38" — that describes one size; do not invent variants.
+      – "Available on Demand" mentions where no concrete sizes are listed.
+    When in doubt, OMIT the Size axis. A single-option Size variant adds clutter, never value.
+
+  • MATERIAL / PATTERN / STYLE axes — only when the seller's text or images clearly enumerate 2+ distinct options.
 
 Rules per axis:
 - For COLOR: number of entries MUST equal the number of product images, in image order.
-- For SIZE and other text-derived axes: number of entries equals what the text actually lists. Do not pad or invent sizes.
+- For SIZE and other text-derived axes: number of entries equals what the text actually lists. Never pad or invent sizes. Never output a Size axis with only 1 option.
 - Use plain everyday names a Pakistani shopper would recognize. Avoid flowery terms.
 - If genuinely no variants exist (single image, no size/material list in text), output "No variants specified" under Variant Groups.
 
@@ -742,9 +754,13 @@ export async function generateFullProductContent(
         .split(/[,/、]|\s{2,}/)
         .map((s) => stripInlineMarkdown(s).replace(/^["']|["']$/g, "").trim())
         .filter((s) => s.length > 0 && !/^no variants specified$/i.test(s));
-      if (opts.length > 0) {
-        variantGroups.push({ type, options: opts });
-      }
+      if (opts.length === 0) continue;
+      // A variant axis with only 1 option (e.g. "Size: Free Size") is not a real
+      // variant — it's a spec. Drop it unless it's the Color axis whose option
+      // count is intentionally tied to image count.
+      const isColor = /^colou?r$/i.test(type);
+      if (!isColor && opts.length < 2) continue;
+      variantGroups.push({ type, options: opts });
     }
   }
   if (variantGroups.length === 0) {
