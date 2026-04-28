@@ -109,10 +109,18 @@ async function callGeminiWithFallback(
           continue;
         }
 
-        const isRateLimit = geminiRes.status === 429 || geminiRes.status === 503;
-        console.warn(`[AI] ${model} key #${i + 1} failed (${geminiRes.status}${isRateLimit ? " rate-limited" : ""}):`, data.error?.message ?? "unknown");
+        const status = geminiRes.status;
+        const reason = data?.error?.status ?? "";
+        const isRateLimit = status === 429 || status === 503;
+        const isAuthOrPermDenied = status === 401 || status === 403;
+        const isTransientServer = status === 500 || status === 502 || status === 504;
+        const isRecoverable = isRateLimit || isAuthOrPermDenied || isTransientServer;
+        console.warn(
+          `[AI] ${model} key #${i + 1} failed (${status} ${reason}${isRateLimit ? " rate-limited" : isAuthOrPermDenied ? " perm-denied" : ""}):`,
+          data.error?.message ?? "unknown"
+        );
 
-        if (!isRateLimit) {
+        if (!isRecoverable) {
           allRecoverable = false;
           break;
         }
@@ -204,6 +212,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       } else if (status === 429 || status === 503) {
         friendlyMsg = `All ${keys.length} Gemini API key(s) are rate-limited on every fallback model${retryAfter ? `. Try again in ~${retryAfter}s.` : "."} Add another GEMINI_API_KEY_B/C/D… to increase capacity. (${baseMsg})`;
+      } else if (status === 401 || status === 403) {
+        friendlyMsg = `All ${keys.length} Gemini API key(s) were denied by Google on every fallback model. Common causes: (1) the API key's Google Cloud project is in a country/region where Gemini API is unavailable — create the keys at https://aistudio.google.com from a supported region; (2) the project has billing or admin restrictions; (3) the key was revoked. Generate fresh keys at https://aistudio.google.com/app/apikey and replace GEMINI_API_KEY / GEMINI_API_KEY_B / GEMINI_API_KEY_C in Replit Secrets. (${baseMsg})`;
       } else {
         friendlyMsg = baseMsg;
       }
