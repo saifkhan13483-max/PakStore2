@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
-import { AlertCircle, TrendingUp, TrendingDown, PackageX } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, PackageX, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SHIPPING_THRESHOLD = 10000;
@@ -147,10 +147,13 @@ export function OrderSummary() {
               <span>Rs. {shippingCharges.toLocaleString()}</span>
             )}
           </div>
-          {shippingCharges > 0 && (
-            <p className="text-[9px] text-muted-foreground text-right">
-              Free over Rs. {SHIPPING_THRESHOLD.toLocaleString()}
-            </p>
+          {shippingCharges > 0 && subtotal > 0 && (
+            <div className="flex items-start gap-1.5 rounded-md bg-emerald-50 border border-emerald-100 px-2 py-1.5 text-[10px] text-emerald-800" data-testid="text-free-shipping-progress">
+              <Truck className="w-3 h-3 mt-0.5 flex-shrink-0" />
+              <span>
+                Add <strong>Rs. {(SHIPPING_THRESHOLD - subtotal).toLocaleString()}</strong> more to get <strong>FREE</strong> shipping!
+              </span>
+            </div>
           )}
         </div>
 
@@ -161,6 +164,11 @@ export function OrderSummary() {
           <span className="text-lg font-bold text-primary" data-testid="text-summary-total">
             Rs. {total.toLocaleString()}
           </span>
+        </div>
+
+        <div className="flex items-center justify-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
+          <Truck className="w-3 h-3" />
+          <span>Cash on Delivery · Delivers in 3-5 business days</span>
         </div>
       </CardContent>
     </Card>

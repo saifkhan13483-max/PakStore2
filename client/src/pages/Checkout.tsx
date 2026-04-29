@@ -5,11 +5,11 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet, AlertCircle, MapPin } from "lucide-react";
+import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet, AlertCircle, MapPin, ArrowLeft, ShieldCheck, MessageSquare } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
@@ -263,6 +263,27 @@ export default function Checkout() {
         </Alert>
       )}
 
+      {step === "info" && (
+        <Link
+          href="/cart"
+          className="inline-flex items-center gap-1.5 text-sm text-emerald-800 hover:text-emerald-900 hover:underline mb-4"
+          data-testid="link-back-to-cart-top"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Cart
+        </Link>
+      )}
+
+      {step === "info" && (
+        <Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-900" data-testid="alert-cod-reassurance">
+          <ShieldCheck className="h-4 w-4 !text-emerald-700" />
+          <AlertTitle className="text-emerald-900 font-semibold">Cash on Delivery — pay only when you receive</AlertTitle>
+          <AlertDescription className="text-emerald-800 text-xs">
+            No advance payment needed. Just fill in your details below and we'll deliver to your doorstep in 3–5 business days.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
         {/* Left Column: Forms */}
         <div className="lg:col-span-8 space-y-6">
@@ -288,12 +309,15 @@ export default function Checkout() {
                               </FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder="Enter your full name" 
+                                  placeholder="e.g. Ahmed Khan" 
                                   className="focus-visible:ring-emerald-800"
                                   {...field} 
                                   data-testid="input-fullname" 
                                 />
                               </FormControl>
+                              <FormDescription className="text-xs">
+                                The name our courier will ask for at delivery.
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -331,6 +355,9 @@ export default function Checkout() {
                                     />
                                   </div>
                                 </FormControl>
+                                <FormDescription className="text-xs">
+                                  10-digit mobile starting with 3 (e.g. 3001234567). No leading zero.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             );
@@ -353,7 +380,9 @@ export default function Checkout() {
                           name="address"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-emerald-900 font-medium">Complete Street Address</FormLabel>
+                              <FormLabel className="text-emerald-900 font-medium">
+                                Complete Street Address <span className="text-red-500">*</span>
+                              </FormLabel>
                               <FormControl>
                                 <Textarea 
                                   placeholder="House #, Street Name, Sector/Block, Landmark" 
@@ -362,6 +391,9 @@ export default function Checkout() {
                                   data-testid="textarea-address"
                                 />
                               </FormControl>
+                              <FormDescription className="text-xs">
+                                The more detail, the faster we deliver. Include house/flat number, street, and sector or block.
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -373,19 +405,22 @@ export default function Checkout() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-emerald-900 font-medium">
-                                  Nearest famous place <span className="text-red-500">*</span>
+                                  Nearest Landmark <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700 pointer-events-none" />
                                     <Input
-                                      placeholder="Famous place/masjid/school"
+                                      placeholder="e.g. near Jamia Masjid / XYZ School"
                                       className="pl-9 focus-visible:ring-emerald-800"
                                       {...field}
                                       data-testid="input-area"
                                     />
                                   </div>
                                 </FormControl>
+                                <FormDescription className="text-xs">
+                                  A well-known place near your home — helps the courier find you.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -400,17 +435,45 @@ export default function Checkout() {
                                 </FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="Enter your city"
+                                    placeholder="e.g. Lahore, Karachi, Islamabad"
                                     className="focus-visible:ring-emerald-800"
                                     data-testid="input-city"
                                     {...field}
                                   />
                                 </FormControl>
+                                <FormDescription className="text-xs">
+                                  We deliver to every city across Pakistan.
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
                         </div>
+
+                        <FormField
+                          control={form.control}
+                          name="notes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-emerald-900 font-medium flex items-center gap-1.5">
+                                <MessageSquare className="w-4 h-4" />
+                                Special Instructions <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="e.g. Call before delivery, deliver after 5 PM, gift wrap please…"
+                                  className="min-h-[70px] resize-none focus-visible:ring-emerald-800"
+                                  {...field}
+                                  data-testid="textarea-notes"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-xs">
+                                Any delivery preferences or notes for the rider.
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -458,38 +521,48 @@ export default function Checkout() {
                 </Card>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                {step === "payment" && (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="flex-1 border-emerald-800 text-emerald-800 hover:bg-emerald-50"
-                    onClick={() => setStep("info")}
+              <div className="space-y-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {step === "payment" && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="flex-1 border-emerald-800 text-emerald-800 hover:bg-emerald-50"
+                      onClick={() => setStep("info")}
+                      data-testid="button-back-to-shipping"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" />
+                      Back to Shipping
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    className={`flex-[2] bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-6 ${
+                      isSubmitting ? "opacity-80" : ""
+                    }`}
+                    disabled={
+                      isSubmitting ||
+                      (step === "payment" && (validation.hasBlockingIssue || validation.isValidating))
+                    }
+                    data-testid={step === "info" ? "button-continue-payment" : "button-complete-order"}
                   >
-                    Back to Shipping
+                    {isSubmitting
+                      ? "Processing..."
+                      : step === "info"
+                        ? "Continue to Payment"
+                        : validation.hasBlockingIssue
+                          ? "Resolve issues to continue"
+                          : validation.isValidating
+                            ? "Verifying cart..."
+                            : "Place Order (Cash on Delivery)"}
                   </Button>
-                )}
-                <Button
-                  type="submit"
-                  className={`flex-[2] bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-6 ${
-                    isSubmitting ? "opacity-80" : ""
-                  }`}
-                  disabled={
-                    isSubmitting ||
-                    (step === "payment" && (validation.hasBlockingIssue || validation.isValidating))
-                  }
-                  data-testid={step === "info" ? "button-continue-payment" : "button-complete-order"}
-                >
-                  {isSubmitting
-                    ? "Processing..."
-                    : step === "info"
-                      ? "Continue to Payment"
-                      : validation.hasBlockingIssue
-                        ? "Resolve issues to continue"
-                        : validation.isValidating
-                          ? "Verifying cart..."
-                          : "Complete Order"}
-                </Button>
+                </div>
+                <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                  {step === "info"
+                    ? "You'll review your order on the next step before placing it. No payment now."
+                    : "Your order will be confirmed instantly. Pay cash when it arrives at your door."}
+                </p>
               </div>
             </form>
           </Form>
