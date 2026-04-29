@@ -1,6 +1,12 @@
 {
   "version": 2,
   "buildCommand": "npm run build && node scripts/generate-seo-html.mjs",
+  "functions": {
+    "api/*.ts": {
+      "runtime": "@vercel/node@5.7.13",
+      "maxDuration": 30
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
