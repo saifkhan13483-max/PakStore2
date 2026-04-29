@@ -20,16 +20,16 @@ import SEO from "@/components/SEO";
 import { sendOrderEmailNotification } from "@/lib/notifications";
 
 const checkoutInfoSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
+  fullName: z.string().min(2, "Poora naam zaroori hai"),
   phone: z
     .string()
     .regex(
       /^\+923\d{9}$/,
-      "Enter a valid Pakistani mobile number, e.g. +923001234567"
+      "Sahi Pakistani mobile number darj karein, jaise +923001234567"
     ),
-  address: z.string().min(10, "Full address is required"),
-  area: z.string().min(2, "Nearest famous place is required"),
-  city: z.string().min(2, "City is required"),
+  address: z.string().min(10, "Mukammal pata zaroori hai"),
+  area: z.string().min(2, "Qareeb ka mashhoor maqaam zaroori hai"),
+  city: z.string().min(2, "Shehar ka naam zaroori hai"),
   notes: z.string().optional(),
 });
 
@@ -48,7 +48,7 @@ export default function Checkout() {
   const seoElement = (
     <SEO 
       title="Checkout" 
-      description="Complete your purchase securely"
+      description="Apna order aram aur mehfooz tareeqe se mukammal karein — Cash on Delivery"
       robots="noindex,follow"
     />
   );
@@ -77,9 +77,9 @@ export default function Checkout() {
     // last line of defence before we write to the orders collection.
     if (validation.hasBlockingIssue) {
       toast({
-        title: "Cart needs your attention",
+        title: "Cart pe dhyan dein",
         description:
-          "One or more items are out of stock or no longer available. Please update your cart and try again.",
+          "Cart ki ek ya zyada items stock mein nahi hain ya available nahi hain. Cart update karke dobara koshish karein.",
         variant: "destructive",
       });
       setLocation("/cart");
@@ -87,8 +87,8 @@ export default function Checkout() {
     }
     if (validation.isValidating) {
       toast({
-        title: "Verifying your cart",
-        description: "Please wait a moment while we confirm the latest prices and stock.",
+        title: "Cart verify ho raha hai",
+        description: "Thora intezar karein — hum latest qeematein aur stock confirm kar rahe hain.",
       });
       return;
     }
@@ -145,8 +145,8 @@ export default function Checkout() {
       const result = await addDocument("orders", orderData, insertOrderSchema);
 
       toast({
-        title: "Order Placed Successfully!",
-        description: `Thank you for shopping with us. Your order ID is #${result}`,
+        title: "Order Kamyab Ho Gaya!",
+        description: `Shukriya hum se shopping karne ka. Aap ka order ID hai #${result}`,
       });
 
       const notificationData = {
@@ -175,8 +175,8 @@ export default function Checkout() {
     } catch (error: any) {
       console.error("Order error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
+        title: "Masla Aaya",
+        description: error.message || "Kuch ghalat ho gaya. Meherbani kar ke dobara koshish karein.",
         variant: "destructive",
       });
     } finally {
@@ -186,9 +186,9 @@ export default function Checkout() {
 
   const steps = [
     { id: "cart", label: "Cart", icon: ShoppingCart, href: "/cart" },
-    { id: "info", label: "Information", icon: Info, active: step === "info", completed: step === "payment" },
+    { id: "info", label: "Maloomat", icon: Info, active: step === "info", completed: step === "payment" },
     { id: "payment", label: "Payment", icon: CreditCard, active: step === "payment" },
-    { id: "confirmation", label: "Confirmation", icon: CheckCircle },
+    { id: "confirmation", label: "Tasdeeq", icon: CheckCircle },
   ];
 
   if (items.length === 0) {
@@ -196,9 +196,9 @@ export default function Checkout() {
       <>
         {seoElement}
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4 text-emerald-900">Your cart is empty</h1>
+          <h1 className="text-2xl font-bold mb-4 text-emerald-900">Aap ka cart khaali hai</h1>
           <Button asChild className="bg-emerald-800 hover:bg-emerald-900">
-            <Link href="/products">Go to Shop</Link>
+            <Link href="/products">Shopping Shuru Karein</Link>
           </Button>
         </div>
       </>
@@ -253,11 +253,11 @@ export default function Checkout() {
       {validation.hasBlockingIssue && (
         <Alert variant="destructive" className="mb-6" data-testid="alert-checkout-blocking">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Some items can't be ordered right now</AlertTitle>
+          <AlertTitle>Kuch items abhi order nahi ho saktay</AlertTitle>
           <AlertDescription className="text-xs">
-            Please return to your cart to remove or replace unavailable items before completing your order.
+            Order mukammal karne se pehle Cart mein wapas jaen aur jo items available nahi hain unhein nikal dein ya badal dein.
             <Link href="/cart" className="ml-2 underline font-medium" data-testid="link-back-to-cart">
-              Back to cart
+              Cart pe wapas jaen
             </Link>
           </AlertDescription>
         </Alert>
@@ -270,16 +270,16 @@ export default function Checkout() {
           data-testid="link-back-to-cart-top"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Cart
+          Cart pe wapas jaen
         </Link>
       )}
 
       {step === "info" && (
         <Alert className="mb-6 border-emerald-200 bg-emerald-50 text-emerald-900" data-testid="alert-cod-reassurance">
           <ShieldCheck className="h-4 w-4 !text-emerald-700" />
-          <AlertTitle className="text-emerald-900 font-semibold">Cash on Delivery — pay only when you receive</AlertTitle>
+          <AlertTitle className="text-emerald-900 font-semibold">Cash on Delivery — sirf order milne pe paisay dein</AlertTitle>
           <AlertDescription className="text-emerald-800 text-xs">
-            No advance payment needed. Just fill in your details below and we'll deliver to your doorstep in 3–5 business days.
+            Abhi koi payment nahi karni. Sirf neeche apni details bhar dein — 3 se 5 din mein order aap ke ghar pohonch jaye ga.
           </AlertDescription>
         </Alert>
       )}
@@ -296,7 +296,7 @@ export default function Checkout() {
                     <CardContent className="p-6">
                       <div className="flex items-center gap-2 mb-6 text-emerald-900">
                         <Info className="w-5 h-5" />
-                        <h2 className="text-xl font-bold">Contact Information</h2>
+                        <h2 className="text-xl font-bold">Raabta Maloomat</h2>
                       </div>
                       <div className="space-y-4">
                         <FormField
@@ -305,18 +305,18 @@ export default function Checkout() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-emerald-900 font-medium">
-                                Full Name <span className="text-red-500">*</span>
+                                Poora Naam <span className="text-red-500">*</span>
                               </FormLabel>
                               <FormControl>
                                 <Input 
-                                  placeholder="e.g. Ahmed Khan" 
+                                  placeholder="Misal: Ahmed Khan" 
                                   className="focus-visible:ring-emerald-800"
                                   {...field} 
                                   data-testid="input-fullname" 
                                 />
                               </FormControl>
                               <FormDescription className="text-xs">
-                                The name our courier will ask for at delivery.
+                                Yehi naam courier delivery ke waqt poochhe ga.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -356,7 +356,7 @@ export default function Checkout() {
                                   </div>
                                 </FormControl>
                                 <FormDescription className="text-xs">
-                                  10-digit mobile starting with 3 (e.g. 3001234567). No leading zero.
+                                  10 digits ka mobile number jo 3 se shuru hota hai (jaise 3001234567). Shuru mein zero (0) na lagaen.
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -372,7 +372,7 @@ export default function Checkout() {
                     <CardContent className="p-6">
                       <div className="flex items-center gap-2 mb-6 text-emerald-900">
                         <ShoppingCart className="w-5 h-5" />
-                        <h2 className="text-xl font-bold">Shipping Address</h2>
+                        <h2 className="text-xl font-bold">Delivery ka Pata</h2>
                       </div>
                       <div className="space-y-4">
                         <FormField
@@ -381,18 +381,18 @@ export default function Checkout() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-emerald-900 font-medium">
-                                Complete Street Address <span className="text-red-500">*</span>
+                                Mukammal Pata <span className="text-red-500">*</span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea 
-                                  placeholder="House #, Street Name, Sector/Block, Landmark" 
+                                  placeholder="Ghar #, Street ka naam, Sector/Block, Landmark" 
                                   className="min-h-[100px] resize-none focus-visible:ring-emerald-800"
                                   {...field} 
                                   data-testid="textarea-address"
                                 />
                               </FormControl>
                               <FormDescription className="text-xs">
-                                The more detail, the faster we deliver. Include house/flat number, street, and sector or block.
+                                Jitni detail dein gay, delivery utni jaldi hogi. Ghar/flat ka number, street, aur sector ya block zaroor likhain.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -405,13 +405,13 @@ export default function Checkout() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-emerald-900 font-medium">
-                                  Nearest Landmark <span className="text-red-500">*</span>
+                                  Qareeb ka Mashhoor Maqaam <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700 pointer-events-none" />
                                     <Input
-                                      placeholder="e.g. near Jamia Masjid / XYZ School"
+                                      placeholder="Misal: Jamia Masjid / XYZ School ke paas"
                                       className="pl-9 focus-visible:ring-emerald-800"
                                       {...field}
                                       data-testid="input-area"
@@ -419,7 +419,7 @@ export default function Checkout() {
                                   </div>
                                 </FormControl>
                                 <FormDescription className="text-xs">
-                                  A well-known place near your home — helps the courier find you.
+                                  Aap ke ghar ke qareeb koi mashhoor jagah — courier ko aap ka ghar dhundhne mein madad milti hai.
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -431,18 +431,18 @@ export default function Checkout() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-emerald-900 font-medium">
-                                  City <span className="text-red-500">*</span>
+                                  Shehar <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="e.g. Lahore, Karachi, Islamabad"
+                                    placeholder="Misal: Lahore, Karachi, Islamabad"
                                     className="focus-visible:ring-emerald-800"
                                     data-testid="input-city"
                                     {...field}
                                   />
                                 </FormControl>
                                 <FormDescription className="text-xs">
-                                  We deliver to every city across Pakistan.
+                                  Hum poore Pakistan mein har shehar tak delivery karte hain.
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
@@ -457,18 +457,18 @@ export default function Checkout() {
                             <FormItem>
                               <FormLabel className="text-emerald-900 font-medium flex items-center gap-1.5">
                                 <MessageSquare className="w-4 h-4" />
-                                Special Instructions <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
+                                Khaas Hidayat <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea
-                                  placeholder="e.g. Call before delivery, deliver after 5 PM, gift wrap please…"
+                                  placeholder="Misal: Delivery se pehle call karein, 5 baje ke baad lain, gift wrap kar dein…"
                                   className="min-h-[70px] resize-none focus-visible:ring-emerald-800"
                                   {...field}
                                   data-testid="textarea-notes"
                                 />
                               </FormControl>
                               <FormDescription className="text-xs">
-                                Any delivery preferences or notes for the rider.
+                                Rider ke liye koi bhi hidayat ya delivery ke baray mein note.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -484,7 +484,7 @@ export default function Checkout() {
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-6 text-emerald-900">
                       <CreditCard className="w-5 h-5" />
-                      <h2 className="text-xl font-bold">Payment Method</h2>
+                      <h2 className="text-xl font-bold">Payment ka Tareeqa</h2>
                     </div>
                     
                     <RadioGroup defaultValue="cod" className="space-y-4">
@@ -494,7 +494,7 @@ export default function Checkout() {
                           <Wallet className="w-6 h-6 text-emerald-800" />
                           <div>
                             <p className="font-bold text-emerald-900">Cash on Delivery (COD)</p>
-                            <p className="text-sm text-muted-foreground">Pay with cash upon delivery to your doorstep.</p>
+                            <p className="text-sm text-muted-foreground">Apne darwazay pe order milne pe cash dein.</p>
                           </div>
                         </label>
                       </div>
@@ -504,8 +504,8 @@ export default function Checkout() {
                         <label htmlFor="card" className="flex flex-1 items-center gap-3 cursor-not-allowed">
                           <CreditCard className="w-6 h-6 text-muted-foreground" />
                           <div>
-                            <p className="font-bold text-muted-foreground">Online Payment (Coming Soon)</p>
-                            <p className="text-sm text-muted-foreground">Debit/Credit Card, JazzCash, or EasyPaisa.</p>
+                            <p className="font-bold text-muted-foreground">Online Payment (Jald Aane Wala)</p>
+                            <p className="text-sm text-muted-foreground">Debit/Credit Card, JazzCash, ya EasyPaisa.</p>
                           </div>
                         </label>
                       </div>
@@ -514,7 +514,7 @@ export default function Checkout() {
                     <div className="mt-8 p-4 bg-emerald-50 rounded-lg border border-emerald-100 flex gap-3 text-emerald-800">
                       <Info className="w-5 h-5 flex-shrink-0" />
                       <p className="text-sm">
-                        By clicking "Complete Order", you agree to our Terms of Service and Privacy Policy. Your order will be processed and delivered within 3-5 business days.
+                        "Order Confirm Karein" pe click karne ka matlab hai aap hamari Terms of Service aur Privacy Policy se ittefaaq karte hain. Aap ka order 3 se 5 din mein deliver ho jaye ga.
                       </p>
                     </div>
                   </CardContent>
@@ -532,7 +532,7 @@ export default function Checkout() {
                       data-testid="button-back-to-shipping"
                     >
                       <ArrowLeft className="w-4 h-4 mr-1" />
-                      Back to Shipping
+                      Maloomat pe wapas jaen
                     </Button>
                   )}
                   <Button
@@ -547,21 +547,21 @@ export default function Checkout() {
                     data-testid={step === "info" ? "button-continue-payment" : "button-complete-order"}
                   >
                     {isSubmitting
-                      ? "Processing..."
+                      ? "Process ho raha hai..."
                       : step === "info"
-                        ? "Continue to Payment"
+                        ? "Aagey Barhain — Payment"
                         : validation.hasBlockingIssue
-                          ? "Resolve issues to continue"
+                          ? "Pehle masail hal karein"
                           : validation.isValidating
-                            ? "Verifying cart..."
-                            : "Place Order (Cash on Delivery)"}
+                            ? "Cart verify ho raha hai..."
+                            : "Order Confirm Karein (Cash on Delivery)"}
                   </Button>
                 </div>
                 <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
                   {step === "info"
-                    ? "You'll review your order on the next step before placing it. No payment now."
-                    : "Your order will be confirmed instantly. Pay cash when it arrives at your door."}
+                    ? "Order place karne se pehle aap aglay step pe ek dafa review kar sakte hain. Abhi koi payment nahi karni."
+                    : "Aap ka order foran confirm ho jaye ga. Paisay tab dein jab order aap ke darwazay pe pohonche."}
                 </p>
               </div>
             </form>
