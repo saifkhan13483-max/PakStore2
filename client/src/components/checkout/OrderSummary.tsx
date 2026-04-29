@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getOptimizedImageUrl } from "@/lib/cloudinary";
-import { AlertCircle, TrendingUp, TrendingDown, PackageX, Truck } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, PackageX } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SHIPPING_THRESHOLD = 10000;
@@ -48,14 +48,14 @@ export function OrderSummary() {
   return (
     <Card className="sticky top-24" data-testid="card-order-summary">
       <CardHeader className="py-4">
-        <CardTitle className="text-lg">Order ka Khulasa</CardTitle>
+        <CardTitle className="text-lg">Order Summary</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {hasBlockingIssue && (
           <Alert variant="destructive" data-testid="alert-summary-blocking">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-xs">
-              Ek ya zyada items available nahi hain. Cart pe wapas jaen aur unhein theek karein.
+              One or more items are unavailable. Please return to your cart to resolve them.
             </AlertDescription>
           </Alert>
         )}
@@ -81,7 +81,7 @@ export function OrderSummary() {
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-accent text-accent-foreground text-[10px]">
-                      Tasveer nahi
+                      No image
                     </div>
                   )}
                 </div>
@@ -100,7 +100,7 @@ export function OrderSummary() {
                     </div>
                   )}
                   <div className="flex justify-between text-muted-foreground text-[11px]">
-                    <span>Tadaad: {item.quantity}</span>
+                    <span>Qty: {item.quantity}</span>
                     <span>
                       {priceChanged && (
                         <span className="line-through mr-1 opacity-70">
@@ -136,39 +136,31 @@ export function OrderSummary() {
 
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">Items ki Qeemat</span>
+            <span className="text-muted-foreground">Subtotal</span>
             <span data-testid="text-summary-subtotal">Rs. {subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-muted-foreground">Delivery Charges</span>
+            <span className="text-muted-foreground">Shipping</span>
             {shippingCharges === 0 ? (
-              <span className="text-green-600 font-medium">MUFT</span>
+              <span className="text-green-600 font-medium">FREE</span>
             ) : (
               <span>Rs. {shippingCharges.toLocaleString()}</span>
             )}
           </div>
-          {shippingCharges > 0 && subtotal > 0 && (
-            <div className="flex items-start gap-1.5 rounded-md bg-emerald-50 border border-emerald-100 px-2 py-1.5 text-[10px] text-emerald-800" data-testid="text-free-shipping-progress">
-              <Truck className="w-3 h-3 mt-0.5 flex-shrink-0" />
-              <span>
-                <strong>Rs. {(SHIPPING_THRESHOLD - subtotal).toLocaleString()}</strong> aur add karein aur <strong>MUFT</strong> delivery hasil karein!
-              </span>
-            </div>
+          {shippingCharges > 0 && (
+            <p className="text-[9px] text-muted-foreground text-right">
+              Free over Rs. {SHIPPING_THRESHOLD.toLocaleString()}
+            </p>
           )}
         </div>
 
         <Separator />
 
         <div className="flex justify-between items-center pt-1">
-          <span className="text-base font-bold">Kul Qeemat</span>
+          <span className="text-base font-bold">Total</span>
           <span className="text-lg font-bold text-primary" data-testid="text-summary-total">
             Rs. {total.toLocaleString()}
           </span>
-        </div>
-
-        <div className="flex items-center justify-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
-          <Truck className="w-3 h-3" />
-          <span>Cash on Delivery · 3 se 5 din mein delivery</span>
         </div>
       </CardContent>
     </Card>

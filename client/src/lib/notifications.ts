@@ -9,7 +9,7 @@ const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "";
 export interface OrderNotificationData {
   orderId: string;
   customerName: string;
-  customerEmail?: string;
+  customerEmail: string;
   customerPhone: string;
   customerAddress: string;
   customerCity: string;
