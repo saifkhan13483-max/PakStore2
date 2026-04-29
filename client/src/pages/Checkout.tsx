@@ -21,7 +21,6 @@ import { sendOrderEmailNotification } from "@/lib/notifications";
 
 const checkoutInfoSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Invalid email address"),
   phone: z
     .string()
     .regex(
@@ -58,7 +57,6 @@ export default function Checkout() {
     resolver: zodResolver(checkoutInfoSchema),
     defaultValues: {
       fullName: "",
-      email: "",
       phone: "",
       address: "",
       area: "",
@@ -133,7 +131,6 @@ export default function Checkout() {
         createdAt: new Date(),
         customerInfo: {
           fullName: String(data.fullName),
-          email: String(data.email),
           mobileNumber: String(data.phone),
         },
         shippingAddress: {
@@ -155,7 +152,6 @@ export default function Checkout() {
       const notificationData = {
         orderId: result,
         customerName: data.fullName,
-        customerEmail: data.email,
         customerPhone: data.phone,
         customerAddress: `${data.address}, ${data.area}`,
         customerCity: data.city,
@@ -302,67 +298,44 @@ export default function Checkout() {
                             </FormItem>
                           )}
                         />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => {
+                            const digits = (field.value || "").replace(/^\+92/, "");
+                            return (
                               <FormItem>
                                 <FormLabel className="text-emerald-900 font-medium">
-                                  Email Address <span className="text-red-500">*</span>
+                                  Mobile Number (Pakistan) <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    type="email" 
-                                    placeholder="Enter your email" 
-                                    className="focus-visible:ring-emerald-800"
-                                    {...field} 
-                                    data-testid="input-email" 
-                                  />
+                                  <div className="flex">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground select-none">
+                                      +92
+                                    </span>
+                                    <Input
+                                      type="tel"
+                                      inputMode="numeric"
+                                      placeholder="3001234567"
+                                      maxLength={10}
+                                      className="rounded-l-none focus-visible:ring-emerald-800"
+                                      value={digits}
+                                      onChange={(e) => {
+                                        const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                        field.onChange(onlyDigits ? `+92${onlyDigits}` : "");
+                                      }}
+                                      onBlur={field.onBlur}
+                                      name={field.name}
+                                      ref={field.ref}
+                                      data-testid="input-phone"
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => {
-                              const digits = (field.value || "").replace(/^\+92/, "");
-                              return (
-                                <FormItem>
-                                  <FormLabel className="text-emerald-900 font-medium">
-                                    Mobile Number (Pakistan) <span className="text-red-500">*</span>
-                                  </FormLabel>
-                                  <FormControl>
-                                    <div className="flex">
-                                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground select-none">
-                                        +92
-                                      </span>
-                                      <Input
-                                        type="tel"
-                                        inputMode="numeric"
-                                        placeholder="3001234567"
-                                        maxLength={10}
-                                        className="rounded-l-none focus-visible:ring-emerald-800"
-                                        value={digits}
-                                        onChange={(e) => {
-                                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                          field.onChange(onlyDigits ? `+92${onlyDigits}` : "");
-                                        }}
-                                        onBlur={field.onBlur}
-                                        name={field.name}
-                                        ref={field.ref}
-                                        data-testid="input-phone"
-                                      />
-                                    </div>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        </div>
+                            );
+                          }}
+                        />
                       </div>
                     </CardContent>
                   </Card>

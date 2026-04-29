@@ -111,7 +111,7 @@ export const orderSchema = baseDocumentSchema.extend({
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
   customerInfo: z.object({
     fullName: z.string(),
-    email: z.string().email(),
+    email: z.string().email().optional(),
     mobileNumber: z.string(),
   }),
   shippingAddress: z.object({
