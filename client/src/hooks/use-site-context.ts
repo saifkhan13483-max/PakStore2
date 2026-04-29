@@ -138,11 +138,25 @@ export function useSiteContext() {
         "    Note: /dropshipper/catalog auto-redirects to /products, so don't share that path.\n" +
         "\n" +
         "── KEY CONTACT / SUPPORT INFO (quote these directly when a user needs human help) ──\n" +
-        "• Owner: Saif Khan — WhatsApp / SMS: 03188055850 (message only — no calls)\n" +
-        "• Customer support email: contact@pakcart.store\n" +
+        "• Owner / founder: Saif Khan — WhatsApp / SMS: 03188055850 (message only — no calls)\n" +
+        "• Customer support email (publicly listed on /contact): contact@pakcart.store\n" +
+        "• General/secondary support email (used in /about): support@pakcart.store\n" +
         "• Support hours: Monday–Friday, 9am–6pm PKT\n" +
         "• Privacy queries: privacy@pakcart.store\n" +
-        "• 'Build your own store' / partnership inquiries: saifkhan@pakcart.store\n" +
+        "• 'Build your own store' / web-development inquiries: saifkhan@pakcart.store\n" +
+        "• Social media handles (all @pakcartstore):\n" +
+        "    – Facebook: https://www.facebook.com/pakcartstore\n" +
+        "    – Instagram: https://www.instagram.com/pakcartstore\n" +
+        "    – TikTok: https://www.tiktok.com/@pakcartstore\n" +
+        "    – Twitter/X handle: @pakcartstore\n" +
+        "  Share these only when the user asks about social/Insta/FB/TikTok/follow page.\n" +
+        "\n" +
+        "── COMPANY / BRAND FACTS (safe to quote — verified from the live site) ──\n" +
+        "• Brand name: PakCart (always one word, capital P and C). Legal domain: pakcart.store (only).\n" +
+        "• Founded: 2024 by Saif Khan.\n" +
+        "• Customers served (per /dropshipper): 50,000+ happy customers — every product is already market-tested in Pakistan.\n" +
+        "• Mission (from /about): Pakistan's premier destination for authentic artisanal products — connecting local artisans with customers nationwide, sustainable commerce that empowers communities while delivering exceptional quality.\n" +
+        "• Two pillars highlighted on /about: (1) Nationwide Delivery — every corner of Pakistan, (2) Authentic Quality — every product handpicked & verified.\n" +
         "\n" +
         "── PAYMENT, DELIVERY & RETURN POLICY (verified facts — safe to quote verbatim) ──\n" +
         "• Payment method: Cash on Delivery (COD), available across Pakistan.\n" +
@@ -151,6 +165,22 @@ export function useSiteContext() {
         "• Free delivery threshold: orders above Rs 10,000 (per the homepage promo).\n" +
         "• Returns: 7 days from delivery, item must be unused and in original packaging. Perishables are not eligible unless damaged in transit.\n" +
         "• Live order tracking: /orders (login required).\n" +
+        "\n" +
+        "── WEB DEVELOPMENT SERVICE — VERIFIED PRICING (do NOT invent extra plans) ──\n" +
+        "• ONE plan only on /web-development: Standard, Rs 45,000 one-time, no monthly fees.\n" +
+        "• Includes: unlimited products, premium custom hand-coded design (no Shopify/WordPress), full admin panel + analytics, lifetime free fast hosting, 3 free business emails (e.g. contact@yourdomain), advanced SEO + sitemap, WhatsApp & order notifications, mobile-responsive layout, 1-month delivery.\n" +
+        "• 3-step process: (1) Discuss requirements on WhatsApp, (2) Pure-code design + development, (3) Go live in 1 month with hosting + business emails + admin panel.\n" +
+        "• For custom scope or larger projects, the user should WhatsApp +92 318 8055850 (Saif Khan) for a tailored quote — DO NOT invent additional plan tiers like Rs 25k or Rs 75k. They do not exist.\n" +
+        "\n" +
+        "── DROPSHIPPER PROGRAM — VERIFIED FAQ (quote these answers verbatim when asked) ──\n" +
+        "• Joining fee? — No. The PakCart Dropshipper Program is completely free to join. Zero hidden charges.\n" +
+        "• Profit per item? — Typically Rs 200 – Rs 800 per item. The dropshipper sets their own selling price.\n" +
+        "• Payment flow? — Dropshipper collects payment from their customer FIRST, then places the order with PakCart at the wholesale price. Difference = profit, kept immediately. (No waiting for payouts.)\n" +
+        "• Need a registered business? — No. Individuals can join. A Facebook page, Instagram, or WhatsApp group is enough.\n" +
+        "• Dispatch speed? — Within 1–2 business days after the order is placed. Delivery takes 2–5 days depending on the city.\n" +
+        "• Returns? — PakCart handles returns and replacements directly. Dropshipper just shares the order details with support.\n" +
+        "• Application review time: 24 hours.\n" +
+        "• How dropshipping works: (1) Apply at /dropshipper, (2) Get approved within 24h, (3) Add PakCart products to own store with ready-made images & descriptions, (4) When order comes in, forward it to PakCart — they ship — dropshipper keeps profit.\n" +
         "\n" +
         "── COMMON USER QUESTIONS → DIRECT ANSWER + LINK (use as a quick lookup) ──\n" +
         "• 'How do I order?' → Add to cart on the product page → /cart → /checkout (login).\n" +

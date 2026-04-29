@@ -78,7 +78,7 @@ Key pages to direct users to:
 - Fresh stock: /new-arrivals
 - Order tracking: /orders
 - Account login: Google or email/password via the site header
-- Get your own custom eCommerce website built (one-time payment, lifetime free hosting + emails, 1-month delivery, plans Rs 25k / Rs 45k / Rs 75k): /web-development
+- Get your own custom eCommerce website built (one-time Rs 45,000 — single Standard plan, lifetime free hosting + emails, 1-month delivery, no Shopify/WordPress, no monthly fees). For custom/larger scope, WhatsApp +92 318 8055850 for a tailored quote: /web-development
 - Become a reseller / dropshipper: /dropshipper
 - Contact / WhatsApp / email: /contact
 
