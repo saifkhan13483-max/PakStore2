@@ -28,7 +28,11 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-import { getRandomName, getDiceBearUrl } from "../client/src/lib/seed-data/name-pool";
+import {
+  getGenderMatchedName,
+  getDiceBearUrl,
+  type GenderTarget,
+} from "../client/src/lib/seed-data/name-pool";
 import {
   detectCategory,
   getRealisticRating,
@@ -72,6 +76,43 @@ const db = getFirestore(app);
 function nudgeRating(raw: number, _realAvg: number): number {
   // Keep all seeded ratings positive — no downward nudging
   return raw;
+}
+
+// ---------------------------------------------------------------------------
+// Gender targeting — infers the audience for a product so reviewer names
+// match the buyer demographic. Strong cues take priority; falls back to
+// "unisex" for genuinely neutral items (tech gadgets, household, etc.).
+// ---------------------------------------------------------------------------
+function inferGenderTarget(p: {
+  name: string;
+  description?: string;
+  category?: string;
+}): GenderTarget {
+  const txt = `${p.name ?? ""} ${p.description ?? ""} ${p.category ?? ""}`.toLowerCase();
+
+  // Female cues: clothing, jewelry, women's bags, etc.
+  if (
+    /\b(women|woman|girls?|ladies|female|her|wife|mother|ammi|behen|sister|bridal|abaya|hijab|maxi|kameez|kurta|kurti|lawn|chiffon|organza|dupatta|frock|stitched|3.?piece|jewelry|jewellery|earring|necklace|cuff|ring set|bangle|bracelet|purse|handbag|clutch|tote|crossbody|hand bag|sling)\b/.test(
+      txt
+    )
+  )
+    return "female";
+
+  // Male cues: men's accessories, formal wear, wallets
+  if (
+    /\b(men|man|boys?|male|him|husband|father|brother|gents|gent's|sherwani|wallet|formal shoe|loafer|moccasin|men's watch|mens watch|men watch|beard|trimmer)\b/.test(
+      txt
+    )
+  )
+    return "male";
+
+  // Watches: ladies/girls cue → female, otherwise male (PK market default)
+  if (/watch/.test(txt)) {
+    if (/(ladies|women|girls)/.test(txt)) return "female";
+    return "male";
+  }
+
+  return "unisex";
 }
 
 // ---------------------------------------------------------------------------
@@ -174,9 +215,9 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
       }))
     );
 
-    // Phase 4: cap at 3 seeded if real comments already exist
-    const rawCount = getCommentCount(product);
-    const numComments = realComments.length > 0 ? Math.min(3, rawCount) : rawCount;
+    // Always honor the per-product 8–20 target, regardless of whether
+    // the product already has real comments.
+    const numComments = getCommentCount(product);
 
     // Phase 4: compute real average for rating nudging
     const realAvg =
@@ -186,7 +227,11 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
         : -1;
 
     const category = detectCategory(product);
-    const timestamps = generateClusteredTimestamps(numComments);
+    // 6-month spread (~180 days) with recency bias built into the clusterer
+    const timestamps = generateClusteredTimestamps(numComments, 180);
+
+    // Infer gender targeting so we use the right name pool for this product
+    const genderTarget = inferGenderTarget(product);
 
     // Phase 4: full product context for context hints
     const productCtx: ProductContext = {
@@ -204,11 +249,14 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
       }...`
     );
 
+    // Track names already used on THIS product (for gender-pool helper)
+    const usedOnProduct = new Set<string>();
+
     for (let i = 0; i < numComments; i++) {
-      // Phase 4: smart name picking with retry
-      let selectedName = getRandomName();
+      // Gender-aware name picking with retry (avoids reuse + overuse globally)
+      let selectedName = getGenderMatchedName(genderTarget, usedOnProduct);
       for (let attempt = 0; attempt < 20; attempt++) {
-        const candidate = getRandomName();
+        const candidate = getGenderMatchedName(genderTarget, usedOnProduct);
         if (
           !detector.isNameUsedOnProduct(productId, candidate.name) &&
           !detector.isNameOverused(candidate.name)
@@ -217,6 +265,7 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
           break;
         }
       }
+      usedOnProduct.add(selectedName.name);
 
       const rawRating = getRealisticRating();
       const rating = realAvg >= 0 ? nudgeRating(rawRating, realAvg) : rawRating;

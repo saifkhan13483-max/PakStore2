@@ -115,6 +115,29 @@ export function getRandomName(): SeedName {
   return NAME_POOL[Math.floor(Math.random() * NAME_POOL.length)];
 }
 
+export type GenderTarget = "male" | "female" | "unisex";
+
+/**
+ * Returns a name whose gender matches the product's targeting.
+ *  - "male"   → male names only
+ *  - "female" → female names only
+ *  - "unisex" → mix naturally from the full pool
+ *
+ * Pass an optional `used` set of names already picked for the current product
+ * so the same reviewer name does not appear twice on the same product.
+ */
+export function getGenderMatchedName(
+  target: GenderTarget,
+  used?: Set<string>
+): SeedName {
+  const candidates = NAME_POOL.filter(
+    (n) => target === "unisex" || n.gender === target
+  );
+  const fresh = used ? candidates.filter((n) => !used.has(n.name)) : candidates;
+  const pool = fresh.length > 0 ? fresh : candidates;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 /**
  * Builds a DiceBear avatar URL for a reviewer.
  *

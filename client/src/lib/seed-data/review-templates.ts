@@ -66,14 +66,15 @@ export function getRealisticRating(): number {
 
 /**
  * Returns how many seeded comments to create for a product.
- * Cheaper products tend to have more buyers → more reviews.
+ * Range: 8–20 reviews. Cheaper products skew higher within the range
+ * (more buyers → more reviews) so the catalog never looks uniform.
  */
 export function getCommentCount(product: SeedProduct): number {
   const price = product.price ?? 5000;
-  if (price < 1000) return Math.floor(Math.random() * 3) + 5; // 5-7
-  if (price < 3000) return Math.floor(Math.random() * 3) + 4; // 4-6
-  if (price < 7000) return Math.floor(Math.random() * 3) + 3; // 3-5
-  return Math.floor(Math.random() * 3) + 2;                    // 2-4
+  if (price < 1000) return Math.floor(Math.random() * 6) + 15; // 15-20
+  if (price < 3000) return Math.floor(Math.random() * 6) + 12; // 12-17
+  if (price < 7000) return Math.floor(Math.random() * 6) + 10; // 10-15
+  return Math.floor(Math.random() * 6) + 8;                     //  8-13
 }
 
 // ---------------------------------------------------------------------------
