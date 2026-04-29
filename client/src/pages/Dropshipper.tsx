@@ -704,18 +704,13 @@ export default function Dropshipper() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs sm:text-sm">City *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-city">
-                                <SelectValue placeholder="Select city" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {CITIES.map((c) => (
-                                <SelectItem key={c} value={c}>{c}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter your city"
+                              data-testid="input-city"
+                              {...field}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
