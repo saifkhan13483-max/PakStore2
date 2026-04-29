@@ -17,6 +17,8 @@ export type ProductCategory =
   | "bedsheets"
   | "shoes"
   | "clothing"
+  | "tech"
+  | "jewelry"
   | "general";
 
 export interface SeedProduct {
@@ -34,14 +36,38 @@ export interface SeedProduct {
  * Infers a broad review category from the product's category string or name.
  */
 export function detectCategory(product: SeedProduct): ProductCategory {
+  // Use only the product NAME + category for detection — descriptions often
+  // contain marketing phrases (e.g. "stylish chain like a bracelet") that
+  // cause false positives for jewelry/tech.
   const haystack = `${product.category ?? ""} ${product.name ?? ""}`.toLowerCase();
 
-  if (/bag|purse|handbag|clutch|tote|satchel|pouch/.test(haystack)) return "bags";
-  if (/watch|timepiece|chronograph|wrist/.test(haystack)) return "watches";
-  if (/slipper|chappal|flip.?flop|sandal|mule/.test(haystack)) return "slippers";
-  if (/bedsheet|bed.?sheet|linen|duvet|pillow.?cover|comforter|quilt/.test(haystack)) return "bedsheets";
-  if (/shoe|boot|sneaker|loafer|heel|pump|oxford/.test(haystack)) return "shoes";
-  if (/shirt|kurta|kameez|trouser|dress|suit|fabric|cloth/.test(haystack)) return "clothing";
+  // Smart watches → tech (handle BEFORE the watches branch).
+  if (/\b(smart\s?watches?|smartwatches?|t1000|fitness band)\b/.test(haystack)) return "tech";
+
+  // Regular watches — strong, unambiguous signal.
+  if (/\b(watch(es)?|wrist\s?watch|timepiece|chronograph)\b/.test(haystack)) return "watches";
+
+  // Tech / electronics — speakers, audio, charging, lighting gadgets, etc.
+  if (
+    /\b(speakers?|bluetooth|airpods?|earbuds?|earphones?|headphones?|headsets?|microphones?|karaoke|power\s?banks?|chargers?|usb|wireless|portable|smart\s?bulb|night\s?light|led\s?light|trimmers?|gadgets?|electronic)\b/.test(
+      haystack
+    )
+  )
+    return "tech";
+
+  // Jewelry — rings, necklaces, bangles, jewelry sets etc.
+  if (
+    /\b(jewell?ery|jewelry|necklaces?|earrings?|bangles?|bracelets?|pendants?|locket|cuff(\s?(and|&)\s?ring)?|ring\s?set|bridal\s?set|stone\s?set|pearl\s?set|alphabet\s?letter|clover\s?set)\b/.test(
+        haystack
+      )
+  )
+    return "jewelry";
+
+  if (/\b(bags?|purses?|handbags?|clutches?|totes?|satchels?|pouches?|backpacks?|wallets?|sling|crossbody)\b/.test(haystack)) return "bags";
+  if (/\b(slippers?|chappals?|flip.?flops?|sandals?|mules?|slides?)\b/.test(haystack)) return "slippers";
+  if (/\b(bedsheets?|bed\s?sheets?|linen|duvet|pillow\s?covers?|comforter|quilt)\b/.test(haystack)) return "bedsheets";
+  if (/\b(shoes?|boots?|sneakers?|loafers?|heels?|pumps?|oxfords?)\b/.test(haystack)) return "shoes";
+  if (/\b(shirts?|kurtas?|kameez|trousers?|dress|suits?|fabric|cloth|abaya|maxi|saree|frock|hijab|night\s?suit)\b/.test(haystack)) return "clothing";
   return "general";
 }
 
@@ -290,27 +316,74 @@ const TEMPLATES: TemplatePool = {
     ],
   },
 
-  general: {
+  tech: {
     5: [
-      "Great product! The {productName} is exactly as described and the quality is impressive. Delivery was fast and packaging was secure. Highly recommended!",
-      "Absolutely satisfied with my {productName}. Worth every rupee and then some. PakCart never disappoints!",
-      "Tried several alternatives before this. The {productName} is by far the best in this range. Will be a repeat customer for sure.",
-      "Bought this as a gift for my mother and she loved it! The {productName} arrived well-packaged and looks premium. 5 stars!",
-      "Second time ordering this. Quality of the {productName} is consistent and delivery keeps getting faster. Highly recommend.",
-      "The {productName} exceeded my expectations completely. Solid build, great finish, and very good value for money.",
-      "Very happy with the {productName}. Does exactly what it promises and looks great too. Will definitely order again from PakCart!",
+      "Sound quality is genuinely impressive for this price — the bass hits well and vocals are crisp at high volume. Battery easily lasts a full day for me.",
+      "Bluetooth pairing was instant on my phone, no glitches. Build feels sturdy and the buttons have a good tactile click. Honestly punching above its price.",
+      "Charging is quick and it holds the charge for ages. Carry it everywhere now — drives, hostel, even the gym. Solid pick if you want value for money.",
+      "Did not expect this kind of clarity at this price. Connected to my laptop and phone simultaneously without any cutout. Build is plastic but feels solid, not cheap.",
+      "Box came sealed and original. Connected straight away. Range is great — works two rooms apart. Battery indicator is also accurate. Very happy with the purchase.",
+      "Compared a few options online and this one wins for the price-to-performance. No lag, no Bluetooth drops, and even the call quality on the mic is decent.",
+      "Using it daily for music and calls — works flawlessly. Charging cable was included and the packaging was secure. PakCart delivery to Karachi was fast.",
     ],
     4: [
-      "Good purchase overall. The {productName} works well and quality is solid. Minor packaging issue but the product itself is excellent.",
-      "The {productName} is very good for daily use. Packaging could be slightly better but the product itself is solid. Would buy again.",
-      "Happy with the {productName}. Does what it says, looks good, and arrived on time. Small improvement in packing would make it 5 stars.",
-      "Solid value. The {productName} is well-made and functional. One minor gripe about the colour being slightly off from the listing but overall satisfied.",
+      "Sound is good, especially the mids. Bass is decent but not earth-shattering. For the price it's a fair deal, would still recommend.",
+      "Works as advertised. Pairing took two tries the first time but has been smooth since. Battery life is solid. Packaging could have been a little better.",
+      "Build quality is nice and the controls are intuitive. Battery indicator drops a bit fast when at max volume but otherwise no complaints.",
+      "Decent product overall. The Bluetooth range is what I expected, the sound is clean. Cable in the box was a little short but that's a minor thing.",
     ],
     3: [
-      "Good product overall and it works well for daily use. Packaging was simple but secure. Very satisfied with the quality for the price paid.",
-      "Decent product that does exactly what it promises. Delivery was on time and the item matches the photos. A small quality improvement would make it a 5-star purchase.",
-      "Happy with this purchase overall. Product is functional and looks good in person. Customer service was also very responsive when I had a question.",
-      "Good value for money. The product is well-made and practical for everyday use. Arrived on time and well-packed. Would recommend to friends.",
+      "Sound quality is good for casual listening. At max volume there's slight distortion but at 70-80% it's perfectly fine. Battery lasts a good few hours.",
+      "Works well, build feels solid in hand. Took a moment to figure out the button combinations but the manual helped. Good value at this price point.",
+      "Functions exactly as described. The Bluetooth connection is stable within a room. A slightly louder max volume would make it a 5-star but happy overall.",
+      "Decent for the price — nothing fancy but does the job. Packaging was simple, item arrived in working condition. Would buy again as a backup.",
+    ],
+  },
+
+  jewelry: {
+    5: [
+      "Mashallah, the finishing on this set is gorgeous. The stones are well set, no missing prongs, and the gold plating looks rich. Wearing it to a wedding next week!",
+      "Exactly as shown in the pictures, maybe even more beautiful in person. The polish is even and the clasp is sturdy. Comes in a nice presentation box too.",
+      "Wore it for an evening event and got so many compliments. The stones catch light beautifully and it does not feel cheap or hollow at all.",
+      "Quality of the plating is far better than I expected at this price. No skin reaction so far, lightweight to wear all day. Highly recommended.",
+      "Bridal-worthy piece honestly. The detailing is intricate and the size is just right — not too heavy, not too dainty. Packaging was also classy.",
+      "Ordered it for an upcoming function and so glad I did. Looks expensive on, the colour did not transfer to skin, and the back has neat finishing too.",
+    ],
+    4: [
+      "Beautiful piece, looks just like the photos. One stone felt slightly loose so I'm being careful with it, but otherwise the craftsmanship is great.",
+      "Lovely set and the gold tone is rich. The clasp is a touch fiddly but secure once on. Will pair perfectly with my outfit for the next function.",
+      "Really pretty and well finished. Box was a little squashed in transit but the jewelry itself was perfect. Good value for what you pay.",
+      "Looks elegant on. The chain length is just right and the stones are evenly set. Would have given five stars with a slightly sturdier clasp.",
+    ],
+    3: [
+      "Pretty design and the colour is exactly as shown. The plating feels decent — would just suggest avoiding water and perfumes to keep it lasting longer.",
+      "Looks lovely on. The stones are well placed and the overall finishing is neat. Slightly lighter weight than I expected but it still looks rich.",
+      "Beautiful set for occasional wear. Clasp could be a bit more secure but I added a safety pin for backup. For the price, very satisfied.",
+      "Nice quality for the price range. The setting is clean and it photographs really well. Would just recommend a soft pouch to keep it in between wears.",
+    ],
+  },
+
+  general: {
+    5: [
+      "Exactly as described — quality is impressive and arrived in perfect condition. Delivery to Lahore was quick and the packaging was secure. Highly recommended!",
+      "Genuinely satisfied with this purchase. Worth every rupee. PakCart's product photos and the actual item are very consistent.",
+      "Tried a couple of cheaper alternatives before this and there's no comparison. The build and finish here is on another level for the price.",
+      "Second time ordering from PakCart. Quality is consistent and delivery keeps getting faster. COD was smooth too.",
+      "Exceeded my expectations completely. Solid build, clean finish, and very good value for money. Will be back for more.",
+      "Very happy with this. Does exactly what the listing promises and looks even better in person. Will definitely order again!",
+      "Neatly packed and arrived earlier than expected via Leopards. Item matches the photos perfectly. No complaints at all.",
+    ],
+    4: [
+      "Good purchase overall. Works well and the quality feels solid. Packaging could have been slightly better but the product itself is excellent.",
+      "Very good for daily use. The finish is clean and it matches the listing. Would buy again from PakCart.",
+      "Happy with this. Does what it says, looks good, and arrived on time. A small improvement in packing would make it five stars.",
+      "Solid value. Well-made and functional. One minor gripe about the colour being slightly off from the listing but overall satisfied.",
+    ],
+    3: [
+      "Good product overall and works well for daily use. Packaging was simple but secure. Very satisfied with the quality for the price paid.",
+      "Decent purchase that does exactly what it promises. Delivery was on time and the item matches the photos. A small quality improvement would make it a 5-star buy.",
+      "Happy with this overall. Functional and looks good in person. Customer service was responsive when I had a question.",
+      "Good value for money. Practical for everyday use. Arrived on time and well-packed. Would recommend to friends.",
     ],
   },
 };
@@ -446,27 +519,74 @@ const TEMPLATES_UR: TemplatePool = {
     ],
   },
 
-  general: {
+  tech: {
     5: [
-      "Excellent product! Bilkul jaisa describe kiya hai waisa hi hai aur quality impressive. Delivery fast aur packaging secure. Highly recommended!",
-      "Apni purchase se ekdum satisfied hun. Har rupay ka mol pura hua. PakCart kabhi disappoint nahi karta!",
-      "Bohat alternatives try ki, but yeh sab se behtar nikla iss range mein. Repeat customer banunga pakka.",
-      "Ammi ke liye gift liya, bohat pasand aaya. Achi packaging mein aaya aur premium lagta hai. 5 stars!",
-      "2nd time order kiya yeh. Quality consistent aur delivery aur fast hoti ja rahi hai. Highly recommend.",
-      "Mere expectations se zyada nikla. Solid build, finish acha aur paisa wasool deal.",
-      "Bohat khush hun is product se. Wahi karta hai jo promise kiya aur dikhta bhi acha hai. Phir zaroor order karunga PakCart se!",
+      "Mashallah sound quality kamaal ki hai iss price mein. Bass strong, vocals clear aur full volume pe distort bhi nahi karta. Battery bhi pura din chal jati hai.",
+      "Bluetooth pairing first try mein ho gayi, koi glitch nahi. Build solid lagti hai haath mein, buttons ka feel acha. Iss price ka best option.",
+      "Charging fast hoti hai aur charge dair tak rehta hai. Saath le ke ghoomta hun – car, hostel, gym har jaga. Paisa wasool deal hai.",
+      "Iss price mein itni clarity expect nahi thi. Phone aur laptop dono se ek saath connect ho jata hai. Plastic build hai magar cheap nahi lagti.",
+      "Box sealed aaya, original piece. Foran connect ho gaya. Range bhi achi hai – do kamre door se bhi chalta hai. Highly recommended.",
+      "Online options compare ki, sab mein iss ka price-to-performance best lagi. No lag, Bluetooth drop nahi hota aur mic call quality bhi theek hai.",
+      "Roz music aur calls ke liye use karta hun, ekdum smooth chalta hai. Charging cable saath thi aur packaging secure thi. Karachi delivery fast.",
     ],
     4: [
-      "Overall achi purchase. Product sahi kaam karta hai aur quality solid. Packaging mein chhoti issue thi but product khud excellent.",
-      "Daily use ke liye bohat acha. Packaging thori behtar ho sakti thi but product solid hai. Repeat order karunga.",
-      "Khush hun product se. Jaisa kaha tha waisa hai, look acha aur on time aaya. Packing mein chhoti improvement aur 5 stars.",
-      "Solid value. Product accha bana hua aur functional. Color thora off tha listing se but baqi sab satisfied.",
+      "Sound theek hai, mids ache hain. Bass decent hai but earth-shattering nahi. Iss price pe fair deal hai, recommended.",
+      "Jaisa likha hai waise hi kaam karta hai. Pehli baar pairing mein 2 try lagey but uske baad smooth. Battery solid. Packaging thori behtar hoti to acha tha.",
+      "Build quality achi hai aur controls intuitive hain. Max volume pe battery thori jaldi girti hai magar baqi sab fine.",
+      "Decent product overall. Bluetooth range expected jaisi, sound clean. Box mein cable thori choti thi but minor baat hai.",
+    ],
+    3: [
+      "Casual listening ke liye sound achi hai. Max volume pe halki distortion hai but 70-80% pe perfectly fine. Battery achi chalti hai.",
+      "Sahi kaam karta hai, build solid lagti hai. Button combinations samajhne mein thora time laga magar manual madad kar deta hai. Iss price pe value sahi hai.",
+      "Jaisa describe kiya hai waisa hi function karta hai. Bluetooth connection room ke andar stable rehti hai. Volume thora aur loud hota to 5 star.",
+      "Iss price ke liye decent hai – fancy nahi but kaam ka hai. Packaging simple thi, working condition mein aaya. Backup ke liye phir lunga.",
+    ],
+  },
+
+  jewelry: {
+    5: [
+      "Mashallah finishing dekh ke dil khush ho gaya. Stones achi tarah set hain, koi loose nahi aur gold plating rich lagti hai. Shaadi mein pehnungi inshaAllah!",
+      "Photo se bilkul match karta hai, balke live mein zyada khoobsurat hai. Polish even hai aur clasp solid. Presentation box bhi achi mili.",
+      "Function pe pehna, sab tareef karte rahay. Stones light catch karte hain aur set bilkul cheap nahi lagta.",
+      "Plating ki quality price ke hisab se bohat zyada achi hai. Skin reaction abhi tak nahi hua, lightweight hai pura din pehnne mein.",
+      "Bridal kit ke liye perfect piece. Detailing barikh hai aur size bhi sahi – na bohat heavy na bohat dainty. Packaging classy thi.",
+      "Function ke liye order kiya, decision sahi nikla. Mehnga lagta hai pehne ke baad, color skin pe nahi lagta aur back side ki finishing bhi neat hai.",
+    ],
+    4: [
+      "Khoobsurat piece, photo jaisa exact. Aik stone thora loose laga isliye thora careful use kar rahi hun, baqi craftsmanship achi hai.",
+      "Lovely set hai aur gold tone rich lagta hai. Clasp thora fiddly hai but secure ho jata hai. Function ke outfit ke saath perfect lagega.",
+      "Bohat pretty aur well finished hai. Box transit mein thora dab gaya tha but jewelry safe thi. Iss price mein achi value.",
+      "Pehne ke baad elegant lagta hai. Chain length sahi aur stones evenly set. Clasp thora aur strong hota to 5 star.",
+    ],
+    3: [
+      "Design achi hai aur color exact photo jaisa. Plating decent hai – paani aur perfume se bachayein to lambi chalegi.",
+      "Pehne ke baad lovely lagta hai. Stones achi tarah lagaye huay aur overall finishing neat. Weight thori light hai expected se but rich lagta hai.",
+      "Occasional wear ke liye khoobsurat set. Clasp thora aur secure hota to behtar, magar safety pin laga li backup ke liye. Iss price pe satisfied hun.",
+      "Iss price range mein quality achi hai. Setting clean aur photos mein bohat achi aati hai. Soft pouch mein rakhein use ke darmiyan.",
+    ],
+  },
+
+  general: {
+    5: [
+      "Bilkul jaisa describe kiya waisa hi mila. Quality impressive aur perfect condition mein aaya. Lahore delivery fast thi aur packaging secure. Highly recommended!",
+      "Iss purchase se ekdum khush hun. Har rupay ka mol pura hua. PakCart ke product photos aur actual item bohat consistent hain.",
+      "Sasti alternatives try ki thi pehle, koi muqabla nahi. Yahan ki build aur finish iss price pe top class hai.",
+      "PakCart se 2nd time order kiya. Quality consistent aur delivery aur fast hoti ja rahi hai. COD bhi smooth thi.",
+      "Mere expectations se kahin zyada nikla. Solid build, finish saaf aur paisa wasool deal. Phir order karunga.",
+      "Bohat khush hun is se. Jo listing pe likha tha wahi mila aur live mein aur acha lagta hai. Phir zaroor order karunga!",
+      "Achi packaging mein aaya aur Leopards se expect se pehle deliver hua. Item photos jaisa exact. Koi complaint nahi.",
+    ],
+    4: [
+      "Overall achi purchase. Sahi kaam karta hai aur quality solid. Packaging thori behtar ho sakti thi magar product khud excellent.",
+      "Daily use ke liye bohat acha. Finish clean hai aur listing jaisa exact. PakCart se phir order karunga.",
+      "Khush hun is se. Jaisa kaha tha waisa hai, look acha aur on time aaya. Packing mein chhoti improvement aur 5 stars.",
+      "Solid value. Accha bana hua aur functional. Color thora off tha listing se but baqi sab satisfied.",
     ],
     3: [
       "Acha product overall, daily use ke liye sahi kaam karta hai. Packaging simple but secure. Iss price ke liye quality se khush hun.",
-      "Decent product, jo promise kiya wahi karta hai. Delivery on time aur photos jaisa exact. Thori quality improvement aur 5 star ho jata.",
-      "Is purchase se khush hun. Product functional aur live mein acha lagta hai. Customer service bhi responsive thi sawal ka jawab dene mein.",
-      "Sahi value for money. Product accha bana hua aur daily use ke liye practical. On time aur achi packing mein aaya. Doston ko recommend karunga.",
+      "Decent purchase, jo promise kiya wahi karta hai. Delivery on time aur photos jaisa exact. Thori quality improvement aur 5 star ho jata.",
+      "Is purchase se khush hun. Functional aur live mein acha lagta hai. Customer service bhi responsive thi sawal ka jawab dene mein.",
+      "Sahi value for money. Daily use ke liye practical. On time aur achi packing mein aaya. Doston ko recommend karunga.",
     ],
   },
 };
