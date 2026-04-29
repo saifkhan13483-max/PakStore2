@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet, AlertCircle } from "lucide-react";
+import { ShoppingCart, Info, CreditCard, CheckCircle, Wallet, AlertCircle, MapPin } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -408,14 +408,19 @@ export default function Checkout() {
                             name="area"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-emerald-900 font-medium">Area / Locality</FormLabel>
+                                <FormLabel className="text-emerald-900 font-medium">
+                                  Nearest famous place <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
-                                  <Input 
-                                    placeholder="Neighborhood / Phase" 
-                                    className="focus-visible:ring-emerald-800"
-                                    {...field} 
-                                    data-testid="input-area" 
-                                  />
+                                  <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-700 pointer-events-none" />
+                                    <Input
+                                      placeholder="Famous place/masjid/school"
+                                      className="pl-9 focus-visible:ring-emerald-800"
+                                      {...field}
+                                      data-testid="input-area"
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
