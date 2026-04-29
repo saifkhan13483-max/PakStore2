@@ -154,6 +154,7 @@ export function generateClusteredTimestamps(count: number, maxDays = 90): Date[]
 // ---------------------------------------------------------------------------
 
 type RatingTier = 5 | 4 | 3 | 2 | 1;
+export type ReviewLanguage = "en" | "ur";
 
 interface TemplatePool {
   [key: string]: {
@@ -314,6 +315,162 @@ const TEMPLATES: TemplatePool = {
 };
 
 // ---------------------------------------------------------------------------
+// Roman Urdu Review Templates  (mirrors English pools per category × rating)
+// ---------------------------------------------------------------------------
+
+const TEMPLATES_UR: TemplatePool = {
+  bags: {
+    5: [
+      "Mashallah bag bohat khoobsurat hai. Quality top class, stitching ekdum perfect aur colour bilkul tasveer jaisa. Roz compliments mil rahe hain!",
+      "Iss bag pe paisa lagana faida hai. Material strong, sab samaan aaram se aa jata hai aur dekhne mein bhi premium lagta hai. Paisa wasool!",
+      "Behan ke liye gift kiya tha, bohat pasand aaya. Packaging bhi achi thi. PakCart se phir order karunga inshaAllah.",
+      "Wife ke liye Eid pe liya tha. Bohat khush hui woh dekh ke. Zip, inside pockets aur finishing sab kuch top notch hai.",
+      "2nd time order kiya hai PakCart se. Quality bilkul same achi hai aur delivery expected se bhi fast thi. 5 stars bila shak.",
+      "Bohat options compare ki, lekin yeh bag iss range mein sab se behtar nikla. Premium feel hai aur price reasonable.",
+      "Roz use karne wala bag chahiye tha, yeh perfect mila. Strap shoulder pe comfortable, andar 3 compartments hain. Mashallah.",
+    ],
+    4: [
+      "Bag overall acha hai, material strong aur design simple. Strap thori si choti hai meri height ke hisab se warna sab sahi.",
+      "Quality theek thaak hai, photo jaisa hi mila. 3 din mein deliver hua jo acceptable hai. Phir order karunga.",
+      "Bag pasand aaya, sirf dust bag missing tha isliye 4 star. Baqi sab perfect, recommended.",
+      "Daily use ke liye perfect hai. Na bohat bara na chota. Iss price mein achi value mili.",
+      "Solid purchase hai. Stitching saaf, hardware bhi solid lagta hai. Color thora gehra hai photo se but achi lagti hai.",
+    ],
+    3: [
+      "Design bohat acha hai, material bhi theek hai. Zipper shuru mein thora tight tha lekin use karne se sahi ho gaya. Iss price ke liye good purchase.",
+      "Bag dekhne mein acha lagta hai, sab tareef karte hain. Inside pockets thore chote hain magar daily ka samaan aaram se aa jata hai.",
+      "Color bilkul jaisa dikha tha waisa hi mila. Strap thori si lambi honi chahiye thi but comfortable hai carry karne mein.",
+      "Stylish aur functional bag hai. Packaging secure thi aur on time aaya. Hardware finishing thori behtar hoti to easily 5 stars.",
+    ],
+  },
+
+  watches: {
+    5: [
+      "Mashallah ghari bohat khoobsurat hai. Dial clear, strap premium aur time bilkul sahi rakhti hai. Sab puchte hain kahan se li!",
+      "Eid pe husband ke liye gift kiya tha. Itni khush hui woh dekh ke. Iss price mein excellent quality. Highly recommended!",
+      "Ghari live mein bohat mehngi lagti hai. Build quality solid aur finishing ekdum top class. PakCart se kabhi disappointment nahi hoti.",
+      "Wrist pe comfortable, time accurate aur design ekdum stylish. Brilliant value for money bhai.",
+      "Yeh meri 3rd ghari hai PakCart se aur sab se behtar yehi nikli. Packaging secure thi, delivery on time. 5 stars!",
+      "Bohat brands try ki, lekin yeh ghari sab se reliable nikli iss range mein. Watch lovers ke liye must buy.",
+    ],
+    4: [
+      "Design bohat clean hai aur strap comfortable. Crown thora hard hai but baqi sab acha. Overall achi purchase.",
+      "Photo jaisi exact mili. Solid lagti hai wrist pe. Mahine mein 1 minute lose karti hai but iss price pe acceptable.",
+      "Acha timepiece hai casual use ke liye. Strap buckle thora rough hai magar baqi sab OK. Satisfied hun.",
+      "Sahi value ki ghari, dial easy to read aur packaging secure thi. Phir order karunga.",
+    ],
+    3: [
+      "Acha look hai aur time accurate rakhti hai. Strap shuru mein stiff thi lekin baad mein soft ho jati hai. Casual daily use ke liye sahi.",
+      "Khoobsurat ghari, dial smart aur clean. Crown thora tight magar time set karna easy hai. Look pasand aaya.",
+      "Iss price mein achi hai, photos se zyada premium lagti hai live mein. Heavy activity mein use mat karein, lambi chalegi.",
+      "Daily wear ke liye solid timepiece. Design eye-catching aur fit comfortable. Buckle thori polished hoti to perfect.",
+    ],
+  },
+
+  slippers: {
+    5: [
+      "Inn slippers ka koi jawab nahi! Pehle din se hi bohat comfortable, breaking-in ki need nahi padi. Saara din ghar mein pehen ke ghoomta hun.",
+      "Iss price mein itni achi quality milna mushkil hai. Sole strong, fit perfect. Ghar wale sab ne ek ek pair order kiya hai!",
+      "Best slippers hain jo kabhi li hain. Comfortable, stylish aur mahino baad bhi naye jaise. 5 stars pakka!",
+      "Ammi ke liye gift ki thi, bohat khush hui. Kehti hain itni comfortable slippers kabhi nahi pehni. MashaAllah.",
+      "Inka 2nd pair order kiya, pehle wala jaisa hi acha. Delivery fast aur packaging solid. Phir mangwaunga inshaAllah.",
+    ],
+    4: [
+      "Bohat comfortable slippers hain. Sole solid hai aur dekhne mein achi lagti hain. Size thora bara hai, half size niche karein.",
+      "Quality achi hai, stitching neat aur padding comfortable. Color photo se thora alag hai magar achi lagti hain.",
+      "Daily ghar mein pehnne ke liye perfect hain. Acha bana hua hai. Strap mahine baad thora dheela hua but kaam chal raha hai.",
+    ],
+    3: [
+      "Indoor use ke liye bohat comfortable. Soft base aur design acha. Color order kiye se thora alag tha but achi lagti hain.",
+      "Ghar ke use ke liye sahi slippers. Cushioning theek hai, fit true to size. Thora arch support aur hota to ideal magar iss price mein OK.",
+      "Daily indoor wear ke liye comfy. Stitching achi aur sole strong. Overall purchase se khush hun, paisa wasool.",
+    ],
+  },
+
+  bedsheets: {
+    5: [
+      "Mashallah bedsheet bohat khoobsurat hai! Fabric soft, color vibrant aur dhone ke baad bhi fade nahi hua. King bed pe perfect fit.",
+      "Order karne ka faisla bilkul sahi tha. Cotton ka feel premium hai itni reasonable price pe. Neend bhi achi aati hai!",
+      "Khoobsurat bedsheets, photo se bhi behtar live mein. Ghar wale sab tareef karte hain. Aik aur set order karne wala hun.",
+      "Naye ghar ke liye house warming gift ke tor pe liya. Sab ko bohat pasand aaya. Quality aur packaging excellent.",
+      "2nd order hai inka. Quality consistent hai - soft, fade-resistant aur edges ki stitching ab tak strong.",
+      "Bohat brands compare karne ke baad yeh choose ki. Best decision - premium feel aur durable. Gifting ke liye must buy!",
+    ],
+    4: [
+      "Bohat khush hun is purchase se. Fabric soft aur design elegant. Pehli wash pe thora shrink hua but baqi sab perfect.",
+      "Achi quality bedsheets. Luxurious dikhti hain aur comfortable hain. Color thora light tha expect se but phir bhi khoobsurat.",
+      "Soft hain aur fabric acha hai. Border ki stitching solid hai. Aik color out of stock tha to 2nd choice leni padi.",
+    ],
+    3: [
+      "Khoobsurat bedsheets, design lovely aur fabric comfortable. Light material hai, summer ke liye perfect. Winter ke liye thori heavy hoti to behtar.",
+      "Achi bedsheets, color vibrant aur photo jaisa exact. Bed pe sahi fit. Fitted sheet ka corner thora loose hai deep mattress pe but manageable.",
+      "Iss price ke liye achi quality. Embroidery detail attractive aur fabric wash bhi sahi hota hai. Aik pillowcase pe loose thread tha but easily fix ho gaya.",
+    ],
+  },
+
+  shoes: {
+    5: [
+      "Shoes lajawab hain - pehle din se hi comfortable, grip strong aur formal/casual dono ke saath sharp lagte hain.",
+      "Bohat khush hun shoes se. Leather soft aur sole solid. Sab tareef karte hain. Highly recommended!",
+      "Online se liye sab se behtar shoes. Size fit, premium look aur saara din pehnne ke baad bhi comfortable.",
+      "Bhai ke liye gift kiye, bohat khush hua. Excellent finishing aur packaging. Phir zaroor order karunga.",
+    ],
+    4: [
+      "Achi shoes hain. Look acha aur build quality solid. 2-3 din lagey break-in mein, ab bohat comfortable hain.",
+      "Khush hun shoes se. Leather quality achi aur stitching clean. Insole thori aur cushioned hoti to perfect, baqi great buy.",
+      "Acha value shoes. Photos jaisa exact aur 2 mahine se regular use ho rahe, ab bhi naye jaise.",
+    ],
+    3: [
+      "Acha look hai photo jaisa. Break-in mein 2-3 din lagey, ab comfortable aur supportive hain. Sole grip solid.",
+      "Iss price mein achi shoes - leather acha aur finishing clean. Gel insole add ki extra cushioning ke liye, ab bohat comfortable.",
+      "Decent shoes hain overall. Design sharp, formal ke saath bohat ache lagte. Toe box thora tight tha shuru mein but hafte mein ease ho gaya.",
+    ],
+  },
+
+  clothing: {
+    5: [
+      "Mashallah fabric exceptional hai - soft, breathable aur color vibrant. Stitching bohat clean. Phir order karunga zaroor!",
+      "Bohat pasand aaya! Fit perfect, fabric garmi mein bhi comfortable aur design exact photo jaisa.",
+      "Ammi ke liye Eid pe gift kiya, bohat khush hui. Embroidery beautiful aur fabric luxurious.",
+      "Yeh meri go-to outfit ban gaya hai. Comfortable, stylish aur wash karne ke baad bhi shape colour same.",
+    ],
+    4: [
+      "Fabric quality achi hai. Fit true to size aur stitching clean. Color photos se thora kam vibrant hai magar phir bhi lovely.",
+      "Khush hun is purchase se. Material comfortable aur design elegant. Delivery fast aur packaging neat thi.",
+    ],
+    3: [
+      "Achi quality fabric aur lovely design. Fit comfortable aur color jaisa dikhaya gaya. Sizing thori chhoti hai, ek size up lein.",
+      "Acha clothing item overall - style attractive aur stitching clean. Dupatta thori kam embroidered hai photo se but overall look presentable hai.",
+      "Comfortable fabric aur khoobsurat design. Wash karne pe shape sahi rehti hai. Pehli wash pe ek embroidery loose hui but easily fix ho gayi.",
+    ],
+  },
+
+  general: {
+    5: [
+      "Excellent product! Bilkul jaisa describe kiya hai waisa hi hai aur quality impressive. Delivery fast aur packaging secure. Highly recommended!",
+      "Apni purchase se ekdum satisfied hun. Har rupay ka mol pura hua. PakCart kabhi disappoint nahi karta!",
+      "Bohat alternatives try ki, but yeh sab se behtar nikla iss range mein. Repeat customer banunga pakka.",
+      "Ammi ke liye gift liya, bohat pasand aaya. Achi packaging mein aaya aur premium lagta hai. 5 stars!",
+      "2nd time order kiya yeh. Quality consistent aur delivery aur fast hoti ja rahi hai. Highly recommend.",
+      "Mere expectations se zyada nikla. Solid build, finish acha aur paisa wasool deal.",
+      "Bohat khush hun is product se. Wahi karta hai jo promise kiya aur dikhta bhi acha hai. Phir zaroor order karunga PakCart se!",
+    ],
+    4: [
+      "Overall achi purchase. Product sahi kaam karta hai aur quality solid. Packaging mein chhoti issue thi but product khud excellent.",
+      "Daily use ke liye bohat acha. Packaging thori behtar ho sakti thi but product solid hai. Repeat order karunga.",
+      "Khush hun product se. Jaisa kaha tha waisa hai, look acha aur on time aaya. Packing mein chhoti improvement aur 5 stars.",
+      "Solid value. Product accha bana hua aur functional. Color thora off tha listing se but baqi sab satisfied.",
+    ],
+    3: [
+      "Acha product overall, daily use ke liye sahi kaam karta hai. Packaging simple but secure. Iss price ke liye quality se khush hun.",
+      "Decent product, jo promise kiya wahi karta hai. Delivery on time aur photos jaisa exact. Thori quality improvement aur 5 star ho jata.",
+      "Is purchase se khush hun. Product functional aur live mein acha lagta hai. Customer service bhi responsive thi sawal ka jawab dene mein.",
+      "Sahi value for money. Product accha bana hua aur daily use ke liye practical. On time aur achi packing mein aaya. Doston ko recommend karunga.",
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Content Generator
 // ---------------------------------------------------------------------------
 
@@ -342,22 +499,38 @@ function replaceWithGeneric(template: string): string {
  * Picks a review template matching the given category and rating,
  * then substitutes {productName}. Only ~10% of reviews include the
  * full product name; the rest use natural generic references.
+ *
+ * @param lang - "en" for English (default) or "ur" for Roman Urdu
  */
 export function generateReviewContent(
   productName: string,
   category: ProductCategory,
-  rating: RatingTier
+  rating: RatingTier,
+  lang: ReviewLanguage = "en"
 ): string {
-  const catPool = TEMPLATES[category] ?? TEMPLATES["general"];
+  const pool = lang === "ur" ? TEMPLATES_UR : TEMPLATES;
+  const catPool = pool[category] ?? pool["general"];
   const ratingPool =
     catPool[rating] ??
-    TEMPLATES["general"][rating] ??
-    TEMPLATES["general"][5]!;
+    pool["general"][rating] ??
+    pool["general"][5]!;
 
   const template = ratingPool[Math.floor(Math.random() * ratingPool.length)];
 
-  if (Math.random() < 0.10) {
+  // Roman Urdu templates rarely include {productName} — they reference items
+  // implicitly ("yeh bag", "ghari"), which feels more natural in Urdu speech.
+  // For both languages, ~10% of templates that DO have the placeholder show
+  // the actual product name; the rest swap to generic references (English only).
+  if (Math.random() < 0.10 && template.includes("{productName}")) {
     return template.replace(/\{productName\}/g, productName);
+  }
+
+  if (lang === "ur") {
+    // Most Urdu templates don't carry the placeholder; if any do, drop it.
+    return template
+      .replace(/\s+\{productName\}/g, "")
+      .replace(/\{productName\}\s+/g, "")
+      .replace(/\{productName\}/g, "");
   }
 
   return replaceWithGeneric(template);

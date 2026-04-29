@@ -22,6 +22,7 @@ import {
   generateClusteredTimestamps,
   generateRealisticTimestamp,
   type ProductCategory,
+  type ReviewLanguage,
 } from "./seed-data/review-templates";
 import {
   generateHelpfulCount,
@@ -209,18 +210,24 @@ function buildReviewContent(
   category: ProductCategory,
   rating: 1 | 2 | 3 | 4 | 5,
   productCtx: ProductContext,
-  commentDate: Date
+  commentDate: Date,
+  lang: ReviewLanguage
 ): string {
-  let content = generateReviewContent(productName, category, rating);
-  content = applyNaturalness(content);
+  let content = generateReviewContent(productName, category, rating, lang);
+  content = applyNaturalness(content, lang);
 
-  const contextHint = getProductContextHint(productCtx, rating);
+  const contextHint = getProductContextHint(productCtx, rating, lang);
   if (contextHint) content = content.trimEnd() + " " + contextHint;
 
-  const seasonalNote = getSeasonalNote(commentDate, category);
+  const seasonalNote = getSeasonalNote(commentDate, category, lang);
   if (seasonalNote) content = content.trimEnd() + " " + seasonalNote;
 
   return content;
+}
+
+/** 70% Roman Urdu, 30% English — matches Pakistani market style. */
+function pickReviewLanguage(): ReviewLanguage {
+  return Math.random() < 0.70 ? "ur" : "en";
 }
 
 // ---------------------------------------------------------------------------
@@ -323,6 +330,7 @@ async function seedOneProduct(
     const rawRating = getRatingByBias(options.ratingBias);
     const rating = realAvg >= 0 ? nudgeRating(rawRating, realAvg) : rawRating;
     const commentDate = timestamps[i];
+    const lang = pickReviewLanguage();
 
     // Phase 4: build content with dedup retry
     let content = buildReviewContent(
@@ -330,7 +338,8 @@ async function seedOneProduct(
       category,
       rating as 1 | 2 | 3 | 4 | 5,
       productCtx,
-      commentDate
+      commentDate,
+      lang
     );
     let dedupAttempts = 0;
     while (
@@ -343,7 +352,8 @@ async function seedOneProduct(
         category,
         rating as 1 | 2 | 3 | 4 | 5,
         productCtx,
-        commentDate
+        commentDate,
+        lang
       );
       dedupAttempts++;
     }
@@ -716,12 +726,14 @@ export function generateCommentPreview(options: SeedOptions, count = 4): Preview
     const rawRating = getRatingByBias(options.ratingBias);
     const commentDate = generateRealisticTimestamp();
 
+    const lang = pickReviewLanguage();
     let content = buildReviewContent(
       sample.name,
       sample.category as ProductCategory,
       rawRating as 1 | 2 | 3 | 4 | 5,
       sample,
-      commentDate
+      commentDate,
+      lang
     );
 
     let dedupAttempts = 0;
@@ -736,7 +748,8 @@ export function generateCommentPreview(options: SeedOptions, count = 4): Preview
         sample.category as ProductCategory,
         rawRating as 1 | 2 | 3 | 4 | 5,
         sample,
-        commentDate
+        commentDate,
+        lang
       );
       dedupAttempts++;
     }

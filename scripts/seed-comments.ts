@@ -36,6 +36,7 @@ import {
   generateReviewContent,
   generateClusteredTimestamps,
   type ProductCategory,
+  type ReviewLanguage,
 } from "../client/src/lib/seed-data/review-templates";
 import {
   generateHelpfulCount,
@@ -82,18 +83,24 @@ function buildReviewContent(
   category: ProductCategory,
   rating: 1 | 2 | 3 | 4 | 5,
   productCtx: ProductContext,
-  commentDate: Date
+  commentDate: Date,
+  lang: ReviewLanguage
 ): string {
-  let content = generateReviewContent(productName, category, rating);
-  content = applyNaturalness(content);
+  let content = generateReviewContent(productName, category, rating, lang);
+  content = applyNaturalness(content, lang);
 
-  const contextHint = getProductContextHint(productCtx, rating);
+  const contextHint = getProductContextHint(productCtx, rating, lang);
   if (contextHint) content = content.trimEnd() + " " + contextHint;
 
-  const seasonalNote = getSeasonalNote(commentDate, category);
+  const seasonalNote = getSeasonalNote(commentDate, category, lang);
   if (seasonalNote) content = content.trimEnd() + " " + seasonalNote;
 
   return content;
+}
+
+/** 70% Roman Urdu, 30% English — matches Pakistani market style. */
+function pickReviewLanguage(): ReviewLanguage {
+  return Math.random() < 0.70 ? "ur" : "en";
 }
 
 // ---------------------------------------------------------------------------
@@ -214,6 +221,7 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
       const rawRating = getRealisticRating();
       const rating = realAvg >= 0 ? nudgeRating(rawRating, realAvg) : rawRating;
       const commentDate = timestamps[i];
+      const lang = pickReviewLanguage();
 
       // Phase 4: full content pipeline with dedup retry
       let content = buildReviewContent(
@@ -221,7 +229,8 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
         category,
         rating as 1 | 2 | 3 | 4 | 5,
         productCtx,
-        commentDate
+        commentDate,
+        lang
       );
       let dedupAttempts = 0;
       while (
@@ -234,7 +243,8 @@ async function seedRandomComments(startOffset = 0, batchSize = 15): Promise<void
           category,
           rating as 1 | 2 | 3 | 4 | 5,
           productCtx,
-          commentDate
+          commentDate,
+          lang
         );
         dedupAttempts++;
       }

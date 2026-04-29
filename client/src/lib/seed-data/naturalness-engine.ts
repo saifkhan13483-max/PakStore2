@@ -47,6 +47,23 @@ const PAKISTANI_URDU_MIX = [
 ];
 
 // ---------------------------------------------------------------------------
+// Roman Urdu trailing phrases — used when language === "ur"
+// ---------------------------------------------------------------------------
+
+const ROMAN_URDU_PHRASES = [
+  "InshaAllah phir order karunga.",
+  "MashaAllah quality bohat achi hai.",
+  "Bhai sab theek hai, recommend karta hun.",
+  "Iss product mein koi issue nahi.",
+  "Sab dosto ko recommend kiya hai.",
+  "5 stars meri taraf se.",
+  "Bohat khush hun apni purchase se.",
+  "Delivery time pe thi, koi shikayat nahi.",
+  "Bohat acha laga, highly recommended.",
+  "Pakka phir order karunga.",
+];
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
@@ -66,11 +83,13 @@ function pick<T>(arr: T[]): T {
  * - 5%  → stray double space
  * - 8%  → "..." replacing first mid-sentence period
  * - 5%  → one content word in ALL CAPS for emphasis
- * - 3%  → common spelling typo
- * - 15% → informal Pakistani English phrase appended
- *          (of which ~33% use an Urdu-mix phrase instead)
+ * - 3%  → common spelling typo (English mode only)
+ * - 15% → informal trailing phrase appended
+ *
+ * @param lang - "en" (default) or "ur". In Urdu mode the trailing phrase
+ *               and the typo-pool are language-appropriate.
  */
-export function applyNaturalness(text: string): string {
+export function applyNaturalness(text: string, lang: "en" | "ur" = "en"): string {
   let result = text;
 
   // 10% — missing trailing period
@@ -89,7 +108,7 @@ export function applyNaturalness(text: string): string {
     result = result.replace(/\. (?=[A-Z])/, "... ");
   }
 
-  // 5% — ALL CAPS content word for emphasis
+  // 5% — ALL CAPS content word for emphasis (works for both languages)
   if (Math.random() < 0.05) {
     const words = result.split(" ");
     const eligible = words
@@ -102,8 +121,9 @@ export function applyNaturalness(text: string): string {
     }
   }
 
-  // 3% — common spelling typo on first matching word
-  if (Math.random() < 0.03) {
+  // 3% — common spelling typo (English-only — Urdu reviews already have
+  // natural transliteration variation built into the templates)
+  if (lang === "en" && Math.random() < 0.03) {
     for (const [correct, typo] of COMMON_TYPOS) {
       const re = new RegExp(`\\b${correct}\\b`, "i");
       if (re.test(result)) {
@@ -113,10 +133,15 @@ export function applyNaturalness(text: string): string {
     }
   }
 
-  // 15% — informal Pakistani English phrase appended
+  // 15% — informal trailing phrase appended
   if (Math.random() < 0.15) {
-    const useUrduMix = Math.random() < 0.33; // ~5% overall
-    const pool = useUrduMix ? PAKISTANI_URDU_MIX : PAKISTANI_ENGLISH_PHRASES;
+    let pool: string[];
+    if (lang === "ur") {
+      pool = ROMAN_URDU_PHRASES;
+    } else {
+      const useUrduMix = Math.random() < 0.33; // ~5% overall
+      pool = useUrduMix ? PAKISTANI_URDU_MIX : PAKISTANI_ENGLISH_PHRASES;
+    }
     result = result.trimEnd() + " " + pick(pool);
   }
 

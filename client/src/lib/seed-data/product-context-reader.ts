@@ -47,6 +47,34 @@ const LOW_PRICE_HINTS = [
 ];
 
 // ---------------------------------------------------------------------------
+// Roman Urdu hint pools (mirror English pools above)
+// ---------------------------------------------------------------------------
+
+const DISCOUNT_HINTS_UR = [
+  "Sale price pe bohat acha deal mila.",
+  "Discount pe lene se aur bhi paisa wasool ho gaya.",
+  "Sale ke time grab kiya, kabhi pachtaye nahi!",
+  "Discount ne value aur badha di.",
+  "Offer pe utha liya tha, faisla bilkul sahi nikla.",
+];
+
+const HIGH_PRICE_HINTS_UR = [
+  "Investment ke layak hai bilkul.",
+  "Premium product hai aur har rupay ka mol pura.",
+  "Mehnga zaroor hai magar quality bilkul justify karti hai.",
+  "Price thori zyada hai but quality pe ek bhi compromise nahi.",
+  "Jo pay karte ho wahi milta hai aur yeh deliver karta hai.",
+];
+
+const LOW_PRICE_HINTS_UR = [
+  "Iss price pe yeh quality milna mushkil hai sach mein.",
+  "Iss price point pe incredible value.",
+  "Iss price ke liye bilkul koi complaint nahi.",
+  "Iss price pe itna milta hai, mashallah!",
+  "Budget friendly hai aur cheap bilkul nahi lagta.",
+];
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -86,9 +114,19 @@ export function extractVariants(rawVariants: unknown): string[] {
  *
  * Only called for positive reviews (rating ≥ 3) — negative reviews rarely
  * mention price in a positive light.
+ *
+ * @param lang - "en" (default) or "ur" — picks language-appropriate hints.
  */
-export function getProductContextHint(product: ProductContext, rating: number): string {
+export function getProductContextHint(
+  product: ProductContext,
+  rating: number,
+  lang: "en" | "ur" = "en"
+): string {
   if (rating < 3) return "";
+
+  const discountPool = lang === "ur" ? DISCOUNT_HINTS_UR : DISCOUNT_HINTS;
+  const highPricePool = lang === "ur" ? HIGH_PRICE_HINTS_UR : HIGH_PRICE_HINTS;
+  const lowPricePool = lang === "ur" ? LOW_PRICE_HINTS_UR : LOW_PRICE_HINTS;
 
   const candidates: string[] = [];
 
@@ -99,23 +137,27 @@ export function getProductContextHint(product: ProductContext, rating: number): 
     product.discountPrice < product.price &&
     Math.random() < 0.45
   ) {
-    candidates.push(pick(DISCOUNT_HINTS));
+    candidates.push(pick(discountPool));
   }
 
   // High price >5000 PKR (~40% chance)
   if ((product.price ?? 0) > 5000 && Math.random() < 0.40) {
-    candidates.push(pick(HIGH_PRICE_HINTS));
+    candidates.push(pick(highPricePool));
   }
 
   // Low price <500 PKR (~40% chance)
   if ((product.price ?? 99_999) < 500 && Math.random() < 0.40) {
-    candidates.push(pick(LOW_PRICE_HINTS));
+    candidates.push(pick(lowPricePool));
   }
 
   // Variant mention (~35% chance when variants exist)
   if (product.variants && product.variants.length > 0 && Math.random() < 0.35) {
     const variant = pick(product.variants);
-    candidates.push(`Ordered the ${variant} — looks exactly like the pictures.`);
+    candidates.push(
+      lang === "ur"
+        ? `${variant} variant order kiya tha — bilkul tasveer jaisa nikla.`
+        : `Ordered the ${variant} — looks exactly like the pictures.`
+    );
   }
 
   if (candidates.length === 0) return "";
