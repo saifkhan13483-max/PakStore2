@@ -17,7 +17,7 @@ const WELCOME_MESSAGE: Message = {
     "السلام علیکم! 👋 Main PakBot hoon — aapka PakCart shopping guide. Koi bhi cheez pochni ho to batao — main help karta hoon!\n\n📞 Owner se baat karni ho to message karein: 03188055850\n(Sirf message — call nahi)",
 };
 
-function renderMessageContent(text: string) {
+function renderInlineWithLinks(text: string, keyPrefix: string) {
   const pattern =
     /(https?:\/\/[^\s)]+|(?:^|\s)pakcart\.store(?:\/[^\s)]*)?|(?:^|\s)\/[a-z][a-z0-9\-/]*|\b0\d{10}\b)/gi;
   const parts: Array<string | { kind: "link"; text: string; href: string }> = [];
@@ -43,11 +43,11 @@ function renderMessageContent(text: string) {
   if (lastIndex < text.length) parts.push(text.slice(lastIndex));
 
   return parts.map((p, i) => {
-    if (typeof p === "string") return <span key={i}>{p}</span>;
+    if (typeof p === "string") return <span key={`${keyPrefix}-${i}`}>{p}</span>;
     const isInternal = p.href.startsWith("/");
     return (
       <a
-        key={i}
+        key={`${keyPrefix}-${i}`}
         href={p.href}
         target={isInternal ? undefined : "_blank"}
         rel={isInternal ? undefined : "noopener noreferrer"}
@@ -57,6 +57,33 @@ function renderMessageContent(text: string) {
       </a>
     );
   });
+}
+
+function renderMessageContent(text: string) {
+  const boldPattern = /\*\*([^*\n]+)\*\*|__([^_\n]+)__/g;
+  const segments: Array<{ bold: boolean; text: string }> = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = boldPattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ bold: false, text: text.slice(lastIndex, match.index) });
+    }
+    segments.push({ bold: true, text: match[1] ?? match[2] ?? "" });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) {
+    segments.push({ bold: false, text: text.slice(lastIndex) });
+  }
+
+  return segments.map((seg, i) =>
+    seg.bold ? (
+      <strong key={`b-${i}`} className="font-semibold">
+        {renderInlineWithLinks(seg.text, `bi-${i}`)}
+      </strong>
+    ) : (
+      <span key={`s-${i}`}>{renderInlineWithLinks(seg.text, `si-${i}`)}</span>
+    ),
+  );
 }
 
 const SYSTEM_PROMPT = `You are PakBot — the personal shopping guide for PakCart, a premium Pakistani e-commerce store. You're not a bot reading from a script. You're that one person in someone's contact list who actually knows Pakistani craftsmanship, can tell real Pashmina from a fake in two sentences, and gives a straight answer without a sales pitch attached.
