@@ -212,15 +212,15 @@ export default function Checkout() {
   return (
     <>
       {seoElement}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl">
       {/* Progress Indicator */}
-      <div className="mb-12">
+      <div className="mb-10 sm:mb-12">
         <div className="flex items-center justify-center max-w-3xl mx-auto">
           {steps.map((s, index) => (
             <div key={s.id} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center relative group">
                 <div 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                     s.active 
                       ? "bg-emerald-800 border-emerald-800 text-white scale-110 shadow-lg" 
                       : s.completed || s.href
@@ -230,10 +230,10 @@ export default function Checkout() {
                   onClick={() => s.href && setLocation(s.href)}
                   data-testid={`checkout-step-${s.id}`}
                 >
-                  {s.completed ? <CheckCircle className="w-5 h-5" /> : <s.icon className="w-5 h-5" />}
+                  {s.completed ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" /> : <s.icon className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </div>
                 <span 
-                  className={`absolute -bottom-7 text-xs font-semibold whitespace-nowrap ${
+                  className={`absolute -bottom-6 sm:-bottom-7 text-[10px] sm:text-xs font-semibold whitespace-nowrap ${
                     s.active ? "text-emerald-900" : "text-muted-foreground"
                   }`}
                 >
@@ -241,7 +241,7 @@ export default function Checkout() {
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div className="flex-1 h-[2px] mx-4 bg-muted overflow-hidden">
+                <div className="flex-1 h-[2px] mx-2 sm:mx-4 bg-muted overflow-hidden">
                   <div 
                     className={`h-full bg-emerald-800 transition-all duration-500 ${
                       s.completed || s.href ? "w-full" : "w-0"
@@ -267,7 +267,7 @@ export default function Checkout() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-6 sm:mt-8">
         {/* Left Column: Forms */}
         <div className="lg:col-span-8 space-y-6">
           <Form {...form}>
@@ -276,10 +276,10 @@ export default function Checkout() {
                 <>
                   <Card className="border-emerald-100 shadow-sm overflow-hidden">
                     <div className="h-1 bg-emerald-800" />
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center gap-2 mb-5 sm:mb-6 text-emerald-900">
                         <Info className="w-5 h-5" />
-                        <h2 className="text-xl font-bold">Contact Information</h2>
+                        <h2 className="text-lg sm:text-xl font-bold">Contact Information</h2>
                       </div>
                       <div className="space-y-4">
                         <FormField
@@ -369,10 +369,10 @@ export default function Checkout() {
 
                   <Card className="border-emerald-100 shadow-sm overflow-hidden">
                     <div className="h-1 bg-emerald-800" />
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center gap-2 mb-5 sm:mb-6 text-emerald-900">
                         <ShoppingCart className="w-5 h-5" />
-                        <h2 className="text-xl font-bold">Shipping Address</h2>
+                        <h2 className="text-lg sm:text-xl font-bold">Shipping Address</h2>
                       </div>
                       <div className="space-y-4">
                         <FormField
@@ -445,10 +445,10 @@ export default function Checkout() {
               ) : (
                 <Card className="border-emerald-100 shadow-sm overflow-hidden">
                   <div className="h-1 bg-emerald-800" />
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6 text-emerald-900">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center gap-2 mb-5 sm:mb-6 text-emerald-900">
                       <CreditCard className="w-5 h-5" />
-                      <h2 className="text-xl font-bold">Payment Method</h2>
+                      <h2 className="text-lg sm:text-xl font-bold">Payment Method</h2>
                     </div>
                     
                     <RadioGroup defaultValue="cod" className="space-y-4">

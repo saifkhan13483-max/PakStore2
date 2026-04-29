@@ -46,7 +46,7 @@ export function OrderSummary() {
   const total = useMemo(() => subtotal + shippingCharges, [subtotal, shippingCharges]);
 
   return (
-    <Card className="sticky top-24" data-testid="card-order-summary">
+    <Card className="lg:sticky lg:top-24" data-testid="card-order-summary">
       <CardHeader className="py-4">
         <CardTitle className="text-lg">Order Summary</CardTitle>
       </CardHeader>
