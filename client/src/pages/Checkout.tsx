@@ -12,7 +12,6 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
@@ -23,51 +22,19 @@ import { sendOrderEmailNotification } from "@/lib/notifications";
 const checkoutInfoSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Valid phone number is required"),
+  phone: z
+    .string()
+    .regex(
+      /^\+923\d{9}$/,
+      "Enter a valid Pakistani mobile number, e.g. +923001234567"
+    ),
   address: z.string().min(10, "Full address is required"),
-  area: z.string().min(2, "Area is required"),
-  city: z.string().min(1, "City is required"),
+  area: z.string().min(2, "Nearest famous place is required"),
+  city: z.string().min(2, "City is required"),
   notes: z.string().optional(),
 });
 
 type CheckoutInfo = z.infer<typeof checkoutInfoSchema>;
-
-const PAKISTANI_CITIES = [
-  // Punjab
-  "Lahore", "Faisalabad", "Rawalpindi", "Gujranwala", "Multan",
-  "Sialkot", "Bahawalpur", "Sargodha", "Sheikhupura", "Jhang",
-  "Rahim Yar Khan", "Gujrat", "Kasur", "Okara", "Sahiwal",
-  "Wazirabad", "Mandi Bahauddin", "Narowal", "Pakpattan", "Mianwali",
-  "Bahawalnagar", "Toba Tek Singh", "Khanewal", "Muzaffargarh", "Vehari",
-  "Lodhran", "Layyah", "Dera Ghazi Khan", "Bhakkar", "Hafizabad",
-  "Attock", "Chakwal", "Jhelum", "Khushab", "Chiniot",
-  "Nankana Sahib", "Rajanpur", "Wah Cantonment",
-  // Sindh
-  "Karachi", "Hyderabad", "Sukkur", "Larkana", "Mirpur Khas",
-  "Nawabshah", "Jacobabad", "Shikarpur", "Khairpur", "Dadu",
-  "Thatta", "Badin", "Tando Adam", "Tando Allahyar", "Umerkot",
-  "Kashmore", "Kandhkot", "Sanghar", "Matiari", "Jamshoro",
-  "Ghotki", "Qambar Shahdadkot",
-  // Khyber Pakhtunkhwa
-  "Peshawar", "Mardan", "Mingora", "Abbottabad", "Mansehra",
-  "Kohat", "Nowshera", "Charsadda", "Dera Ismail Khan", "Bannu",
-  "Haripur", "Swabi", "Hangu", "Karak", "Lakki Marwat",
-  "Tank", "Chitral", "Malakand", "Timergara", "Saidu Sharif",
-  "Batkhela", "Buner",
-  // Balochistan
-  "Quetta", "Turbat", "Khuzdar", "Chaman", "Gwadar",
-  "Hub", "Sibi", "Zhob", "Loralai", "Dalbandin",
-  "Dera Allah Yar", "Kharan", "Mastung", "Kalat", "Panjgur",
-  "Nushki", "Bela", "Dera Murad Jamali",
-  // Islamabad Capital Territory
-  "Islamabad",
-  // Azad Kashmir
-  "Muzaffarabad", "Mirpur", "Rawalakot", "Bagh", "Kotli",
-  "Pallandri", "Bhimber",
-  // Gilgit-Baltistan
-  "Gilgit", "Skardu", "Hunza", "Chilas", "Ghanche",
-  "Other",
-].sort();
 
 export default function Checkout() {
   const { clearCart } = useCartStore();
@@ -92,7 +59,7 @@ export default function Checkout() {
     defaultValues: {
       fullName: "",
       email: "",
-      phone: "+92",
+      phone: "",
       address: "",
       area: "",
       city: "",
@@ -320,7 +287,9 @@ export default function Checkout() {
                           name="fullName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-emerald-900 font-medium">Full Name</FormLabel>
+                              <FormLabel className="text-emerald-900 font-medium">
+                                Full Name <span className="text-red-500">*</span>
+                              </FormLabel>
                               <FormControl>
                                 <Input 
                                   placeholder="Enter your full name" 
@@ -339,7 +308,9 @@ export default function Checkout() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-emerald-900 font-medium">Email Address</FormLabel>
+                                <FormLabel className="text-emerald-900 font-medium">
+                                  Email Address <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="email" 
@@ -356,20 +327,40 @@ export default function Checkout() {
                           <FormField
                             control={form.control}
                             name="phone"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-emerald-900 font-medium">Mobile Number (Pakistan)</FormLabel>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="+92XXXXXXXXXX" 
-                                    className="focus-visible:ring-emerald-800"
-                                    {...field} 
-                                    data-testid="input-phone" 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            render={({ field }) => {
+                              const digits = (field.value || "").replace(/^\+92/, "");
+                              return (
+                                <FormItem>
+                                  <FormLabel className="text-emerald-900 font-medium">
+                                    Mobile Number (Pakistan) <span className="text-red-500">*</span>
+                                  </FormLabel>
+                                  <FormControl>
+                                    <div className="flex">
+                                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground select-none">
+                                        +92
+                                      </span>
+                                      <Input
+                                        type="tel"
+                                        inputMode="numeric"
+                                        placeholder="3001234567"
+                                        maxLength={10}
+                                        className="rounded-l-none focus-visible:ring-emerald-800"
+                                        value={digits}
+                                        onChange={(e) => {
+                                          const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                          field.onChange(onlyDigits ? `+92${onlyDigits}` : "");
+                                        }}
+                                        onBlur={field.onBlur}
+                                        name={field.name}
+                                        ref={field.ref}
+                                        data-testid="input-phone"
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
                           />
                         </div>
                       </div>
@@ -431,7 +422,9 @@ export default function Checkout() {
                             name="city"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-emerald-900 font-medium">City</FormLabel>
+                                <FormLabel className="text-emerald-900 font-medium">
+                                  City <span className="text-red-500">*</span>
+                                </FormLabel>
                                 <FormControl>
                                   <Input
                                     placeholder="Enter your city"
