@@ -432,21 +432,14 @@ export default function Checkout() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-emerald-900 font-medium">City</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger 
-                                      className="focus:ring-emerald-800"
-                                      data-testid="select-city"
-                                    >
-                                      <SelectValue placeholder="Select your city" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {PAKISTANI_CITIES.map((city) => (
-                                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Enter your city"
+                                    className="focus-visible:ring-emerald-800"
+                                    data-testid="input-city"
+                                    {...field}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
