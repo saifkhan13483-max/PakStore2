@@ -3,7 +3,7 @@ import {
   callGeminiWithFallback,
   extractRetryAfter,
   getGeminiApiKeys,
-} from "./_gemini";
+} from "./_gemini.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

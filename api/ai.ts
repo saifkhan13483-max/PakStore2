@@ -3,7 +3,7 @@ import {
   callGeminiWithFallback,
   extractRetryAfter,
   getGeminiApiKeys,
-} from "./_gemini";
+} from "./_gemini.js";
 
 async function fetchImageAsInlineData(url: string): Promise<{ mimeType: string; data: string } | null> {
   try {
