@@ -99,6 +99,7 @@ const AdminHomepageSlider = lazyWithRetry(() => import("@/pages/admin/HomepageSl
 const AdminAnnouncements = lazyWithRetry(() => import("@/pages/admin/Announcements"));
 const AdminSeedComments = lazyWithRetry(() => import("@/pages/admin/SeedComments"));
 const AdminSeedCategories = lazyWithRetry(() => import("@/pages/admin/SeedCategories"));
+const AdminRecategorizeProducts = lazyWithRetry(() => import("@/pages/admin/RecategorizeProducts"));
 const AdminSearchAnalytics = lazyWithRetry(() => import("@/pages/admin/SearchAnalytics"));
 const AdminProfitRules = lazyWithRetry(() => import("@/pages/admin/ProfitRules"));
 const OrderDetail = lazyWithRetry(() => import("@/pages/OrderDetail"));
@@ -254,6 +255,13 @@ function Router() {
         <AdminRoute>
           <AdminLayout>
             <AdminSeedCategories />
+          </AdminLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/recategorize-products">
+        <AdminRoute>
+          <AdminLayout>
+            <AdminRecategorizeProducts />
           </AdminLayout>
         </AdminRoute>
       </Route>
