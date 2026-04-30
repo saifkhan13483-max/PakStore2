@@ -39,12 +39,18 @@ export default function SeedCategories() {
     try {
       const existingParents = await categoryFirestoreService.getAllParentCategories();
       const parentBySlug = new Map<string, string>();
+      const parentByName = new Map<string, string>();
       existingParents.forEach((p: any) => {
         if (p.slug) parentBySlug.set(p.slug, p.id);
+        if (p.name) parentByName.set(p.name.trim().toLowerCase(), p.id);
       });
 
       for (const parent of PARENT_CATEGORIES) {
-        if (parentBySlug.has(parent.slug)) {
+        const existingId =
+          parentBySlug.get(parent.slug) ||
+          parentByName.get(parent.name.trim().toLowerCase());
+        if (existingId) {
+          parentBySlug.set(parent.slug, existingId);
           append({ kind: "skip", message: `Parent already exists: ${parent.name}` });
           continue;
         }
@@ -56,6 +62,7 @@ export default function SeedCategories() {
             image: "",
           });
           parentBySlug.set(parent.slug, created.id);
+          parentByName.set(parent.name.trim().toLowerCase(), created.id);
           append({ kind: "ok", message: `Created parent: ${parent.name}` });
         } catch (e: any) {
           append({ kind: "err", message: `Parent ${parent.name} failed: ${e.message}` });
@@ -63,10 +70,20 @@ export default function SeedCategories() {
       }
 
       const existingCats = await categoryFirestoreService.getAllCategories();
-      const existingCatSlugs = new Set(existingCats.map((c: any) => c.slug).filter(Boolean));
+      const existingCatSlugs = new Set(
+        existingCats.map((c: any) => c.slug).filter(Boolean),
+      );
+      const existingCatNames = new Set(
+        existingCats
+          .map((c: any) => (c.name ? c.name.trim().toLowerCase() : ""))
+          .filter(Boolean),
+      );
 
       for (const sub of SUB_CATEGORIES) {
-        if (existingCatSlugs.has(sub.slug)) {
+        if (
+          existingCatSlugs.has(sub.slug) ||
+          existingCatNames.has(sub.name.trim().toLowerCase())
+        ) {
           append({ kind: "skip", message: `Category already exists: ${sub.name}` });
           continue;
         }
@@ -82,7 +99,8 @@ export default function SeedCategories() {
             description: `Premium ${sub.name} collection`,
             image: sub.image,
             parentCategoryId: parentId,
-          });
+            parentId,
+          } as any);
           append({ kind: "ok", message: `Created category: ${sub.name}` });
         } catch (e: any) {
           append({ kind: "err", message: `Category ${sub.name} failed: ${e.message}` });
