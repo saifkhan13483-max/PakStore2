@@ -12,7 +12,6 @@ import {
   Megaphone,
   MessageSquare,
   BarChart3,
-  Zap,
   TrendingUp,
   Wand2,
 } from "lucide-react";
@@ -27,7 +26,6 @@ import { Separator } from "@/components/ui/separator";
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Package, label: "Products", href: "/admin/products" },
-  { icon: Zap, label: "Bulk Add Products", href: "/admin/products/bulk-add" },
   { icon: ListTree, label: "Categories", href: "/admin/categories" },
   { icon: ShoppingCart, label: "Orders", href: "/admin/orders" },
   { icon: ImageIcon, label: "Homepage Slider", href: "/admin/homepage-slider" },

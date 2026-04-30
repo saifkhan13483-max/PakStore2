@@ -9,7 +9,6 @@ import {
   Megaphone,
   BarChart2,
   MessageSquarePlus,
-  PackagePlus,
   Users,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -40,7 +39,6 @@ const overviewItems = [
 
 const productItems = [
   { title: "Products", url: "/admin/products", icon: ShoppingBag },
-  { title: "Bulk Add Products", url: "/admin/products/bulk-add", icon: PackagePlus },
   { title: "Categories", url: "/admin/categories", icon: Tags },
 ];
 
