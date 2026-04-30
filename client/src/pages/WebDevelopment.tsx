@@ -97,21 +97,42 @@ const WebDevelopment = () => {
     },
   ];
 
-  const plan = {
-    name: "Standard",
-    price: "45,000",
-    tagline: "Most popular for growing brands",
-    features: [
-      "Unlimited products",
-      "Premium custom design",
-      "Full admin panel + analytics",
-      "Lifetime free fast hosting",
-      "3 free business emails",
-      "Advanced SEO + sitemap",
-      "WhatsApp & order notifications",
-      "Delivery in 1 month",
-    ],
-  };
+  const plans = [
+    {
+      name: "Standard",
+      price: "45,000",
+      tagline: "Most popular for growing brands",
+      badge: "Most Popular",
+      highlighted: true,
+      features: [
+        "Unlimited products",
+        "Premium custom design",
+        "Full admin panel + analytics",
+        "Lifetime free fast hosting",
+        "3 free business emails",
+        "Advanced SEO + sitemap",
+        "WhatsApp & order notifications",
+        "Delivery in 1 month",
+      ],
+    },
+    {
+      name: "AI Pro",
+      price: "85,000",
+      tagline: "Smart store powered by AI",
+      badge: "AI Powered",
+      highlighted: false,
+      features: [
+        "Everything in Standard, plus:",
+        "AI product recommendations",
+        "AI chatbot for 24/7 customer support",
+        "AI-powered smart search",
+        "AI-generated product descriptions",
+        "AI image enhancement & background removal",
+        "AI sales insights & analytics",
+        "Personalized shopping experience",
+      ],
+    },
+  ];
 
   const serviceSchema = {
     "@context": "https://schema.org",
@@ -545,69 +566,112 @@ const WebDevelopment = () => {
             </p>
           </div>
 
-          <div className="mt-12 max-w-md mx-auto">
-            <Card
-              className="relative border-primary border-2 shadow-xl"
-              data-testid={`card-plan-${plan.name.toLowerCase()}`}
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow">
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  Most Popular
-                </span>
-              </div>
-              <CardContent className="p-6 sm:p-8 flex flex-col">
-                <div className="space-y-1">
-                  <h3 className="font-display font-bold text-xl">
-                    {plan.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {plan.tagline}
-                  </p>
-                </div>
-
-                <div className="mt-5 pb-5 border-b">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-medium text-muted-foreground">
-                      Rs.
-                    </span>
+          <div className="mt-12 grid gap-6 md:gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
+            {plans.map((plan) => {
+              const slug = plan.name.toLowerCase().replace(/\s+/g, "-");
+              const isAi = plan.name === "AI Pro";
+              return (
+                <Card
+                  key={plan.name}
+                  className={`relative shadow-xl flex flex-col ${
+                    plan.highlighted
+                      ? "border-primary border-2"
+                      : "border-secondary border-2"
+                  }`}
+                  data-testid={`card-plan-${slug}`}
+                >
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span
-                      className="font-display text-4xl sm:text-5xl font-bold text-foreground"
-                      data-testid={`text-price-${plan.name.toLowerCase()}`}
+                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold shadow ${
+                        plan.highlighted
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-primary text-primary-foreground"
+                      }`}
                     >
-                      {plan.price}
+                      {isAi ? (
+                        <Sparkles className="h-3.5 w-3.5" />
+                      ) : (
+                        <Star className="h-3.5 w-3.5 fill-current" />
+                      )}
+                      {plan.badge}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    One-time payment
-                  </p>
-                </div>
+                  <CardContent className="p-6 sm:p-8 flex flex-col flex-1">
+                    <div className="space-y-1">
+                      <h3 className="font-display font-bold text-xl">
+                        {plan.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {plan.tagline}
+                      </p>
+                    </div>
 
-                <ul className="space-y-3 py-5">
-                  {plan.features.map((f, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-3 text-sm"
+                    <div className="mt-5 pb-5 border-b">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Rs.
+                        </span>
+                        <span
+                          className="font-display text-4xl sm:text-5xl font-bold text-foreground"
+                          data-testid={`text-price-${slug}`}
+                        >
+                          {plan.price}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        One-time payment
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 py-5 flex-1">
+                      {plan.features.map((f, i) => {
+                        const isHeader = f.endsWith(":");
+                        return (
+                          <li
+                            key={i}
+                            className={`flex items-start gap-3 text-sm ${
+                              isHeader ? "pt-1" : ""
+                            }`}
+                          >
+                            {isHeader ? (
+                              <Sparkles className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                            ) : (
+                              <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                            )}
+                            <span
+                              className={
+                                isHeader
+                                  ? "text-foreground font-semibold"
+                                  : "text-foreground"
+                              }
+                            >
+                              {f}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    <a
+                      href="https://wa.me/923188055850"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid={`link-plan-${slug}`}
+                      className="mt-auto"
                     >
-                      <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                      <span className="text-foreground">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="https://wa.me/923188055850"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid={`link-plan-${plan.name.toLowerCase()}`}
-                >
-                  <Button className="w-full" size="lg">
-                    Get Started
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </a>
-              </CardContent>
-            </Card>
+                      <Button
+                        className="w-full"
+                        size="lg"
+                        variant={plan.highlighted ? "default" : "secondary"}
+                      >
+                        Get Started
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           <p className="text-center text-xs sm:text-sm text-muted-foreground mt-8">
