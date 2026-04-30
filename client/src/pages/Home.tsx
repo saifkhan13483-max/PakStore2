@@ -586,10 +586,10 @@ export default function Home() {
           return [...categories].sort((a, b) => orderIndex(a.name) - orderIndex(b.name));
         })().map((category, catIndex) => {
           const categoryProducts = allProducts?.filter(p => p.categoryId === category.id) || [];
-          if (categoryProducts.length === 0 && !isAllProductsLoading) return null;
           const categorySlug = category.slug || String(category.id);
           const isExpanded = expandedCategories.has(category.id);
           const visibleProducts = isExpanded ? categoryProducts : categoryProducts.slice(0, 6);
+          const hasProducts = categoryProducts.length > 0;
           return (
             <section
               key={category.id}
@@ -610,25 +610,47 @@ export default function Home() {
                     </h2>
                     <div className="h-1.5 w-16 bg-secondary rounded-full" />
                   </motion.div>
+                  <Link href={`/collections/${categorySlug}`}>
+                    <Button
+                      variant="ghost"
+                      className="text-primary hover:text-primary/80"
+                      data-testid={`link-view-all-${categorySlug}`}
+                    >
+                      View All <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
-                  {isAllProductsLoading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
+                {isAllProductsLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
+                    {Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="space-y-4">
                         <Skeleton className="h-[300px] w-full rounded-2xl" />
                         <Skeleton className="h-4 w-2/3" />
                         <Skeleton className="h-4 w-1/3" />
                       </div>
-                    ))
-                  ) : (
-                    visibleProducts.map((product) => (
+                    ))}
+                  </div>
+                ) : hasProducts ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
+                    {visibleProducts.map((product) => (
                       <ProductCard key={product.id} product={product} />
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-border bg-card/40 py-12 text-center" data-testid={`empty-category-${categorySlug}`}>
+                    <p className="text-muted-foreground mb-4">
+                      No products in {category.name} yet.
+                    </p>
+                    <Link href={`/collections/${categorySlug}`}>
+                      <Button variant="outline" className="rounded-full">
+                        Browse {category.name} <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
 
-                {categoryProducts.length > 5 && (
+                {hasProducts && categoryProducts.length > 5 && (
                   <div className="mt-6 text-center">
                     <Button
                       variant="outline"
