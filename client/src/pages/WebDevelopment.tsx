@@ -117,7 +117,7 @@ const WebDevelopment = () => {
     },
     {
       name: "AI Pro",
-      price: "85,000",
+      price: "125,000",
       tagline: "Smart store powered by AI",
       badge: "AI Powered",
       highlighted: false,
