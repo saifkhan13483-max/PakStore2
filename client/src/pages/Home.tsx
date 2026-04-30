@@ -24,7 +24,22 @@ import SEO from "@/components/SEO";
 
 export default function Home() {
   const { data: allProducts, isLoading: isAllProductsLoading } = useProducts();
-  const { categories, isLoading: isCategoriesLoading } = useCategories();
+  const { categories: categoriesRaw, isLoading: isCategoriesLoading } = useCategories();
+  const categories = useMemo(() => {
+    const preferredKeywords = ["watch", "wallet", "bag", "jewel", "dress"];
+    const orderIndex = (name: string) => {
+      const lower = (name || "").toLowerCase().trim();
+      for (let i = 0; i < preferredKeywords.length; i++) {
+        if (lower.includes(preferredKeywords[i])) return i;
+      }
+      return preferredKeywords.length;
+    };
+    return [...categoriesRaw].sort((a, b) => {
+      const diff = orderIndex(a.name) - orderIndex(b.name);
+      if (diff !== 0) return diff;
+      return a.name.localeCompare(b.name);
+    });
+  }, [categoriesRaw]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
