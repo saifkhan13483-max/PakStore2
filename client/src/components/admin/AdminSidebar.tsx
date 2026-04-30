@@ -32,6 +32,7 @@ const menuItems = [
   { icon: ImageIcon, label: "Homepage Slider", href: "/admin/homepage-slider" },
   { icon: Megaphone, label: "Announcements", href: "/admin/announcements" },
   { icon: MessageSquare, label: "Seed Comments", href: "/admin/seed-comments" },
+  { icon: ListTree, label: "Seed Categories", href: "/admin/seed-categories" },
   { icon: BarChart3, label: "Search Analytics", href: "/admin/search-analytics" },
   { icon: TrendingUp, label: "Profit Rules", href: "/admin/profit-rules" },
   { icon: FileSearch, label: "Sitemap", href: "/admin/sitemap" },
