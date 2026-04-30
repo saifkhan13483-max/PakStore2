@@ -9,7 +9,6 @@ import {
   Package,
   ChevronDown,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -250,23 +249,17 @@ const Header = () => {
                   data-testid="header-cart-btn"
                 >
                   <ShoppingBag className="h-5 w-5" />
-                  <AnimatePresence>
-                    {totalItems > 0 && (
-                      <motion.span
-                        key="cart-badge"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        className={cn(
-                          "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center",
-                          cartBadgePulse && "animate-bounce"
-                        )}
-                        data-testid="cart-badge"
-                      >
-                        {totalItems > 99 ? "99+" : totalItems}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  {totalItems > 0 && (
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center transition-transform",
+                        cartBadgePulse && "animate-bounce"
+                      )}
+                      data-testid="cart-badge"
+                    >
+                      {totalItems > 99 ? "99+" : totalItems}
+                    </span>
+                  )}
                 </button>
               </Link>
 

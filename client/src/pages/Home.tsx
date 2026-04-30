@@ -306,13 +306,23 @@ export default function Home() {
             >
                   <picture>
                     {safeSlide.image_webp_url ? (
-                      <source srcSet={safeSlide.image_webp_url} type="image/webp" />
+                      <source
+                        srcSet={
+                          isMobile
+                            ? `${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 480 })} 480w, ${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 768 })} 768w`
+                            : `${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 1280 })} 1280w, ${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 1920 })} 1920w`
+                        }
+                        sizes="100vw"
+                        type="image/webp"
+                      />
                     ) : (
                       <source
-                        srcSet={getOptimizedImageUrl(safeSlide.image_url, {
-                          format: 'webp',
-                          width: isMobile ? 768 : 1920,
-                        })}
+                        srcSet={
+                          isMobile
+                            ? `${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 480 })} 480w, ${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 768 })} 768w`
+                            : `${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 1280 })} 1280w, ${getOptimizedImageUrl(safeSlide.image_url, { format: 'webp', width: 1920 })} 1920w`
+                        }
+                        sizes="100vw"
                         type="image/webp"
                       />
                     )}
@@ -322,6 +332,12 @@ export default function Home() {
                         format: 'auto',
                         width: isMobile ? 768 : 1920,
                       })}
+                      srcSet={
+                        isMobile
+                          ? `${getOptimizedImageUrl(safeSlide.image_url, { width: 480 })} 480w, ${getOptimizedImageUrl(safeSlide.image_url, { width: 768 })} 768w`
+                          : `${getOptimizedImageUrl(safeSlide.image_url, { width: 1280 })} 1280w, ${getOptimizedImageUrl(safeSlide.image_url, { width: 1920 })} 1920w`
+                      }
+                      sizes="100vw"
                       alt={`Hero slide ${currentSlide + 1}`}
                       className="w-full h-full object-cover"
                       loading={currentSlide === 0 ? "eager" : "lazy"}
@@ -451,21 +467,15 @@ export default function Home() {
                   else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
                   else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;
                   return (
-                    <motion.div
+                    <CategoryCard
                       key={category.id}
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
-                    >
-                      <CategoryCard
-                        name={category.name}
-                        slug={category.slug || String(category.id)}
-                        href={`/collections/${category.slug || String(category.id)}`}
-                        count={0}
-                        image={categoryImage}
-                      />
-                    </motion.div>
+                      name={category.name}
+                      slug={category.slug || String(category.id)}
+                      href={`/collections/${category.slug || String(category.id)}`}
+                      count={0}
+                      image={categoryImage}
+                      priority={index < 2}
+                    />
                   );
                 })
               )}
@@ -502,22 +512,16 @@ export default function Home() {
                     else if (category.name.toLowerCase().includes("eid special")) categoryImage = eidSpecialImage;
                     else if (category.name.toLowerCase().includes("watches")) categoryImage = watchesImage;
                     return (
-                      <motion.div
-                        key={category.id}
-                        className="flex-none w-44 md:w-48"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: (index + 1) * 0.06 }}
-                      >
+                      <div key={category.id} className="flex-none w-44 md:w-48">
                         <CategoryCard
                           name={category.name}
                           slug={category.slug || String(category.id)}
                           href={`/collections/${category.slug || String(category.id)}`}
                           count={0}
                           image={categoryImage}
+                          priority={index < 4}
                         />
-                      </motion.div>
+                      </div>
                     );
                   })
                 )}

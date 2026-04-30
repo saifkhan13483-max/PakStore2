@@ -1,6 +1,5 @@
-import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import logoImg from "@/assets/logo.png";
-import { Facebook, Instagram, Twitter, MapPin, Phone, Mail, Globe, Heart } from "lucide-react";
+import { Facebook, Instagram, Twitter, Phone, Mail, Globe, Heart } from "lucide-react";
 import { Link } from "wouter";
 
 const Footer = () => {
@@ -12,7 +11,7 @@ const Footer = () => {
           {/* Company Information */}
           <div className="space-y-4 flex-1 lg:max-w-[30%] lg:mr-12">
             <Link href="/" className="inline-block">
-              <img src={getOptimizedImageUrl(logoImg)} alt="PakCart" className="h-12 w-auto" />
+              <img src={logoImg} alt="PakCart" className="h-12 w-auto" width="168" height="48" loading="lazy" decoding="async" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Bringing the finest craftsmanship of Pakistan to your doorstep. Authentic, premium, and ethically sourced Pakistani artisanal products.

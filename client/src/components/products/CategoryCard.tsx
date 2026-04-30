@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { getOptimizedImageUrl, getResponsiveSrcSet } from "@/lib/cloudinary";
 
 interface CategoryCardProps {
   name: string;
@@ -9,22 +8,31 @@ interface CategoryCardProps {
   count: number;
   slug: string;
   href?: string;
+  priority?: boolean;
 }
 
-export function CategoryCard({ name, image, count, slug, href }: CategoryCardProps) {
+export function CategoryCard({ name, image, count, slug, href, priority = false }: CategoryCardProps) {
   const linkHref = href || `/collections/${slug}`;
+  const optimized = getOptimizedImageUrl(image, { width: 600, height: 450, crop: 'fill' });
+  const srcSet = getResponsiveSrcSet(image, [320, 480, 600, 800]);
+
   return (
-    <motion.div
-      whileHover={{ y: -8 }}
-      transition={{ type: "spring", stiffness: 300 }}
-      className="h-full"
+    <div
+      className="h-full transition-transform duration-300 hover:-translate-y-2 will-change-transform"
     >
       <Link href={linkHref}>
         <Card className="overflow-hidden cursor-pointer group hover-elevate border-none shadow-md h-full rounded-2xl relative">
           <CardContent className="p-0 relative aspect-[16/9] sm:aspect-[4/3] flex flex-col justify-end">
-            <img 
-              src={image} 
-              alt={name} 
+            <img
+              src={optimized}
+              srcSet={srcSet}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px"
+              alt={name}
+              width="600"
+              height="450"
+              loading={priority ? "eager" : "lazy"}
+              decoding={priority ? "sync" : "async"}
+              fetchPriority={priority ? "high" : "auto"}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 object-center"
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-500" />
@@ -36,7 +44,7 @@ export function CategoryCard({ name, image, count, slug, href }: CategoryCardPro
                 </h3>
               </div>
             </div>
-            
+
             {/* Professional glass effect corner */}
             <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
                <div className="w-12 h-12 rounded-full border-2 border-white/30" />
@@ -47,6 +55,6 @@ export function CategoryCard({ name, image, count, slug, href }: CategoryCardPro
           </CardContent>
         </Card>
       </Link>
-    </motion.div>
+    </div>
   );
 }

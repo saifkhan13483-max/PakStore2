@@ -1,11 +1,10 @@
-import { getOptimizedImageUrl } from "@/lib/cloudinary";
+import { getOptimizedImageUrl, getResponsiveSrcSet } from "@/lib/cloudinary";
 import { Link } from "wouter";
 import { ShoppingCart, Eye, Star, ImageOff, Plus, Loader2, Download } from "lucide-react";
 import { type Product, commentSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { useRealtimeCollection } from "@/hooks/use-firestore-realtime";
 import { where } from "firebase/firestore";
@@ -100,7 +99,9 @@ export function ProductCard({ product }: ProductCardProps) {
     }).format(price);
   };
 
-  const imageUrl = product.images?.[0] ? getOptimizedImageUrl(product.images[0], { width: 400, height: 500, crop: 'fill' }) : null;
+  const rawImage = product.images?.[0];
+  const imageUrl = rawImage ? getOptimizedImageUrl(rawImage, { width: 400, height: 500, crop: 'fill' }) : null;
+  const imageSrcSet = rawImage ? getResponsiveSrcSet(rawImage, [200, 320, 400, 600]) : undefined;
 
   return (
     <>
@@ -111,11 +112,8 @@ export function ProductCard({ product }: ProductCardProps) {
         onClose={() => setMediaOpen(false)}
       />
     )}
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -12 }}
-      className="group relative bg-white dark:bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-transparent hover:border-primary/20"
+    <div
+      className="group relative bg-white dark:bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 border border-transparent hover:border-primary/20 will-change-transform"
       style={{ contentVisibility: 'auto', containIntrinsicSize: '300px 400px' }}
     >
       {/* Image Container */}
@@ -123,6 +121,8 @@ export function ProductCard({ product }: ProductCardProps) {
         {imageUrl && !imageError ? (
           <img
             src={imageUrl}
+            srcSet={imageSrcSet}
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 240px"
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
             loading="lazy"
@@ -228,7 +228,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
     </>
   );
 }
