@@ -308,7 +308,6 @@ import { useCartStore } from "@/store/cartStore";
 
 import { AuthProvider } from "@/hooks/use-auth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import PromoModal from "@/components/PromoModal";
 
 function App() {
   return (
@@ -324,7 +323,6 @@ function App() {
                 <meta property="og:type" content="website" />
               </Helmet>
               <Router />
-              <PromoModal />
               <Toaster />
             </TooltipProvider>
           </HelmetProvider>
