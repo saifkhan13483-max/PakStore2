@@ -578,12 +578,19 @@ export default function Home() {
 
         {/* Per-Category Sections */}
         {(() => {
-          const preferredOrder = ["watches", "bags & wallets", "bags and wallets", "bags", "jewelry", "stitched dresses"];
+          const preferredKeywords = ["watch", "wallet", "bag", "jewel", "dress"];
           const orderIndex = (name: string) => {
-            const idx = preferredOrder.indexOf(name.toLowerCase().trim());
-            return idx === -1 ? preferredOrder.length : idx;
+            const lower = (name || "").toLowerCase().trim();
+            for (let i = 0; i < preferredKeywords.length; i++) {
+              if (lower.includes(preferredKeywords[i])) return i;
+            }
+            return preferredKeywords.length;
           };
-          return [...categories].sort((a, b) => orderIndex(a.name) - orderIndex(b.name));
+          return [...categories].sort((a, b) => {
+            const diff = orderIndex(a.name) - orderIndex(b.name);
+            if (diff !== 0) return diff;
+            return a.name.localeCompare(b.name);
+          });
         })().map((category, catIndex) => {
           const categoryProducts = allProducts?.filter(p => p.categoryId === category.id) || [];
           const categorySlug = category.slug || String(category.id);
