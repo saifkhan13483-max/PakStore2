@@ -6,6 +6,21 @@ import { getOptimizedImageUrl } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import type { Category, ParentCategory } from "@shared/schema";
 
+const CATEGORY_IMAGE_OVERRIDES: Record<string, string> = {
+  "bags": "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789701/ChatGPT_Image_Mar_6_2026_02_15_28_PM_1_t8uwak.png",
+  "bags & wallets": "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789701/ChatGPT_Image_Mar_6_2026_02_15_28_PM_1_t8uwak.png",
+  "slippers": "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789698/ChatGPT_Image_Mar_6_2026_02_15_30_PM_1_glrglb.png",
+  "shoes": "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789706/ChatGPT_Image_Mar_6_2026_12_57_07_PM_1_ghqfjt.png",
+  "watches": "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772789699/ChatGPT_Image_Mar_6_2026_12_57_08_PM_1_r0e1a4.png",
+};
+
+function getSubCategoryImage(sub: Category): string {
+  const key = sub.name.trim().toLowerCase();
+  if (CATEGORY_IMAGE_OVERRIDES[key]) return CATEGORY_IMAGE_OVERRIDES[key];
+  if (key.includes("eid special")) return "https://res.cloudinary.com/dftvtsjcg/image/upload/v1772792215/ChatGPT_Image_Mar_6_2026_03_12_34_PM_1_wdck6p.png";
+  return sub.image ?? "";
+}
+
 interface MegaDropdownProps {
   isOpen: boolean;
   parentCategories: ParentCategory[];
@@ -100,9 +115,9 @@ export function MegaDropdown({
                     >
                       <div className="group flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-green-50 transition-colors cursor-pointer">
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                          {sub.image ? (
+                          {getSubCategoryImage(sub) ? (
                             <img
-                              src={getOptimizedImageUrl(sub.image, {
+                              src={getOptimizedImageUrl(getSubCategoryImage(sub), {
                                 width: 128,
                                 height: 128,
                                 crop: "fill",
