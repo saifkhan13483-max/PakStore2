@@ -929,19 +929,30 @@ export default function Dropshipper() {
             <p className="text-sm text-gray-500 mb-4">
               Shuru karna bohat aasaan hai — bas ek message bhejein. 👇
             </p>
-            <a
-              href="https://wa.me/923188055850"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block sm:inline-block"
-            >
-              <Button
-                size="lg"
-                className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-full px-6 sm:px-8 font-semibold gap-2 text-sm sm:text-base"
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="https://wa.me/923188055850"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full sm:w-auto"
               >
-                <SiWhatsapp className="h-4 w-4" /> WhatsApp Us — +92 318 8055850
-              </Button>
-            </a>
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-full px-6 sm:px-8 font-semibold gap-2 text-sm sm:text-base"
+                >
+                  <SiWhatsapp className="h-4 w-4" /> WhatsApp Us — +92 318 8055850
+                </Button>
+              </a>
+              <Link href="/web-development" className="block w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-amber-400 text-amber-700 hover:bg-amber-50 active:bg-amber-100 rounded-full px-6 sm:px-8 font-semibold gap-2 text-sm sm:text-base"
+                >
+                  <Globe className="h-4 w-4" /> Web Development Details
+                </Button>
+              </Link>
+            </div>
           </div>
 
         </div>
