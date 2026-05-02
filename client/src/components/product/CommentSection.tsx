@@ -323,33 +323,33 @@ export function CommentSection({ productId }: CommentSectionProps) {
       </Card>
 
       {/* Review list */}
-      <div className="space-y-6">
+      <div className="space-y-3">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : comments?.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-6 text-sm">
             No reviews yet. Be the first to review!
           </p>
         ) : (
           comments?.map((comment) => (
             <Card key={comment.id}>
-              <CardContent className="pt-6 space-y-3">
+              <CardContent className="pt-4 pb-3 px-4 space-y-2">
                 {/* Reviewer header */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2.5">
                   {comment.userId === "system-seed" || !comment.userPhoto ? (
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-lg"
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
                       style={{ backgroundColor: getAvatarColor(comment.userName) }}
                     >
                       {comment.userName[0]?.toUpperCase()}
                     </div>
                   ) : (
-                    <Avatar className="flex-shrink-0">
+                    <Avatar className="flex-shrink-0 w-8 h-8">
                       <AvatarImage src={comment.userPhoto} />
                       <AvatarFallback
-                        className="text-white font-bold text-lg"
+                        className="text-white font-bold text-sm"
                         style={{ backgroundColor: getAvatarColor(comment.userName) }}
                       >
                         {comment.userName[0]?.toUpperCase()}
@@ -357,40 +357,39 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     </Avatar>
                   )}
 
-                  <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold leading-tight">{comment.userName}</h4>
-                          {/* Verified Purchase badge — only shown when present */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-sm font-bold leading-tight">{comment.userName}</h4>
                           {comment.isVerifiedPurchase && (
-                            <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                              <CheckCircle className="w-3.5 h-3.5" />
-                              <span className="text-xs font-medium">Verified Purchase</span>
+                            <span className="inline-flex items-center gap-0.5 text-green-600 dark:text-green-400">
+                              <CheckCircle className="w-3 h-3" />
+                              <span className="text-[10px] font-medium">Verified Purchase</span>
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[11px] text-muted-foreground">
                           {formatTimestamp(comment.createdAt)}
                         </span>
                       </div>
                       {user?.uid === comment.userId && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                              <MoreVertical className="w-4 h-4" />
+                            <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0">
+                              <MoreVertical className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => startEdit(comment)}>
-                              <Edit2 className="w-4 h-4 mr-2" />
+                              <Edit2 className="w-3.5 h-3.5 mr-2" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onClick={() => setDeletingCommentId(comment.id)}
                             >
-                              <Trash2 className="w-4 h-4 mr-2" />
+                              <Trash2 className="w-3.5 h-3.5 mr-2" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -403,40 +402,40 @@ export function CommentSection({ productId }: CommentSectionProps) {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${i < comment.rating ? "fill-current" : "text-muted"}`}
+                          className={`w-3.5 h-3.5 ${i < comment.rating ? "fill-current" : "text-muted"}`}
                         />
                       ))}
                     </div>
 
                     {/* Review body */}
-                    <p className="text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed break-words">{comment.content}</p>
+                    <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed break-words">{comment.content}</p>
 
                     {/* Attached images */}
                     {comment.images && comment.images.length > 0 && (
-                      <div className="flex flex-wrap gap-2 pt-1">{renderImages(comment.images)}</div>
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">{renderImages(comment.images)}</div>
                     )}
 
                     {/* Helpful count + Was this helpful? buttons */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 border-t border-border/40">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-1.5 border-t border-border/40">
                       {(comment.helpfulCount ?? 0) > 0 && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <ThumbsUp className="w-3 h-3 flex-shrink-0" />
+                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <ThumbsUp className="w-2.5 h-2.5 flex-shrink-0" />
                           {comment.helpfulCount}{" "}
                           {comment.helpfulCount === 1 ? "person" : "people"} found this helpful
                         </span>
                       )}
-                      <div className="flex items-center gap-1 ml-auto">
+                      <div className="flex items-center gap-0.5 ml-auto">
                         {votedIds.has(comment.id) ? (
-                          <span className="text-xs text-muted-foreground italic">
+                          <span className="text-[11px] text-muted-foreground italic">
                             Thanks for your feedback!
                           </span>
                         ) : (
                           <>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">Was this helpful?</span>
+                            <span className="text-[11px] text-muted-foreground whitespace-nowrap">Was this helpful?</span>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 px-2 text-xs hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                              className="h-5 px-1.5 text-[11px] hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
                               onClick={() => handleHelpfulYes(comment.id)}
                               data-testid={`btn-helpful-yes-${comment.id}`}
                             >
@@ -445,7 +444,7 @@ export function CommentSection({ productId }: CommentSectionProps) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 px-2 text-xs hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
+                              className="h-5 px-1.5 text-[11px] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
                               onClick={() => handleHelpfulNo(comment.id)}
                               data-testid={`btn-helpful-no-${comment.id}`}
                             >
@@ -460,17 +459,17 @@ export function CommentSection({ productId }: CommentSectionProps) {
 
                 {/* Seller reply — only rendered when present */}
                 {comment.sellerReply && (
-                  <div className="ml-12 sm:ml-14 mt-1 p-3 bg-muted/50 border-l-2 border-primary/40 rounded-r-md">
+                  <div className="ml-10 mt-1 p-2.5 bg-muted/50 border-l-2 border-primary/40 rounded-r-md">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Store className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-xs font-semibold text-primary">PakCart Store</span>
+                      <Store className="w-3 h-3 text-primary" />
+                      <span className="text-[11px] font-semibold text-primary">PakCart Store</span>
                       {comment.sellerReplyDate && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[11px] text-muted-foreground">
                           · {formatTimestamp(comment.sellerReplyDate)}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{comment.sellerReply}</p>
+                    <p className="text-xs text-muted-foreground">{comment.sellerReply}</p>
                   </div>
                 )}
               </CardContent>
