@@ -246,8 +246,19 @@ export function CommentSection({ productId }: CommentSectionProps) {
       />
     ));
 
+  // ── Rating breakdown (Amazon/Daraz style) ──────────────────────────────────
+  const avgRating = comments?.length
+    ? comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) / comments.length
+    : 0;
+
+  const starCounts = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: comments?.filter((c) => Math.round(Number(c.rating)) === star).length ?? 0,
+  }));
+  const totalReviews = comments?.length ?? 0;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Full-size image viewer */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none">
@@ -263,58 +274,93 @@ export function CommentSection({ productId }: CommentSectionProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold">Customer Reviews</h2>
-        <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border">
-          <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold leading-none">
-              {comments?.length
-                ? (
-                    comments.reduce((acc, c) => acc + (Number(c.rating) || 0), 0) /
-                    comments.length
-                  ).toFixed(1)
-                : "0.0"}
+      {/* Section heading */}
+      <h2 className="text-lg sm:text-xl font-bold">Customer Reviews</h2>
+
+      {/* ── Amazon / Daraz style rating summary ── */}
+      <div className="rounded-xl border bg-muted/30 p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+
+          {/* Big average */}
+          <div className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-1 sm:min-w-[80px]">
+            <span className="text-4xl sm:text-5xl font-bold text-foreground leading-none">
+              {avgRating ? avgRating.toFixed(1) : "—"}
             </span>
-            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              ({comments?.length || 0} reviews)
-            </span>
+            <div className="flex flex-col gap-1">
+              <div className="flex text-yellow-500">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={`w-4 h-4 ${i < Math.round(avgRating) ? "fill-current" : "text-muted-foreground/30"}`} />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground text-center">{totalReviews} reviews</span>
+            </div>
           </div>
+
+          {/* Star bars */}
+          <div className="flex-1 space-y-1.5 min-w-0">
+            {starCounts.map(({ star, count }) => {
+              const pct = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+              return (
+                <div key={star} className="flex items-center gap-2">
+                  <span className="text-[11px] text-muted-foreground w-4 text-right shrink-0">{star}</span>
+                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 shrink-0" />
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-yellow-400 rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-muted-foreground w-6 shrink-0">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Trust line */}
+        <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap items-center gap-1.5">
+          <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0" />
+          <span className="text-[11px] text-muted-foreground">
+            Real verified customer reviews — same system as{" "}
+            <span className="font-semibold text-foreground">Daraz</span>,{" "}
+            <span className="font-semibold text-foreground">Amazon</span> &{" "}
+            <span className="font-semibold text-foreground">Alibaba</span>
+          </span>
         </div>
       </div>
 
-      {/* New review form */}
+      {/* ── New review form ── */}
       <Card>
-        <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-2">
+        <CardContent className="pt-4 pb-4 px-4">
+          <p className="text-sm font-semibold mb-3">Write a Review</p>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
-                  className={`p-1 transition-colors ${rating >= star ? "text-yellow-500" : "text-muted"}`}
+                  className={`p-1 transition-colors ${rating >= star ? "text-yellow-500" : "text-muted-foreground/30"}`}
                 >
-                  <Star className={`w-6 h-6 ${rating >= star ? "fill-current" : ""}`} />
+                  <Star className={`w-6 h-6 sm:w-7 sm:h-7 ${rating >= star ? "fill-current" : ""}`} />
                 </button>
               ))}
             </div>
             <Textarea
-              placeholder="Write your review..."
+              placeholder="Share your experience with this product..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[100px]"
+              className="min-h-[80px] text-sm resize-none"
             />
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Add Images</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Add Photos (optional)</label>
               <ImageUploader value={images} onChange={setImages} maxImages={3} />
             </div>
-            <Button type="submit" disabled={mutation.isPending} className="w-full sm:w-auto">
+            <Button type="submit" disabled={mutation.isPending} size="sm" className="w-full sm:w-auto">
               {mutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />
               ) : (
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-3.5 h-3.5 mr-2" />
               )}
               Post Review
             </Button>
@@ -416,42 +462,44 @@ export function CommentSection({ productId }: CommentSectionProps) {
                     )}
 
                     {/* Helpful count + Was this helpful? buttons */}
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-1.5 border-t border-border/40">
-                      {(comment.helpfulCount ?? 0) > 0 && (
-                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <ThumbsUp className="w-2.5 h-2.5 flex-shrink-0" />
-                          {comment.helpfulCount}{" "}
-                          {comment.helpfulCount === 1 ? "person" : "people"} found this helpful
-                        </span>
-                      )}
-                      <div className="flex items-center gap-0.5 ml-auto">
-                        {votedIds.has(comment.id) ? (
-                          <span className="text-[11px] text-muted-foreground italic">
-                            Thanks for your feedback!
+                    <div className="pt-1.5 border-t border-border/40">
+                      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                        {(comment.helpfulCount ?? 0) > 0 && (
+                          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                            <ThumbsUp className="w-2.5 h-2.5 flex-shrink-0" />
+                            {comment.helpfulCount}{" "}
+                            {comment.helpfulCount === 1 ? "person" : "people"} found this helpful
                           </span>
-                        ) : (
-                          <>
-                            <span className="text-[11px] text-muted-foreground whitespace-nowrap">Was this helpful?</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-5 px-1.5 text-[11px] hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
-                              onClick={() => handleHelpfulYes(comment.id)}
-                              data-testid={`btn-helpful-yes-${comment.id}`}
-                            >
-                              Yes
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-5 px-1.5 text-[11px] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
-                              onClick={() => handleHelpfulNo(comment.id)}
-                              data-testid={`btn-helpful-no-${comment.id}`}
-                            >
-                              No
-                            </Button>
-                          </>
                         )}
+                        <div className="flex items-center gap-0.5 ml-auto">
+                          {votedIds.has(comment.id) ? (
+                            <span className="text-[11px] text-muted-foreground italic">
+                              Thanks for your feedback!
+                            </span>
+                          ) : (
+                            <>
+                              <span className="text-[11px] text-muted-foreground whitespace-nowrap">Helpful?</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-[11px] hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                                onClick={() => handleHelpfulYes(comment.id)}
+                                data-testid={`btn-helpful-yes-${comment.id}`}
+                              >
+                                Yes
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-[11px] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
+                                onClick={() => handleHelpfulNo(comment.id)}
+                                data-testid={`btn-helpful-no-${comment.id}`}
+                              >
+                                No
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
