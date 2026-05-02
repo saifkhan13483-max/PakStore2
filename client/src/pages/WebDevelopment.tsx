@@ -829,25 +829,56 @@ const WebDevelopment = () => {
 
       {/* CTA */}
       <section className="container mx-auto px-4 pt-0 pb-14 sm:pb-20">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--primary-hover))] text-primary-foreground">
-          <div
-            aria-hidden
-            className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-secondary/30 blur-2xl"
-          />
-          <div
-            aria-hidden
-            className="absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
-          />
-          <div className="relative px-5 py-10 sm:px-10 sm:py-14 text-center max-w-3xl mx-auto space-y-5">
-            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
-              eCommerce website banwana chahte hain?
-            </h2>
-            <p className="text-primary-foreground/90 leading-relaxed text-sm sm:text-base max-w-2xl mx-auto">
-              Apne business ke liye ek professional, fast aur SEO-friendly
-              website chahiye? Abhi rabta karein — hum ek mahine mein
-              ready-to-use website bana ke dete hain.
-            </p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--primary-hover))] text-primary-foreground">
+          {/* Background blobs */}
+          <div aria-hidden className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-secondary/25 blur-3xl" />
+          <div aria-hidden className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+          <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+
+          <div className="relative px-5 py-10 sm:px-10 sm:py-14 max-w-4xl mx-auto">
+
+            {/* Top badge */}
+            <div className="flex justify-center mb-5 sm:mb-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-4 py-1.5 text-xs font-semibold text-primary-foreground backdrop-blur">
+                <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                Free consultation — koi commitment nahi
+              </span>
+            </div>
+
+            {/* Heading */}
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3">
+                Apna eCommerce Store Sirf{" "}
+                <span className="text-secondary">Rs 45,000</span> Mein
+              </h2>
+              <p className="text-primary-foreground/80 leading-relaxed text-sm sm:text-base max-w-xl mx-auto">
+                Ek baar payment karein — phir lifetime free hosting, free business emails,
+                aur full admin panel. Koi monthly fees nahi, kabhi nahi.
+              </p>
+            </div>
+
+            {/* Quick highlights row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-7 sm:mb-8 max-w-2xl mx-auto">
+              {[
+                { icon: Clock, label: "1 Month Delivery" },
+                { icon: Wallet, label: "One-Time Payment" },
+                { icon: Server, label: "Free Lifetime Hosting" },
+                { icon: BadgeCheck, label: "No Hidden Fees" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex flex-col items-center gap-1.5 rounded-xl bg-white/10 border border-white/15 px-3 py-3 text-center backdrop-blur"
+                >
+                  <item.icon className="h-4 w-4 text-secondary" />
+                  <span className="text-[11px] sm:text-xs font-medium text-primary-foreground/90 leading-tight">
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
               <a
                 href="https://wa.me/923188055850"
                 target="_blank"
@@ -858,10 +889,10 @@ const WebDevelopment = () => {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="w-full sm:w-auto gap-2"
+                  className="w-full sm:w-auto gap-2 shadow-lg shadow-black/20"
                 >
                   <SiWhatsapp className="h-4 w-4" />
-                  Contact on WhatsApp
+                  WhatsApp — +92 318 8055850
                 </Button>
               </a>
               <Link
@@ -872,13 +903,19 @@ const WebDevelopment = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto bg-transparent text-primary-foreground border-primary-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground gap-2"
+                  className="w-full sm:w-auto bg-transparent text-primary-foreground border-white/40 hover:bg-white/10 hover:text-primary-foreground gap-2"
                 >
                   Contact Form
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
+
+            {/* Reassurance line */}
+            <p className="text-center text-xs text-primary-foreground/50 mt-5">
+              Free mein baat karein — koi advance payment ya commitment nahi
+            </p>
+
           </div>
         </div>
       </section>
