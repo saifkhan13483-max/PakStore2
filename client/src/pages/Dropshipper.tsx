@@ -850,51 +850,84 @@ export default function Dropshipper() {
 
       {/* E-commerce Platform Promo */}
       <section className="py-10 sm:py-14 bg-gradient-to-br from-amber-50 to-orange-50 border-y border-amber-200">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-6 sm:mb-8">
+        <div className="container mx-auto px-4 max-w-3xl">
+
+          {/* Header */}
+          <div className="text-center mb-8 sm:mb-10">
             <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-100 mb-3 sm:mb-4">
               <Rocket className="h-6 w-6 sm:h-7 sm:w-7 text-amber-600" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              Want Your Own Online Store Like This?
+              Apna Online Store Banana Chahte Hain?
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
-              We build complete, professional e-commerce websites for businesses in Pakistan —
-              fully set up and ready to sell from day one.
+            <p className="text-sm sm:text-base text-gray-600 max-w-lg mx-auto leading-relaxed">
+              Koi coding nahi. Koi technical kaam nahi. Bas WhatsApp karein — baaki sab hum karte hain.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          {/* Simple 3 Steps */}
+          <div className="space-y-3 sm:space-y-4 mb-8 sm:mb-10">
             {[
               {
-                icon: Globe,
-                title: "Your Own Website",
-                desc: "A professional online store with your brand name, logo, and products.",
-              },
-              {
-                icon: ShieldCheck,
-                title: "Fully Managed",
-                desc: "We handle design, setup, and technical work — you just focus on sales.",
-              },
-              {
+                step: "1",
                 icon: Phone,
-                title: "Full Support",
-                desc: "We guide you every step of the way, even if you have zero tech experience.",
+                title: "WhatsApp Karen",
+                detail: "Hum se contact karen aur batayein ke aap kya sell karna chahte hain — kapre, accessories, ya kuch bhi.",
+              },
+              {
+                step: "2",
+                icon: Globe,
+                title: "Hum Aap Ka Store Banate Hain",
+                detail: "Hum aap ki website design karte hain, products dalete hain, aur sab set up karte hain. Aap ko kuch nahi karna — sirf approve karna hai.",
+              },
+              {
+                step: "3",
+                icon: ShieldCheck,
+                title: "Aap Sell Karna Shuru Karen",
+                detail: "Aap ka store live ho jata hai. Customers order dete hain, aap payment lete hain. Hum hamesha help ke liye available hain.",
               },
             ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl p-4 sm:p-5 border border-amber-100 shadow-sm text-center">
-                <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-50 mb-2 sm:mb-3">
-                  <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              <div key={item.step} className="bg-white rounded-xl p-4 sm:p-5 border border-amber-100 shadow-sm flex items-start gap-4">
+                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-500 text-white font-bold text-base sm:text-lg flex items-center justify-center shadow-sm">
+                  {item.step}
                 </div>
-                <h3 className="font-semibold text-gray-900 text-xs sm:text-sm mb-1">{item.title}</h3>
-                <p className="text-[11px] sm:text-xs text-muted-foreground">{item.desc}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{item.detail}</p>
+                </div>
+                <div className="flex-shrink-0 hidden sm:flex items-center justify-center w-9 h-9 rounded-lg bg-amber-50">
+                  <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                </div>
               </div>
             ))}
           </div>
 
+          {/* What you get */}
+          <div className="bg-white rounded-xl border border-amber-100 shadow-sm p-4 sm:p-5 mb-7 sm:mb-8">
+            <p className="font-semibold text-gray-800 text-sm sm:text-base mb-3">Aap Ko Milega:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                "Aap ke naam ki apni website",
+                "Day 1 se orders lene ki ability",
+                "Products, photos, prices — sab set up",
+                "24/7 WhatsApp support hum se",
+                "Koi coding ya tech knowledge zaroor nahi",
+                "Pakistan mein delivery ready setup",
+              ].map((point) => (
+                <div key={point} className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
+                  <div className="w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  </div>
+                  {point}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
           <div className="text-center">
-            <p className="text-xs sm:text-sm text-gray-600 mb-4">
-              Ready to start? WhatsApp us — no technical knowledge needed.
+            <p className="text-sm text-gray-500 mb-4">
+              Shuru karna bohat aasaan hai — bas ek message bhejein. 👇
             </p>
             <a
               href="https://wa.me/923188055850"
@@ -910,6 +943,7 @@ export default function Dropshipper() {
               </Button>
             </a>
           </div>
+
         </div>
       </section>
 
