@@ -540,56 +540,88 @@ const WebDevelopment = () => {
               ];
 
               return (
-                <Card
-                  className="overflow-hidden shadow-sm"
-                  data-testid="card-comparison"
-                >
-                  {/* Header row */}
-                  <div className="grid grid-cols-3 bg-muted/60 border-b">
-                    <div className="px-4 sm:px-6 py-4 text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                      Feature
-                    </div>
-                    <div className="px-3 sm:px-6 py-4 text-center border-l">
-                      <div className="font-display font-semibold text-sm sm:text-base text-foreground">
-                        Others
+                <>
+                  {/* Mobile: stacked cards (hidden on sm+) */}
+                  <div className="flex flex-col gap-3 sm:hidden" data-testid="card-comparison-mobile">
+                    {/* Column legend */}
+                    <div className="grid grid-cols-2 gap-2 mb-1">
+                      <div className="rounded-lg border bg-muted/60 py-2 text-center">
+                        <div className="font-semibold text-xs text-foreground">Others</div>
+                        <div className="text-[10px] text-muted-foreground">Shopify · WP · Wix</div>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                        Shopify · WordPress · Wix
+                      <div className="rounded-lg border bg-primary/10 py-2 text-center">
+                        <div className="font-semibold text-xs text-primary">PakCart</div>
+                        <div className="text-[10px] text-muted-foreground">Custom Dev</div>
                       </div>
                     </div>
-                    <div className="px-3 sm:px-6 py-4 text-center border-l bg-primary/5">
-                      <div className="font-display font-semibold text-sm sm:text-base text-primary">
-                        PakCart
+
+                    {rows.map((r, i) => (
+                      <div
+                        key={r.label}
+                        className="rounded-xl border bg-card shadow-sm overflow-hidden"
+                        data-testid={`row-comparison-${i}`}
+                      >
+                        {/* Feature label */}
+                        <div className="bg-muted/50 px-4 py-2 border-b">
+                          <span className="text-xs font-semibold text-foreground uppercase tracking-wide">{r.label}</span>
+                        </div>
+                        {/* Two-column comparison */}
+                        <div className="grid grid-cols-2 divide-x">
+                          <div className="px-3 py-3 flex items-start gap-2">
+                            <X className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+                            <span className="text-[11px] text-muted-foreground leading-snug">{r.others}</span>
+                          </div>
+                          <div className="px-3 py-3 flex items-start gap-2 bg-primary/5">
+                            <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                            <span className="text-[11px] font-medium text-foreground leading-snug">{r.pakcart}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                        Custom Web Development
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Rows */}
-                  {rows.map((r, i) => (
-                    <div
-                      key={r.label}
-                      className={`grid grid-cols-3 ${
-                        i !== rows.length - 1 ? "border-b" : ""
-                      }`}
-                      data-testid={`row-comparison-${i}`}
-                    >
-                      <div className="px-4 sm:px-6 py-4 text-xs sm:text-sm font-medium text-foreground flex items-center">
-                        {r.label}
+                  {/* Desktop: full table (hidden on mobile) */}
+                  <Card
+                    className="hidden sm:block overflow-hidden shadow-sm"
+                    data-testid="card-comparison"
+                  >
+                    {/* Header row */}
+                    <div className="grid grid-cols-3 bg-muted/60 border-b">
+                      <div className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                        Feature
                       </div>
-                      <div className="px-3 sm:px-6 py-4 border-l flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
-                        <X className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                        <span>{r.others}</span>
+                      <div className="px-6 py-4 text-center border-l">
+                        <div className="font-display font-semibold text-base text-foreground">Others</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">Shopify · WordPress · Wix</div>
                       </div>
-                      <div className="px-3 sm:px-6 py-4 border-l bg-primary/5 flex items-start gap-2 text-xs sm:text-sm text-foreground">
-                        <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <span className="font-medium">{r.pakcart}</span>
+                      <div className="px-6 py-4 text-center border-l bg-primary/5">
+                        <div className="font-display font-semibold text-base text-primary">PakCart</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">Custom Web Development</div>
                       </div>
                     </div>
-                  ))}
-                </Card>
+
+                    {/* Rows */}
+                    {rows.map((r, i) => (
+                      <div
+                        key={r.label}
+                        className={`grid grid-cols-3 ${i !== rows.length - 1 ? "border-b" : ""}`}
+                        data-testid={`row-comparison-${i}`}
+                      >
+                        <div className="px-6 py-4 text-sm font-medium text-foreground flex items-center">
+                          {r.label}
+                        </div>
+                        <div className="px-6 py-4 border-l flex items-start gap-2 text-sm text-muted-foreground">
+                          <X className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                          <span>{r.others}</span>
+                        </div>
+                        <div className="px-6 py-4 border-l bg-primary/5 flex items-start gap-2 text-sm text-foreground">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <span className="font-medium">{r.pakcart}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </Card>
+                </>
               );
             })()}
 
