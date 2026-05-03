@@ -53,3 +53,9 @@ id = "JWFI2Tng6u4E1VbWBrtWA"
 uri = "file://used-phone-khareedne-ki-guide.md"
 type = "text"
 title = "Used Phone Khareedne Ki Mukammal Guide"
+
+[[outputs]]
+id = "y5zzSvImNbcAxB4aP05pC"
+uri = "file://ecommerce-color-palettes.md"
+type = "text"
+title = "E-Commerce Color Palettes"
