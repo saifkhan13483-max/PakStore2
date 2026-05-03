@@ -65,3 +65,9 @@ id = "5FfYsqlJGD4PFAtfxj9V2"
 uri = "file://fullstack-portfolio-guide.md"
 type = "text"
 title = "Fullstack Portfolio — Step-by-Step Guide"
+
+[[outputs]]
+id = "IRI6HDIE9UMBATGzCg5RS"
+uri = "file://freelance-fullstack-guide.md"
+type = "text"
+title = "How to Present Yourself Online & Earn Money as a Fullstack Developer"
