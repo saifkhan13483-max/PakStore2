@@ -23,6 +23,9 @@ import {
   Users,
   BadgeCheck,
   Zap,
+  TrendingDown,
+  Tag,
+  Timer,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { Button } from "@/components/ui/button";
@@ -114,9 +117,13 @@ const WebDevelopment = () => {
   const plans = [
     {
       name: "Standard",
-      price: "45,000",
+      price: "38,000",
+      originalPrice: "45,000",
+      worldwideUsd: "$1,500 – $5,000",
+      worldwidePkr: "4,20,000 – 14,00,000",
       tagline: "Most popular for growing brands",
       badge: "Most Popular",
+      offerLabel: "Save Rs. 7,000",
       highlighted: true,
       features: [
         "Unlimited products",
@@ -131,9 +138,13 @@ const WebDevelopment = () => {
     },
     {
       name: "AI Pro",
-      price: "125,000",
+      price: "99,000",
+      originalPrice: "125,000",
+      worldwideUsd: "$5,000 – $15,000",
+      worldwidePkr: "14,00,000 – 42,00,000",
       tagline: "Smart store powered by AI",
       badge: "AI Powered",
+      offerLabel: "Save Rs. 26,000",
       highlighted: false,
       features: [
         "Everything in Standard, plus:",
@@ -272,7 +283,8 @@ const WebDevelopment = () => {
               data-testid="text-webdev-title"
             >
               Apna Online Store
-              <span className="block text-secondary">Sirf Rs 45,000 Mein</span>
+              <span className="block text-secondary line-through opacity-50 text-2xl sm:text-3xl md:text-4xl">Rs 45,000</span>
+              <span className="block text-secondary">Sirf Rs 38,000 Mein 🎉</span>
             </h1>
             <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
               Shopify ya WordPress ki monthly fees se chutkara payen. Hum aap ke liye
@@ -673,7 +685,66 @@ const WebDevelopment = () => {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
+          {/* Limited-Time Offer Banner */}
+          <div className="mt-10 max-w-4xl mx-auto">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-5 py-4 sm:px-8 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+              <div aria-hidden className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                  <Timer className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm sm:text-base">🎉 Limited Time Offer — Abhi Order Karein!</p>
+                  <p className="text-white/80 text-xs sm:text-sm">Special launch discount — original prices par wapas jaane se pehle book karein</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Tag className="h-4 w-4 text-yellow-300" />
+                <span className="font-bold text-yellow-300 text-sm sm:text-base">Up to Rs. 26,000 OFF</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Worldwide Price Comparison */}
+          <div className="mt-6 max-w-4xl mx-auto">
+            <Card className="border-dashed border-2 border-primary/20 bg-primary/5">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingDown className="h-4 w-4 text-primary" />
+                  <span className="font-semibold text-sm sm:text-base text-foreground">Duniya mein yahi kaam kitne ka hota hai?</span>
+                  <span className="ml-auto text-[10px] sm:text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">Worldwide Market Rate</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {plans.map((plan) => (
+                    <div key={plan.name} className="flex flex-col gap-1.5 rounded-xl bg-background border p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm text-foreground">{plan.name} Store</span>
+                        <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground">Worldwide:</span>
+                        <span className="font-bold text-destructive text-sm">{plan.worldwideUsd} USD</span>
+                        <span className="text-xs text-muted-foreground">≈ Rs. {plan.worldwidePkr}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">PakCart:</span>
+                        <span className="font-bold text-primary text-sm">Rs. {plan.price}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5">
+                          <TrendingDown className="h-2.5 w-2.5" />
+                          90%+ Sasta
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-3 text-center">
+                  * Worldwide rates based on Upwork, Fiverr & agency market data (2024–25). PakCart gives you the same quality at a fraction of the cost.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-8 grid gap-6 md:gap-8 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
             {plans.map((plan) => {
               const slug = plan.name.toLowerCase().replace(/\s+/g, "-");
               const isAi = plan.name === "AI Pro";
@@ -687,6 +758,7 @@ const WebDevelopment = () => {
                   }`}
                   data-testid={`card-plan-${slug}`}
                 >
+                  {/* Top badge */}
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold shadow ${
@@ -703,6 +775,15 @@ const WebDevelopment = () => {
                       {plan.badge}
                     </span>
                   </div>
+
+                  {/* Offer ribbon */}
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 shadow">
+                      <Tag className="h-2.5 w-2.5" />
+                      {plan.offerLabel}
+                    </span>
+                  </div>
+
                   <CardContent className="p-6 sm:p-8 flex flex-col flex-1">
                     <div className="space-y-1">
                       <h3 className="font-display font-bold text-xl">
@@ -714,6 +795,12 @@ const WebDevelopment = () => {
                     </div>
 
                     <div className="mt-5 pb-5 border-b">
+                      {/* Original price crossed out */}
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm text-muted-foreground line-through">Rs. {plan.originalPrice}</span>
+                        <span className="text-[10px] font-semibold text-red-500 bg-red-50 rounded px-1.5 py-0.5">Limited Offer</span>
+                      </div>
+                      {/* Discounted price */}
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-sm font-medium text-muted-foreground">
                           Rs.
@@ -728,6 +815,11 @@ const WebDevelopment = () => {
                       <p className="text-xs text-muted-foreground mt-1">
                         One-time payment — koi bhi recurring charge nahi
                       </p>
+                      {/* Worldwide comparison mini */}
+                      <div className="mt-3 rounded-lg bg-muted/60 px-3 py-2 flex items-center gap-2">
+                        <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <span className="text-[11px] text-muted-foreground">Worldwide yahi kaam: <span className="font-semibold text-destructive">{plan.worldwideUsd} USD</span></span>
+                      </div>
                     </div>
 
                     <ul className="space-y-3 py-5 flex-1">
@@ -849,10 +941,11 @@ const WebDevelopment = () => {
             <div className="text-center mb-6 sm:mb-8">
               <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3">
                 Apna eCommerce Store Sirf{" "}
-                <span className="text-secondary">Rs 45,000</span> Mein
+                <span className="text-secondary/50 line-through text-xl sm:text-2xl">Rs 45,000</span>{" "}
+                <span className="text-secondary">Rs 38,000</span> Mein 🎉
               </h2>
               <p className="text-primary-foreground/80 leading-relaxed text-sm sm:text-base max-w-xl mx-auto">
-                Ek baar payment karein — phir lifetime free hosting, free business emails,
+                Limited time offer — ek baar payment karein, phir lifetime free hosting, free business emails,
                 aur full admin panel. Koi monthly fees nahi, kabhi nahi.
               </p>
             </div>
