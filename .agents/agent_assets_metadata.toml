@@ -59,3 +59,9 @@ id = "y5zzSvImNbcAxB4aP05pC"
 uri = "file://ecommerce-color-palettes.md"
 type = "text"
 title = "E-Commerce Color Palettes — Ultimate Design Reference Guide v2.0"
+
+[[outputs]]
+id = "5FfYsqlJGD4PFAtfxj9V2"
+uri = "file://fullstack-portfolio-guide.md"
+type = "text"
+title = "Fullstack Portfolio — Step-by-Step Guide"
